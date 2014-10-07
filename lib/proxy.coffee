@@ -63,6 +63,8 @@ class Proxy
     app.get('/authproxy/google', @redirect())
     app.get('/authproxy/google/return', @callback())
     app.get('/authproxy/user', ensureAuthed, @getUser())
+    app.get('/cbioportal', ensureAuthed, @goCBioPortal())
+    app.get('/galaxy', ensureAuthed, @goGalaxy())
     app.get('/*', ensureAuthed, @goProxy())
 
 
@@ -85,7 +87,7 @@ class Proxy
       e = @internal_domains[search_domain]
 
       unless e?
-        return res.status(404).send('invalid domain')
+        return res.status(404).send('invalid domain' + search_domain)
 
       req.authproxy_endpoint = e
       req.authproxy_domain = search_domain
@@ -96,6 +98,26 @@ class Proxy
       dest = splitHostPort(randomUpstream(req.authproxy_endpoint.upstream))
       @http_proxy.web(req, res, {
         target: "http://#{dest.host}:#{dest.port}",
+        headers: { 'x-forwarded-user': req.session.passport.user },
+        host: req.authproxy_domain,
+        xfwd: true
+        })
+
+  goCBioPortal: =>
+    (req, res, next) =>
+      dest = splitHostPort(randomUpstream(req.authproxy_endpoint.upstream))
+      @http_proxy.web(req, res, {
+        target: "http://localhost:8080",
+        headers: { 'x-forwarded-user': req.session.passport.user },
+        host: req.authproxy_domain,
+        xfwd: true
+        })
+
+  goGalaxy: =>
+    (req, res, next) =>
+      dest = splitHostPort(randomUpstream(req.authproxy_endpoint.upstream))
+      @http_proxy.web(req, res, {
+        target: "http://localhost:8081",
         headers: { 'x-forwarded-user': req.session.passport.user },
         host: req.authproxy_domain,
         xfwd: true

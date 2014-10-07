@@ -23,9 +23,10 @@
   "homepage": "https://github.com/lxfontes/authproxy",
   "dependencies": {
     "coffee-script": "1.7.1",
-    "http-proxy": "*",
     "express": "*",
     "express-session": "*",
+    "http-proxy": "*",
+    "mongoose-rbac": "^0.1.3",
     "passport": "*",
     "passport-oauth": "*",
     "toml": "*"

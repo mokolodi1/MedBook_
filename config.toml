@@ -1,19 +1,14 @@
 [server]
 bind_ip = "0.0.0.0"
-bind_port = 8080
-cookie_secret = "monstah"
+bind_port = 9000
+cookie_secret = "medbookCookie"
 # google apps domain
-auth_domain = "custom.com"
+auth_domain = ""
 
 [domains]
   [domains.example1]
-  host = "localhost"
-  upstream = ["google.com:80", "yahoo.com:80"]
-  client_id = "__clientID__"
-  client_secret = "TWWWWz-EWWWWlxfX"
+  host = "su2c-dev.ucsc.edu:9000"
+  upstream = [ "su2c-dev.ucsc.edu:8081"]
+  client_id = "210653342985.apps.googleusercontent.com"
+  client_secret = "tRD12MAYeFxVZOYkgqKK8AoP"
 
-  [domains.example2]
-  host = "localhost2"
-  upstream = ["google.com:80", "yahoo.com:80"]
-  client_id = "__clientID__"
-  client_secret = "TWWWWz-EWWWWlxfX"
