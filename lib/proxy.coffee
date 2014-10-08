@@ -11,10 +11,11 @@ passport.deserializeUser (id, done) ->
 ensureAuthed = (req, res, next) ->
   if req.session.passport?.user?
     return next()
-  return res.redirect('/authproxy/google')
+  return passport.authenticate(req.authproxy_domain, { scope: ['profile', 'email'], successRedirect: req.originalUrl, failureRedirect: '/authproxy/google' })(req, res, next)
+
+  # return res.redirect('/authproxy/google')
 
 testVerify = (accessToken, refreshToken, profile, done) ->
-  console.log("Verified #{profile.email}")
   process.nextTick ->
     return done(null, profile)
 
@@ -43,9 +44,15 @@ class Proxy
     @internal_domains = {}
     @http_proxy = httpProxy.createProxyServer({})
 
+    @http_proxy.on 'upgrade', (req, socket, head) =>
+          @http_proxy.ws req, socket, head
+
+    @http_proxy.on 'error', (e) =>
+          console.log "error", e
+
+
   # host,upstream,client_id,client_secret,cookie_secret
   addInternalDomain: (auth_domain, domain) ->
-    console.log("Adding #{domain.host}")
     @internal_domains[domain.host] = domain
 
     strategy = new MixedStrategy({
@@ -63,9 +70,25 @@ class Proxy
     app.get('/authproxy/google', @redirect())
     app.get('/authproxy/google/return', @callback())
     app.get('/authproxy/user', ensureAuthed, @getUser())
+
+    app.get('/tel/', ensureAuthed, @goTelescope())
+    app.get('/tel/*', ensureAuthed, @goTelescope())
+    app.post('/tel/*', ensureAuthed, @goTelescope())
+
     app.get('/cbioportal', ensureAuthed, @goCBioPortal())
+    app.get('/cbioportal/*', ensureAuthed, @goCBioPortal())
+    app.post('/cbioportal/*', ensureAuthed, @goCBioPortal())
+
     app.get('/galaxy', ensureAuthed, @goGalaxy())
+    app.get('/galaxy/*', ensureAuthed, @goGalaxy())
+    app.post('/galaxy/*', ensureAuthed, @goGalaxy())
+
+    app.get('/hello', ensureAuthed, @goHello())
+    app.get('/hello/*', ensureAuthed, @goHello())
+    app.post('/hello/*', ensureAuthed, @goHello())
+
     app.get('/*', ensureAuthed, @goProxy())
+    app.post('/*', ensureAuthed, @goProxy())
 
 
   getUser: =>
@@ -76,7 +99,7 @@ class Proxy
     (req, res, next) =>
       passport.authenticate(req.authproxy_domain, { scope: ['profile', 'email'] })(req, res, next)
 
-  callback: =>
+  callback: () =>
     (req, res, next) =>
       passport.authenticate(req.authproxy_domain, { successRedirect: '/', failureRedirect: '/authproxy/google' })(req, res, next)
 
@@ -95,6 +118,7 @@ class Proxy
 
   goProxy: =>
     (req, res, next) =>
+      console.log "goProxy", req.url
       dest = splitHostPort(randomUpstream(req.authproxy_endpoint.upstream))
       @http_proxy.web(req, res, {
         target: "http://#{dest.host}:#{dest.port}",
@@ -105,9 +129,9 @@ class Proxy
 
   goCBioPortal: =>
     (req, res, next) =>
-      dest = splitHostPort(randomUpstream(req.authproxy_endpoint.upstream))
+      console.log "goCBioPortal", req.url
       @http_proxy.web(req, res, {
-        target: "http://localhost:8080",
+        target: "http://localhost:8585",
         headers: { 'x-forwarded-user': req.session.passport.user },
         host: req.authproxy_domain,
         xfwd: true
@@ -115,9 +139,40 @@ class Proxy
 
   goGalaxy: =>
     (req, res, next) =>
-      dest = splitHostPort(randomUpstream(req.authproxy_endpoint.upstream))
+      console.log "goGalaxy", req.url
+      req.url = req.url.replace(/^\/galaxy/,"");
       @http_proxy.web(req, res, {
-        target: "http://localhost:8081",
+        target: "http://localhost:10010",
+        headers: { 'x-forwarded-user': req.session.passport.user },
+        host: req.authproxy_domain,
+        xfwd: true
+        })
+
+  goHello: =>
+    (req, res, next) =>
+      @http_proxy.web(req, res, {
+        target: "http://localhost:10002",
+        headers: { 'x-forwarded-user': req.session.passport.user },
+        host: req.authproxy_domain,
+        xfwd: true
+        })
+
+  goTelescope: =>
+    (req, res, next) =>
+      console.log "goTelescope"
+      @http_proxy.web(req, res, {
+        target: "http://localhost:10005",
+        headers: { 'x-forwarded-user': req.session.passport.user },
+        host: req.authproxy_domain,
+        xfwd: true
+        })
+
+  goLocalForward: (prefix, port) =>
+    (req, res, next) =>
+      console.log "goLocalForward"
+      req.url = req.url.replace(prefix,"");
+      @http_proxy.web(req, res, {
+        target: "http://localhost:10000",
         headers: { 'x-forwarded-user': req.session.passport.user },
         host: req.authproxy_domain,
         xfwd: true

@@ -25,6 +25,7 @@ for k, domain of CONFIG.domains
 
 app = express()
 app.use(session({
+  ws: true,
   secret: CONFIG.server.cookie_secret,
   resave: true,
   saveUninitialized: true
@@ -32,6 +33,9 @@ app.use(session({
 proxy.configApp(app)
 
 server = http.createServer(app)
+
+
+
 server.listen CONFIG.server.bind_port, CONFIG.server.bind_ip, (err) ->
   if err
     console.log("Failed to bind")
