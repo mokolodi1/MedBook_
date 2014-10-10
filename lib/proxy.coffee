@@ -1,4 +1,27 @@
 
+mongoose = require('mongoose');
+mongoose.connect(process.env["MONGO_URL"])
+
+printMe = (arg) ->
+    console.log "print", arg
+
+
+
+MongoClient = require('mongodb').MongoClient
+MedBookDB = null
+MongoClient.connect process.env["MONGO_URL"], (err, db) ->
+    if err
+        throw err
+    MedBookDB = db
+
+lookupUser = (email, good, bad) ->
+    query = {"emails.address":email}
+    users = MedBookDB.collection('users');
+    users.find(query).toArray (err, docs) ->
+      console.dir(docs)
+      if docs.length > 0
+          next()
+      else
 
 
 httpProxy = require('http-proxy')
@@ -23,8 +46,10 @@ ensureAuthed = (req, res, next) ->
   # return res.redirect('/authproxy/google')
 
 testVerify = (accessToken, refreshToken, profile, done) ->
-  process.nextTick ->
-    return done(null, profile)
+  console.log "testVerify", accessToken, refreshToken, profile
+  lookupUser profile.email,
+      process.nextTick ->
+        return done(null, profile)
 
 randomUpstream = (upstreams) ->
   upstreams[Math.floor((Math.random()*upstreams.length))]
