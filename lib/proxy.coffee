@@ -2,6 +2,8 @@ httpProxy = require('http-proxy')
 passport = require('passport')
 MixedStrategy = require('./mixed_strategy')
 
+HeaderText = "<body>header text </body>"
+
 passport.serializeUser (user, done) ->
   done(null, user.email)
 
@@ -34,6 +36,12 @@ splitHostPort = (s) ->
     ret.port = 80
 
   return ret
+
+respondHeader = (req, res, next) =>
+  res.writeHead(200);
+  res.write(HeaderText, "binary")
+  res.end()
+
 
 class InternalDomain
   constructor: (config) ->
@@ -68,6 +76,7 @@ class Proxy
     app.use(passport.initialize())
     app.use(passport.session())
     app.use(@checkDomain())
+    app.get('/header', respondHeader)
     app.get('/authproxy/google', @redirect())
     app.get('/authproxy/google/return', @callback())
     app.get('/authproxy/user', ensureAuthed, @getUser())
