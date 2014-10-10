@@ -30,7 +30,7 @@ app.use(session({
   resave: true,
   saveUninitialized: true
 }))
-proxy.configApp(app)
+proxy.configApp(app, CONFIG)
 
 server = http.createServer(app)
 

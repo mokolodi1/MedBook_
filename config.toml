@@ -11,3 +11,41 @@ auth_domain = ""
   upstream = [ "su2c-dev.ucsc.edu:8081"]
   client_id = "210653342985.apps.googleusercontent.com"
   client_secret = "tRD12MAYeFxVZOYkgqKK8AoP"
+
+[apps]
+   [apps.fileupload]
+   route = "/apps/fileupload"
+   maintainRoute = true
+   run = "./Apps/fileupload/run 22222"
+   port = 22222
+
+   [apps.galaxy]
+   route = "/galaxy"
+   maintainRoute = true
+   run = "./galaxy-central/run"
+   port = 10010
+
+   [apps.cbioportal]
+   route = "/cbioportal"
+   maintainRoute = true
+   run = ""
+   port = 8585
+
+   [apps.hello]
+   route = "/apps/hello"
+   maintainRoute = true
+   run = "./Apps/hello/run 10002"
+   port = 10002
+
+   [apps.flat]
+   route = "/apps/flat"
+   maintainRoute = true
+   run = "./Apps/hello/run 22222"
+   port = 22222
+
+   [apps.Telescope]
+   route = "/tel"
+   maintainRoute = true
+   run = "./Telescope/run 10005"
+   port = 10005
+
