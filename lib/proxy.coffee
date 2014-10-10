@@ -53,11 +53,6 @@ takeoff = (req, res, next) =>
 land = (req, res, next) =>
   res.redirect (new Cookies(req, res)).get "Final-Destination"
 
-  ###
-  res.writeHead(200);
-  res.write("<body>Land"+req.originalUrl+"</body>", "binary")
-  res.end()
-  ###
 
 
 class InternalDomain
@@ -94,19 +89,17 @@ class Proxy
     app.use(passport.session())
     app.use(@checkDomain())
     app.get('/header', respondHeader)
-    app.get('/authproxy/google', @redirect())
+    app.get('/authproxy/google', @googleAuth())
     app.get('/authproxy/google/return', @callback())
     app.get('/authproxy/user', ensureAuthed, @getUser())
     app.get('/authproxy/land', land)
 
-    for appName, conf of config.apps
-        prefix = if conf.maintainRoute then "" else conf.route
-        app.get(conf.route,        ensureAuthed, @goForward(prefix, conf.port))
-        app.get(conf.route+'/*',   ensureAuthed, @goForward(prefix, conf.port))
-        app.post(conf.route+'/*',  ensureAuthed, @goForward(prefix, conf.port))
+    for appName, ca of config.apps
+        app.get(ca.route,        ensureAuthed, @goForward(ca.port))
+        app.get(ca.route+'/*',   ensureAuthed, @goForward(ca.port))
+        app.post(ca.route+'/*',  ensureAuthed, @goForward(ca.port))
 
-    app.get('/*', ensureAuthed, @goProxy())
-    app.post('/*', ensureAuthed, @goProxy())
+    app.get('/', @goto(config.final.redirect));
 
 
   goProxy: =>
@@ -123,9 +116,13 @@ class Proxy
     (req, res) =>
       res.send(req.session.passport.user)
 
-  redirect: =>
+  googleAuth: =>
     (req, res, next) =>
       passport.authenticate(req.authproxy_domain, { scope: ['profile', 'email'] })(req, res, next)
+
+  goto: (dest) =>
+      (req, res, next) =>
+          res.redirect (dest)
 
   callback: () =>
     (req, res, next) =>
@@ -144,10 +141,8 @@ class Proxy
       req.authproxy_domain = search_domain
       next()
 
-  goForward: (prefix, port) =>
+  goForward: (port) =>
     (req, res, next) =>
-      if prefix
-          req.url = req.url.replace(prefix,"");
       @http_proxy.web(req, res, {
         target: "http://localhost:" + port,
         headers: { 'x-forwarded-user': req.session.passport.user },
