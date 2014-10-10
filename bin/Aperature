@@ -1,0 +1,3 @@
+#!/usr/bin/env coffee
+process.argv.push "#{__dirname}/../config.toml"
+require("#{__dirname}/../lib/authproxy")
