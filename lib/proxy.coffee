@@ -1,6 +1,10 @@
+
+
+
 httpProxy = require('http-proxy')
 passport = require('passport')
 MixedStrategy = require('./mixed_strategy')
+Cookies = require('cookies')
 
 HeaderText = "<body>header text </body>"
 
@@ -13,7 +17,8 @@ passport.deserializeUser (id, done) ->
 ensureAuthed = (req, res, next) ->
   if req.session.passport?.user?
     return next()
-  return passport.authenticate(req.authproxy_domain, { scope: ['profile', 'email'], successRedirect: req.originalUrl, failureRedirect: '/authproxy/google' })(req, res, next)
+  takeoff req, res, next
+  return passport.authenticate(req.authproxy_domain, { scope: ['profile', 'email'], successRedirect: "/authproxy/land",  failureRedirect: '/authproxy/google' })(req, res, next)
 
   # return res.redirect('/authproxy/google')
 
@@ -41,6 +46,18 @@ respondHeader = (req, res, next) =>
   res.writeHead(200);
   res.write(HeaderText, "binary")
   res.end()
+
+takeoff = (req, res, next) =>
+  (new Cookies(req, res)).set "Final-Destination", req.originalUrl
+
+land = (req, res, next) =>
+  res.redirect (new Cookies(req, res)).get "Final-Destination"
+
+  ###
+  res.writeHead(200);
+  res.write("<body>Land"+req.originalUrl+"</body>", "binary")
+  res.end()
+  ###
 
 
 class InternalDomain
@@ -80,6 +97,7 @@ class Proxy
     app.get('/authproxy/google', @redirect())
     app.get('/authproxy/google/return', @callback())
     app.get('/authproxy/user', ensureAuthed, @getUser())
+    app.get('/authproxy/land', land)
 
     for appName, conf of config.apps
         prefix = if conf.maintainRoute then "" else conf.route
@@ -111,7 +129,7 @@ class Proxy
 
   callback: () =>
     (req, res, next) =>
-      passport.authenticate(req.authproxy_domain, { successRedirect: '/', failureRedirect: '/authproxy/google' })(req, res, next)
+      passport.authenticate(req.authproxy_domain, { successRedirect: '/authproxy/land', failureRedirect: '/authproxy/google' })(req, res, next)
 
   checkDomain: =>
     (req, res, next) =>
