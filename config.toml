@@ -13,35 +13,41 @@ auth_domain = ""
   client_secret = "tRD12MAYeFxVZOYkgqKK8AoP"
 
 [apps]
+   [apps.Telescope]
+   auth = false
+   route = "/tel"
+   run = "./Telescope/run 10005"
+   port = 10005
+
    [apps.fileupload]
+   auth = true
    route = "/fileupload"
    run = "./Apps/fileupload/run 22222"
    port = 22222
 
    [apps.galaxy]
+   auth = true
    route = "/galaxy"
    run = "./galaxy-central/run"
    port = 10010
 
    [apps.cbioportal]
+   auth = true
    route = "/cbioportal"
    run = ""
    port = 8585
 
    [apps.hello]
+   auth = false
    route = "/hello"
    run = "./Apps/hello/run 10002"
    port = 10002
 
    [apps.flat]
+   auth = true
    route = "/flat"
    run = "./Apps/flat/run 22222"
    port = 22222
-
-   [apps.Telescope]
-   route = "/tel"
-   run = "./Telescope/run 10005"
-   port = 10005
 
 [final]
    redirect = "/tel"

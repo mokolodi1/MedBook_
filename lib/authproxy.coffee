@@ -20,9 +20,6 @@ if args.length < 1
 
 CONFIG = getConfig(args[0])
 
-for k, domain of CONFIG.domains
-  proxy.addInternalDomain(CONFIG.server.auth_domain, domain)
-
 app = express()
 app.use(session({
   ws: true,
