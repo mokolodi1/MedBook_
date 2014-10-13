@@ -31,7 +31,8 @@ class Proxy
         app.get(ca.route,        @forward(ca.route, ca.port, ca.auth))
         app.get(ca.route+'/*',   @forward(ca.route, ca.port, ca.auth))
         app.post(ca.route+'/*',  @forward(ca.route, ca.port, ca.auth))
-    app.get('/', @redirect(config.final.redirect));
+    app.get('/*', @finally());
+    app.post('/*', @finally());
 
   respond: (text) ->
     (req, res, next) =>
@@ -46,9 +47,13 @@ class Proxy
   forward: (route, port, auth) =>
     route = route.replace /\//g, ""
     (req, res, next) =>
-      if auth and not ((new Cookies(req, res)).get("X-MedBook-Perms"))?.match(route)
+      if auth and not ((new Cookies(req, res)).get("MedBookPermissions"))?.match(route)
           res.redirect @configuration.final.redirect
       else
           @http_proxy.web(req, res, { target: "http://localhost:" + port, host: req.authproxy_domain, xfwd: true })
+
+  finally:  =>
+    (req, res, next) =>
+      @http_proxy.web(req, res, { target: "http://localhost:" + @configuration.final.port, host: req.authproxy_domain, xfwd: true })
 
 module.exports = new Proxy

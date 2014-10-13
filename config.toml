@@ -16,8 +16,8 @@ auth_domain = ""
    [apps.Telescope]
    auth = false
    route = "/tel"
-   run = "./Telescope/run 10005"
-   port = 10005
+   run = "./Telescope/run 10009"
+   port = 10009
 
    [apps.fileupload]
    auth = true
@@ -50,5 +50,7 @@ auth_domain = ""
    port = 22222
 
 [final]
-   redirect = "/tel"
+   redirect = "/"
+   run = "./Telescope/run 10009"
+   port = 10009
 
