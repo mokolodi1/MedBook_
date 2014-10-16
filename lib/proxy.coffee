@@ -22,7 +22,8 @@ class Proxy
     @http_proxy.on 'upgrade', (req, socket, head) =>
           @http_proxy.ws req, socket, head
     @http_proxy.on 'error', (e) =>
-          console.log "error", e
+          if e.code != "ECONNRESET"
+              console.log "error", e
 
   configApp: (app, config) =>
     @configuration = config
