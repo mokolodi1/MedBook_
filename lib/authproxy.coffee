@@ -18,23 +18,32 @@ if args.length < 1
   console.log("Please specify configuration file")
   process.exit(1)
 
-CONFIG = getConfig(args[0])
+server = null;
+app = null;
 
-app = express()
-app.use(session({
-  ws: true,
-  secret: CONFIG.server.cookie_secret,
-  resave: true,
-  saveUninitialized: true
-}))
-proxy.configApp(app, CONFIG)
+run =  ->
+    CONFIG = getConfig(args[0]);
+    console.log "loading",  args[0]
 
-server = http.createServer(app)
+    if (server)
+        server.close()
 
+    app = express()
+    app.use(session({
+      ws: true,
+      secret: CONFIG.server.cookie_secret,
+      resave: true,
+      saveUninitialized: true
+    }))
+    proxy.configApp(app, CONFIG)
+    server = http.createServer(app)
 
+    server.listen CONFIG.server.bind_port, CONFIG.server.bind_ip, (err) ->
+      if err
+        console.log("Failed to bind")
+        process.exit(1)
+      console.log("Listening on #{CONFIG.server.bind_ip}:#{CONFIG.server.bind_port}")
 
-server.listen CONFIG.server.bind_port, CONFIG.server.bind_ip, (err) ->
-  if err
-    console.log("Failed to bind")
-    process.exit(1)
-  console.log("Listening on #{CONFIG.server.bind_ip}:#{CONFIG.server.bind_port}")
+run()
+console.log "watching",  args[0]
+fs.watchFile args[0], run

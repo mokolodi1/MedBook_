@@ -42,12 +42,14 @@ class Proxy
 
   redirect: (loc) ->
      (req, res, next) ->
+        console.log "Gateway redirect", loc
         res.redirect loc
 
   forward: (route, port, auth) =>
     route = route.replace /\//g, ""
     (req, res, next) =>
       if auth and not ((new Cookies(req, res)).get("MedBookPermissions"))?.match(route)
+          console.log "Gateway redirect final"
           res.redirect @configuration.final.redirect
       else
           @http_proxy.web(req, res, { target: "http://localhost:" + port, host: req.authproxy_domain, xfwd: true })
