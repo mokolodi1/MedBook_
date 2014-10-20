@@ -9,8 +9,6 @@ auth_domain = ""
   [domains.example1]
   host = "su2c-dev.ucsc.edu:10000"
   upstream = [ "su2c-dev.ucsc.edu:8081"]
-  client_id = "210653342985.apps.googleusercontent.com"
-  client_secret = "tRD12MAYeFxVZOYkgqKK8AoP"
 
 [apps]
    [apps.Telescope]
