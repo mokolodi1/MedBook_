@@ -25,6 +25,7 @@ menuFile = null;
 
 readMenu = ->
     menuFile = fs.readFileSync("menu.html");
+    console.log "menu.html read", menuFile.length
 readMenu()
 
 run =  ->
@@ -93,8 +94,7 @@ class Proxy
 
   getMenu: (menu) ->
     (req, res, next) =>
-        console.log "menuFile", menuFile
-        text = String(menuFile).replace("LIST", (menu.map (a) -> "<li>"+a+"</li>") .join(''))
+        text = String(menuFile).replace("LIST", (menu.map (a) -> "<li>"+a+"</li><br/>") .join(''))
         res.writeHead(200);
         res.write(text, "binary")
         res.end()
