@@ -36,12 +36,16 @@ run =  ->
         server.close()
 
     app = express()
+    app.use('/journalentry', express.static(__dirname + '/journalentry'));
+
+    ###
     app.use(session({
       ws: true,
       secret: CONFIG.server.cookie_secret,
       resave: true,
       saveUninitialized: true
     }))
+    ###
     proxy = new Proxy();
     proxy.configApp(app, CONFIG)
     server = http.createServer(app)
@@ -82,7 +86,12 @@ class Proxy
         app.get(ca.route,        @forward(ca.route, ca.port, ca.auth))
         app.get(ca.route+'/*',   @forward(ca.route, ca.port, ca.auth))
         app.post(ca.route+'/*',  @forward(ca.route, ca.port, ca.auth))
-        link = "<a class='MedBookLink' href='"+ca.route+"'>" +ca.menuItem + "</a>"
+        menuItem = String(ca.menuItem);
+        if menuItem == null
+            menuItem = ca.route
+        console.log "menuItem", menuItem, typeof(menuItem)
+        menuItem = menuItem.replace(" ", "&nbsp;")
+        link = "<a class='MedBookLink' href='"+ca.route+"'>" + menuItem + "</a>"
         if ca.menuItem
             if ca.menuPosition != undefined
                 menu.splice(ca.menuPosition, 0, link);

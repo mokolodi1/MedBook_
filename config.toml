@@ -16,30 +16,40 @@ auth_domain = ""
    route = "/tel"
    run = "./Telescope/run 10002"
    port = 10002
+   menuPosition = 0
+   menuItem = "Telescope"
+
+   [apps.demoPost]
+   auth = false
+   route = "/demoPost"
+   run = "./Telescope/run 20004"
+   port = 20004
+   menuPosition = 1
+   menuItem = "Demo Post"
+
 
    [apps.fileupload]
    auth = false
    route = "/fileupload"
    run = "./Apps/fileupload/run 22222"
    port = 22222
+   menuPosition = 2
+   menuItem = "File Upload"
 
    [apps.galaxy]
    auth = true
    route = "/galaxy"
    run = "./galaxy-central/run"
    port = 10010
+   menuPosition = 3
+   menuItem = "Galaxy"
 
    [apps.cbioportal]
    auth = true
    route = "/cbioportal"
    run = ""
    port = 8585
-
-   [apps.hello]
-   auth = false
-   route = "/hello"
-   run = "./Apps/hello/run 10002"
-   port = 10002
+   menuItem = "CBioPortal"
 
    [apps.flat]
    auth = true
@@ -52,6 +62,8 @@ auth_domain = ""
    route = "/admin"
    run = "./Apps/flat/run 10004"
    port = 10004
+   menuPosition = 0
+   menuItem = "Admin"
 
 [final]
    redirect = "/"
