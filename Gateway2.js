@@ -4,9 +4,11 @@ if (args.length < 1) {
   process.exit(1);
 }
 
-var Cookies = require('cookies')
-var toml = require('toml')
-var fs = require('fs')
+var Cookies = require('cookies');
+var toml = require('toml');
+var fs = require('fs');
+var url = require('url');
+var path = require('path');
 
 
 var server = null;
@@ -42,6 +44,9 @@ run = function() {
 
     if (req.url == "/menu")
         return serveMenu(req, res);
+
+    if (req.url.indexOf("/journalentry") == 0 || req.url.indexOf("/public") == 0)
+        return serveFile(req, res);
 
     var port = getPort(req);
     console.log("web", req.url, port)
@@ -143,7 +148,35 @@ serveMenu = function(req, res) {
 };
 
 
-run();
+
+var mimeTypes = {
+    "html": "text/html",
+    "jpeg": "image/jpeg",
+    "jpg": "image/jpeg",
+    "png": "image/png",
+    "js": "text/javascript",
+    "css": "text/css"};
+
+        
+function serveFile(req, res) {
+    var uri = url.parse(req.url).pathname;
+    var filename = path.join(process.cwd(), uri);
+    fs.exists(filename, function(exists) {
+        if(!exists) {
+            console.log("not exists: " + filename);
+            res.writeHead(404, {'Content-Type': 'text/plain'});
+            res.end();
+            return;
+        }
+        var mimeType = mimeTypes[path.extname(filename).split(".")[1]];
+        res.writeHead(200, mimeType);
+
+        var fileStream = fs.createReadStream(filename);
+        fileStream.pipe(res);
+
+    }); //end fs.exists
+
+};
 
 console.log("watching", args[0]);
 
@@ -152,8 +185,12 @@ fs.watchFile("menu.html", readMenu);
 
 function log_error(e,req){
   if(e){
+    console.log("log_error");
     console.error(e.message);
     console.log(req.headers.host,'-->');
     console.log('-----');
   }
 }
+
+run();
+
