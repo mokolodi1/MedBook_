@@ -11,12 +11,28 @@ auth_domain = ""
   upstream = [ "su2c-dev.ucsc.edu:8081"]
 
 [apps]
+   [apps.WB]
+   auth = false
+   route = "/wb"
+   run = "./Telescope/run 10003"
+   port = 10003
+   menuPosition = 0
+   menuItem = "WB"
+
+   [apps.CRFs]
+   auth = false
+   route = "/CRF"
+   run = "./Telescope/run 10002"
+   port = 10002
+   menuPosition = 1
+   menuItem = "Forms"
+
    [apps.Telescope]
    auth = false
    route = "/tel"
-   run = "./Telescope/run 10002"
-   port = 10002
-   menuPosition = 0
+   run = "./Telescope/run 10001"
+   port = 10001
+   menuPosition = 3
    menuItem = "Telescope"
 
    [apps.demoPost]
@@ -33,7 +49,7 @@ auth_domain = ""
    route = "/fileupload"
    run = "./Apps/fileupload/run 22222"
    port = 22222
-   menuPosition = 2
+   menuPosition = 3
    menuItem = "File Upload"
 
    [apps.galaxy]
@@ -41,8 +57,17 @@ auth_domain = ""
    route = "/galaxy"
    run = "./galaxy-central/run"
    port = 10010
-   menuPosition = 3
+   menuPosition = 4
    menuItem = "Galaxy"
+
+   [apps.Admin]
+   auth = true
+   route = "/admin"
+   run = "./Apps/flat/run 10005"
+   port = 10005
+   menuPosition = 0
+   menuItem = "Admin"
+
 
    [apps.cbioportal]
    auth = true
@@ -56,17 +81,10 @@ auth_domain = ""
    route = "/flat"
    run = "./Apps/flat/run 22222"
    port = 22222
-
-   [apps.Admin]
-   auth = true
-   route = "/admin"
-   run = "./Apps/flat/run 10004"
-   port = 10004
-   menuPosition = 0
-   menuItem = "Admin"
+   menuItem = "Flat"
 
 [final]
    redirect = "/"
-   run = "./Telescope/run 10002"
-   port = 10002
+   run = "./Telescope/run 10001"
+   port = 10001
 

@@ -1,2 +1,2 @@
-coffee Gateway.coffee config.toml
+forever Gateway2.js config.toml
 

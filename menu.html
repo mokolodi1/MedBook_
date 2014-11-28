@@ -1,7 +1,9 @@
 <style >
+<!--
 body {
   background: #E3CAA1;
 }
+-->
 .MedBookMenuOverlay {
     position: fixed;
     left: 0;
@@ -101,7 +103,7 @@ body {
 }
 
 </style>
-  <div id="MedBookAbs"  class="MedBookAbs" style="z-index:10001;visibility:visible;position:absolute;left:550px;top:60px;height:500px;">
+  <div hidden id="MedBookAbs"  class="MedBookAbs" style="z-index:10001;visibility:visible;position:absolute;left:550px;top:60px;height:500px;">
     <ul class="MedBookMenu">
         LIST
     </ul>
@@ -118,7 +120,7 @@ body {
 
     var off = $('#MedBookImage').offset();
     var top = off.top + $('#MedBookImage').height()-5;
-    $('#MedBookAbs').css({left: off.left, top:top });
+    $('#MedBookAbs').css({left: off.left, top:top }).show();
   });
   </script>
 
