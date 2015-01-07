@@ -17,7 +17,7 @@ menuFile = null;
 
 getPort = function(req) {
     var a = req.url.split("/");
-    if (a.length > 2) {
+    if (a.length > 1) {
         var p = routes["/" + a[1]];
         if (p)
             return p;
