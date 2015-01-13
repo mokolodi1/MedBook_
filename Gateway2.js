@@ -121,6 +121,7 @@ configApp = function(path) {
 serveMenu = function(req, res) {
   var menu = [];
   _ref = config.apps;
+  var routeHacks = "";
   for (appName in _ref) {
     var ca = _ref[appName];
     menuItem = String(ca.menuItem);
@@ -130,6 +131,7 @@ serveMenu = function(req, res) {
     console.log("menuItem", menuItem, typeof menuItem);
     menuItem = menuItem.replace(/\ /g, "&nbsp;");
     link = "<a class='MedBookLink' href='" + ca.route + "'>" + menuItem + "</a>";
+    routeHacks += "Router.route('" + ca.route + "', function () {}, {where: 'server'});\n";
     if (ca.menuItem) {
       if (ca.menuPosition !== void 0) {
         menu.splice(ca.menuPosition, 0, link);
@@ -142,6 +144,10 @@ serveMenu = function(req, res) {
   var text = String(menuFile).replace("LIST", (menu.map(function(a) {
     return "<li>" + a + "</li><br/>";
   })).join(''));
+
+  text += "<script>if (Router) {\n" + routeHacks + "}\n</script>";
+
+
   res.writeHead(200);
   res.write(text, "binary");
   return res.end();
