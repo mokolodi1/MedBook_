@@ -129,7 +129,7 @@ serveMenu = function(req, res) {
     }
     console.log("menuItem", menuItem, typeof menuItem);
     menuItem = menuItem.replace(/\ /g, "&nbsp;");
-    link = "<a class='MedBookLink' href='" + ca.route + "'>" + menuItem + "</a>";
+    link = "<a target='_self' class='MedBookLink' href='" + ca.route + "'>" + menuItem + "</a>";
     if (ca.menuItem) {
       if (ca.menuPosition !== void 0) {
         menu.splice(ca.menuPosition, 0, link);
