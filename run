@@ -1,2 +1,2 @@
-forever Gateway2.js config.toml
+forever -l gateway.log -o gateway.out -e gateway.err Gateway2.js config.toml
 

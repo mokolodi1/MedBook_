@@ -7,8 +7,8 @@ auth_domain = ""
 
 [domains]
   [domains.example1]
-  host = "su2c-dev.ucsc.edu:10000"
-  upstream = [ "su2c-dev.ucsc.edu:8081"]
+  host = "su2c.ucsc.edu:10000"
+  upstream = [ "su2c.ucsc.edu:8081"]
 
 [apps]
    [apps.WB]
