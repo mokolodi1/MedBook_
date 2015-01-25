@@ -130,12 +130,8 @@ serveMenu = function(req, res) {
     }
     console.log("menuItem", menuItem, typeof menuItem);
     menuItem = menuItem.replace(/\ /g, "&nbsp;");
-<<<<<<< HEAD
-    link = "<a class='MedBookLink' href='" + ca.route + "'>" + menuItem + "</a>";
-    routeHacks += "Router.route('" + ca.route + "', function () {}, {where: 'server'});\n";
-=======
     link = "<a target='_self' class='MedBookLink' href='" + ca.route + "'>" + menuItem + "</a>";
->>>>>>> bb92c9b509ee8adb4f409d3f8c3ffb99a547e690
+    routeHacks += "Router.route('" + ca.route + "', function () {}, {where: 'server'});\n";
     if (ca.menuItem) {
       if (ca.menuPosition !== void 0) {
         menu.splice(ca.menuPosition, 0, link);
