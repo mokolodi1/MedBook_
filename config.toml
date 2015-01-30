@@ -7,14 +7,14 @@ auth_domain = ""
 
 [domains]
   [domains.example1]
-  host = "su2c-dev.ucsc.edu:10000"
-  upstream = [ "su2c-dev.ucsc.edu:8081"]
+  host = "su2c.ucsc.edu:10000"
+  upstream = [ "su2c.ucsc.edu:8081"]
 
 [apps]
    [apps.WB]
    auth = false
    route = "/wb"
-   run = "./Telescope/run 10003"
+   run = "./MedBook-Workbench/run 10003"
    port = 10003
    menuPosition = 0
    menuItem = "WB"
@@ -55,7 +55,7 @@ auth_domain = ""
    [apps.galaxy]
    auth = true
    route = "/galaxy"
-   run = "./galaxy-central/run"
+   run = "./galaxy-dist/run"
    port = 10010
    menuPosition = 4
    menuItem = "Galaxy"

@@ -3,6 +3,8 @@ Configuration = null
 
 httpProxy = require('http-proxy')
 Cookies = require('cookies')
+websocket = require('websocket')
+utils = require('socket.io')
 
 splitHostPort = (s) ->
   parts = s.split(':', 2)
@@ -20,6 +22,7 @@ class Proxy
     @internal_domains = {}
     @http_proxy = httpProxy.createProxyServer({})
     @http_proxy.on 'upgrade', (req, socket, head) =>
+          console.log "upgrade called", req
           @http_proxy.ws req, socket, head
     @http_proxy.on 'error', (e) =>
           if e.code != "ECONNRESET"
