@@ -9,6 +9,8 @@ var toml = require('toml');
 var fs = require('fs');
 var url = require('url');
 var path = require('path');
+var CryptoJS = require('./sha256.js');
+console.log("CryptoJS", CryptoJS);
 
 
 var server = null;
@@ -70,7 +72,7 @@ run = function() {
     });
   })
    
-  server.listen(10000)
+  server.listen(8081)
 };
 
 splitHostPort = function(s) {

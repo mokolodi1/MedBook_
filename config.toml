@@ -22,7 +22,7 @@ auth_domain = ""
    [apps.CRFs]
    auth = false
    route = "/CRF"
-   run = "./Telescope/run 10002"
+   run = "./CRF/run 10002"
    port = 10002
    menuPosition = 1
    menuItem = "Forms"
