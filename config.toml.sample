@@ -29,7 +29,7 @@ auth_domain = ""
 
    [apps.Telescope]
    auth = false
-   route = "/tel"
+   route = "/"
    run = "./Telescope/run 10001"
    port = 10001
    menuPosition = 3
