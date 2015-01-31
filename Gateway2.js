@@ -43,6 +43,8 @@ run = function() {
   console.log("loading", args[0]);
 
   server = require('http').createServer(function(req, res) {
+    var cookies = new Cookies( req, res);
+    var meteor_login_token = cookies.get('meteor_login_token');
 
     if (req.url == "/menu")
         return serveMenu(req, res);
@@ -51,6 +53,13 @@ run = function() {
         return serveFile(req, res);
 
     var port = getPort(req);
+    if (meteor_login_token == null && port != final) {
+        res.writeHead(301, { location: "https://su2c-dev.ucsc.edu/sign-in?RETURNTO="+encodeURI(req.url)});
+        res.end();
+        return;
+    }
+
+    // if (req.url.indexOf("/user/login") == 0) req.url = "/galaxy/user/login";
     console.log("web", req.url, port)
     proxy.web(req, res, {
       target: "http://localhost:"+port,
