@@ -1,0 +1,50 @@
+[server]
+host = "su2c-dev.ucsc.edu"
+bind_ip = "0.0.0.0"
+nonssl = 9000
+
+[apps]
+   [apps.WB]
+   auth = false
+   route = "/wb"
+   run = "./MedBook-Workbench/run 10003"
+   port = 10003
+   menuPosition = 0
+   menuItem = "Workbench"
+
+   [apps.CRFs]
+   auth = false
+   route = "/CRF"
+   run = "./Telescope/run 10002"
+   port = 10002
+   menuPosition = 1
+   menuItem = "Forms"
+
+   [apps.Telescope]
+   auth = false
+   route = "/"
+   run = "./Telescope/run 10001"
+   port = 10001
+   menuPosition = 3
+   menuItem = "Telescope"
+
+   [apps.galaxy]
+   auth = true
+   route = "/galaxy"
+   run = "./galaxy-dist/run"
+   port = 10010
+   menuPosition = 4
+   menuItem = "Galaxy"
+
+   [apps.upload]
+   auth = true
+   route = "/fileupload"
+   run = "./Apps/fileupload/run"
+   port = 22200
+   menuItem = "File Upload"
+
+[final]
+   redirect = "/"
+   run = "./Telescope/run 10001"
+   port = 10001
+

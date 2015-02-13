@@ -1,7 +1,6 @@
 var args = process.argv.slice(2);
 if (args.length < 1) {
-  console.log("Please specify configuration file");
-  process.exit(1);
+  args = ["config.toml"]
 }
 
 var Cookies = require('cookies');
@@ -13,7 +12,7 @@ var CryptoJS = require('./sha256.js');
 console.log("CryptoJS", CryptoJS);
 
 
-var server = null;
+var sslServer = null;
 
 menuFile = null;
 
@@ -34,15 +33,57 @@ readMenu = function() {
 
 readMenu();
 
+
+readSSLcredentials = function() {
+    var options = {
+         key: fs.readFileSync(config.server.key),
+         cert: fs.readFileSync(config.server.cert),
+    };
+
+    if (config.server.chain) {
+        var ca = []
+        var chain = fs.readFileSync(config.server.chain, 'utf8');
+        chain = chain.split("\n");
+        var cert = [];
+        for (var i =0; i < chain.length; i++) {
+          var line = chain[i];
+          if (line.length > 0) {
+            cert.push(line);
+            if (line.match(/-END CERTIFICATE-/)) {
+                var c = cert.join("\n");
+                ca.push(c);
+                cert = [];
+            }
+          }
+        }
+        options.ca = ca;
+    }
+    return options;
+}
+
 run = function() {
-  if (server) {
-    server.close();
+  if (sslServer) {
+    sslServer.close();
   }
 
   configApp(args[0]);
   console.log("loading", args[0]);
 
-  server = require('http').createServer(function(req, res) {
+  redirectServer = require('http').createServer(function(req, res) {
+       
+       var red = "https://" + config.server.host + ":" + config.server.ssl + req.url;
+       console.log("redirect", red);
+       res.writeHead(302, {'Location': red});
+       res.end();
+
+  });
+  console.log("nonssl listening on", config.server.nonssl);
+  redirectServer.listen(config.server.nonssl);
+
+  var sslOptions = readSSLcredentials();
+
+  sslServer = require('https').createServer(sslOptions, 
+          function(req, res) {
     var cookies = new Cookies( req, res);
     var meteor_login_token = cookies.get('meteor_login_token');
 
@@ -71,7 +112,7 @@ run = function() {
   var httpProxy = require('http-proxy')
   var proxy = httpProxy.createProxy({ ws : true });
 
-  server.on('upgrade',function(req,res){
+  sslServer.on('upgrade',function(req,res){
     var port = getPort(req);
     console.log("ws upgrade", req.url, port);
     proxy.ws(req, res, {
@@ -81,7 +122,8 @@ run = function() {
     });
   })
    
-  server.listen(8081)
+  console.log("ssl listening on", config.server.ssl);
+  sslServer.listen(config.server.ssl)
 };
 
 splitHostPort = function(s) {
