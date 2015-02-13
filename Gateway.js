@@ -9,7 +9,6 @@ var fs = require('fs');
 var url = require('url');
 var path = require('path');
 var CryptoJS = require('./sha256.js');
-console.log("CryptoJS", CryptoJS);
 
 
 var server = null;
@@ -28,7 +27,6 @@ getPort = function(req) {
 
 readMenu = function() {
   menuFile = fs.readFileSync("menu.html");
-  return console.log("menu.html read", menuFile.length);
 };
 
 readMenu();
@@ -42,12 +40,10 @@ readSSLcredentials = function() {
 
       redirectServer = require('http').createServer(function(req, res) {
            var red = "https://" + config.server.host + ":" + config.server.ssl + req.url;
-           console.log("redirect", red);
            res.writeHead(302, {'Location': red});
            res.end();
 
       });
-      console.log("nonssl listening on", config.server.nonssl);
       redirectServer.listen(config.server.nonssl);
     }
 
@@ -83,7 +79,6 @@ run = function() {
   }
 
   configApp(args[0]);
-  console.log("loading", args[0]);
 
 
   function main(req, res) {
@@ -181,7 +176,6 @@ configApp = function(path) {
     auth[ca.route] = ca.auth;
   }
 
-  return console.log("configApp menu", menu);
 };
 
 serveMenu = function(req, res) {
@@ -194,7 +188,6 @@ serveMenu = function(req, res) {
     if (menuItem === null) {
       menuItem = ca.route;
     }
-    console.log("menuItem", menuItem, typeof menuItem);
     menuItem = menuItem.replace(/\ /g, "&nbsp;");
     link = "<a target='_self' class='MedBookLink' href='" + ca.route + "'>" + menuItem + "</a>";
     routeHacks += "Router.route('" + ca.route + "', function () {}, {where: 'server'});\n";
