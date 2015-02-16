@@ -1,5 +1,5 @@
 [server]
-host = "su2c-dev.ucsc.edu"
+host = "localhost"
 bind_ip = "0.0.0.0"
 nonssl = 9000
 
@@ -36,12 +36,11 @@ nonssl = 9000
    menuPosition = 4
    menuItem = "Galaxy"
 
-   [apps.upload]
+   [apps.cbioportal]
    auth = true
-   route = "/fileupload"
-   run = "./Apps/fileupload/run"
-   port = 22200
-   menuItem = "File Upload"
+   route = "/cbioportal"
+   port = 8585
+   menuItem = "Cbioportal"
 
 [final]
    redirect = "/"

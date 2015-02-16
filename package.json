@@ -20,6 +20,7 @@
   "dependencies": {
     "http-proxy": "*",
     "https": "*",
-    "toml": "*"
+    "toml": "*",
+    "randomstring": "*",
   }
 }

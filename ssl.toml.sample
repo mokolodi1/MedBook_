@@ -42,12 +42,11 @@ chain = "/etc/httpd/conf/ssl.crt/chain.crt"
    menuPosition = 4
    menuItem = "Galaxy"
 
-   [apps.upload]
+   [apps.cbioportal]
    auth = true
-   route = "/fileupload"
-   run = "./Apps/fileupload/run"
-   port = 22200
-   menuItem = "File Upload"
+   route = "/cbioportal"
+   port = 8585
+   menuItem = "Cbioportal"
 
 [final]
    redirect = "/"
