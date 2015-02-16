@@ -1,1 +1,1 @@
-forever -l logs/log -e logs/err -o logs/out Gateway.js config.toml
+forever -l logs/log -e logs/err -o logs/out Gateway.js nonssl.toml

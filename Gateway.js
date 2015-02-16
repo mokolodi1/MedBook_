@@ -8,8 +8,22 @@ var toml = require('toml');
 var fs = require('fs');
 var url = require('url');
 var path = require('path');
-var CryptoJS = require('./sha256.js');
+var http = require('http');
+var crypto = require('crypto');
+var randomstring = require("randomstring");
 
+var SECRET;
+function changeSecret() {
+    SECRET = randomstring.generate(7);
+}
+changeSecret();
+
+setInterval(changeSecret, 30000);
+
+function hash(pwd) {
+    var hash = crypto.createHash('sha256').update(SECRET + pwd).digest('base64');
+    return hash;
+}
 
 var server = null;
 
@@ -40,7 +54,7 @@ readSSLcredentials = function() {
 
       redirectServer = require('http').createServer(function(req, res) {
            var red = "https://" + config.server.host + ":" + config.server.ssl + req.url;
-           res.writeHead(302, {'Location': red});
+           res.writeHead(307, {'Location': red});
            res.end();
 
       });
@@ -80,32 +94,112 @@ run = function() {
 
   configApp(args[0]);
 
+  function forward(req, res) {
+        var port = getPort(req);
+        // console.log("web", req.url, port)
+        proxy.web(req, res, {
+          target: "http://localhost:"+port,
+        },function(e){
+          log_error(e,req);
+      });
+  }
+
+  function signIn(req, res) {
+      // console.log("signIn");
+      var host = null;
+      if (config.server.ssl)
+        host = "https://" + config.server.host + ":"+ config.server.ssl;
+      else
+        host = "http://" + config.server.host + ":"+ config.server.nonssl;
+
+      var url = host + "/sign-in?RETURNTO="+encodeURI(req.url);
+      res.writeHead(307, { location: url});
+      res.end();
+  }
+
+  function mustLogin(firstPart, req, res) {
+      // console.log("mustLogin");
+      var cookies = new Cookies(req, res);
+
+      function checkCredentials(cache) {
+         var gateway_token = cookies.get('gateway_token');
+         if (gateway_token)
+           try {
+               var gateway_credentials = JSON.parse(gateway_token);
+               var obj = JSON.parse(gateway_credentials.json);
+               // console.log( obj.collaborations.indexOf(firstPart), "firstPart", firstPart, "collaborations", obj.collaborations);
+
+               if ( obj.collaborations.indexOf(firstPart) >= 0) {
+                   var signature = hash( gateway_credentials.json );
+                   if ( signature == gateway_credentials.signature ) {
+                       if (cache) console.log("credentials cached");
+                       return true;
+                   }
+               }
+           } catch (err) {
+               console.log("credential failure" + err);
+           }
+         return false;
+      }
+
+      function requestCredentials() {
+        console.log("requestCredentials");
+        var options = {
+          method: 'GET',
+          path: '/medbookUser',
+          port: final,
+          headers: { 'cookie': req.headers.cookie, },
+          keepAlive: true,
+          keepAliveMsecs: 3600000, // an hour
+         };
+         var medbookUserReq = http.request(options, function(medbookUserRes) {
+               // console.log("medbookUser response");
+               medbookUserRes.setEncoding('utf8');
+               var all = "";
+               medbookUserRes.on("data", function(data) { all += data; });
+               medbookUserRes.on("end", function(data) {
+                   if (data != null) all += data;
+                   var gateway_credentials = { signature: hash( all ), json: all, }
+                   cookies.set("gateway_token", JSON.stringify(gateway_credentials));
+                   if (checkCredentials(false))
+                       forward(req, res);
+                   else
+                       signIn(req, res);
+               });
+         });
+        medbookUserReq.on("error", function(err) {
+             console.log("medbookUser error", err);
+             signIn(req, res);
+        });
+        medbookUserReq.end();
+      }; // requestCredentials()
+
+      if (checkCredentials(true))
+         forward(req, res);
+      else
+         requestCredentials();
+  } // mustLogin
 
   function main(req, res) {
-    var cookies = new Cookies( req, res);
-    var meteor_login_token = cookies.get('meteor_login_token');
-
     if (req.url == "/menu")
         return serveMenu(req, res);
-
+    /*
     if (req.url.indexOf("/journalentry") == 0 || req.url.indexOf("/public") == 0)
         return serveFile(req, res);
+    */
 
-    var port = getPort(req);
-    if (meteor_login_token == null && port != final) {
-        res.writeHead(301, { location: "https://su2c-dev.ucsc.edu/sign-in?RETURNTO="+encodeURI(req.url)});
-        res.end();
-        return;
-    }
+    var urlPath = req.url.split("/");
+    var firstPart = "never match";
+    if (urlPath && urlPath.length >= 2 && urlPath[1].length > 0)
+        firstPart = urlPath[1];
 
-    // if (req.url.indexOf("/user/login") == 0) req.url = "/galaxy/user/login";
-    console.log("web", req.url, port)
-    proxy.web(req, res, {
-      target: "http://localhost:"+port,
-    },function(e){
-      log_error(e,req);
-    });
-  }
+    // console.log("main", firstPart);
+
+    if (("/" + firstPart) in routes)
+        mustLogin(firstPart, req, res);
+    else
+        forward(req, res);
+  } // main
 
   if (config.server.ssl)
       server = require('https').createServer(readSSLcredentials(), main);
@@ -117,7 +211,7 @@ run = function() {
 
   server.on('upgrade',function(req,res){
     var port = getPort(req);
-    console.log("ws upgrade", req.url, port);
+    // console.log("ws upgrade", req.url, port);
     proxy.ws(req, res, {
       target: "http://localhost:" + port,
     },function(e){
@@ -250,10 +344,12 @@ fs.watchFile("menu.html", readMenu);
 
 function log_error(e,req){
   if(e){
+    /*
     console.log("log_error");
     console.error(e.message);
     console.log(req.headers.host,'-->');
     console.log('-----');
+    */
   }
 }
 
