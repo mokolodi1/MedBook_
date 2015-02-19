@@ -1,7 +1,7 @@
 {
   "name": "Gateway",
   "version": "0.0.5",
-  "description": "Gateway Proxy",
+  "description": "GatewayProxy",
   "main": "GatewaySSL",
   "repository": {
     "type": "git",
@@ -21,6 +21,6 @@
     "http-proxy": "*",
     "https": "*",
     "toml": "*",
-    "randomstring": "*",
+    "randomstring": "*"
   }
 }
