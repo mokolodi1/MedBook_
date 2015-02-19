@@ -137,7 +137,9 @@ run = function() {
                    }
                }
            } catch (err) {
-               console.log("credential failure" + err);
+               console.log("credential failure" , err);
+               console.log("gateway_token" , gateway_token);
+               console.log("gateway_credentials" , gateway_credentials);
            }
          return false;
       }

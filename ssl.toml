@@ -1,12 +1,15 @@
 [server]
 host = "localhost"
 bind_ip = "0.0.0.0"
-nonssl = 10000
-ssl = 10001
+nonssl = 9999
+ssl = 10000
 cookie_secret = "medbookCookie change for production"
 key   = "/etc/httpd/conf/ssl.key/server.key"
 cert  = "/etc/httpd/conf/ssl.crt/server.crt"
 chain = "/etc/httpd/conf/ssl.crt/chain.crt"
+# key   = "ssl/test.key"
+# cert  = "ssl/test.crt"
+# chain = "ssl/ca/ca.crt"
 
 
 [apps]
