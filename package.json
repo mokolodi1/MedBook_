@@ -8,7 +8,7 @@
     "url": "https://github.com/UCSC-MedBook/MedBook-Gateway"
   },
   "bin": {
-    "Gateway": "./GatewaySSL.js"
+    "Gateway": "./Gateway.js"
   },
   "keywords": [
     "proxy",
