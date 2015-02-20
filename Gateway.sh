@@ -18,10 +18,10 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 ##
- 
+
 # Source function library.
-# . /etc/init.d/functions
- 
+. /etc/init.d/functions
+
 ################################################################################
 ################################################################################
 ##                                                                            ##
@@ -29,14 +29,18 @@
 ##             Edit the variables below for your installation                 ##
 ################################################################################
 ################################################################################
- 
+
+DESC="Gateway"
 NAME="Gateway.js"
-DIR="/data/galaxy/MedBook/Gateway"
-CONFIG=ssl.toml
+DIR="/data/MedBook"
+APP=${DIR}/${DESC}/${NAME}
+LOGDIR=${DIR}/${DESC}/logs
 LOCKFILE=`basename $0 .sh`
+CONFIG=${DIR}/${DESC}/config.toml
+
 export NODE_ENV=${NODE_ENV:="production"}
- 
- 
+
+
 ################################################################################
 ################################################################################
 ##                                                                            ##
@@ -44,13 +48,17 @@ export NODE_ENV=${NODE_ENV:="production"}
 ##                                                                            ##
 ################################################################################
 ################################################################################
- 
- 
+
+
 export PATH=$HOME/local/bin:${PATH:=}
 export MANPATH=$HOME/local/man:${MANPATH:=}
 export LD_LIBRARY_PATH=$HOME/local/lib:${LD_LIBRARY_PATH:=}
- 
- 
+
+export PATH=/usr/local/bin:${PATH:=}
+export MANPATH=/usr/local/man:${MANPATH:=}
+export LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH:=}
+
+
 ################################################################################
 ################################################################################
 ##                                                                            ##
@@ -58,25 +66,24 @@ export LD_LIBRARY_PATH=$HOME/local/lib:${LD_LIBRARY_PATH:=}
 ##                                                                            ##
 ################################################################################
 ################################################################################
- 
- 
+
+
 running() {
-        cd ${DIR}
-	forever list 2>/dev/null | grep ${NAME} ${CONFIG} 2>&1 >/dev/null
+    forever list 2>/dev/null | grep ${APP} 2>&1 
     return $?
 }
- 
+
 start_server() {
-        cd ${DIR}
-        forever start -l logs/log -e logs/err -o logs/out ${NAME} ${CONFIG}
+        # forever ${APP} ${CONFIG} 
+        forever start -a -l ${LOGDIR}/log -e ${LOGDIR}/err -o ${LOGDIR}/out ${APP} ${CONFIG}
 	return $?
 }
- 
+
 stop_server() {
-	forever stop ${NAME} 2>&1 >/dev/null
+	forever stop ${APP} 2>&1 >/dev/null
 	return $?
 }
- 
+
 ################################################################################
 ################################################################################
 ##                                                                            ##
@@ -84,14 +91,14 @@ stop_server() {
 ##                                                                            ##
 ################################################################################
 ################################################################################
- 
- 
- 
+
+
+
 DIETIME=10              # Time to wait for the server to die, in seconds
                         # If this value is set too low you might not
                         # let some servers to die gracefully and
                         # 'restart' will not work
- 
+
 STARTTIME=2             # Time to wait for the server to start, in seconds
                         # If this value is set each time the server is
                         # started (on start or restart) the script will
@@ -100,11 +107,11 @@ STARTTIME=2             # Time to wait for the server to start, in seconds
                         # to setup a pid file the log message might
                         # be a false positive (says it did not start
                         # when it actually did)
- 
+
 # Console logging.
 log() {
   local STRING mode
- 
+
   STRING=$1
   arg2=$2
   mode="${arg2:=success}"
@@ -129,7 +136,7 @@ log() {
     echo > /etc/rhgb/temp/rhgb-console
   fi
 }
- 
+
 # Starts the server.
 do_start() {
   # Check if it's running first
@@ -157,7 +164,7 @@ do_start() {
   fi
   return $RETVAL
 }
- 
+
 # Stops the server.
 do_stop() {
   if running ; then
@@ -172,7 +179,7 @@ do_stop() {
   fi
   return $RETVAL
 }
- 
+
 case "$1" in
   start)
     do_start
@@ -201,8 +208,9 @@ case "$1" in
     RETVAL=0
     ;;
   *)
+    echo "Usage: ${0} {start|stop|status|restart}"
     RETVAL=1
     ;;
 esac
- 
+
 exit $RETVAL

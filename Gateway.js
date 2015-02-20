@@ -96,7 +96,6 @@ run = function() {
 
   function forward(req, res) {
         var port = getPort(req);
-        // console.log("web", req.url, port)
         proxy.web(req, res, {
           target: "http://localhost:"+port,
         },function(e){
@@ -105,7 +104,6 @@ run = function() {
   }
 
   function signIn(req, res) {
-      // console.log("signIn");
       var host = null;
       if (config.server.ssl)
         host = "https://" + config.server.host + ":"+ config.server.ssl;
@@ -118,18 +116,17 @@ run = function() {
   }
 
   function mustLogin(firstPart, req, res) {
-      // console.log("mustLogin");
       var cookies = new Cookies(req, res);
 
-      function checkCredentials(cache) {
-         var gateway_token = cookies.get('gateway_token');
+      function checkCredentials(cache, gateway_token) {
          if (gateway_token)
            try {
                var gateway_credentials = JSON.parse(gateway_token);
                var obj = JSON.parse(gateway_credentials.json);
-               // console.log( obj.collaborations.indexOf(firstPart), "firstPart", firstPart, "collaborations", obj.collaborations);
+
 
                if ( obj.collaborations.indexOf(firstPart) >= 0) {
+
                    var signature = hash( gateway_credentials.json );
                    if ( signature == gateway_credentials.signature ) {
                        if (cache) console.log("credentials cached");
@@ -145,7 +142,6 @@ run = function() {
       }
 
       function requestCredentials() {
-        console.log("requestCredentials");
         var options = {
           method: 'GET',
           path: '/medbookUser',
@@ -155,28 +151,27 @@ run = function() {
           keepAliveMsecs: 3600000, // an hour
          };
          var medbookUserReq = http.request(options, function(medbookUserRes) {
-               // console.log("medbookUser response");
                medbookUserRes.setEncoding('utf8');
                var all = "";
                medbookUserRes.on("data", function(data) { all += data; });
                medbookUserRes.on("end", function(data) {
                    if (data != null) all += data;
                    var gateway_credentials = { signature: hash( all ), json: all, }
-                   cookies.set("gateway_token", JSON.stringify(gateway_credentials));
-                   if (checkCredentials(false))
+                   var gateway_token = JSON.stringify(gateway_credentials);
+                   cookies.set("gateway_token", gateway_token);
+                   if (checkCredentials(false, gateway_token))
                        forward(req, res);
                    else
                        signIn(req, res);
                });
          });
         medbookUserReq.on("error", function(err) {
-             console.log("medbookUser error", err);
              signIn(req, res);
         });
         medbookUserReq.end();
       }; // requestCredentials()
 
-      if (checkCredentials(true))
+      if (checkCredentials(true, cookies.get("gateway_token")))
          forward(req, res);
       else
          requestCredentials();
@@ -195,11 +190,11 @@ run = function() {
     if (urlPath && urlPath.length >= 2 && urlPath[1].length > 0)
         firstPart = urlPath[1];
 
-    // console.log("main", firstPart);
+    var sla = "/" + firstPart;
 
-    if (("/" + firstPart) in routes)
+    if (sla in routes && auth[sla]) {
         mustLogin(firstPart, req, res);
-    else
+    } else
         forward(req, res);
   } // main
 
@@ -213,7 +208,6 @@ run = function() {
 
   server.on('upgrade',function(req,res){
     var port = getPort(req);
-    // console.log("ws upgrade", req.url, port);
     proxy.ws(req, res, {
       target: "http://localhost:" + port,
     },function(e){
@@ -262,7 +256,6 @@ configApp = function(path) {
   menu = [];
   routes = {};
   auth = {};
-  console.log(config.final);
   final = config.final.port
 
   _ref = config.apps;
