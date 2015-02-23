@@ -191,8 +191,9 @@ run = function() {
         firstPart = urlPath[1];
 
     var sla = "/" + firstPart;
+    console.log("sla", sla, auth[sla]);
 
-    if (sla in routes && auth[sla]) {
+    if (sla in auth && auth[sla]) {
         mustLogin(firstPart, req, res);
     } else
         forward(req, res);

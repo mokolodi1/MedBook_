@@ -1,7 +1,7 @@
 [server]
 host = "localhost"
 bind_ip = "0.0.0.0"
-nonssl = 9000
+nonssl = 10000
 
 [apps]
    [apps.WB]
@@ -13,7 +13,7 @@ nonssl = 9000
    menuItem = "Workbench"
 
    [apps.CRFs]
-   auth = false
+   auth = true
    route = "/CRF"
    run = "./Telescope/run 10002"
    port = 10002

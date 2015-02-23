@@ -13,7 +13,7 @@ nonssl = 10000
    menuItem = "Workbench"
 
    [apps.CRFs]
-   auth = false
+   auth = true
    route = "/CRF"
    run = "./Telescope/run 10002"
    port = 10002
