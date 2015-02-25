@@ -13,7 +13,7 @@ write_matrix <- function(data_matrix, file){
 	write.table(t(header), file, quote=FALSE, sep="\t", row.names=FALSE, col.names=FALSE)
 	write.table(data_matrix, file, quote=FALSE, sep="\t", row.names=TRUE, col.names=FALSE)
 }
-x = read.table(args[1], header = TRUE, row.names = 1, check.names=FALSE, stringsAsFactors=FALSE)
+x = read.table(args[1], na.strings = c('undefined','null','NA'), header = TRUE, row.names = 1, check.names=FALSE, stringsAsFactors=FALSE)
 contrast = read.delim(args[2], header = TRUE, row.names = 1, check.names=FALSE, stringsAsFactors=FALSE)
 u = intersect(colnames(x), rownames(contrast))
 length(u)
@@ -25,12 +25,21 @@ contrast = contrast[u, ]
 length(contrast)
 colnames(x)
 
+allzero <- colSums(x > 0, na.rm=TRUE) == 0
+print (c('all zero', allzero))
 dge = DGEList(counts=x)
-isexpr = rowSums(cpm(dge) > 10) >= 2
+#print (c('DGEList returns: ',dge[1:3,1:3]))
+#print (c('rowSums(count per million(dge) ) returns: ',rowSums(cpm(dge[1:4,]), na.rm=TRUE) ))
+isexpr = rowSums(cpm(dge) > 10, na.rm=TRUE) >= 2
+#print (c('rowSums(cpm(dge) > 10) >= 2 returns: ',isexpr[1:10]))
 flt = dge[isexpr,]
+#print (c('dge returns',flt[1:3,1:3]))
 tmm = calcNormFactors(flt)
+#print (c('calcNormFactors returns tmm: ',tmm$counts[1:3,], tmm$samples))
 design = model.matrix(~ contrast)
+#print (c('model.matrix(~contrast) returns design: ',design))
 y = voom(tmm, design, plot=TRUE)
+#print (c('voom returns', y[1:3]))
 pdf(args[6])
 plotMDS(y,top=50,labels=contrast, col=ifelse(contrast=="SmallCell","blue","red"),gene.selection="common")
 dev.off()
