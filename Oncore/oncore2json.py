@@ -620,13 +620,13 @@ if __name__ == "__main__":
                 if not os.path.exists(options.directory):
                    # makedirs is the right thing to use here: recursive
                    os.makedirs(options.directory)
-                cohort_file = options.directory+"/cohort.json"
+                cohort_file = options.directory+"/"+cohort_output
                 summary_file = options.directory+"/summary.html"
             else:
-                cohort_file = "cohort.json"
+                cohort_file = cohort_output
                 summary_file = "summary.html"
             cohort = open(cohort_file, 'w')
-            cohort2 = open(cohort_output, 'w')
+            oncore_out = open('clinical_oncore.dat', 'w')
             print ('\nWriting all json to '+cohort_file+'.')
             all = open(html_output, 'w')
             print ('Writing html to '+html_output+'.')
@@ -1247,6 +1247,7 @@ if __name__ == "__main__":
                 j=json.dumps({"patient":sample,"attributes":sample_list[sample]['attributes']}, default=json_util.default, sort_keys=True)
                 print ("%s" % (j))
                 f.write("%s\n" % (j))
+                oncore_out.write("%s\n" % (j))
                 f.close()
                 filename = options.directory+"/"+sample+"_timeline.json"
                 f = open(filename, 'w')
@@ -1327,9 +1328,8 @@ if __name__ == "__main__":
                         print('\n')
             cbio.close()
             cohort.write("%s" % (json.dumps(sample_list, default=json_util.default, sort_keys=True)))
-            cohort2.write("%s" % (json.dumps(sample_list, default=json_util.default, sort_keys=True)))
             cohort.close()
-            cohort2.close()
+            oncore_out.close()
 
 
         return None
