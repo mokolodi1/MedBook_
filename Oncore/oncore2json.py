@@ -626,7 +626,7 @@ if __name__ == "__main__":
                 cohort_file = cohort_output
                 summary_file = "summary.html"
             cohort = open(cohort_file, 'w')
-            oncore_out = open('clinical_oncore.dat', 'w')
+            oncore_out = open('clinical_oncore.json', 'w')
             print ('\nWriting all json to '+cohort_file+'.')
             all = open(html_output, 'w')
             print ('Writing html to '+html_output+'.')
