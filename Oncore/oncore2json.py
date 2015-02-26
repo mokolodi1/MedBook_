@@ -108,16 +108,22 @@ if __name__ == "__main__":
             s_date = ret_date.strftime('%Y %m %d')
         return s_date
 
-    def parse_date_both(in_date):
+    def parse_date_both(in_date, date_ext):
         try:
-            if len(in_date) > 5:
-                if in_date[0] == '(' and in_date[-1] == ')':
-                    ret_date= datetime.strptime(in_date,'(%Y, %m, %d, %H, %M, %S)')
-                else:
-                    ret_date= datetime.strptime(in_date,'%Y, %m, %d, %H, %M, %S')
-                s_date = ret_date.strftime('%Y %m %d')
+            if isinstance(in_date, tuple):
+                ret_date = datetime(in_date[0], in_date[1], in_date[2], in_date[3], in_date[4])
+                s_date = {"date": datetime(in_date[0], in_date[1], in_date[2], in_date[3], in_date[4])}
+                #s_date = ret_date.strftime('%Y %m %d')
+                return s_date, ret_date
             else:
-                return
+                if len(in_date) > 5:
+                    if in_date[0] == '(' and in_date[-1] == ')':
+                        ret_date= datetime.strptime(in_date,'(%Y, %m, %d, %H, %M, %S)')
+                    else:
+                        ret_date= datetime.strptime(in_date,'%Y, %m, %d, %H, %M, %S')
+                    s_date = ret_date.strftime('%Y %m %d')
+                else:
+                    return
         except ValueError: 
             try:
                 ret_date = datetime.strptime(in_date, '%m/%d/%Y').strftime('%Y,%m,%d')
@@ -128,6 +134,8 @@ if __name__ == "__main__":
                     try:
                         ret_date = datetime.strptime(in_date, '00/00/%Y').strftime('%Y,01,01')
                     except ValueError:
+                        if date_ext == 'Ongoing':
+                            return
                         return
             s_date = ret_date.strftime('%Y %m %d')
         return s_date, ret_date
@@ -155,7 +163,10 @@ if __name__ == "__main__":
         else: # insert attributes
             try: 
                 #val = datetime.strptime(val, '%m/%d/%Y').strftime('%Y,%m,%d')
+                print('#SHEET',sheet,' type',ty, 'key',key)
                 if ty==3:
+                    #if sheet == 'Demographics':
+                    #    pdb.set_trace()
                     sdate = str(val[0])+'/'+str(val[1])+'/'+str(val[2])
                     val = {"date": datetime(val[0], val[1], val[2], val[3], val[4])}
             except ValueError:
@@ -238,9 +249,9 @@ if __name__ == "__main__":
                                 j_row[key] = d
                             else:
                                 if not sample_list[sample_id]['attributes'][sheet].has_key(key) :
-                                    sample_list[sample_id]['attributes'][sheet][key] = val
+                                    sample_list[sample_id]['attributes'][sheet][key] = d
                                 else:
-                                    print("#ERROR value alread stored ", sample_id, "sheet", sheet, "key", key, "val", val)
+                                    print("#ERROR value already stored ", sample_id, "sheet", sheet, "key", key, "val", val)
             if convert and rowx > 0:
                 if subdocument:
                     print ('sheet', sheet, 'j_row', j_row)
@@ -665,9 +676,10 @@ if __name__ == "__main__":
                             for index, f in enumerate(form):
                                 event = {}
                                 continue
-                                start_date_ext = f['Start Date Ext'][index]
+                                start_date_ext = f['Start Date Ext']
                                 if len(start_date) > 5:
                                     event['startDate'] = start_date
+                                    event['startDateExt'] = start_date_ext
                                 try:
                                     print("start_date:",start_date)
                                     #start_date_dt = datetime.strptime(start_date.replace(","," "), '%Y %m %d')
@@ -676,9 +688,9 @@ if __name__ == "__main__":
                                     print("start_date:",start_date)
                                     start_date_dt = ""
                                     pass
-                                stop_date_ext = f['Stop Date Ext'][index]
-                                if len(f['Stop Date'][index]) > 5:
-                                    stop_date = f['Stop Date'][index].replace("(","").replace(")","")
+                                stop_date_ext = f['Stop Date Ext']
+                                if len(f['Stop Date']) > 5:
+                                    stop_date = f['Stop Date'].replace("(","").replace(")","")
                                 try:
                                     stop_date_dt = datetime.strptime(stop_date.replace(","," "), '%Y %m %d %H %M %S' )
                                     #stop_date_dt = datetime.strptime(stop_date.replace(","," "), '%Y %m %d')
@@ -695,14 +707,14 @@ if __name__ == "__main__":
 				if len(start_date) > 2:
 				    event['startDate'] = start_date
 				else:
-				    event['startDate'] = f[u'Visit Date'][index]
+				    event['startDate'] = f[u'Visit Date']
 				if len(stop_date) > 3:
 				    event['stopDate'] = stop_date
 				event['headline'] = "Radiation/Surgery Summary"
-				surgery_date = f[u'Surgery Date'][index]
+				surgery_date = f[u'Surgery Date']
 				if len(surgery_date) < 2:
-				    surgery_date = f[u'Surgery Date_EXT'][index]
-				event['text'] = "<p>Radiation Therapy: <b>"+f[u'Radiation Therapy'][index]+"</b>  Duration of Radiation: <b>"+weeks_diff+"</b><p>Radical Prostatectomy: <b>"+f[u'Radical Prostatectomy'][index]+" </b>  Surgery Date: <b>"+surgery_date.replace(","," ")+"</b><p>Phase: <b>"+f[u'Phase'][index] +"</b>"
+				    surgery_date = f[u'Surgery Date_EXT']
+				event['text'] = "<p>Radiation Therapy: <b>"+f[u'Radiation Therapy']+"</b>  Duration of Radiation: <b>"+weeks_diff+"</b><p>Radical Prostatectomy: <b>"+f[u'Radical Prostatectomy']+" </b>  Surgery Date: <b>"+surgery_date.replace(","," ")+"</b><p>Phase: <b>"+f[u'Phase'] +"</b>"
 				event['tag'] = "Diagnosis"
 				event['asset'] = {}
                                 sample_list[sample]['timeline']['date'].append(event)
@@ -1076,7 +1088,7 @@ if __name__ == "__main__":
                                 #start_date_ext = f['Start Date Ext']
                                 try:
                                     if len(f['Start Date']) > 5:
-                                        start_date, start_date_dt = parse_date_both(f['Start Date'])
+                                        start_date, start_date_dt = parse_date_both(f['Start Date'], f['Start Date Ext'])
                                         stop_date_dt = start_date_dt
                                 except:
                                     continue
@@ -1088,7 +1100,7 @@ if __name__ == "__main__":
                                     if len(f['Stop Date']) > 5:
                                         print("parse stop date: "+f['Stop Date'])
                                         try:
-                                            stop_date, stop_date_dt = parse_date_both(f['Stop Date'])
+                                            stop_date, stop_date_dt = parse_date_both(f['Stop Date'], f['Stop Date Ext'])
                                             weeks_num = weeks_between(start_date_dt, stop_date_dt)
                                             print("weeks num "+str(weeks_num))
                                         except:
@@ -1227,8 +1239,10 @@ if __name__ == "__main__":
                                     stop_date = form['Stop Date Ext']
                             event['headline'] = "On Study Treatment: "+str(form['Drug Name'])
                             event['startDate'] = start_date
+                            event['startDateExt'] = form['Start Date Ext']
                             if len(stop_date)> 2:
                                 event['stopDate'] = stop_date
+                                event['stopDateExt'] = form['stop Date Ext']
                             event['tag'] = "Treatment"
                             if key =='SU2C Subsequent TX V1':
                                 event['text'] = "<p>Type: " + str(form['Treatment Type'])+ "<br>Details: "+str(form['Treatment Details'])+"<br>Best Response : "+str(form['Best Response'])+"<br>Reason for Stopping Treatment: "+form['Reason for Stopping Treatment']
@@ -1277,18 +1291,16 @@ if __name__ == "__main__":
             all.write("</html>\n")
             all.close()
             cbio = open("data_clinical_events.txt", 'a+')
-            print("##cbio\n")
+            print("##cbio len=", len(sample_list.items()), "\n")
             for key,values in sample_list.items():
                     print("key:"+key)
                     sample_dict = sample_list[key]
                     try:
-                        print("#attr ")
-                        print(sample_dict['attributes'][u'Prostate Diagnosis V2'])
-                        print("\nDiagnosis ")
-                        diag_str, diag_dt = parse_date_both(sample_dict['attributes'][u'Prostate Diagnosis V2'][u'Date of diagnosis'])
-                        print(diag_dt)
+                        print("DIAG FORM", sample_dict['attributes'][u'Prostate Diagnosis V2'])
+                        diag_str, diag_dt = parse_date_both(sample_dict['attributes'][u'Prostate Diagnosis V2'][u'Date of diagnosis'],sample_dict['attributes'][u'Prostate Diagnosis V2'][u'Date of diagnosis Ext'] )
+                        print("\nDiagnosis dt ", diag_dt)
                     except:
-                        print('nothing\n')
+                        print('no date of diagnosis\n')
                         pass
                     print("#timeline ")
                     if 'timeline' in sample_dict:
@@ -1300,17 +1312,17 @@ if __name__ == "__main__":
                             if event_type == 'treatment' or event_type == 'diagnostic':
                                 agent = h['headline']
                                 try:
-                                    treat_start_dt = datetime.strptime(h['startdate'],'%y %m %d')
+                                    treat_start_dt = datetime.strptime(h['startDate'],'%y %m %d')
                                 except:
                                     print(key+" agent:"+agent)
-                                    print(h['startdate'])
-                                    treat_start_str, treat_start_dt = parse_date_both(h['startdate'])
+                                    print('#timeline start', h['startDate'])
+                                    treat_start_str, treat_start_dt = parse_date_both(h['startDate'], h['startDateExt'])
                                 try:
-                                    treat_stop_dt = datetime.strptime(h['stopdate'],'%y %m %d')
+                                    treat_stop_dt = datetime.strptime(h['stopDate'],'%y %m %d')
                                 except:
                                     try:
                                         print(h['stopdate'])
-                                        treat_stop_str, treat_stop_dt = parse_date_both(h['stopdate'])
+                                        treat_stop_str, treat_stop_dt = parse_date_both(h['stopDate'], h['stopDateExt'])
                                     except:
                                         print(key+" failed to get stop date for "+agent+"using start date")
                                         treat_stop_dt = none
