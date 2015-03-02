@@ -1,3 +1,6 @@
+#
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR
 sh pull.sh data.zip
 mkdir -p html
 python oncore2json.py oncore data.zip -s 0 --output html/index.html --cohort cohort.json --directory html

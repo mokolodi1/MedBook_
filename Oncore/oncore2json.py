@@ -1129,6 +1129,8 @@ if __name__ == "__main__":
                                             pass
                                 try:
                                     details = "<br>Details<b>" + str(f['Treatment Details'])+"</b>"
+                                except KeyError:
+                                    details = ""
                                 except:
                                     details = ""
                                 try:
