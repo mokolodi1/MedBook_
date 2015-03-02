@@ -79,10 +79,12 @@ if __name__ == "__main__":
         if end_date == "":
             return 999
         # return number of weeks between two dates
+        print ('types ', type(start_date), type(end_date))
         weeks = rrule.rrule(rrule.WEEKLY, dtstart=start_date, until=end_date)
         return weeks.count()
 
     def parse_date(in_date):
+        print('#parse date ',in_date, type(in_date))
         if isinstance(in_date, tuple):
             return datetime(in_date[0], in_date[1], in_date[2], in_date[3], in_date[4])
         try:
@@ -90,7 +92,7 @@ if __name__ == "__main__":
                 if in_date[0] == '(' and in_date[-1] == ')':
                     ret_date= datetime.strptime(in_date,'(%Y, %m, %d, %H, %M, %S)')
                 else:
-                    ret_date= datetime.strptime(in_date,'%Y, %m, %d, %H, %M, %S')
+                    ret_date= datetime.strptime(in_date,'%Y-%m-%d %H:%M:%S')
                 s_date = ret_date.strftime('%Y %m %d')
             else:
                 return
@@ -109,6 +111,8 @@ if __name__ == "__main__":
         return s_date
 
     def parse_date_both(in_date, date_ext):
+        print('#parse date both',in_date, date_ext)
+        print('#parse date both',in_date, type(in_date), date_ext)
         try:
             if isinstance(in_date, tuple):
                 ret_date = datetime(in_date[0], in_date[1], in_date[2], in_date[3], in_date[4])
@@ -116,11 +120,14 @@ if __name__ == "__main__":
                 #s_date = ret_date.strftime('%Y %m %d')
                 return s_date, ret_date
             else:
+                if isinstance(in_date, datetime):
+                    s_date = in_date.strftime('%Y %m %d')
+                    return s_date, in_date
                 if len(in_date) > 5:
                     if in_date[0] == '(' and in_date[-1] == ')':
                         ret_date= datetime.strptime(in_date,'(%Y, %m, %d, %H, %M, %S)')
                     else:
-                        ret_date= datetime.strptime(in_date,'%Y, %m, %d, %H, %M, %S')
+                        ret_date= datetime.strptime(in_date,'%Y-%m-%d %H:%M:%S')
                     s_date = ret_date.strftime('%Y %m %d')
                 else:
                     return
@@ -163,7 +170,7 @@ if __name__ == "__main__":
         else: # insert attributes
             try: 
                 #val = datetime.strptime(val, '%m/%d/%Y').strftime('%Y,%m,%d')
-                print('#SHEET',sheet,' type',ty, 'key',key)
+                #print('#SHEET',sheet,' type',ty, 'key',key)
                 if ty==3:
                     #if sheet == 'Demographics':
                     #    pdb.set_trace()
@@ -254,7 +261,7 @@ if __name__ == "__main__":
                                     print("#ERROR value already stored ", sample_id, "sheet", sheet, "key", key, "val", val)
             if convert and rowx > 0:
                 if subdocument:
-                    print ('sheet', sheet, 'j_row', j_row)
+                    #print ('sheet', sheet, 'j_row', j_row)
                     sample_list[sample_id]['attributes'][sheet].append(j_row)
 
     def get_row_data(bk, sh, rowx, colrange):
@@ -652,7 +659,7 @@ if __name__ == "__main__":
                 firstBiopsy = None
                 for key in sample_list[sample]['attributes'].keys():
                     form = sample_list[sample]['attributes'][key]
-                    print("\n#key:",key," form: ", form)
+                    #print("\n#key:",key," form: ", form)
                     key_found = False
                     if key =='SU2C Pr Ca Tx Sumry V2':
                         """ {
@@ -1259,18 +1266,16 @@ if __name__ == "__main__":
                 filename = options.directory+"/"+sample+".json"
                 f = open(filename, 'w')
                 print ('>> Writing '+sample+' attributes json to '+filename+'.')
-                print ("%s" % ({"patient":sample,"attributes":sample_list[sample]['attributes']}))
+                #print ("%s" % ({"patient":sample,"attributes":sample_list[sample]['attributes']}))
                 j=json.dumps({"patient":sample,"attributes":sample_list[sample]['attributes']}, default=json_util.default, sort_keys=True)
-                print ("%s" % (j))
                 f.write("%s\n" % (j))
                 oncore_out.write("%s\n" % (j))
                 f.close()
                 filename = options.directory+"/"+sample+"_timeline.json"
                 f = open(filename, 'w')
                 print ('>> Writing '+sample+' timeline json to '+filename+'.')
-                print ("%s" % ({"timeline":sample_list[sample]['timeline']}))
+                #print ("%s" % ({"timeline":sample_list[sample]['timeline']}))
                 j = json.dumps({"timeline":sample_list[sample]['timeline']}, default=json_util.default, sort_keys=True)
-                print ("%s" % j)
                 f.write("%s" % j)
                 f.close()
                 page_no = 1
@@ -1299,7 +1304,7 @@ if __name__ == "__main__":
                     sample_dict = sample_list[key]
                     try:
                         print("DIAG FORM", sample_dict['attributes'][u'Prostate Diagnosis V2'])
-                        diag_str, diag_dt = parse_date_both(sample_dict['attributes'][u'Prostate Diagnosis V2'][u'Date of diagnosis'],sample_dict['attributes'][u'Prostate Diagnosis V2'][u'Date of diagnosis Ext'] )
+                        diag_str, diag_dt = parse_date_both(sample_dict['attributes'][u'Prostate Diagnosis V2'][u'Date of diagnosis']['date'],sample_dict['attributes'][u'Prostate Diagnosis V2'][u'Date of diagnosis Ext'] )
                         print("\nDiagnosis dt ", diag_dt)
                     except:
                         print('no date of diagnosis\n')
@@ -1311,35 +1316,39 @@ if __name__ == "__main__":
                                 event_type = h['tag']
                             except: 
                                 event_type = 'missing'
-                            if event_type == 'treatment' or event_type == 'diagnostic':
+                            print('#event_type',event_type, h)
+                            if event_type == 'Treatment' :
+                                print('#treatment',h)
                                 agent = h['headline']
+                                treat_start_dt = None
+                                treat_stop_dt = None
                                 try:
-                                    treat_start_dt = datetime.strptime(h['startDate'],'%y %m %d')
-                                except:
                                     print(key+" agent:"+agent)
-                                    print('#timeline start', h['startDate'])
+                                    print('#timeline start', h['startDate'], h['startDateExt'])
                                     treat_start_str, treat_start_dt = parse_date_both(h['startDate'], h['startDateExt'])
-                                try:
-                                    treat_stop_dt = datetime.strptime(h['stopDate'],'%y %m %d')
                                 except:
                                     try:
-                                        print(h['stopdate'])
-                                        treat_stop_str, treat_stop_dt = parse_date_both(h['stopDate'], h['stopDateExt'])
+                                        treat_start_dt = parse_date_both(h['startDate'],"")
                                     except:
-                                        print(key+" failed to get stop date for "+agent+"using start date")
-                                        treat_stop_dt = none
-                                        pass
-                                print(treat_start_dt)
-                                print(treat_stop_dt)
+                                        print('error converting start date',h['startDate'])
+                                try:
+                                    print(h['stopdate']['date'])
+                                    treat_stop_str, treat_stop_dt = parse_date_both(h['stopDate'], h['stopDateExt'])
+                                except:
+                                    print(key+" failed to get stop date for "+agent+"using start date")
+                                    treat_stop_dt = None
+                                    pass
+                                #print(treat_start_dt)
+                                #print(treat_stop_dt)
+                                print("\n Weeks between Diagnosis dt ", diag_dt, treat_start_dt)
                                 start_mon = weeks_between(diag_dt, treat_start_dt)/12
-                                if treat_stop_dt is not none:
+                                print('months=',start_mon)
+                                if treat_stop_dt is not None:
                                     stop_mon = weeks_between(diag_dt, treat_stop_dt)/12
+                                    cbio.write("%s\t%d\t%d\t%s\t%s\n" %(key, start_mon, stop_mon , event_type, agent))
                                 else:
-                                    stop_mon = none
-                                cbio.write("%s\t%d\t%d\t%s\t%s\n" %(key, start_mon, stop_mon , event_type, agent))
-                        print("values ")
-                        print(values)
-                        print('\n')
+                                    stop_mon = None
+                                    cbio.write("%s\t%d\t\t%s\t%s\n" %(key, start_mon, event_type, agent))
             cbio.close()
             cohort.write("%s" % (json.dumps(sample_list, default=json_util.default, sort_keys=True)))
             cohort.close()
