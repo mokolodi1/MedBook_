@@ -76,10 +76,12 @@ if __name__ == "__main__":
     null_cell = xlrd.empty_cell
 
     def weeks_between(start_date, end_date):
+        print ('types ', type(start_date), type(end_date))
+        assert(isinstance(start_date, datetime))
+        assert(isinstance(end_date, datetime))
         if end_date == "":
             return 999
         # return number of weeks between two dates
-        print ('types ', type(start_date), type(end_date))
         weeks = rrule.rrule(rrule.WEEKLY, dtstart=start_date, until=end_date)
         return weeks.count()
 
@@ -87,6 +89,13 @@ if __name__ == "__main__":
         print('#parse date ',in_date, type(in_date))
         if isinstance(in_date, tuple):
             return datetime(in_date[0], in_date[1], in_date[2], in_date[3], in_date[4])
+        if isinstance(in_date, dict):
+            ret_date = in_date['$date']
+            s_date = ret_date.strftime('%Y %m %d')
+        if isinstance(in_date, datetime):
+            ret_date = in_date
+            s_date = ret_date.strftime('%Y %m %d')
+            return s_date
         try:
             if len(in_date) > 5:
                 if in_date[0] == '(' and in_date[-1] == ')':
@@ -116,12 +125,17 @@ if __name__ == "__main__":
         try:
             if isinstance(in_date, tuple):
                 ret_date = datetime(in_date[0], in_date[1], in_date[2], in_date[3], in_date[4])
-                s_date = {"date": datetime(in_date[0], in_date[1], in_date[2], in_date[3], in_date[4])}
+                s_date = datetime(in_date[0], in_date[1], in_date[2], in_date[3], in_date[4])
                 #s_date = ret_date.strftime('%Y %m %d')
                 return s_date, ret_date
             else:
                 if isinstance(in_date, datetime):
                     s_date = in_date.strftime('%Y %m %d')
+                    return s_date, in_date
+                elif isinstance(in_date, dict):
+                    ret_date = in_date['date']
+                    s_date = ret_date.strftime('%Y %m %d')
+                    print('#parse dict ret',s_date, type(s_date), ret_date, type(ret_date))
                     return s_date, in_date
                 if len(in_date) > 5:
                     if in_date[0] == '(' and in_date[-1] == ')':
@@ -145,6 +159,7 @@ if __name__ == "__main__":
                             return
                         return
             s_date = ret_date.strftime('%Y %m %d')
+        print('#parse ret',s_date, type(s_date), ret_date, type(ret_date))
         return s_date, ret_date
 
     def convert_col(rowx, colx, key , ty, val, printit, convert, sheet, subdocument, sample_id):
@@ -175,7 +190,7 @@ if __name__ == "__main__":
                     #if sheet == 'Demographics':
                     #    pdb.set_trace()
                     sdate = str(val[0])+'/'+str(val[1])+'/'+str(val[2])
-                    val = {"date": datetime(val[0], val[1], val[2], val[3], val[4])}
+                    val = datetime(val[0], val[1], val[2], val[3], val[4])
             except ValueError:
                 print('#DATEERROR', val, sample_id)
                 try:
@@ -815,11 +830,11 @@ if __name__ == "__main__":
                         except:
                             event['headline'] = "Followup visit"
                         try:
-                            date_off = str(form[u'Off Treatment Date']['date'])
+                            date_off = str(form[u'Off Treatment Date']['$date'])
                         except:
                             date_off = ""
                         try:
-                            date_prog = str(form[u'Date of Progression']['date'])
+                            date_prog = str(form[u'Date of Progression']['$date'])
                         except:
                             date_prog = ""
                         try:
@@ -1047,11 +1062,12 @@ if __name__ == "__main__":
                         else:
                             event = {}
                             if form.has_key(u'Date of diagnosis'):
-                                if len(form[u'Date of diagnosis']) > 3:
+                                if isinstance(form[u'Date of diagnosis'], datetime):
                                     event['startDate'] = parse_date(form[u'Date of diagnosis'])
                                 else:
                                     event['startDate'] = parse_date(form[u'Visit Date'])
                             else:
+                                print('#form',form)
                                 event['startDate'] = parse_date(form[u'Visit Date'])
                             event['headline'] = "Prostate Diagnosis"
                             event['tag'] = "Diagnostic"
@@ -1204,11 +1220,11 @@ if __name__ == "__main__":
                                 print("form", f )
                                 event = {}
                                 try:
-                                    start_date = str(f['Start Date']['date'])
+                                    start_date = str(f['Start Date'])
                                 except:
-                                    start_date = str(f['Visit Date']['date'])
+                                    start_date = str(f['Visit Date'])
                                 try:
-                                    stop_date = str(f['Stop Date']['date'])
+                                    stop_date = str(f['Stop Date'])
                                     event['stopDate'] = stop_date
                                 except:
                                     pass
@@ -1300,11 +1316,11 @@ if __name__ == "__main__":
             cbio = open("data_clinical_events.txt", 'a+')
             print("##cbio len=", len(sample_list.items()), "\n")
             for key,values in sample_list.items():
-                    print("key:"+key)
+                    print("#key:"+key)
                     sample_dict = sample_list[key]
                     try:
                         print("DIAG FORM", sample_dict['attributes'][u'Prostate Diagnosis V2'])
-                        diag_str, diag_dt = parse_date_both(sample_dict['attributes'][u'Prostate Diagnosis V2'][u'Date of diagnosis']['date'],sample_dict['attributes'][u'Prostate Diagnosis V2'][u'Date of diagnosis Ext'] )
+                        diag_str, diag_dt = parse_date_both(sample_dict['attributes'][u'Prostate Diagnosis V2'][u'Date of diagnosis'],sample_dict['attributes'][u'Prostate Diagnosis V2'][u'Date of diagnosis Ext'] )
                         print("\nDiagnosis dt ", diag_dt)
                     except:
                         print('no date of diagnosis\n')
@@ -1319,7 +1335,10 @@ if __name__ == "__main__":
                             print('#event_type',event_type, h)
                             if event_type == 'Treatment' :
                                 print('#treatment',h)
-                                agent = h['headline']
+                                try:
+                                    agent = h['headline']
+                                except: 
+                                    agent = "Unknown"
                                 treat_start_dt = None
                                 treat_stop_dt = None
                                 try:
@@ -1328,7 +1347,7 @@ if __name__ == "__main__":
                                     treat_start_str, treat_start_dt = parse_date_both(h['startDate'], h['startDateExt'])
                                 except:
                                     try:
-                                        treat_start_dt = parse_date_both(h['startDate'],"")
+                                        treat_start_str, treat_start_dt = parse_date_both(h['startDate'],"")
                                     except:
                                         print('error converting start date',h['startDate'])
                                 try:
@@ -1340,8 +1359,10 @@ if __name__ == "__main__":
                                     pass
                                 #print(treat_start_dt)
                                 #print(treat_stop_dt)
-                                print("\n Weeks between Diagnosis dt ", diag_dt, treat_start_dt)
-                                start_mon = weeks_between(diag_dt, treat_start_dt)/12
+                                start_mon = 0
+                                if treat_start_dt is not None:
+                                    print("\n Weeks between Diagnosis dt ", diag_dt, treat_start_dt)
+                                    start_mon = weeks_between(diag_dt, treat_start_dt)/12
                                 print('months=',start_mon)
                                 if treat_stop_dt is not None:
                                     stop_mon = weeks_between(diag_dt, treat_stop_dt)/12
