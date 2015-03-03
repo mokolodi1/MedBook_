@@ -1109,8 +1109,9 @@ if __name__ == "__main__":
                                 event = {}
                                 start_date = f['Visit Date']
                                 #start_date_ext = f['Start Date Ext']
+                                print("start date", f)
                                 try:
-                                    if len(f['Start Date']) > 5:
+                                    if isinstance(f['Start Date'], datetime):
                                         start_date, start_date_dt = parse_date_both(f['Start Date'], f['Start Date Ext'])
                                         stop_date_dt = start_date_dt
                                 except:
