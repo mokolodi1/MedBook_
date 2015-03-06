@@ -1110,7 +1110,7 @@ if __name__ == "__main__":
                                 start_date = f['Visit Date']
                                 #start_date_ext = f['Start Date Ext']
                                 try:
-                                    if len(f['Start Date']) > 5:
+                                    if isinstance(f['Start Date'], datetime):
                                         start_date, start_date_dt = parse_date_both(f['Start Date'], f['Start Date Ext'])
                                         stop_date_dt = start_date_dt
                                 except:
@@ -1120,8 +1120,7 @@ if __name__ == "__main__":
                                 weeks_diff = "Unknown"
                                 weeks_num = 0
                                 try:
-                                    if len(f['Stop Date']) > 5:
-                                        print("parse stop date: "+f['Stop Date'])
+                                    if isinstance(f['Stop Date'], datetime):
                                         try:
                                             stop_date, stop_date_dt = parse_date_both(f['Stop Date'], f['Stop Date Ext'])
                                             weeks_num = weeks_between(start_date_dt, stop_date_dt)
