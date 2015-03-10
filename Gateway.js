@@ -40,7 +40,7 @@ getPort = function(req) {
 }
 
 readMenu = function() {
-  menuFile = fs.readFileSync("menu.html");
+  menuFile = fs.readFileSync("/data/MedBook/Gateway/menu.html");
 };
 
 readMenu();
@@ -96,6 +96,10 @@ run = function() {
 
   function forward(req, res) {
         var port = getPort(req);
+        if (req.url.indexOf("/xena") == 0) {
+            console.log("xena directing to port", port, "mapping url", req.url, "to", req.url.replace("/xena","/"));
+            req.url =  req.url.replace("/xena","");
+        }
         proxy.web(req, res, {
           target: "http://localhost:"+port,
         },function(e){
@@ -191,7 +195,6 @@ run = function() {
         firstPart = urlPath[1];
 
     var sla = "/" + firstPart;
-    console.log("sla", sla, auth[sla]);
 
     if (sla in auth && auth[sla]) {
         mustLogin(firstPart, req, res);
@@ -336,7 +339,7 @@ function serveFile(req, res) {
 console.log("watching", args[0]);
 
 fs.watchFile(args[0], run);
-fs.watchFile("menu.html", readMenu);
+fs.watchFile("/data/MedBook/Gateway/menu.html", readMenu);
 
 function log_error(e,req){
   if(e){
