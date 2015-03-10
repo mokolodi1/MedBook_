@@ -1,0 +1,4 @@
+#-----------------------------------------------------------------------------
+#Min     Hour    Day     Month   Weekday Command
+#-----------------------------------------------------------------------------
+16 17 * * * export BASH_ENV=~/.bashrc ; bash /data/MedBook/Tools/MedBook-Adapters/Oncore/cron.sh > /data/MedBook/logs/cron.log 2>> /data/MedBook/logs/cron.err
