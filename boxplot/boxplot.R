@@ -25,9 +25,16 @@ contrast = contrast[u, ]
 length(contrast)
 message('contrast',contrast)
 
+ttest <- t.test(y_t~contrast)
+names(ttest)
 pdf(args[4])
 boxplot(y_t~contrast)
-title(paste('expression of ',genes))
+stripchart(y_t~contrast,method="jitter",jitter=.05,vertical=T,add=T) 
+title(paste('expression of ',genes, 'p-value of Welsh two sample t-test',round(ttest$p.value, digits=4)))
 dev.off()
 
-
+svg(args[5])
+boxplot(y_t~contrast)
+stripchart(y_t~contrast,method="jitter",jitter=.05,vertical=T,add=T) 
+title(paste('expression of ',genes, 'p-value of Welsh two sample t-test',round(ttest$p.value, digits=4)))
+dev.off()

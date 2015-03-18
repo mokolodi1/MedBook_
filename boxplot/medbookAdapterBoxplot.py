@@ -28,7 +28,7 @@ def main():
     print "start"
     
     ## parse arguments
-    parser = OptionParser(usage = "%prog [options] data_matrix contrast ")
+    parser = OptionParser(usage = "%prog [options] data_matrix contrast output.pdf output.svg")
     parser.add_option("-t", "--top", dest = "top_genes", default = 200,
                       help = "number of genes to keep in diffential analysis")
     parser.add_option("-p", "--plot", dest = "plot_genes", default = 50,
@@ -42,13 +42,14 @@ def main():
     
     work_dir = os.path.abspath("./")
     
-    if len(args) != 4:
+    if len(args) != 5:
         logging.error("ERROR: incorrect number of arguments\n")
         sys.exit(1)
     data_file = os.path.abspath(args[0])
     phenotype_file = os.path.abspath(args[1])
     genes = args[2]
     pdf_file = os.path.join(work_dir, "report", args[3])
+    svg_file = os.path.join(work_dir, "report", args[4])
     try:
         os.mkdir(os.path.join(work_dir,"report"))
     except:
@@ -60,6 +61,7 @@ def main():
     cmd += " %s %s" % (data_file, phenotype_file)
     cmd += " %s "  % (genes)
     cmd += " %s " % (pdf_file)
+    cmd += " %s " % (svg_file)
     print "cmd ",cmd
     os.system(cmd)
     logging.info("system: %s" % (cmd))
