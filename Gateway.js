@@ -182,12 +182,23 @@ run = function() {
   } // mustLogin
 
   function main(req, res) {
+    var hostname = req.headers.host
+    console.log('main',hostname)
     if (req.url == "/menu")
         return serveMenu(req, res);
-    /*
-    if (req.url.indexOf("/journalentry") == 0 || req.url.indexOf("/public") == 0)
-        return serveFile(req, res);
-    */
+    
+    if (req.url.indexOf("/tumormap") == 0 || hostname.indexOf("tumormap") == 0 ) {
+        req.url = req.url.replace("/tumormap", "");
+ 	if (req.url.indexOf("/..") >=0 ) {
+            console.log(".. not allowed: " + req.url);
+            res.writeHead(404, {'Content-Type': 'text/plain'});
+            res.end();
+	}
+        return serveFile(req, res, '/data/tumormap/');
+    }
+    /*if (req.url.indexOf("/public") == 0)
+        return serveFile(req, res, '/data/public/');*/
+    
 
     var urlPath = req.url.split("/");
     var firstPart = "never match";
@@ -282,7 +293,9 @@ serveMenu = function(req, res) {
       menuItem = ca.route;
     }
     menuItem = menuItem.replace(/\ /g, "&nbsp;");
-    link = "<a target='_self' class='MedBookLink' href='" + ca.route + "'>" + menuItem + "</a>";
+    href = ca.path ? ca.path : ca.route;
+
+    link = "<a target='_self' class='MedBookLink' href='" + href  + "'>" + menuItem + "</a>";
     routeHacks += "Router.route('" + ca.route + "', function () {}, {where: 'server'});\n";
     if (ca.menuItem) {
       if (ca.menuPosition !== void 0) {
@@ -316,9 +329,12 @@ var mimeTypes = {
     "css": "text/css"};
 
         
-function serveFile(req, res) {
+function serveFile(req, res, dir) {
     var uri = url.parse(req.url).pathname;
-    var filename = path.join(process.cwd(), uri);
+    console.log("serveFile uri", uri);
+    if (uri == null || uri == "" || uri == "/")
+       uri = "index.html"
+    var filename = path.join(dir, uri);
     fs.exists(filename, function(exists) {
         if(!exists) {
             console.log("not exists: " + filename);
