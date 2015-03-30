@@ -28,14 +28,18 @@ function hash(pwd) {
 var server = null;
 
 menuFile = null;
+postScript = null;
 
 getPort = function(req) {
     var a = req.url.split("/");
     if (a.length > 1) {
         var p = routes["/" + a[1]];
-        if (p)
+        if (p) {
+            // console.log("getPort", req.url, p);
             return p;
+        }
     }
+    // console.log("getPort final", req.url, final);
     return final;
 }
 
@@ -44,6 +48,13 @@ readMenu = function() {
 };
 
 readMenu();
+
+
+postScriptFilename = "/data/MedBook/Gateway/postScript.js";
+readPostScript = function() {
+  postScript = fs.readFileSync(postScriptFilename);
+};
+readPostScript();
 
 
 redirectServer = null;
@@ -97,7 +108,7 @@ run = function() {
   function forward(req, res) {
         var port = getPort(req);
         if (req.url.indexOf("/xena") == 0) {
-            console.log("xena directing to port", port, "mapping url", req.url, "to", req.url.replace("/xena","/"));
+            // console.log("xena directing to port", port, "mapping url", req.url, "to", req.url.replace("/xena","/"));
             req.url =  req.url.replace("/xena","");
         }
         proxy.web(req, res, {
@@ -183,9 +194,10 @@ run = function() {
 
   function main(req, res) {
     var hostname = req.headers.host
-    console.log('main',hostname)
     if (req.url == "/menu")
         return serveMenu(req, res);
+    if (req.url.indexOf( "/postScript") == 0)
+        return serveScript(req, res, postScript);
     
     if (req.url.indexOf("/tumormap") == 0 || hostname.indexOf("tumormap") == 0 ) {
         req.url = req.url.replace("/tumormap", "");
@@ -318,6 +330,11 @@ serveMenu = function(req, res) {
   return res.end();
 };
 
+serveScript = function(req, res, script) {
+  res.writeHead(200, {'Content-Type': 'application/x-javascript'});
+  res.write(script, "binary");
+  return res.end();
+};
 
 
 var mimeTypes = {
@@ -331,7 +348,7 @@ var mimeTypes = {
         
 function serveFile(req, res, dir) {
     var uri = url.parse(req.url).pathname;
-    console.log("serveFile uri", uri);
+    // console.log("serveFile uri", uri);
     if (uri == null || uri == "" || uri == "/")
        uri = "index.html"
     var filename = path.join(dir, uri);
@@ -356,6 +373,7 @@ console.log("watching", args[0]);
 
 fs.watchFile(args[0], run);
 fs.watchFile("/data/MedBook/Gateway/menu.html", readMenu);
+fs.watchFile(postScriptFilename, readPostScript);
 
 function log_error(e,req){
   if(e){

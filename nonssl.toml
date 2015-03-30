@@ -20,13 +20,12 @@ nonssl = 10000
    menuPosition = 1
    menuItem = "Forms"
 
-   [apps.Telescope]
+   [apps.Streams]
    auth = false
    route = "/"
-   run = "./Telescope/run 10001"
    port = 10001
    menuPosition = 3
-   menuItem = "Telescope"
+   menuItem = "Streams"
 
    [apps.galaxy]
    auth = true
@@ -35,6 +34,13 @@ nonssl = 10000
    port = 10010
    menuPosition = 4
    menuItem = "Galaxy"
+
+   [apps.fusion]
+   auth = false
+   route = "/fusion"
+   port = 10011
+   menuPosition = 5
+   menuItem = "Fusion"
 
    [apps.cbioportal]
    auth = true
