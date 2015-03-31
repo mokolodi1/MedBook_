@@ -3,10 +3,6 @@ var url = document.location.href;
 
 function getSvg() {
     var $post_svg = $('svg');
-    if ($post_svg.length == 1)
-        $post_svg = $post_svg.html();
-    else
-        $post_svg = null;
     return $post_svg;
 };
 
