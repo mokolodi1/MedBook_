@@ -1,4 +1,7 @@
 <style >
+.MedBookAbs {
+    background: white;
+}
 .MedBookMenuOverlay {
     position: fixed;
     left: 0;
@@ -83,12 +86,6 @@
  color: black!important;
 }
 
-.MedBookMenu li ul li:hover { background: lightgreen; }
-.MedBookMenu li:hover ul {
-  display: block;
-  opacity: 1;
-  visibility: visible;
-}
 
 </style>
   <div hidden id="MedBookAbs"  class="MedBookAbs" style="z-index:10001;visibility:visible;position:absolute;left:550px;top:60px;height:500px;">
@@ -107,7 +104,7 @@
     $('#MedBookMenuOverlay').click(MedBookMenuBye);
 
     var off = $('#MedBookImage').offset();
-    var top = off.top + $('#MedBookImage').height()-5;
+    var top = off.top + $('#MedBookImage').height()-50;
     $('#MedBookAbs').css({left: off.left, top:top }).show();
   });
   </script>
