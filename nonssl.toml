@@ -40,7 +40,14 @@ nonssl = 10000
    route = "/fusion"
    port = 10011
    menuPosition = 5
-   menuItem = "Fusion"
+   menuItem = "Data Fusion"
+
+   [apps.wrangle]
+   auth = false
+   route = "/wrangle"
+   port = 10011
+   menuPosition = 5
+   menuItem = "Data Wrangler"
 
    [apps.cbioportal]
    auth = true
