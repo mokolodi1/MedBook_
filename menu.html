@@ -1,6 +1,10 @@
 <style >
 .MedBookAbs {
     background: white;
+    box-shadow: 10px 10px 5px #888888;
+    border-radius: 5px;
+    border: 1px solid gray;
+    width: 200px;
 }
 .MedBookMenuOverlay {
     position: fixed;
@@ -14,7 +18,6 @@
     background-color: #1f1f1f;
     opacity: 0.22;
     background-image: none;
-    padding: 12px 10px 12px 15px;
     width: calc(100% - 15px);
 }
 
@@ -26,9 +29,8 @@
   font-weight: bold;
   text-align: center;
   text-align: left;
-  display: inline;
-  margin: 0;
-  padding: 15px 4px 17px 0;
+  font-weight: bold;
+  display: table-cell;
   list-style: none;
 }
 .MedBookMenu li ::before{
@@ -36,32 +38,31 @@
 }
 
 .MedBookMenu li {
+  vertical-align: middle;
   display: inline-block;
   margin: 0px -4px 0px 0px;
+  padding: 5px 0 0 5px;
   position: relative;
-  padding: auto;
   cursor: pointer;
   -webkit-transition: all 0.2s;
   -moz-transition: all 0.2s;
   -ms-transition: all 0.2s;
   -o-transition: all 0.2s;
   transition: all 0.2s;
-  background: linear-gradient(#36aae7, #1fa0e4);
-  width: 200px;
   height: 35px;
 }
 
 .MedBookMenu li:hover {
   background: lightblue;
+  width: 100%;
 }
+
 .MedBookMenu li a {
-  padding: 0px 60px 10px 30px;
 }
 .MedBookMenu li:hover a {
    text-decoration:underline; 
 }
 .MedBookMenu li ul {
-  padding: 0;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
   box-shadow: none;
@@ -88,7 +89,8 @@
 
 
 </style>
-  <div hidden id="MedBookAbs"  class="MedBookAbs" style="z-index:10001;visibility:visible;position:absolute;left:550px;top:60px;height:200px;">
+
+  <div hidden id="MedBookAbs"  class="MedBookAbs" style="z-index:10001;visibility:visible;position:absolute;left:550px;top:60px;">
     <ul class="MedBookMenu">
         LIST
     </ul>
@@ -96,7 +98,6 @@
 
   <script>
   function MedBookMenuBye() {
-        console.log("leaving");
         setTimeout(function() { $('.MedBookMenuOverlay').remove(); $('.MedBookAbs').remove(); }, 100);
   }
   $(document).ready(function() {
