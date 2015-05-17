@@ -86,7 +86,7 @@ if __name__ == "__main__":
         return weeks.count()
 
     def parse_date(in_date):
-        print('#parse date ',in_date, type(in_date))
+        print('    #parse date ',in_date, type(in_date))
         if isinstance(in_date, tuple):
             return datetime(in_date[0], in_date[1], in_date[2], in_date[3], in_date[4])
         if isinstance(in_date, dict):
@@ -120,8 +120,8 @@ if __name__ == "__main__":
         return s_date
 
     def parse_date_both(in_date, date_ext):
-        print('#parse date both',in_date, date_ext)
-        print('#parse date both',in_date, type(in_date), date_ext)
+        print('    #parse date both',in_date, date_ext)
+        print('    #parse date both',in_date, type(in_date), date_ext)
         try:
             if isinstance(in_date, tuple):
                 ret_date = datetime(in_date[0], in_date[1], in_date[2], in_date[3], in_date[4])
@@ -135,7 +135,7 @@ if __name__ == "__main__":
                 elif isinstance(in_date, dict):
                     ret_date = in_date['date']
                     s_date = ret_date.strftime('%Y %m %d')
-                    print('#parse dict ret',s_date, type(s_date), ret_date, type(ret_date))
+                    print('    #parse dict ret',s_date, type(s_date), ret_date, type(ret_date))
                     return s_date, ret_date
                 if len(in_date) > 5:
                     if in_date[0] == '(' and in_date[-1] == ')':
@@ -159,7 +159,7 @@ if __name__ == "__main__":
                             return
                         return
             s_date = ret_date.strftime('%Y %m %d')
-        print('#parse ret',s_date, type(s_date), ret_date, type(ret_date))
+        print('    #parse ret',s_date, type(s_date), ret_date, type(ret_date))
         return s_date, ret_date
 
     def convert_col(rowx, colx, key , ty, val, printit, convert, sheet, subdocument, sample_id):
@@ -224,7 +224,11 @@ if __name__ == "__main__":
                         % (xlrd.colname(colx), rowx+1, ty, val, cxfx))
         else:
             subdocument = False
+            if sheet == 'Past Tissue V1' :
+                subdocument = True
             if sheet == 'ECOG-Weight V2' :
+                subdocument = True
+            if sheet == 'ECOG-Weight V3' :
                 subdocument = True
             if sheet == 'Blood Labs V2' :
                 subdocument = True
@@ -234,13 +238,21 @@ if __name__ == "__main__":
                 subdocument = True
             if sheet == 'SU2C Biopsy V2' :
                 subdocument = True
+            if sheet == 'SU2C Biopsy V3' :
+                subdocument = True
             if sheet == 'SU2C Pr Ca Tx Sumry V2' :
                 subdocument = True
             if sheet == 'SU2C Prior TX V2' :
                 subdocument = True
+            if sheet == 'SU2C Prior TX V3' :
+                subdocument = True
             if sheet == 'SU2C Specimen V1' :
                 subdocument = True
             if sheet == 'SU2C Subsequent TX V2' :
+                subdocument = True
+            if sheet == 'SU2C Subsequent Treatment V1' :
+                subdocument = True
+            if sheet == 'SU2C Tissue Report V1' :
                 subdocument = True
             j_row = {}
             for colx, ty, val, _unused in get_row_data(bk, sh, rowx, colrange):
@@ -273,6 +285,7 @@ if __name__ == "__main__":
                                 if not sample_list[sample_id]['attributes'][sheet].has_key(key) :
                                     sample_list[sample_id]['attributes'][sheet][key] = d
                                 else:
+                                    pdb.set_trace()
                                     print("#ERROR value already stored ", sample_id, "sheet", sheet, "key", key, "val", val)
             if convert and rowx > 0:
                 if subdocument:
@@ -458,7 +471,7 @@ if __name__ == "__main__":
         gc_mode = options.gc
         if gc_mode:
             gc.disable()
-        logfile.write("\n=== FILE: %s ===" % fname)
+        logfile.write("=== FILE: %s ===\n" % fname)
         if logfile != sys.stdout:
             logfile.setfileheading("\n=== File: %s ===\n" % fname)
         if gc_mode == 1:
@@ -795,6 +808,7 @@ if __name__ == "__main__":
 				event['tag'] = "Diagnosis"
 				event['asset'] = {}
 				sample_list[sample]['timeline']['date'].append(event)
+                                pdb.set_trace()
 				continue
                     if key =='Followup':
                         """ {
@@ -856,7 +870,7 @@ if __name__ == "__main__":
                         event['asset'] = {}
                         sample_list[sample]['timeline']['date'].append(event)
                         continue
-                    if key =='ECOG-Weight V2':
+                    if key =='ECOG-Weight V2' or key == 'ECOG-Weight V3' :
                         """{
                         u'Visit Date': ['2013,02,13', '2013,05,22'], 
                         u'Weight': [u'82.872', u'81.058'], 
@@ -865,11 +879,13 @@ if __name__ == "__main__":
                         u'Segment': [u'Screening ', u'Progression/Study Termination'], 
                         u'Arm': [u'', u'Biopsy'], 
                         u'ECOG PS': [u'0 - Fully active', u'0 - Fully active']}
+                        u'BMI': [30,30]}
                         """
                         key_found = True
                         if isinstance(form, list):
                             for index, f in enumerate(form):
                                 event = {}
+                                print("form" , key, "Weight member of list#:", index, f)
                                 start_date = f['Visit Date']
                                 event['startDate'] = start_date
                                 event['headline'] = "ECOG Weight"
@@ -894,7 +910,9 @@ if __name__ == "__main__":
                                 #event['text'] = "<p>Weight of patient"+form['Weight'].strip()+" kg <p>" + "ECOG PS:"+form['ECOG PS']+" during phase:"+form['Phase']+" "+form['Segment']
                                 event['text'] = "<p>Weight of patient: <b>"+form['Weight']+" kg </b><p> ECOG PS: <b>"+form['ECOG PS']+"</b><p>Phase: <b>"+form['Phase']+"</b><br>Segment: <b>"+form['Segment']+"</b>"
                             except TypeError: 
-                                print("ERROR in Weight:", form['Weight'])
+                                print("ERROR in Weight:", form)
+                            except : 
+                                print("ERROR in Weight:", form)
                             sample_list[sample]['timeline']['date'].append(event)
                             continue
                     if key =='RECIST V2':
@@ -952,7 +970,7 @@ if __name__ == "__main__":
                             event['text'] = "<p>Procedure: <b>"+form[u'Procedure']+"</b>"+comment_str+notes+"<p>Lesions Present?: <b>"+form['Are Lesions Present?']+"</b><p>Segment: <b>"+form['Segment']+"</b> Arm: <b>"+form['Arm']+"</b>"
                             sample_list[sample]['timeline']['date'].append(event)
                         continue
-                    if key =='SU2C Biopsy V1' or key =='SU2C Biopsy V2':
+                    if key =='SU2C Biopsy V1' or key =='SU2C Biopsy V2' or key =='SU2C Biopsy V3':
                         """ {
                         u'Visit Date': '2013,02,22', 
                         u'If Other, specify': u'', 
@@ -1000,8 +1018,8 @@ if __name__ == "__main__":
                                 biopsy_site['id'] = sample
                                 b_key = 'Biopsy'
                                 if not sample_list.has_key(b_key):
-                                    print(biopsy_site)
-                                    print(str(biopsy_site))
+                                    #print(biopsy_site)
+                                    #print(str(biopsy_site))
                                     sample_list[b_key] = { 'sites': [] , 'counts' : {}}
                                 sample_list[b_key]['sites'].append( biopsy_site )
                                 try:
@@ -1039,7 +1057,7 @@ if __name__ == "__main__":
                                 pass
                             event['text'] = "<p>Biopsy site: <b>"+form['Site']+"</b><p> "+other+ drugs + "</b><p>Segment: <b>"+form['Segment']+"</b>"
                         sample_list[sample]['timeline']['date'].append(event)
-                    if key =='Prostate Diagnosis V1' or key =='Prostate Diagnosis V2':
+                    if key =='Prostate Diagnosis V1' or key =='Prostate Diagnosis V2' or key =='Prostate Diagnosis V4':
                         key_found = True
                         if isinstance(form['Visit Date'], list):
                             for index, start_date in enumerate(form['Visit Date']):
@@ -1083,7 +1101,7 @@ if __name__ == "__main__":
                             except:
                                 pass
                             continue
-                    if key =='SU2C Prior TX V1' or key =='SU2C Prior TX V2':
+                    if key =='SU2C Prior TX V1' or key =='SU2C Prior TX V2' or key =='SU2C Prior TX V3':
                         """{
                         u'Best Response': [u'Partial Response', u'Stable Disease', u'Progressive Disease', u'Not Evaluable', u'Partial Response', u'Progressive Disease', u'Partial Response', u'Complete Response'], 
                         u'Drug Name': [u'Abiraterone', u'Carboplatin/Etoposide', u'Enzalutamide', u'Taxotere', u'Casodex', u'Ketoconazole', u'Lupron', u''],
@@ -1156,8 +1174,8 @@ if __name__ == "__main__":
                                 except:
                                     details = ""
                                 try:
-                                    best_resp = "<br>Best Response<b>" + str(f['Best Response'])+"</b>"
-                                except:
+                                    best_resp = "<br>PSA Response<b>" + str(f['PSA Response'])+"</b>"
+                                except KeyError:
                                     best_resp = ""
                                 try:
                                     reason = "<br>Reason for Stopping Treatment<b>" + str(f['Reason for Stopping Treatment'])+"</b>"
@@ -1191,7 +1209,7 @@ if __name__ == "__main__":
                             event['text'] = "<p>Type: <b>" + str(form['Treatment Type'])+ "</b><br>Treatment details: <b>"+str(form['Treatment Details'])+"</b><br>Best Response: <b>"+form['Best Response']+"</b><br>Reason for Stopping Treatment: <b>"+form['Reason for Stopping Treatment']+"</b>"
                             sample_list[sample]['timeline']['date'].append(event)
                             continue
-                    if key =='SU2C Subsequent TX V1' or key =='SU2C Subsequent TX V2':
+                    if key =='SU2C Subsequent Treatment V1' :
                         """{
                         u'Best Response': u'Progressive Disease', 
                         u'Drug Name': u'Abiraterone; Prednisone', 
@@ -1270,7 +1288,7 @@ if __name__ == "__main__":
                             event['tag'] = "Treatment"
                             if key =='SU2C Subsequent TX V1':
                                 event['text'] = "<p>Type: " + str(form['Treatment Type'])+ "<br>Details: "+str(form['Treatment Details'])+"<br>Best Response : "+str(form['Best Response'])+"<br>Reason for Stopping Treatment: "+form['Reason for Stopping Treatment']
-                            if key =='SU2C Subsequent TX V2':
+                            if key =='SU2C Subsequent TX V2' or key == 'SU2C Subsequent Treatment V1':
                                 event['text'] = "<p>Type: <b>" + str(form['Treatment Type'])+ "</b><br>Details: <b>"+str(form['Treatment Details'])+"</b><br>Best Response: <b>"+str(form['Best Response'])+"</b><br>Reason for Stopping Treatment: <b>"+form['Reason for Stopping Treatment']+"</b>"
                             sample_list[sample]['timeline']['date'].append(event)
                         continue
