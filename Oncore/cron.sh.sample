@@ -6,4 +6,5 @@ mkdir -p html
 python oncore2json.py oncore data.zip -s 0 --output html/index.html --cohort cohort.json --directory html
 mongo MedBook remove_clinical_oncore.js
 mongoimport -d MedBook -c clinical_oncore < clinical_oncore.json
+python oncore_patch.py 
 curl http://localhost:10002/CRF/ingestOncore  
