@@ -2,7 +2,6 @@
 usage <- "\nusage: nmf_cluster exp_data clinical max_sd min_rank max_rank out.Rdata out.pdf"
 library(NMF)
 library("Biobase")
-library(convert)
 args <- commandArgs(TRUE)
 #dataDirectory <- system.file("/Users/robertbaertsch/src/meteor/scripts", package="Biobase")
 exprsFile <- args[1]
@@ -13,6 +12,7 @@ min_rank <- args[4]
 max_rank <- args[5]
 outfile_R <- args[6]
 outfile_pdf <- args[7]
+outfile_survey <- "survey.pdf"
 #exprs <- as.matrix(read.table(exprsFile, header=TRUE, sep="\t",row.names=1, as.is=T, stringsAsFactors=F,check.names=F))
 read_matrix <- function(in_file){
   header <- strsplit(readLines(con=in_file, n=1), "\t")[[1]]
@@ -36,13 +36,19 @@ metadata <- data.frame(labelDescription=c("Histology","Small Cell or Not", "Smal
 phenoData <- new("AnnotatedDataFrame",data=pData, varMetadata=metadata)
 exampleSet <- ExpressionSet(assayData=exprs,phenoData=phenoData)
 wcdt <- ExpressionSet(assayData=exprs,phenoData=phenoData)
+ind <- apply(exprs, 1, function(x) all(x==0))
+summary(ind)
+exprs <- exprs[!ind,]
 ind <- apply(exprs, 1, function(x) sd(x<max_sd))
 summary(ind)
 exprs <- exprs[!ind,]
 dim(exprs)
 wcdt <- ExpressionSet(assayData=exprs,phenoData=phenoData)
-wcdt_nmf <- nmf(wcdt, min_rank:max_rank, nrun=10, seed=123456)
+wcdt_nmf <- nmf(wcdt, min_rank:max_rank, nrun=10, seed=123456, .options='tpv')
+pdf(outfile_survey)
+plot(wcdt_nmf)
+dev.off()
 pdf(outfile_pdf)
 consensusmap(wcdt_nmf, annCol=wcdt$Adeno, labCol = NA, labRow = NA)
-save(outfile_R)
+save.image(outfile_R)
 dev.off()
