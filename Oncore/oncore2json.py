@@ -39,6 +39,7 @@ if __name__ == "__main__":
     col_index = {}   # dictionary for each sheet containing an array of column names indexed by column number. 
                      # ie. col_index[sheet][3] = 'Treatment Start Date'
 
+    domain_map = {} # dictionary for datatype containing valid values and mapping to other values (in case of drug names)
     import pdb
     import xlrd
     import sys, time, glob, traceback, gc
@@ -166,11 +167,11 @@ if __name__ == "__main__":
         if colx == 0:
             if not sample_list.has_key(sample_id):
                 sample_list[sample_id] = { 'patient': sample_id, 'attributes': {}, "timeline": {"date": [], "startDate": "2008,01,01", "headline": "Patient Timeline for "+sample_id, "type":"default", "text": "Description "+sample_id }, 'forms': {} }
-                if printit:
-                    print("    MT sample_id: %s value: %r" % (sample_id, sample_list))
+                #if printit:
+                #    print("    MT sample_id: %s value: %r" % (sample_id, sample_list))
             if printit:
                 print("sample_id: %s row %d col_index %s" % (sample_id, rowx, REPR(col_index[sheet])))
-                print("sample_id: %s sample_list %r" % (sample_id, REPR(sample_list)))
+                #print("sample_id: %s sample_list %r" % (sample_id, REPR(sample_list)))
         if key == 'Birth Date':
             val = 'protected'
         if printit:
@@ -212,7 +213,7 @@ if __name__ == "__main__":
                     pass
             return val
 
-    def show_row(bk, sh, rowx, colrange, printit, convert=0, sheet=""):
+    def show_row(bk, sh, rowx, colrange, printit, convert=0, sheet="", main_sheet =""):
         if bk.ragged_rows:
             colrange = range(sh.row_len(rowx))
         if not colrange: return
@@ -220,44 +221,69 @@ if __name__ == "__main__":
         if bk.formatting_info:
             for colx, ty, val, cxfx in get_row_data(bk, sh, rowx, colrange):
                 if printit:
-                    print("cell %s%d: type=%d, data: %r, xfx: %s"
-                        % (xlrd.colname(colx), rowx+1, ty, val, cxfx))
+                    print("cell %s%d: row:%d type=%d, data: %r, xfx: %s"
+                        % (xlrd.colname(colx), rowx+1, rowx+1, ty, val, cxfx))
         else:
+            prev_sheet = ""
             subdocument = False
+            sheet_type = 'Data'
             if sheet == 'Past Tissue V1' :
                 subdocument = True
-            if sheet == 'ECOG-Weight V2' :
+            elif sheet == 'ECOG-Weight V2' :
                 subdocument = True
-            if sheet == 'ECOG-Weight V3' :
+            elif sheet == 'ECOG-Weight V3' :
                 subdocument = True
-            if sheet == 'Blood Labs V2' :
+            elif sheet == 'Blood Labs V2' :
                 subdocument = True
-            if sheet == 'GU-Disease Assessment V3' :
+            elif sheet == 'GU-Disease Assessment V3' :
                 subdocument = True
-            if sheet == 'SU2C Biopsy AE V1' :
+            elif sheet == 'SU2C Biopsy AE V1' :
                 subdocument = True
-            if sheet == 'SU2C Biopsy V2' :
+            elif sheet == 'SU2C Biopsy V2' :
                 subdocument = True
-            if sheet == 'SU2C Biopsy V3' :
+            elif sheet == 'SU2C Biopsy V3' :
                 subdocument = True
-            if sheet == 'SU2C Pr Ca Tx Sumry V2' :
+            elif sheet == 'SU2C Pr Ca Tx Sumry V2' :
                 subdocument = True
-            if sheet == 'SU2C Prior TX V2' :
+            elif sheet == 'SU2C Prior TX V2' :
                 subdocument = True
-            if sheet == 'SU2C Prior TX V3' :
+            elif sheet == 'SU2C Prior TX V3' :
                 subdocument = True
-            if sheet == 'SU2C Specimen V1' :
+            elif sheet == 'SU2C Specimen V1' :
                 subdocument = True
-            if sheet == 'SU2C Subsequent TX V2' :
+            elif sheet == 'SU2C Subsequent TX V2' :
                 subdocument = True
-            if sheet == 'SU2C Subsequent Treatment V1' :
+            elif sheet == 'SU2C Subsequent Treatment V1' :
                 subdocument = True
-            if sheet == 'SU2C Tissue Report V1' :
+            elif sheet == 'SU2C Tissue Report V1' :
                 subdocument = True
+            elif sheet == 'Demographics' :
+                subdocument = False
+            elif sheet == 'Followup' :
+                subdocument = False
+            elif sheet == 'Prostate Diagnosis V4' :
+                subdocument = False
+            elif sheet == 'Domains' :
+                sheet_type = sheet
+                sheet = main_sheet
+                subdocument = False
+            elif sheet == 'Format' :
+                sheet_type = sheet
+                sheet = main_sheet
+                subdocument = False
+            else:
+                print("#ERROR unknown form ", sheet)
+                pdb.set_trace()
             j_row = {}
             for colx, ty, val, _unused in get_row_data(bk, sh, rowx, colrange):
                 if printit:
                     print("cell %s%d: type=%d, data: %r" % (xlrd.colname(colx), rowx+1, ty, val))
+                if sheet_type == 'Format':
+                    print("Format cell %s%d: type=%d, data: %r" % (xlrd.colname(colx), rowx+1, ty, val))
+                if sheet_type == 'Domains':
+                    print("Domain sheet %s cell %s %d: type=%d, data: %r" % (sheet, xlrd.colname(colx), rowx+1, ty, val))
+                    #if sheet == 'SU2C Prior TX V3':
+                    #    pdb.set_trace()
                 if convert:
                     if colx == 0:
                         if val > 0 and val <> '':
@@ -266,31 +292,44 @@ if __name__ == "__main__":
                             sample_id = "DTB-MISSING"
                     if rowx == 0:
                         col_index[sheet].append(val)
-                        #print("sheet %s col_index %s" % (sheet, REPR(col_index[sheet])))
                     else:
                         key = col_index[sheet][colx]
                         d = convert_col(rowx, colx, key, ty, val, printit, convert, sheet, subdocument, sample_id)
                         if d:
-                            if not sample_list[sample_id]['attributes'].has_key(sheet):
+                            if sheet_type == 'Domains':
+                                print("Domain sheet %s cell %s %d: type=%d, data: %r" % (sheet, xlrd.colname(colx), rowx+1, ty, val))
+                                if val == u'DRUG':
+                                    if u'DRUG' not in domain_map:
+                                        domain_map[u'DRUG'] = {}
+                                    print('#drug', d)
+                                    domain_map[u'DRUG']['test'] = d
+                            if sheet_type == 'Data':
+                                if not sample_list[sample_id]['attributes'].has_key(sheet):
+                                    if subdocument:
+                                        sample_list[sample_id]['attributes'][sheet] = []
+                                    else:
+                                        sample_list[sample_id]['attributes'][sheet] = {}
+                                        #if printit:
+                                        #    print("    MT sample_id: %s value: %r" % (sample_id, sample_list))
+                                print("#SHEET",sheet, sample_id, key, '=', val)
                                 if subdocument:
-                                    sample_list[sample_id]['attributes'][sheet] = []
+                                    j_row[key] = d
                                 else:
-                                    sample_list[sample_id]['attributes'][sheet] = {}
-                                    if printit:
-                                        print("    MT sample_id: %s value: %r" % (sample_id, sample_list))
-                            #print("#SHEET",sheet, sample_id, 'key', key, 'val', val)
-                            if subdocument:
-                                j_row[key] = d
-                            else:
-                                if not sample_list[sample_id]['attributes'][sheet].has_key(key) :
-                                    sample_list[sample_id]['attributes'][sheet][key] = d
-                                else:
-                                    pdb.set_trace()
-                                    print("#ERROR value already stored ", sample_id, "sheet", sheet, "key", key, "val", val)
-            if convert and rowx > 0:
+                                    if not sample_list[sample_id]['attributes'][sheet].has_key(key) :
+                                        sample_list[sample_id]['attributes'][sheet][key] = d
+                                    else:
+                                        print("#ERROR value already stored ", sample_id, "sheet", sheet, "key", key, "val", val)
+                                        pdb.set_trace()
+            if convert and rowx > 0 and sheet_type == 'Data':
                 if subdocument:
-                    #print ('sheet', sheet, 'j_row', j_row)
-                    sample_list[sample_id]['attributes'][sheet].append(j_row)
+                    print ('#add subdoc ', sample_id, 'sheet', sheet, 'j_row', j_row)
+                    if (sheet != 'SU2C Biopsy V3' or (sheet == 'SU2C Biopsy V3' and u'Date of Procedure' in j_row)): 
+
+                        sample_list[sample_id]['attributes'][sheet].append(j_row)
+                    else:
+                        print("#skipped blank biopsy" , sample_id, j_row)
+            if sheet_type == 'Data':
+                prev_sheet = sheet
 
     def get_row_data(bk, sh, rowx, colrange):
         result = []
@@ -394,17 +433,20 @@ if __name__ == "__main__":
             print("rc stats")
             for k, v in rclist:
                 print("0x%04x %7d" % (k, v))
-        if options.onesheet:
+        print("#options: ", options.onesheet)
+        if (options.onesheet):
             try:
                 shx = int(options.onesheet)
             except ValueError:
                 shx = bk.sheet_by_name(options.onesheet).number
             shxrange = [shx]
+            print("number of sheets: 1", shx)
         else:
             shxrange = range(bk.nsheets)
-        # print("shxrange", list(shxrange))
+            print("number of sheets:", bk.nsheets)
         for shx in shxrange:
             sh = bk.sheet_by_index(shx)
+            main_sheet_obj = bk.sheet_by_index(0)
             nrows, ncols = sh.nrows, sh.ncols
             colrange = range(ncols)
             anshow = min(nshow, nrows)
@@ -413,6 +455,7 @@ if __name__ == "__main__":
                     (shx, REPR(sh.name), sh.nrows, sh.ncols))
             if convert:
                 sheet_name = sh.name
+                main_sheet = main_sheet_obj.name
                 #sample_list[sheet_name] = dict()
                 col_index[sheet_name] = []
             if nrows and ncols:
@@ -426,9 +469,9 @@ if __name__ == "__main__":
             for rowx in xrange(anshow-1):
                 if not printit and rowx % 10000 == 1 and rowx > 1:
                     print("done %d rows" % (rowx-1,))
-                show_row(bk, sh, rowx, colrange, printit, convert, sheet=sheet_name)
+                show_row(bk, sh, rowx, colrange, printit, convert, sheet=sheet_name, main_sheet=main_sheet)
             if anshow and nrows:
-                show_row(bk, sh, nrows-1, colrange, printit, convert, sheet=sheet_name)
+                show_row(bk, sh, nrows-1, colrange, printit, convert, sheet=sheet_name, main_sheet=main_sheet)
             if printit:
                 print()
             if bk.on_demand: bk.unload_sheet(shx)
@@ -618,6 +661,7 @@ if __name__ == "__main__":
         elif len(args) < 2:
             oparser.error("Expected at least 2 args, found %d" % len(args))
         cmd = args[0]
+        print("options: ", options)
         xlrd_version = getattr(xlrd, "__VERSION__", "unknown; before 0.5")
         if cmd == 'biff_dump':
             xlrd.dump(args[1], unnumbered=options.unnumbered)
@@ -687,7 +731,7 @@ if __name__ == "__main__":
                 firstBiopsy = None
                 for key in sample_list[sample]['attributes'].keys():
                     form = sample_list[sample]['attributes'][key]
-                    #print("\n#key:",key," form: ", form)
+                    print("\n#key:",key," form: ", form)
                     key_found = False
                     if key =='SU2C Pr Ca Tx Sumry V2':
                         """ {
@@ -895,7 +939,7 @@ if __name__ == "__main__":
                                 except:
                                     wt = ""
                                 try:
-                                    ecog = f['ECOG PS']
+                                    ecog = f['ECOG-PS']
                                 except:
                                     ecog = ""
                                 event['text'] = "<p>Weight of patient: <b>"+wt+" kg </b><p> ECOG PS:"+ecog+"<p>Phase: <b>"+f['Phase']+"</b><br>Segment: <b>"+f['Segment']+"</b>"
@@ -1335,13 +1379,6 @@ if __name__ == "__main__":
             for key,values in sample_list.items():
                     print("#key:"+key)
                     sample_dict = sample_list[key]
-                    try:
-                        print("DIAG FORM", sample_dict['attributes'][u'Prostate Diagnosis V2'])
-                        diag_str, diag_dt = parse_date_both(sample_dict['attributes'][u'Prostate Diagnosis V2'][u'Date of diagnosis'],sample_dict['attributes'][u'Prostate Diagnosis V2'][u'Date of diagnosis Ext'] )
-                        print("\nDiagnosis dt ", diag_dt)
-                    except:
-                        print('no date of diagnosis\n')
-                        pass
                     print("#timeline ")
                     if 'timeline' in sample_dict:
                         for h in sample_dict['timeline']['date']:
@@ -1374,19 +1411,6 @@ if __name__ == "__main__":
                                     print(key+" failed to get stop date for "+agent+"using start date")
                                     treat_stop_dt = None
                                     pass
-                                #print(treat_start_dt)
-                                #print(treat_stop_dt)
-                                start_mon = 0
-                                if treat_start_dt is not None:
-                                    print("\n Weeks between Diagnosis dt ", diag_dt, treat_start_dt)
-                                    start_mon = weeks_between(diag_dt, treat_start_dt)/12
-                                print('months=',start_mon)
-                                if treat_stop_dt is not None:
-                                    stop_mon = weeks_between(diag_dt, treat_stop_dt)/12
-                                    cbio.write("%s\t%d\t%d\t%s\t%s\n" %(key, start_mon, stop_mon , event_type, agent))
-                                else:
-                                    stop_mon = None
-                                    cbio.write("%s\t%d\t\t%s\t%s\n" %(key, start_mon, event_type, agent))
             cbio.close()
             cohort.write("%s" % (json.dumps(sample_list, default=json_util.default, sort_keys=True)))
             cohort.close()
