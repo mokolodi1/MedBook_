@@ -64,9 +64,19 @@ readSSLcredentials = function() {
           server.close();
 
       redirectServer = require('http').createServer(function(req, res) {
+       var hostname = req.headers.host
+       
+
+       // redirect http://tumormap.ucsc.edu to https://medbook.ucsc.edu/hex  (change hex to tumormap later)
+        if (hostname.indexOf("tumormap") == 0 ) {
+            var red = "https://" + config.server.host + ":" + config.server.ssl + "/hex" + req.url;
+            res.writeHead(307, {'Location': red});
+            res.end();
+        } else {
            var red = "https://" + config.server.host + ":" + config.server.ssl + req.url;
            res.writeHead(307, {'Location': red});
            res.end();
+        }
 
       });
       redirectServer.listen(config.server.nonssl);
@@ -199,14 +209,10 @@ run = function() {
     if (req.url.indexOf( "/postScript") == 0)
         return serveScript(req, res, postScript);
     
-    if (req.url.indexOf("/tumormap") == 0 ) {
-        req.url = req.url.replace("/tumormap", "");
- 	if (req.url.indexOf("/..") >=0 ) {
-            console.log(".. not allowed: " + req.url);
-            res.writeHead(404, {'Content-Type': 'text/plain'});
-            res.end();
-	}
-        return serveFile(req, res, '/data/tumormap/');
+    if (req.url.indexOf(hostname.indexOf("tumormap")) == 0 ) {
+        var red = "https://" + config.server.host + ":" + config.server.ssl + "/hex/" + req.url;
+        res.writeHead(307, {'Location': red});
+        res.end();
     }
     if (req.url.indexOf("/swat") == 0 ) {
         req.url = req.url.replace("/swat", "");
