@@ -199,7 +199,7 @@ run = function() {
     if (req.url.indexOf( "/postScript") == 0)
         return serveScript(req, res, postScript);
     
-    if (req.url.indexOf("/tumormap") == 0 || hostname.indexOf("tumormap") == 0 ) {
+    if (req.url.indexOf("/tumormap") == 0 ) {
         req.url = req.url.replace("/tumormap", "");
  	if (req.url.indexOf("/..") >=0 ) {
             console.log(".. not allowed: " + req.url);
@@ -207,6 +207,15 @@ run = function() {
             res.end();
 	}
         return serveFile(req, res, '/data/tumormap/');
+    }
+    if (req.url.indexOf("/swat") == 0 ) {
+        req.url = req.url.replace("/swat", "");
+ 	if (req.url.indexOf("/..") >=0 ) {
+            console.log(".. not allowed: " + req.url);
+            res.writeHead(404, {'Content-Type': 'text/plain'});
+            res.end();
+	}
+        return serveFile(req, res, '/data/home/swat/hexProxy/');
     }
     /*if (req.url.indexOf("/public") == 0)
         return serveFile(req, res, '/data/public/');*/
