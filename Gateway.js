@@ -68,7 +68,7 @@ readSSLcredentials = function() {
        
 
        // redirect http://tumormap.ucsc.edu to https://medbook.ucsc.edu/hex  (change hex to tumormap later)
-        if (hostname.indexOf("tumormap") == 0 ) {
+        if (hostname && hostname.indexOf("tumormap") == 0 ) {
             var red = "https://" + config.server.host + ":" + config.server.ssl + "/hex" + req.url;
             res.writeHead(307, {'Location': red});
             res.end();
@@ -221,7 +221,7 @@ run = function() {
             res.writeHead(404, {'Content-Type': 'text/plain'});
             res.end();
 	}
-        return serveFile(req, res, '/data/home/swat/hexProxy/');
+        return serveFile(req, res, '/data/home/galaxy/hexProxy/');
     }
     /*if (req.url.indexOf("/public") == 0)
         return serveFile(req, res, '/data/public/');*/
