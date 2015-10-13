@@ -12,6 +12,42 @@ var http = require('http');
 var crypto = require('crypto');
 var randomstring = require("randomstring");
 
+var forever = require('forever-monitor');
+
+function launch(app, res) {
+ console.log("Gateway launching", app.route, app.cwd, app.run);
+ var cmd =  app.run.split(" ");
+ console.log("launch", cmd);
+ var child = forever.start(cmd, {
+     silent : true,
+     fork: true,
+     env: {
+	PORT : app.port,
+	ROUTE : app.route,
+     },
+     cwd : app.cwd,
+     max: 3,
+ });
+
+ child.on('forever watch:restart', function(info) {
+     res.write('Restaring script because ' + info.file + ' changed');
+     console.error('Restaring script because ' + info.file + ' changed');
+ });
+
+ child.on('forever restart', function() {
+     res.write('Forever restarting script for ' + child.times + ' time');
+     console.error('Forever restarting script for ' + child.times + ' time');
+ });
+
+ child.on('forever exit:code', function(code) {
+     res.write('Forever detected script exited with code ' + code);
+     console.error('Forever detected script exited with code ' + code);
+ });
+
+
+}
+
+
 var SECRET;
 function changeSecret() {
     SECRET = randomstring.generate(7);
@@ -30,6 +66,7 @@ var server = null;
 menuFile = null;
 postScript = null;
 
+
 getPort = function(req) {
     var a = req.url.split("/");
     if (a.length > 1) {
@@ -42,6 +79,18 @@ getPort = function(req) {
     // console.log("getPort final", req.url, final);
     return final;
 }
+
+getApp = function(req) {
+    var a = req.url.split("/");
+    if (a.length > 1) {
+        var p = apps["/" + a[1]];
+        if (p) {
+            return p;
+        }
+    }
+    return config.final;
+}
+
 
 readMenu = function() {
   menuFile = fs.readFileSync("/data/MedBook/Gateway/menu.html");
@@ -124,7 +173,13 @@ run = function() {
         proxy.web(req, res, {
           target: "http://localhost:"+port,
         },function(e){
+	  res.write('Something went wrong. Relaunching application.');
           log_error(e,req);
+	  console.log("web error", e);
+	  launch(getApp(req), res);
+	  res.writeHead(500, {
+	    'Content-Type': 'text/plain'
+	  });
       });
   }
 
@@ -248,12 +303,23 @@ run = function() {
   var httpProxy = require('http-proxy')
   var proxy = httpProxy.createProxy({ ws : true });
 
+
+
   server.on('upgrade',function(req,res){
     var port = getPort(req);
     proxy.ws(req, res, {
       target: "http://localhost:" + port,
     },function(e){
       log_error(e, req);
+	launch(getApp(req));
+
+	console.log("WS ERROR", e);
+	/*
+	res.writeHead(500, {
+	  'Content-Type': 'text/plain'
+	});
+	res.end('Something went wrong. And we are reporting a custom error message.');
+	*/
     });
   })
    
@@ -264,6 +330,8 @@ run = function() {
       console.log("nonssl listening on", config.server.nonssl);
       server.listen(config.server.nonssl)
   }
+
+
 };
 
 splitHostPort = function(s) {
@@ -282,6 +350,7 @@ splitHostPort = function(s) {
 
 var configuration = null;
 var routes = null;
+var apps = null;
 var auth = null;
 var final = null;
 var config = null;
@@ -297,6 +366,7 @@ configApp = function(path) {
   var appName, ca, link, menu, menuItem, _ref;
   menu = [];
   routes = {};
+  apps = {};
   auth = {};
   final = config.final.port
 
@@ -304,6 +374,7 @@ configApp = function(path) {
   for (appName in _ref) {
     var ca = _ref[appName];
     routes[ca.route] = ca.port;
+    apps[ca.route] = ca;
     auth[ca.route] = ca.auth;
   }
 
@@ -323,7 +394,7 @@ serveMenu = function(req, res) {
     href = ca.path ? ca.path : ca.route;
 
     link = "<a target='_self' class='MedBookLink' href='" + href  + "'>" + menuItem + "</a>";
-    routeHacks += "Router.route('" + ca.route + "', function () {}, {where: 'server'});\n";
+    routeHacks += "if (Router && !('" + ca.route + "' in  Router.routes)) Router.route('" + ca.route + "', function () {}, {where: 'server'});\n";
     if (ca.menuItem) {
       if (ca.menuPosition !== void 0) {
         menu.splice(ca.menuPosition, 0, link);
