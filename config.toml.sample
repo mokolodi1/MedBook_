@@ -1,28 +1,26 @@
 [server]
-bind_ip = "0.0.0.0"
-bind_port = 10000
-cookie_secret = "medbookCookie change for production"
-# google apps domain
-auth_domain = ""
-
-[domains]
-  [domains.example1]
-  host = "su2c.ucsc.edu:10000"
-  upstream = [ "su2c.ucsc.edu:8081"]
+  host = "localhost"
+  bind_ip = "0.0.0.0"
+  nonssl = 10000
+  cookie_secret = "medbookCookie change for production"
+  pingIntervalMS = 2000
+  uid = "galaxy"
 
 [apps]
    [apps.WB]
    auth = false
    route = "/wb"
-   run = "./MedBook-Workbench/run 10003"
+   cwd = "../MedBook-Workbench"
+   run = "/bin/sh -c ./run"
    port = 10003
    menuPosition = 0
-   menuItem = "WB"
+   menuItem = "Workbench"
 
    [apps.CRFs]
    auth = false
    route = "/CRF"
-   run = "./CRF/run 10002"
+   cwd = "../MedBook-CRFs/"
+   run = "/bin/sh -c ./run.sh"
    port = 10002
    menuPosition = 1
    menuItem = "Forms"
@@ -30,61 +28,49 @@ auth_domain = ""
    [apps.Telescope]
    auth = false
    route = "/"
-   run = "./Telescope/run 10001"
+   cwd = "../MedBook-Telescope"
+   run = "/bin/sh -c ./run"
    port = 10001
    menuPosition = 3
    menuItem = "Telescope"
 
-   [apps.demoPost]
-   auth = false
-   route = "/demoPost"
-   run = "./Telescope/run 20004"
-   port = 20004
-   menuPosition = 1
-   menuItem = "Demo Post"
-
-
-   [apps.fileupload]
-   auth = false
-   route = "/fileupload"
-   run = "./Apps/fileupload/run 22222"
-   port = 22222
-   menuPosition = 3
-   menuItem = "File Upload"
-
    [apps.galaxy]
-   auth = true
+   auth = false
    route = "/galaxy"
-   run = "./galaxy-dist/run"
+   cwd = "../galaxy-dist"
+   run = "/bin/sh -c ./run"
    port = 10010
    menuPosition = 4
    menuItem = "Galaxy"
 
-   [apps.Admin]
-   auth = true
-   route = "/admin"
-   run = "./Apps/flat/run 10005"
-   port = 10005
-   menuPosition = 0
-   menuItem = "Admin"
+   [apps.fusion]
+   auth = false
+   route = "/fusion"
+   cwd = "../Medbook-Fusion5"
+   ping = "/fusion/packages/reload.js"
+   run = "/bin/sh -c ./run"
+   port = 10011
+   menuPosition = 5
+   menuItem = "Data Fusion"
 
 
    [apps.cbioportal]
    auth = true
    route = "/cbioportal"
-   run = ""
    port = 8585
-   menuItem = "CBioPortal"
+   menuItem = "Cbioportal"
 
-   [apps.flat]
-   auth = true
-   route = "/flat"
-   run = "./Apps/flat/run 22222"
-   port = 22222
-   menuItem = "Flat"
+[daemons]
+   [daemons.mongodb]
+   MONGO_URL= "mongodb://localhost:27017/MedBook"
+   cwd = "/"
+   run = "/bin/sh -c /Users/tedgoldstein/Downloads/mongodb-osx-x86_64-2.6.10/bin/mongod"
+   uid = "tedgoldstein"
+
 
 [final]
    redirect = "/"
-   run = "./Telescope/run 10001"
+   cwd = "../MedBook-Telescope3"
+   run = "/bin/sh -c ./run"
    port = 10001
 
