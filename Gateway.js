@@ -11,8 +11,72 @@ var path = require('path');
 var http = require('http');
 var crypto = require('crypto');
 var randomstring = require("randomstring");
-
 var forever = require('forever-monitor');
+var MongoClient = require('mongodb').MongoClient;
+
+
+var configuration = null;
+var routes = null;
+var apps = null;
+var auth = null;
+var final = null;
+var config = null;
+
+
+
+var MongoDB = null;
+
+var MongoDBstates = ["unknown", "dead", "live", "connecting", "lost"]
+var MongoDBstate = "unknown";
+
+
+function mongoCheck() {
+    if (MongoDB == null)
+	MongoClient.connect(config.daemons.mongodb.MONGO_URL, function(err, db) {
+	  if (db == null) {
+	      console.log("still dead after connect");
+	      MongoDBstate = "dead";
+	  } else {
+	      MongoDB = db;
+	      MongoDBstate = "connecting";
+	  }
+	}) 
+      else MongoDB.admin().ping(function(err, pingResult) {
+	  if (pingResult && pingResult.ok == 1)
+	      MongoDBstate = "live";
+	  else {
+	      MongoDBstate = "lost";
+	  }
+      });
+    if (MongoDBstate == "dead" || MongoDBstate == "connecting" || MongoDBstate == "lost")
+	launchMongoDB();
+    console.log("mongoCheck", MongoDBstate);
+    return MongoDBstate;
+}
+// setInterval(mongoCheck, 5000);
+
+
+/*
+[daemons]
+   [daemons.mongodb]
+   MONGO_URL= "mongodb://localhost:27017/MedBook"
+   cwd = "/"
+   run = "/Users/tedgoldstein/Downloads/mongodb-osx-x86_64-2.6.10/bin/mongod"
+   uid = "tedgoldstein"
+*/
+
+function launchMongoDB() {
+ var cmd =  config.daemons.mongodb.run.split(" ");
+ console.log("launch mongodb", cmd);
+ var child = forever.start(cmd, {
+     silent : true,
+     fork: true,
+     killTree: false,
+     max: 1,
+ });
+}
+
+
 
 function launch(app, res) {
  console.log("Gateway launching", app.route, app.cwd, app.run);
@@ -21,30 +85,30 @@ function launch(app, res) {
  var child = forever.start(cmd, {
      silent : true,
      fork: true,
+     killTree: false,
      env: {
 	PORT : app.port,
 	ROUTE : app.route,
+        MONGO_URL : config.daemons.mongodb.MONGO_URL,
      },
      cwd : app.cwd,
      max: 3,
  });
 
  child.on('forever watch:restart', function(info) {
-     res.write('Restaring script because ' + info.file + ' changed');
+     if (res) res.write('Restaring script because ' + info.file + ' changed');
      console.error('Restaring script because ' + info.file + ' changed');
  });
 
  child.on('forever restart', function() {
-     res.write('Forever restarting script for ' + child.times + ' time');
+     if (res) res.write('Forever restarting script for ' + child.times + ' time');
      console.error('Forever restarting script for ' + child.times + ' time');
  });
 
  child.on('forever exit:code', function(code) {
-     res.write('Forever detected script exited with code ' + code);
+     if (res) res.write('Forever detected script exited with code ' + code);
      console.error('Forever detected script exited with code ' + code);
  });
-
-
 }
 
 
@@ -64,6 +128,7 @@ function hash(pwd) {
 var server = null;
 
 menuFile = null;
+reloadFile = null;
 postScript = null;
 
 
@@ -94,6 +159,7 @@ getApp = function(req) {
 
 readMenu = function() {
   menuFile = fs.readFileSync("/data/MedBook/Gateway/menu.html");
+  reloadFile = fs.readFileSync("/data/MedBook/Gateway/reload.html");
 };
 
 readMenu();
@@ -173,13 +239,12 @@ run = function() {
         proxy.web(req, res, {
           target: "http://localhost:"+port,
         },function(e){
-	  res.write('Something went wrong. Relaunching application.');
           log_error(e,req);
 	  console.log("web error", e);
 	  launch(getApp(req), res);
-	  res.writeHead(500, {
-	    'Content-Type': 'text/plain'
-	  });
+	  res.writeHead(500, { 'Content-Type': 'text/html' });
+          res.write(reloadFile, "binary");
+	  res.end();
       });
   }
 
@@ -348,12 +413,6 @@ splitHostPort = function(s) {
   return ret;
 };
 
-var configuration = null;
-var routes = null;
-var apps = null;
-var auth = null;
-var final = null;
-var config = null;
 
 configApp = function(path) {
   try {
@@ -363,29 +422,47 @@ configApp = function(path) {
     return process.exit(1);
   }
 
-  var appName, ca, link, menu, menuItem, _ref;
+  var appName, ca, link, menu, menuItem;
   menu = [];
   routes = {};
   apps = {};
   auth = {};
   final = config.final.port
+  pingable = [];
 
-  _ref = config.apps;
-  for (appName in _ref) {
-    var ca = _ref[appName];
+  for (appName in config.apps) {
+    var ca = config.apps[appName];
     routes[ca.route] = ca.port;
     apps[ca.route] = ca;
+    if (ca.ping)
+	pingable.push(ca)
     auth[ca.route] = ca.auth;
   }
 
+  function relaunch() {
+       if (mongoCheck() == "LIVE")
+	   pingable.map(function(app) {
+	       if (app.ping)
+		   http.get("http://localhost:" + app.port + app.ping, function(res) {
+		       console.log("Alive", app.route || app.daemon, " ping " + res.statusCode);
+		   }).on('error', function(e) {
+		       console.log("DEAD", app.route || app.daemon, " ping " + e.message);
+		       launch(app, null);
+		   });
+	   });
+   }
+
+  if (parseInt(config.server.pingIntervalMS)) {
+      console.log( "pinging every", config.server.pingIntervalMS);
+      setInterval(relaunch, config.server.pingIntervalMS);
+  }
 };
 
 serveMenu = function(req, res) {
   var menu = [];
-  _ref = config.apps;
   var routeHacks = "";
-  for (appName in _ref) {
-    var ca = _ref[appName];
+  for (appName in config.apps) {
+    var ca = config.apps[appName];
     menuItem = String(ca.menuItem);
     if (menuItem === null) {
       menuItem = ca.route;
@@ -473,4 +550,3 @@ function log_error(e,req){
 }
 
 run();
-

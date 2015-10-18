@@ -15,12 +15,12 @@
     "websockets"
   ],
   "author": "Ted Goldstein",
-  "bugs": {
-  },
+  "bugs": {},
   "dependencies": {
     "http-proxy": "*",
     "https": "*",
-    "toml": "*",
-    "randomstring": "*"
+    "mongodb": "^2.0.46",
+    "randomstring": "*",
+    "toml": "*"
   }
 }
