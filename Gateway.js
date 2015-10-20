@@ -50,7 +50,7 @@ function mongoCheck() {
       });
     if (MongoDBstate == "dead" || MongoDBstate == "connecting" || MongoDBstate == "lost")
 	launchMongoDB();
-    console.log("mongoCheck", MongoDBstate);
+    // console.log("mongoCheck", MongoDBstate);
     return MongoDBstate;
 }
 // setInterval(mongoCheck, 5000);
@@ -440,7 +440,7 @@ configApp = function(path) {
   }
 
   function relaunch() {
-       if (mongoCheck() == "LIVE")
+       if (mongoCheck() == "LIVE") // if mongo is not live, don't bother checking anything else.
 	   pingable.map(function(app) {
 	       if (app.ping)
 		   http.get("http://localhost:" + app.port + app.ping, function(res) {
@@ -450,7 +450,7 @@ configApp = function(path) {
 		       launch(app, null);
 		   });
 	   });
-   }
+  }
 
   if (parseInt(config.server.pingIntervalMS)) {
       console.log( "pinging every", config.server.pingIntervalMS);

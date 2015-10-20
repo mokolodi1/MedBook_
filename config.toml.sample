@@ -28,8 +28,8 @@
    [apps.Telescope]
    auth = false
    route = "/"
-   cwd = "../MedBook-Telescope"
-   run = "/bin/sh -c ./run"
+   cwd = "../MedBook-Telescope3"
+   run = "/bin/sh -c ./rundev"
    port = 10001
    menuPosition = 3
    menuItem = "Telescope"
@@ -71,6 +71,6 @@
 [final]
    redirect = "/"
    cwd = "../MedBook-Telescope3"
-   run = "/bin/sh -c ./run"
+   run = "/bin/sh -c ./rundev"
    port = 10001
 
