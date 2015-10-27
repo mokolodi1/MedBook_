@@ -1,7 +1,7 @@
 
 Package.describe({
   name: 'clinical:collaborations',
-  version: '2.1.2',
+  version: '2.1.3',
   summary: 'Collaboration based security architecture (similar to Roles and Friends)',
   git: 'https://github.com/clinical-meteor/clinical-collaborations',
   documentation: 'README.md'
@@ -24,6 +24,7 @@ Package.onUse(function (api) {
     'http@1.1.0',
     'underscore@1.0.3',
     'yasaricli:slugify@0.0.7',
+    "socialize:base-model@0.2.3"
     //'clinical:user-model@0.1.5'
   ], ['client', 'server']);
 
@@ -64,11 +65,8 @@ Package.onTest(function (api) {
   api.use('accounts-password@1.1.1');
   api.use('autopublish@1.0.3');
   api.use('insecure@1.0.3');
-  // api.use('accounts-base');
-  // api.use('accounts-password');
   api.use('tinytest@1.0.5');
   api.use('clinical:verification');
-  // api.use("tulip:munit-helpers");
   api.use('clinical:collaborations');
 
   api.addFiles('tests/collaborations.js');
