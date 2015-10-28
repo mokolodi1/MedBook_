@@ -1,7 +1,7 @@
 
 Package.describe({
   name: 'clinical:collaborations',
-  version: '2.1.4',
+  version: '2.1.5',
   summary: 'Collaboration based security architecture (similar to Roles and Friends)',
   git: 'https://github.com/clinical-meteor/clinical-collaborations',
   documentation: 'README.md'
@@ -11,6 +11,7 @@ Package.onUse(function (api) {
   api.versionsFrom('1.1.0.2');
 
   api.use('meteor-platform@1.2.0');
+
   api.use([
     'mongo@1.1.0',
     'mongo-livedata@1.0.8',
@@ -25,7 +26,7 @@ Package.onUse(function (api) {
     'http@1.1.0',
     'underscore@1.0.3',
     'yasaricli:slugify@0.0.7',
-    "socialize:base-model@0.2.3"
+    "clinical:base-model@1.3.0"
     //'clinical:user-model@0.1.5'
   ], ['client', 'server']);
 
