@@ -45,6 +45,7 @@ exprs <- exprs[!ind,]
 dim(exprs)
 wcdt <- ExpressionSet(assayData=exprs,phenoData=phenoData)
 wcdt_nmf <- nmf(wcdt, min_rank:max_rank, nrun=10, seed=123456, .options='tpv')
+wcdt3 <- nmf(wcdt, 3, nrun=10, seed=123456, .options='tpv')
 pdf(outfile_survey)
 plot(wcdt_nmf)
 dev.off()
