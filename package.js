@@ -1,7 +1,7 @@
 
 Package.describe({
   name: 'clinical:collaborations',
-  version: '2.1.7',
+  version: '2.2.1',
   summary: 'Collaboration based security architecture (similar to Roles and Friends)',
   git: 'https://github.com/clinical-meteor/clinical-collaborations',
   documentation: 'README.md'
@@ -18,15 +18,16 @@ Package.onUse(function (api) {
     'minimongo@1.0.8',
     'accounts-base@1.2.0',
     'accounts-password@1.1.1',
-    // 'accounts-base',
-    // 'accounts-password',
     'aldeed:simple-schema@1.3.3',
     'aldeed:collection2@2.5.0',
     'grove:less@0.1.1',
     'http@1.1.0',
     'underscore@1.0.3',
     'yasaricli:slugify@0.0.7',
-    "clinical:base-model@1.3.0"
+    'clinical:base-model@1.3.0',
+    'matb33:collection-hooks@0.8.1'
+    // 'accounts-base',
+    // 'accounts-password',
     //'clinical:user-model@0.1.5'
   ], ['client', 'server']);
 
@@ -36,8 +37,8 @@ Package.onUse(function (api) {
 
   api.addFiles([
     'lib/collection.collaborations.js',
-    'lib/extentions.js',
     'lib/object.collaboration.js',
+    'lib/extentions.js',
     //'lib/object.user.js'
   ]);
 
