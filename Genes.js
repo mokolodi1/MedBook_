@@ -14,9 +14,15 @@ Genes.attachSchema(new SimpleSchema({
   synonym_names: { type: [String], optional: true },
   synonym_labels: { type: [String], optional: true },
 
-  // TODO: ask Robert whether pseudogenes have this defined
+  // TODO: ask Robert why some don't have this defined
   chromosome: { type: String, optional: true }, // ex. 15q11.2
+
+  locus_type: { type: String },
+  locus_group: { type: String },
+
   hgnc_id: { type: String, optional: true, label: "HGNC ID" },
+
+
 
   // NOTE: fields below have been DEPRECATED
   status: {
