@@ -41,7 +41,7 @@ design = model.matrix(~ contrast)
 y = voom(tmm, design, plot=TRUE)
 #print (c('voom returns', y[1:3]))
 pdf(args[6])
-plotMDS(y,top=50,labels=contrast, col=ifelse(contrast=="SmallCell","blue","red"),gene.selection="common")
+plotMDS(y,top=50,labels=contrast, col=ifelse(contrast==contrast[1],"red","blue"),gene.selection="common")
 dev.off()
 
 fit = eBayes(lmFit(y, design))
