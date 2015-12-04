@@ -1,7 +1,7 @@
 
 Package.describe({
   name: 'clinical:collaborations',
-  version: '2.2.1',
+  version: '2.2.2',
   summary: 'Collaboration based security architecture (similar to Roles and Friends)',
   git: 'https://github.com/clinical-meteor/clinical-collaborations',
   documentation: 'README.md'
