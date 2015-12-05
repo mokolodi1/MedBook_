@@ -90,7 +90,9 @@ var patientsSchema = new SimpleSchema({
 
 var geneValuePair = new SimpleSchema({
   "gene_id": { type: String },
-  "value": { type: Number, decimal: true }
+  "value": { type: Number, decimal: true },
+  "p_value": { type: Number, decimal: true, optional: true },
+  "probability": { type: Number, decimal: true, optional: true }
 });
 
 var signaturesSchema = new SimpleSchema({
