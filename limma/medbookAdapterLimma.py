@@ -42,15 +42,16 @@ def main():
     
     work_dir = os.path.abspath("./")
     
-    if len(args) != 6:
+    if len(args) != 7:
         logging.error("ERROR: incorrect number of arguments\n")
         sys.exit(1)
     data_file = os.path.abspath(args[0])
     phenotype_file = os.path.abspath(args[1])
     top_genes = args[2]
-    sig_file = os.path.join(work_dir, "report", args[3])
-    top_gene_file = os.path.join(work_dir, "report", args[4])
-    pdf_file = os.path.join(work_dir, "report", args[5])
+    correction = args[3]
+    sig_file = os.path.join(work_dir, "report", args[4])
+    top_gene_file = os.path.join(work_dir, "report", args[5])
+    pdf_file = os.path.join(work_dir, "report", args[6])
     try:
         os.mkdir(os.path.join(work_dir,"report"))
     except:
@@ -62,6 +63,7 @@ def main():
     print "cmd", cmd
     cmd += " %s %s" % (data_file, phenotype_file)
     cmd += " %s "  % (top_genes)
+    cmd += " %s "  % (correction)
     cmd += " %s " % (sig_file) 
     cmd += " %s " % (top_gene_file)
     cmd += " %s " % (pdf_file)

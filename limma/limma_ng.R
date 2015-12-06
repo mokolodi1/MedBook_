@@ -1,5 +1,5 @@
 #! /usr/bin/Rscript --vanilla 
-usage <- "\nusage: limma_ng input contrast top_count output.tab top_output.tab out.pdf"
+usage <- "\nusage: limma_ng input contrast top_count correction_BH_or_none output.tab top_output.tab out.pdf"
 library(edgeR)
 library(limma)
 args <- commandArgs(TRUE)
@@ -40,7 +40,7 @@ design = model.matrix(~ contrast)
 #print (c('model.matrix(~contrast) returns design: ',design))
 y = voom(tmm, design, plot=TRUE)
 #print (c('voom returns', y[1:3]))
-pdf(args[6])
+pdf(args[7])
 plotMDS(y,top=50,labels=contrast, col=ifelse(contrast==contrast[1],"red","blue"),gene.selection="common")
 dev.off()
 
@@ -48,10 +48,10 @@ fit = eBayes(lmFit(y, design))
 cn = sprintf("contrast%s", as.character(levels(as.factor(contrast))[2]))
 cn
 args[3]
-tt = topTable(fit, coef=cn, number=as.numeric(args[3]))
+tt = topTable(fit, coef=cn, number=as.numeric(args[3]), adjust.method=args[4], sort.by = "logFC")
 limma_out = list(design=design, y=y, fit=fit, tt=tt)
-out_data = args[4]
-out_top = args[5]
+out_data = args[5]
+out_top = args[6]
 write_matrix( limma_out$fit, out_data)
 write_matrix( tt, out_top)
 
