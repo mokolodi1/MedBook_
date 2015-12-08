@@ -21,6 +21,11 @@ Jobs.attachSchema(new SimpleSchema({
     blackbox: true,
   },
 
+  timeout_length: {
+    type: Number,
+    defaultValue: 10000,
+  },
+
   // optional fields
   "prerequisite_job_ids": {
     type: [Meteor.ObjectID],
