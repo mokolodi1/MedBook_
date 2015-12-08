@@ -31,6 +31,11 @@ Package.onUse(function(api) {
   api.addFiles('Jobs.js');
   api.export('Jobs');
 
+  api.addFiles('Networks.js');
+  api.export('Networks');
+  api.export('NetworkElements');
+  api.export('NetworkInteractions');
+
   api.addFiles('Genes.js');
   api.export('Genes');
 

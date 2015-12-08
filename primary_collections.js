@@ -159,61 +159,7 @@ var studyAndCollaboration = new SimpleSchema({
   "collaboration_label": { type: String },
 });
 
-var superpathwaySchema = new SimpleSchema([
-  studyAndCollaboration,
-  {
-    "name": { type: String },
-    "version": { type: Number },
-  },
-]);
-superpathwaySchema.fieldOrder = [
-  "name",
-  "version",
-];
 
-var superpathwayElementSchema = new SimpleSchema({
-  "label": {
-    type: String,
-  },
-  "type": {
-    type: String,
-    allowedValues: [
-      "protein",
-      "complex",
-      "abstract",
-      "family",
-      "miRNA",
-      "rna",
-    ],
-  },
-  "superpathway_id": { type: String },
-});
-superpathwayElementSchema.fieldOrder = [
-  "label",
-  "type",
-];
-
-var superpathwayInteractionSchema = new SimpleSchema({
-  "source": { type: String },
-  "target": { type: String },
-  "interaction": {
-    type: String,
-    allowedValues: [
-      "-t>",
-      "-t|",
-      "-a>",
-      "-a|",
-      "-phos>",
-      "PPI>",
-    ],
-  },
-  "superpathway_id": { type: String },
-});
-superpathwayInteractionSchema.fieldOrder = [
-  "source",
-  "interaction",
-  "target",
-];
 
 
 // var studiesSchema = new SimpleSchema({
@@ -506,14 +452,7 @@ Mutations.attachSchema(mutationSchema);
 // Studies = new Meteor.Collection("studies");
 // Studies.attachSchema(studiesSchema);
 
-Superpathways = new Meteor.Collection("superpathways");
-Superpathways.attachSchema(superpathwaySchema);
 
-SuperpathwayElements = new Meteor.Collection("superpathway_elements");
-SuperpathwayElements.attachSchema(superpathwayElementSchema);
-
-SuperpathwayInteractions = new Meteor.Collection("superpathway_interactions");
-SuperpathwayInteractions.attachSchema(superpathwayInteractionSchema);
 
 Contrast = new Meteor.Collection('contrast');
 Contrast.attachSchema(contrastSchema);
