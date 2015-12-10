@@ -12,8 +12,6 @@ ArachneRegulon.prototype = Object.create(TabSeperatedFile.prototype);
 ArachneRegulon.prototype.constructor = ArachneRegulon;
 
 ArachneRegulon.prototype.parseLine = function (brokenTabs, lineNumber, line) {
-  console.log("lineNumber:", lineNumber);
-
   if (lineNumber % 1000 === 0) {
     console.log("lineNumber:", lineNumber);
   }
