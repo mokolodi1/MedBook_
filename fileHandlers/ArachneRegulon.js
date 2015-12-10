@@ -12,7 +12,7 @@ ArachneRegulon.prototype = Object.create(TabSeperatedFile.prototype);
 ArachneRegulon.prototype.constructor = ArachneRegulon;
 
 ArachneRegulon.prototype.parseLine = function (brokenTabs, lineNumber, line) {
-  if (lineNumber % 1000 === 0) {
+  if (lineNumber % 10 === 0) {
     console.log("lineNumber:", lineNumber);
   }
 
@@ -42,6 +42,8 @@ ArachneRegulon.prototype.parseLine = function (brokenTabs, lineNumber, line) {
       this.network_id = Networks.insert({
         name: this.networkName,
         version: this.networkVersion,
+        collaborations: [this.submission.options.collaboration_label],
+        type: "arachne_regulon"
       });
     }
   }
@@ -67,7 +69,7 @@ ArachneRegulon.prototype.parseLine = function (brokenTabs, lineNumber, line) {
         network_id: this.network_id,
         label: target_label,
         type: "gene",
-      });
+      }, {});
 
       NetworkInteractions.insert({
         network_id: this.network_id,
@@ -79,13 +81,12 @@ ArachneRegulon.prototype.parseLine = function (brokenTabs, lineNumber, line) {
     }
   }
 
-  if (allWeights.length === 0) {
-    throw "No interactions specified for source gene " + source_label;
-  }
-
   // TODO: add in gene label checking/mapping
 
   if (this.wranglerPeek) {
+    if (allWeights.length === 0) {
+      throw "No interactions specified for source gene " + source_label;
+    }
     var mean_weight = _.reduce(allWeights, function(memo, num) {
       return memo + num;
     }, 0) / allWeights.length;
@@ -107,7 +108,7 @@ ArachneRegulon.prototype.parseLine = function (brokenTabs, lineNumber, line) {
       network_id: this.network_id,
       label: source_label,
       type: "gene",
-    });
+    }, {});
   }
 };
 
