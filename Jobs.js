@@ -23,7 +23,7 @@ Jobs.attachSchema(new SimpleSchema({
 
   timeout_length: {
     type: Number,
-    defaultValue: 10000,
+    defaultValue: 2 * 60 * 1000,
   },
 
   // optional fields
