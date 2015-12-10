@@ -1,11 +1,11 @@
-RectangularFile = function (options) {
+TabSeperatedFile = function (options) {
   FileHandler.call(this, options);
 };
 
-RectangularFile.prototype = Object.create(FileHandler.prototype);
-RectangularFile.prototype.constructor = RectangularFile;
+TabSeperatedFile.prototype = Object.create(FileHandler.prototype);
+TabSeperatedFile.prototype.constructor = TabSeperatedFile;
 
-RectangularFile.prototype.parse = function () {
+TabSeperatedFile.prototype.parse = function () {
   var self = this;
   return new Q.Promise(function (resolve, reject) {
     // lineBufferMax chosen based on crude yet effective testing:
@@ -23,7 +23,6 @@ RectangularFile.prototype.parse = function () {
     var lineBufferPromises = [];
     var allLinePromises = [];
     var lineNumber = 0; // starts at one (no really, I promise!)
-    var tabCount;
 
     // store stream in a variable so it can be paused
     var bylineStream = byLine(self.blob.createReadStream("blobs"));
@@ -52,17 +51,6 @@ RectangularFile.prototype.parse = function () {
           }, reject));
       }
 
-      // make sure file is rectangular
-      if (tabCount === undefined) {
-        tabCount = brokenTabs.length;
-      } else if (tabCount !== brokenTabs.length) {
-        var message = "File not rectangular. " +
-            "Line " + thisLineNumber + " has " + brokenTabs.length +
-            " columns, not " + tabCount;
-        deferred.reject(message);
-        return; // don't parse that line
-      }
-
       // I guess we should parse the line eventually...
       Q.resolve(self.parseLine.call(self, brokenTabs, thisLineNumber, line))
         .then(deferred.resolve)
@@ -81,10 +69,26 @@ RectangularFile.prototype.parse = function () {
   });
 };
 
-RectangularFile.prototype.parseLine = function (brokenTabs, lineNumber, line) {
+TabSeperatedFile.prototype.parseLine = function (brokenTabs, lineNumber, line) {
   throw "parseLine function not overridden";
 };
 
-RectangularFile.prototype.endOfFile = function () {
+TabSeperatedFile.prototype.endOfFile = function () {
   console.log("endOfFile not overridden");
+};
+
+TabSeperatedFile.prototype.ensureRectangular = function (brokenTabs, lineNumber) {
+  if (!lineNumber) { // TODO: should just have a test for this?
+    throw new Error("lineNumber not defined");
+  }
+
+  if (this.tabCount === undefined) {
+    this.tabCount = brokenTabs.length;
+  } else {
+    if (this.tabCount !== brokenTabs.length) {
+      throw "File not rectangular. " +
+          "Line " + lineNumber + " has " + brokenTabs.length +
+          " columns, not " + this.tabCount;
+    }
+  }
 };

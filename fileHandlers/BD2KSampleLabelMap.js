@@ -1,25 +1,33 @@
 // TODO: change this to accept options instead of wrangler_file_id
 function BD2KSampleLabelMap (wrangler_file_id) {
-  RectangularFile.call(this, {
+  TabSeperatedFile.call(this, {
     wrangler_file_id: wrangler_file_id
   });
 
-  // // TODO: remove this
-  // this.setSubmissionType.call(this, 'gene_expression');
+  // TODO: remove this (?)
+  this.setSubmissionType.call(this, 'gene_expression');
 }
 
-BD2KSampleLabelMap.prototype = Object.create(RectangularFile.prototype);
+BD2KSampleLabelMap.prototype = Object.create(TabSeperatedFile.prototype);
 BD2KSampleLabelMap.prototype.constructor = BD2KSampleLabelMap;
 
-BD2KSampleLabelMap.prototype.parseLine =
-    function (brokenTabs, lineNumber, line) {
+BD2KSampleLabelMap.prototype.parseLine = function (brokenTabs, lineNumber, line) {
+  this.ensureRectangular.call(this, brokenTabs, lineNumber);
+
   if (this.wranglerPeek) {
     if (lineNumber === 1) {
-      this.headerLine = brokenTabs;
+      this.sampleNameIndex = brokenTabs.indexOf("Sample_Name");
+      if (this.sampleNameIndex === -1) {
+        throw "Can't find column with header \"Sample_Name\"";
+      }
+
+      this.sampleNameUUID = brokenTabs.indexOf("Sample_UUID");
+      if (this.sampleNameUUID === -1) {
+        throw "Can't find column with header \"Sample_UUID\"";
+      }
     } else {
-      var original_sample_label =
-          brokenTabs[this.headerLine.indexOf("Sample_Name")];
-      var sample_uuid = brokenTabs[this.headerLine.indexOf("Sample_UUID")];
+      var original_sample_label = brokenTabs[this.sampleNameIndex];
+      var sample_uuid = brokenTabs[this.sampleNameUUID];
 
       // some error checking
       if (!original_sample_label) {

@@ -38,3 +38,12 @@ Expression2Insert = function(gene, sampleLabels, expressionStrings) {
 getNormalizationLabel = function (slug) {
   return GeneExpression.simpleSchema().schema()['values.' + slug].label;
 };
+
+validateNumberStrings = function (strings) {
+  for (var index in strings) {
+    var valueString = strings[index];
+    if (isNaN(valueString)) {
+      throw "Non-numerical expression value: " + valueString;
+    }
+  }
+};

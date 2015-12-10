@@ -1,5 +1,5 @@
 RectangularGeneAssay = function (options) {
-  RectangularFile.call(this, options);
+  TabSeperatedFile.call(this, options);
 
   var self = this;
 
@@ -39,17 +39,8 @@ RectangularGeneAssay = function (options) {
   console.log("done loading valid genes");
 };
 
-RectangularGeneAssay.prototype = Object.create(RectangularFile.prototype);
+RectangularGeneAssay.prototype = Object.create(TabSeperatedFile.prototype);
 RectangularGeneAssay.prototype.constructor = RectangularGeneAssay;
-
-RectangularGeneAssay.prototype.validateNumberStrings = function (strings) {
-  for (var index in strings) {
-    var valueString = strings[index];
-    if (isNaN(valueString)) {
-      throw "Error: Non-numerical expression value: " + valueString;
-    }
-  }
-};
 
 // RectangularGeneAssay.prototype.CopyNumberInsert =
 //     function(gene_label, sampleLabels, expressionStrings) {

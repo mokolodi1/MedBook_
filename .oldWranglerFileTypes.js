@@ -397,7 +397,7 @@ if (Meteor.isServer) {
 // function BasicClinical (wrangler_file_id, isSimulation) {
 //   RectangularGeneExpression.call(this, wrangler_file_id, isSimulation);
 // }
-// BasicClinical.prototype = Object.create(RectangularFile.prototype);
+// BasicClinical.prototype = Object.create(TabSeperatedFile.prototype);
 // BasicClinical.schema = new SimpleSchema({
 //   // TODO:
 // });

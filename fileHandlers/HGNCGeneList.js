@@ -1,13 +1,12 @@
 // TODO: specify options instead of a blob_id
 function HGNCGeneList (blob_id) {
   console.log("blob_id:", blob_id);
-  RectangularFile.call(this, {
+  TabSeperatedFile.call(this, {
     blob_id: blob_id
   });
 }
 
-HGNCGeneList.prototype =
-    Object.create(RectangularFile.prototype);
+HGNCGeneList.prototype = Object.create(TabSeperatedFile.prototype);
 HGNCGeneList.prototype.constructor = HGNCGeneList;
 
 // '"first", second, "third"' ==> ["first", "second", "third"]
@@ -37,11 +36,12 @@ function makeArray(obj, attribute) {
   }
 }
 
-HGNCGeneList.prototype.parseLine =
-    function (brokenTabs, lineNumber, line) {
+HGNCGeneList.prototype.parseLine = function (brokenTabs, lineNumber, line) {
   if (lineNumber % 1000 === 0) {
     console.log("lineNumber:", lineNumber);
   }
+
+  this.ensureRectangular.call(this, brokenTabs, lineNumber);
 
   if (lineNumber === 1) { // header line
     // TODO: add non-required-ness

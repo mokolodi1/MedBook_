@@ -23,11 +23,12 @@ Package.onUse(function(api) {
   api.addFiles([
     'fileHandlers/globals.js',
     'fileHandlers/FileHandler.js',
-    'fileHandlers/RectangularFile.js',
+    'fileHandlers/TabSeperatedFile.js',
     'fileHandlers/RectangularGeneAssay.js',
     'fileHandlers/BD2KGeneExpression.js',
     'fileHandlers/BD2KSampleLabelMap.js',
     'fileHandlers/HGNCGeneList.js',
+    'fileHandlers/ArachneRegulon.js',
   ], 'server');
   api.export('WranglerFileTypes', 'server');
 

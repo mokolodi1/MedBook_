@@ -62,6 +62,8 @@ BD2KGeneExpression.prototype.parseLine =
     console.log("lineNumber:", lineNumber);
   }
 
+  this.ensureRectangular.call(this, brokenTabs, lineNumber);
+
   if (lineNumber === 1) { // header line
     if (brokenTabs.length !== 2) {
       throw "Expected 2 column tab file, got " + brokenTabs.length +
@@ -155,7 +157,7 @@ BD2KGeneExpression.prototype.parseLine =
     }
 
     var expressionString = brokenTabs[1];
-    this.validateNumberStrings.call(this, [expressionString]);
+    validateNumberStrings([expressionString]);
 
     if (this.wranglerPeek) {
       this.gene_count++;

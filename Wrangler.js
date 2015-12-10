@@ -133,4 +133,12 @@ Wrangler.fileTypes = {
   BD2KSampleLabelMap: {
     description: "Sample label mapping (BD2K pipeline)",
   },
+  ArachneRegulon: {
+    description: "Arachne generated adjacancy matrix weighted by mutual information",
+    schema: new SimpleSchema({
+      network_name: {
+        type: String, // TODO: add some kind of autocomplete
+      },
+    }),
+  }
 };

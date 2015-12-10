@@ -37,6 +37,7 @@ WranglerFiles.attachSchema(new SimpleSchema({
     type: String,
     allowedValues: [
       "gene_expression",
+      "network",
     ],
     optional: true,
   },
@@ -100,6 +101,8 @@ WranglerDocuments.attachSchema(new SimpleSchema({
       "sample_normalization",
       "gene_expression_data_exists",
       "sample_label_map",
+      "new_network",
+      "source_level_interactions",
     ],
   },
   contents: {
