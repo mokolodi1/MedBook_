@@ -65,12 +65,12 @@ ArachneRegulon.prototype.parseLine = function (brokenTabs, lineNumber, line) {
     if (this.wranglerPeek) {
       allWeights.push(parsedWeight);
     } else {
-      NetworkElements.upsert({
+      var ne = {
         network_id: this.network_id,
-        label: target_label,
-        type: "gene",
-      }, {});
-
+        label: source_label,
+        type: "gene"
+      };
+      NetworkElements.upsert(ne, {$set:ne});
       NetworkInteractions.insert({
         network_id: this.network_id,
         source_label: source_label,
@@ -104,11 +104,12 @@ ArachneRegulon.prototype.parseLine = function (brokenTabs, lineNumber, line) {
       },
     });
   } else {
-    NetworkElements.upsert({
+    var ne = {
       network_id: this.network_id,
       label: source_label,
       type: "gene",
-    }, {});
+    };
+    NetworkElements.upsert(ne, {$set:ne});
   }
 };
 
