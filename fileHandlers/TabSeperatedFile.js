@@ -17,8 +17,8 @@ TabSeperatedFile.prototype.parse = function () {
     // This is so that any variables in the header are set for future
     // lines if needed.
     // ex. this.sample_label requires a mongodb lookup for UUID mapping
-    var lineBufferMax = 1;
-    var headerLineCount = 1;
+    var lineBufferMax = 50;
+    var headerLineCount = 10;
 
     var lineBufferPromises = [];
     var allLinePromises = [];
