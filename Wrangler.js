@@ -88,6 +88,15 @@ Wrangler.wrangleSampleLabel = function (text) {
 
     return "DTB-" + numbers + proIfPro + replicateNumber;
   }
+
+  // http://regexr.com/3cd38
+  // ex. "RNA150410JA_10_1-1-15_M12_EV_05uM_JQ1"
+  var ohsu = text.match(
+    /RNA[0-9]{6}JA_[0-9]{1,2}_([0-9]{1,2}-){2}[0-9]{1,2}_([A-Za-z0-9-]+_?){3,5}/g
+  );
+  if (ohsu) {
+    return ohsu[0];
+  }
 };
 
 Wrangler.findSampleLabel = function (possibleOptions) {
