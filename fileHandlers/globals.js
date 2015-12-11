@@ -22,7 +22,7 @@ Expression2Insert = function(gene, sampleLabels, expressionStrings) {
     setObject[exceptNormalization + normalization] = parsedValue;
 
     if (normalization === 'quantile_counts') {
-      var log2Value = Math.log(parsedValue) / Math.LN2;
+      var log2Value = Math.log(parsedValue + 1) / Math.LN2;
       setObject[exceptNormalization + 'rsem_quan_log2'] = log2Value;
     }
   }
