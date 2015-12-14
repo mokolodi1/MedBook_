@@ -39,5 +39,4 @@ Meteor.publish('collaborations', function() {
     return Collaborations.find( {isUnlisted: false} );
   }
 
-
 });
