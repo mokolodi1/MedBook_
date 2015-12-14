@@ -83,5 +83,5 @@ Package.onTest(function (api) {
   api.use('clinical:verification');
   api.use('clinical:collaborations');
 
-  api.addFiles('tests/collaborations.js');
+  api.addFiles('tests/tinytests/collaborations.js');
 });
