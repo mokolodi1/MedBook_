@@ -33,9 +33,21 @@ meteor add clinical:collaborations
 #### Collaboration Object
 
 ````js
-  Collaboration.get();
-  Collaboration.getChecked(properties);
-  Collaboration.getChecked(getUrl);
+  Collaboration.save();
+  Collaboration.getSelected(properties);
+  Collaboration.getUrl(collaborationName);
+  Collaboration.removeCollaborator(emailAddress);
+  Collaboration.addCollaborator(emailAddress);
+  Collaboration.addCollaborators(collaboratorsInputString);
+  Collaboration.addAdministrator(emailAddress);
+  Collaboration.addAdministrators(administratorsInputString);
+  Collaboration.removeAdministrator(emailAddress);
+  Collaboration.hasMember(emailAddress);
+  Collaboration.hasApplied(emailAddress);
+  Collaboration.getNames();
+  Collaboration.getCollaboratorsGraph();
+  Collaboration.getExtendedGraph();
+  Collaboration.getCollaborators();
 
   // client
   Collaboration.create();
