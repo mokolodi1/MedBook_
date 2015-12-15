@@ -48,10 +48,8 @@ validateNumberStrings = function (strings) {
   }
 };
 
-Expression2.rawCollection().ensureIndex({
+Moko.ensureIndex(Expression2, {
   gene: 1,
   Study_ID: 1,
   Collaborations: 1,
-}, function (error, result) {
-  console.log("ensuredIndex:", result);
 });

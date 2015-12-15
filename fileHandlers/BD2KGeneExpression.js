@@ -196,12 +196,10 @@ BD2KGeneExpression.prototype.endOfFile = function () {
 
 WranglerFileTypes.BD2KGeneExpression = BD2KGeneExpression;
 
-GeneExpression.rawCollection().ensureIndex({
+Moko.ensureIndex(GeneExpression, {
   study_label: 1,
   collaborations: 1,
   gene_label: 1,
   sample_label: 1,
   baseline_progression: 1,
-}, function (error, result) {
-  console.log("ensuredIndex:", result);
 });

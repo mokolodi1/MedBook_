@@ -1,4 +1,3 @@
-WranglerSubmissions = new Meteor.Collection("wrangler_submissions");
 WranglerSubmissions.attachSchema(new SimpleSchema({
   user_id: { type: Meteor.ObjectID },
   date_created: { type: Date },
@@ -28,7 +27,6 @@ var fileTypeNames = _.map(Wrangler.fileTypes, function (value, file_type) {
     description: value.description,
   };
 });
-WranglerFiles = new Meteor.Collection("wrangler_files");
 WranglerFiles.attachSchema(new SimpleSchema({
   submission_id: { type: Meteor.ObjectID },
   user_id: { type: Meteor.ObjectID },
@@ -88,11 +86,14 @@ WranglerFiles.attachSchema(new SimpleSchema({
   // uncompressed_from_id: { type: Meteor.ObjectID, optional: true },
 }));
 
-WranglerDocuments = new Meteor.Collection("wrangler_documents");
 WranglerDocuments.attachSchema(new SimpleSchema({
   submission_id: { type: Meteor.ObjectID },
   user_id: { type: Meteor.ObjectID },
-  wrangler_file_id: { type: Meteor.ObjectID, optional: true },
+  wrangler_file_ids: {
+    type: [Meteor.ObjectID],
+    optional: true,
+    defaultValue: [],
+  },
   document_type: {
     type: String,
     allowedValues: [
@@ -153,7 +154,8 @@ function makePermissions (collection) {
   };
 }
 
-WranglerDocuments.allow(makePermissions(WranglerDocuments));
+// NOTE: don't want people to be able to add just any document
+// WranglerDocuments.allow(makePermissions(WranglerDocuments));
 WranglerFiles.allow(makePermissions(WranglerFiles));
 
 getCollectionByName = function(collectionName) {

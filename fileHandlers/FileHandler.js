@@ -48,11 +48,14 @@ FileHandler.prototype.parse = function() {
 ** by this FileHandler and then inserts into WranglerDocuments.
 */
 FileHandler.prototype.insertWranglerDocument = function (typeAndContents) {
-  WranglerDocuments.insert(_.extend({
+  WranglerDocuments.upsert(_.extend({
     submission_id: this.blob.metadata.submission_id,
     user_id: this.blob.metadata.user_id,
-    wrangler_file_id: this.wranglerFile._id,
-  }, typeAndContents));
+  }, typeAndContents), {
+    $addToSet: {
+      wrangler_file_ids: this.wranglerFile._id,
+    }
+  });
 };
 
 FileHandler.prototype.blobAsString = function() {
@@ -76,3 +79,10 @@ FileHandler.prototype.setSubmissionType = function (submission_type) {
     }
   });
 };
+
+Moko.ensureIndex(WranglerFiles, {
+  submission_id: 1,
+  user_id: 1,
+  document_type: 1,
+  contents: 1,
+});

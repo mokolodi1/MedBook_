@@ -1,6 +1,6 @@
 Package.describe({
   name: 'medbook:wrangler-collections',
-  version: '0.0.8',
+  version: '0.0.9',
   // Brief, one-line summary of the package.
   summary: 'Collections and such relating to Wrangler',
   // URL to the Git repository containing the source code for this package.
@@ -18,7 +18,15 @@ Package.onUse(function(api) {
   api.use('underscore');
   api.use('aldeed:simple-schema@1.3.3');
   api.use('aldeed:autoform@5.5.1');
+  api.use("mokolodi1:helpers@0.0.3");
   api.use('medbook:primary-collections@0.0.8');
+
+  // the definitions are loaded first so that indexes can be ensured in
+  // the file handlers
+  api.addFiles('wranglerCollectionsDefinitions.js');
+  api.export('WranglerSubmissions');
+  api.export('WranglerDocuments');
+  api.export('WranglerFiles');
 
   api.addFiles([
     'fileHandlers/globals.js',
@@ -35,15 +43,9 @@ Package.onUse(function(api) {
   api.addFiles('Wrangler.js'); // both
   api.export('Wrangler');
 
+  api.addFiles('wranglerCollectionsSchemas.js');
+
   // api.addFiles('WranglerFileTypes.js');
-
-  // api.addFiles('createIndexes.js', 'server');
-
-
-  api.addFiles('wrangler-collections.js');
-  api.export('WranglerSubmissions');
-  api.export('WranglerDocuments');
-  api.export('WranglerFiles');
 
   // TODO: remove this when we move the schemas to collections
   api.export('getCollectionByName');
