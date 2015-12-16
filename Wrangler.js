@@ -99,15 +99,6 @@ Wrangler.wrangleSampleLabel = function (text) {
   }
 };
 
-Wrangler.findSampleLabel = function (possibleOptions) {
-  for (var i in possibleOptions) {
-    var label = Wrangler.wrangleSampleLabel(possibleOptions[i]);
-    if (label) {
-      return label;
-    }
-  }
-};
-
 // for BD2KGeneExpression schema
 var geneExpressionValues = GeneExpression.simpleSchema().schema();
 var normalizationKeys = _.filter(Object.keys(geneExpressionValues),
