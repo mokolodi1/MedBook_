@@ -14,7 +14,8 @@ GeneExpression.attachSchema(new SimpleSchema({
   gene_label: { type: String },
 
   sample_label: { type: String },
-  baseline_progression: {
+
+  baseline_progression: { // NOTE: this field will be deprecated soon
     type: String,
     allowedValues: [
       "baseline",
