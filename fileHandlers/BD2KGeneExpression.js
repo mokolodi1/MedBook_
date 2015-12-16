@@ -89,6 +89,21 @@ BD2KGeneExpression.prototype.parseLine =
       throw "Could not parse sample label from header line or file name";
     }
 
+    // TODO: add wrangler documents warning the user of this insertion
+    console.log("before the study update stuff");
+    if (!this.wranglerPeek) {
+      console.log("this.submission.options.study_label:", this.submission.options.study_label);
+
+      var ret = Studies.update({
+        id: this.submission.options.study_label
+      }, {
+        $addToSet: {
+          Sample_IDs: this.sampleLabel
+        }
+      });
+      console.log("ret:", ret);
+    }
+
     if (this.sampleLabel.match(/pro/gi)) {
       this.baseline_progression = 'progression';
     } else {
@@ -101,7 +116,6 @@ BD2KGeneExpression.prototype.parseLine =
       this.gene_count = 0;
 
       // check to see if gene_expression already has data like this
-
       // TODO: search for collaboration, study
       // NOTE: currently any user can figure out if a certain
       //       sample has gene_expression data.
