@@ -52,7 +52,8 @@ Package.onUse(function (api) {
     'server/accounts.js',
     'server/helpers.js',
     'server/methods.js',
-    'server/publications.js'
+    'server/publications.js',
+    //'server/methods.initialization.js'
   ], ['server']);
 
 
@@ -68,7 +69,8 @@ Package.onUse(function (api) {
 
 
 Package.onTest(function (api) {
-  api.versionsFrom('1.2.0.2');
+  api.versionsFrom('1.1.0.2');
+
   api.use('meteor-platform@1.2.2');
 
   api.use('mongo@1.1.0');
