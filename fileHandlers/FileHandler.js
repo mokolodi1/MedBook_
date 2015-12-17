@@ -80,7 +80,7 @@ FileHandler.prototype.setSubmissionType = function (submission_type) {
   });
 };
 
-Moko.ensureIndex(WranglerFiles, {
+Moko.ensureIndex(WranglerDocuments, {
   submission_id: 1,
   user_id: 1,
   document_type: 1,

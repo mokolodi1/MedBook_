@@ -57,6 +57,25 @@ function wrangleSampleThenUUID (text) {
   return wrangledLabel;
 }
 
+function getSetObject (parsedValue) {
+  // calculate autoValues ;)
+  var values = {};
+  values[this.wranglerFile.options.normalization] = parsedValue;
+  var onlyValues = {
+    values: values
+  };
+  GeneExpression.simpleSchema().clean(onlyValues);
+  values = onlyValues.values; // squeaky clean
+
+  var setObject = {};
+  var keys = Object.keys(onlyValues.values);
+  _.each(keys, function (normalization) {
+    setObject['values.' + normalization] = values[normalization];
+  });
+
+  return setObject;
+}
+
 RectangularGeneExpression.prototype.parseLine =
     function (brokenTabs, lineNumber, line) {
   if (lineNumber % 1000 === 0) {
@@ -153,6 +172,7 @@ RectangularGeneExpression.prototype.parseLine =
         };
         query["values." + normalization] = { $exists: true };
 
+        // TODO: add index for findOne
         if (GeneExpression.findOne(query)) {
           this.insertWranglerDocument.call(this, {
             document_type: 'gene_expression_data_exists',
@@ -207,25 +227,42 @@ RectangularGeneExpression.prototype.parseLine =
       this.gene_count++;
     } else {
       // insert into GeneExpression
+      var bulk = GeneExpression.rawCollection().initializeUnorderedBulkOp();
       for (index in expressionStrings) {
         sample_label = this.sampleLabels[index];
 
-        var setObject = {};
-        setObject['values.' + this.wranglerFile.options.normalization] =
-            parseFloat(expressionStrings[index]);
+        // TODO: check on simpleschema (merge setObject, query)
 
-        GeneExpression.upsert({
+        var setObject = getSetObject.call(this, parseFloat(expressionStrings[index]));
+        bulk.find({
           study_label: this.submission.options.study_label,
           collaborations: [this.submission.options.collaboration_label],
           gene_label: mappedGeneLabel,
           sample_label: sample_label,
-        }, {
+        }).upsert().updateOne({
           $set: setObject
         });
       }
+
+      var deferred = Q.defer();
+      bulk.execute(function (error, result) {
+        if (error) {
+          deferred.reject(error);
+        } else {
+          deferred.resolve(result);
+        }
+      });
+      return deferred.promise;
     }
   }
 };
+
+Moko.ensureIndex(GeneExpression, {
+  study_label: 1,
+  collaborations: 1,
+  gene_label: 1,
+  sample_label: 1,
+});
 
 RectangularGeneExpression.prototype.endOfFile = function () {
   if (this.wranglerPeek) {
@@ -248,11 +285,3 @@ RectangularGeneExpression.prototype.endOfFile = function () {
 };
 
 WranglerFileTypes.RectangularGeneExpression = RectangularGeneExpression;
-
-Moko.ensureIndex(GeneExpression, {
-  study_label: 1,
-  collaborations: 1,
-  gene_label: 1,
-  sample_label: 1,
-  baseline_progression: 1,
-});
