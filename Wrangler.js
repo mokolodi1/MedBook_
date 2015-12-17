@@ -99,6 +99,25 @@ Wrangler.wrangleSampleLabel = function (text) {
   }
 };
 
+Wrangler.wranglePatientLabel = function (text) {
+  // NOTE: this is the only place with study-specific code
+  var matches;
+
+  // WCDT
+  matches = text.match(/DTB-[0-9]{3}/);
+  if (matches) {
+    return matches[0];
+  }
+
+  // TCGA
+  matches = text.match(/TCGA-[A-Z0-9]{2}-[A-Z0-9]{1,4}/g);
+  if (matches) {
+    return matches[0];
+  }
+
+  return text;
+};
+
 // for RectangularGeneExpression schema
 var geneExpressionValues = GeneExpression.simpleSchema().schema();
 var normalizationKeys = _.filter(Object.keys(geneExpressionValues),

@@ -98,14 +98,38 @@ RectangularGeneExpression.prototype.parseLine =
 
     // add the sample_labels to the studies table if necessary
 
-    // TODO: add wrangler documents warning the user of this insertion
+    // TODO: add wrangler documents warning the user of inserting into
+    // both studies and Clinical_Info
     if (!this.wranglerPeek) {
+      var patientLabels = [];
+
+      for (index in this.sampleLabels) {
+        var Sample_ID = this.sampleLabels[index];
+        var Patient_ID = Wrangler.wranglePatientLabel(Sample_ID);
+
+        var clinical = {
+          CRF: "Clinical_Info",
+          Study_ID: this.submission.options.study_label,
+          Patient_ID: Patient_ID,
+          Sample_ID: Sample_ID,
+        };
+
+        CRFs.upsert(clinical, {
+          $set: clinical
+        });
+
+        patientLabels.push(Patient_ID);
+      }
+
       Studies.update({
         id: this.submission.options.study_label
       }, {
         $addToSet: {
           Sample_IDs: {
             $each: this.sampleLabels
+          },
+          Patient_IDs: {
+            $each: patientLabels
           }
         }
       });

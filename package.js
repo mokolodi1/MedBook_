@@ -1,6 +1,6 @@
 Package.describe({
   name: 'medbook:wrangler-collections',
-  version: '0.0.11',
+  version: '0.0.12',
   // Brief, one-line summary of the package.
   summary: 'Collections and such relating to Wrangler',
   // URL to the Git repository containing the source code for this package.
@@ -27,6 +27,11 @@ Package.onUse(function(api) {
   api.export('WranglerSubmissions');
   api.export('WranglerDocuments');
   api.export('WranglerFiles');
+
+  // TODO: move this to primary-collections once I get the validation code
+  // from Ted
+  api.addFiles("collections.js");
+  api.export("CRFs");
 
   api.addFiles([
     'fileHandlers/globals.js',

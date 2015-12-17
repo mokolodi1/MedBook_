@@ -35,6 +35,12 @@ Expression2Insert = function(gene, sampleLabels, expressionStrings) {
   });
 };
 
+Moko.ensureIndex(Expression2, {
+  gene: 1,
+  Study_ID: 1,
+  Collaborations: 1,
+});
+
 getNormalizationLabel = function (slug) {
   return GeneExpression.simpleSchema().schema()['values.' + slug].label;
 };
@@ -47,9 +53,3 @@ validateNumberStrings = function (strings) {
     }
   }
 };
-
-Moko.ensureIndex(Expression2, {
-  gene: 1,
-  Study_ID: 1,
-  Collaborations: 1,
-});
