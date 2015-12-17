@@ -99,7 +99,7 @@ Wrangler.wrangleSampleLabel = function (text) {
   }
 };
 
-// for BD2KGeneExpression schema
+// for RectangularGeneExpression schema
 var geneExpressionValues = GeneExpression.simpleSchema().schema();
 var normalizationKeys = _.filter(Object.keys(geneExpressionValues),
     function (value) {
@@ -118,8 +118,8 @@ var options = _.map(allowedValues, function (normalization) {
 });
 
 Wrangler.fileTypes = {
-  BD2KGeneExpression: {
-    description: "Single patient gene expression (BD2K pipeline)",
+  RectangularGeneExpression: {
+    description: "Rectangular matrix gene expression",
     schema: new SimpleSchema({
       normalization: {
         type: String,

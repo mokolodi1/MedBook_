@@ -33,7 +33,7 @@ Package.onUse(function(api) {
     'fileHandlers/FileHandler.js',
     'fileHandlers/TabSeperatedFile.js',
     'fileHandlers/RectangularGeneAssay.js',
-    'fileHandlers/BD2KGeneExpression.js',
+    'fileHandlers/RectangularGeneExpression.js',
     'fileHandlers/BD2KSampleLabelMap.js',
     'fileHandlers/HGNCGeneList.js',
     'fileHandlers/ArachneRegulon.js',

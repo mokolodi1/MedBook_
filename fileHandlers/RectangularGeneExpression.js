@@ -1,5 +1,5 @@
 // TODO: change this to accept options instead of wrangler_file_id
-function BD2KGeneExpression (wrangler_file_id) {
+function RectangularGeneExpression (wrangler_file_id) {
   RectangularGeneAssay.call(this, {
     wrangler_file_id: wrangler_file_id
   });
@@ -7,9 +7,9 @@ function BD2KGeneExpression (wrangler_file_id) {
   this.setSubmissionType.call(this, 'gene_expression');
 }
 
-BD2KGeneExpression.prototype =
+RectangularGeneExpression.prototype =
     Object.create(RectangularGeneAssay.prototype);
-BD2KGeneExpression.prototype.constructor = BD2KGeneExpression;
+RectangularGeneExpression.prototype.constructor = RectangularGeneExpression;
 
 function wrangleSampleUUID (text) {
   var mappingContents;
@@ -57,7 +57,7 @@ function wrangleSampleThenUUID (text) {
   return wrangledLabel;
 }
 
-BD2KGeneExpression.prototype.parseLine =
+RectangularGeneExpression.prototype.parseLine =
     function (brokenTabs, lineNumber, line) {
   if (lineNumber % 1000 === 0) {
     console.log("lineNumber:", lineNumber);
@@ -75,26 +75,25 @@ BD2KGeneExpression.prototype.parseLine =
     }
 
     // wrangle sample labels
-
     var wrangledLabel;
-    this.sampleLabels = new Array(brokenTabs.length - 1);
+    this.sampleLabels = [];
     for (var column = 1; column < brokenTabs.length; column++) {
+
       wrangledLabel = wrangleSampleThenUUID.call(this, brokenTabs[column]);
+
+      // if it's a 2-column file, also check the file name for the sample label
+      if (brokenTabs.length === 2 && !wrangledLabel) {
+        wrangledLabel = wrangleSampleThenUUID.call(this, this.blob.original.name);
+        if (!wrangledLabel) {
+          throw "Could not parse sample label from header line or file name";
+        }
+      }
+
       if (!wrangledLabel) {
         throw "Could not parse sample label in column " + column;
       }
-      this.sampleLabels[column - 1] = wrangledLabel;
+      this.sampleLabels.push(wrangledLabel);
     }
-
-    // special case: look in the file name if it's a 2-column file
-    if (brokenTabs.length === 2 && !this.sampleLabels[0]) {
-      wrangledLabel = wrangleSampleThenUUID.call(this, this.blob.original.name);
-      if (!wrangledLabel) {
-        throw "Could not parse sample label from header line or file name";
-      }
-      this.sampleLabels[0] = wrangledLabel;
-    }
-
     console.log("this.sampleLabels:", this.sampleLabels);
 
     // add the sample_labels to the studies table if necessary
@@ -126,7 +125,7 @@ BD2KGeneExpression.prototype.parseLine =
         sample_label = this.sampleLabels[index];
 
         var query = {
-          sample_label: this.sampleLabel,
+          sample_label: sample_label,
         };
         query["values." + normalization] = { $exists: true };
 
@@ -189,14 +188,13 @@ BD2KGeneExpression.prototype.parseLine =
 
         var setObject = {};
         setObject['values.' + this.wranglerFile.options.normalization] =
-            parseFloat(expressionString);
+            parseFloat(expressionStrings[index]);
 
         GeneExpression.upsert({
           study_label: this.submission.options.study_label,
           collaborations: [this.submission.options.collaboration_label],
           gene_label: mappedGeneLabel,
           sample_label: sample_label,
-          baseline_progression: this.baseline_progression,
         }, {
           $set: setObject
         });
@@ -205,7 +203,7 @@ BD2KGeneExpression.prototype.parseLine =
   }
 };
 
-BD2KGeneExpression.prototype.endOfFile = function () {
+RectangularGeneExpression.prototype.endOfFile = function () {
   if (this.wranglerPeek) {
     var normalization = this.wranglerFile.options.normalization;
     var normalization_description = getNormalizationLabel(normalization);
@@ -225,7 +223,7 @@ BD2KGeneExpression.prototype.endOfFile = function () {
   }
 };
 
-WranglerFileTypes.BD2KGeneExpression = BD2KGeneExpression;
+WranglerFileTypes.RectangularGeneExpression = RectangularGeneExpression;
 
 Moko.ensureIndex(GeneExpression, {
   study_label: 1,
