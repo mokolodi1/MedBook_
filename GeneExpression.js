@@ -15,13 +15,6 @@ GeneExpression.attachSchema(new SimpleSchema({
 
   sample_label: { type: String },
 
-  baseline_progression: { // NOTE: this field will be deprecated soon
-    type: String,
-    allowedValues: [
-      "baseline",
-      "progression",
-    ],
-  },
   values: {
     type: new SimpleSchema({
       quantile_counts: _.extend({
@@ -50,5 +43,5 @@ GeneExpression.attachSchema(new SimpleSchema({
       }, normalValue),
     }),
     optional: true, // simply because collection2 can't do upserts
-  }
+  },
 }));
