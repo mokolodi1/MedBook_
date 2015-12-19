@@ -207,7 +207,7 @@ describe('clinical:collaborations - getCollaboratorsGraph()', function () {
       // ============================================================================
       // INITIALIZE STUDIES
 
-      //Studies = new Mongo.Collection('studies');
+      var Studies = new Mongo.Collection('studies');
 
       Studies.upsert({
         _id: "neuroblastoma"
@@ -219,7 +219,7 @@ describe('clinical:collaborations - getCollaboratorsGraph()', function () {
           "description": "Nifty Neuroblastoma Study",
           "public": false,
           "citation": "unpublished",
-          "collaborations": [],
+          "collaborations": ["ckcc"],
           "tables": [],
           "Questionnaires": [
             "Patient_Enrollment_form",
@@ -238,7 +238,7 @@ describe('clinical:collaborations - getCollaboratorsGraph()', function () {
           "description": "Lazy Lymphoma Study",
           "public": false,
           "citation": "unpublished",
-          "collaborations": [],
+          "collaborations": ["ucsf"],
           "tables": [],
           "Questionnaires": [
             "Demographics",
@@ -256,7 +256,7 @@ describe('clinical:collaborations - getCollaboratorsGraph()', function () {
           "description": "Grumpy Granuloma Study",
           "public": false,
           "citation": "unpublished",
-          "collaborations": [],
+          "collaborations": ["ucsf"],
           "tables": [],
           "Questionnaires": [
             "Patient_Enrollment_form",
@@ -277,7 +277,7 @@ describe('clinical:collaborations - getCollaboratorsGraph()', function () {
           "description": "Cranky Carcinoma Study",
           "public": false,
           "citation": "unpublished",
-          "collaborations": [],
+          "collaborations": ["genomics"],
           "tables": [],
           "Questionnaires": [
             "RNASeq_completion_form",
@@ -295,7 +295,7 @@ describe('clinical:collaborations - getCollaboratorsGraph()', function () {
           "description": "Meloncholy Melanoma Study",
           "public": false,
           "citation": "unpublished",
-          "collaborations": [],
+          "collaborations": ["ucla"],
           "tables": [],
           "Questionnaires": [
             "RNASeq_completion_form",
@@ -313,7 +313,7 @@ describe('clinical:collaborations - getCollaboratorsGraph()', function () {
           "description": "Sappy Sarcoma Study",
           "public": false,
           "citation": "unpublished",
-          "collaborations": [],
+          "collaborations": ["ucsc"],
           "tables": [],
           "Questionnaires": [
             "Laser_Capture_Microdissection",
@@ -332,7 +332,7 @@ describe('clinical:collaborations - getCollaboratorsGraph()', function () {
           "description": "Patient Satisfaction Study",
           "public": false,
           "citation": "unpublished",
-          "collaborations": [],
+          "collaborations": ["wcdt"],
           "tables": [],
           "Questionnaires": [
             "Patient_Satisfaction"
@@ -407,16 +407,6 @@ describe('clinical:collaborations - getCollaboratorsGraph()', function () {
       expect(collaborations.length).to.equal(6);
     });
   });
-  it('Confirm studies are initialized', function () {
-    return server.wait(1000, "until studies are loaded", function () {
-    // return server.execute(function () {
-      return Studies.find().fetch();
-    }).then(function (studies){
-      expect(studies.length).to.equal(7);
-    });
-  });
-
-
 
 
   it("Collaboration.getCollaborators()", function () {
