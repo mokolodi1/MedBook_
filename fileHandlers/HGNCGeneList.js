@@ -94,22 +94,9 @@ HGNCGeneList.prototype.parseLine = function (brokenTabs, lineNumber, line) {
 };
 
 HGNCGeneList.prototype.endOfFile = function () {
-  // if (this.wranglerPeek) {
-  //   var normalization_description = GeneExpression.simpleSchema()
-  //       .schema()['values.' + this.wranglerFile.options.normalization].label;
-  //
-  //   this.insertWranglerDocument.call(this, {
-  //     document_type: 'sample_normalization',
-  //     contents: {
-  //       sample_label: this.sample_label,
-  //       normalization_description: normalization_description,
-  //       gene_count: this.gene_count,
-  //     }
-  //   });
-  // }
-
-  return Q({genes_created: this.genesCreated});
+  return {
+    genesCreated: this.genesCreated
+  };
 };
 
-// TODO: move to medbook:file-handlers, rename to FileHandlers
 WranglerFileTypes.HGNCGeneList = HGNCGeneList;

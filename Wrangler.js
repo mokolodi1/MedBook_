@@ -123,7 +123,8 @@ var geneExpressionValues = GeneExpression.simpleSchema().schema();
 var normalizationKeys = _.filter(Object.keys(geneExpressionValues),
     function (value) {
   // check if it has 'values.' at the beginning
-  return value.slice(0, 7) === 'values.';
+  return value.slice(0, 7) === 'values.' &&
+      value !== "values.quantile_counts_log";
 });
 var allowedValues = _.map(normalizationKeys, function (value) {
   // 'values.raw_counts' ==> 'raw_counts'
