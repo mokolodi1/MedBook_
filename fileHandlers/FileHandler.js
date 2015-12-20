@@ -20,10 +20,18 @@ FileHandler = function (options) {
     }
 
     this.wranglerPeek = this.submission.status === "editing";
+
+    // remove wrangler documents from the last peek
     if (this.wranglerPeek) {
-      // remove all of the WranglerDocuments created last time
+      WranglerDocuments.update({
+        submission_id: this.submission._id,
+        wrangler_file_ids: options.wrangler_file_id,
+      }, {
+        $pull: { wrangler_file_ids: options.wrangler_file_id }
+      }, {multi: true});
       WranglerDocuments.remove({
-        wrangler_file_id: options.wrangler_file_id,
+        submission_id: this.submission._id,
+        wrangler_file_ids: {$size: 0},
       });
     }
   } else if (options.blob_id) {

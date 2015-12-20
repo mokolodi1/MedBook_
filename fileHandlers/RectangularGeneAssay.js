@@ -42,40 +42,140 @@ RectangularGeneAssay = function (options) {
 RectangularGeneAssay.prototype = Object.create(TabSeperatedFile.prototype);
 RectangularGeneAssay.prototype.constructor = RectangularGeneAssay;
 
-// RectangularGeneAssay.prototype.CopyNumberInsert =
-//     function(gene_label, sampleLabels, expressionStrings) {
-//   // do some checks
-//   if (sampleLabels.length !== expressionStrings.length) {
-//     throw "Internal error: sampleLabels not the same length as " +
-//         " expressionStrings!";
-//   }
-//
-//   var bulk = CopyNumber.rawCollection().initializeUnorderedBulkOp();
-//
-//   for (var index in sampleLabels) {
-//     var baseline_progression = "baseline";
-//     if (sampleLabels[index].match(/pro/gi)) {
-//       baseline_progression = "progression";
-//     }
-//
-//     bulk.insert({
-//       study_label: this.submission.options.study_label,
-//       collaborations: [this.submission.options.collaboration_label],
-//       sample_label: sampleLabels[index],
-//       baseline_progression: baseline_progression,
-//       normalization: "gistic",
-//       gene_label: gene_label,
-//       value: parseFloat(expressionStrings[index]),
-//     });
-//   }
-//
-//   var deferred = Q.defer();
-//   bulk.execute(function (error, result) {
-//     if (error) {
-//       deferred.reject(error);
-//     } else {
-//       deferred.resolve();
-//     }
-//   });
-//   return deferred.promise;
-// };
+function wrangleSampleUUID (text) {
+  var mappingContents;
+  var submissionIds = [];
+
+  WranglerDocuments.find({
+    user_id: this.wranglerFile.user_id,
+    document_type: "sample_label_map",
+  }).forEach(function (wranglerDoc) {
+    // check if sample_uuid in text
+    if (text.indexOf(wranglerDoc.contents.sample_uuid) >= 0) {
+      if (mappingContents &&
+          !_.isEqual(wranglerDoc.contents, mappingContents)) {
+        throw "Two sample label mappings for same UUID: " +
+            wranglerDoc.contents.sample_uuid;
+      }
+
+      submissionIds.push(wranglerDoc.submission_id);
+      mappingContents = wranglerDoc.contents;
+    }
+  });
+
+  if (mappingContents) {
+    // only add it if it's not already in this submission
+    if (submissionIds.indexOf(this.wranglerFile.submission_id) === -1) {
+      // NOTE: the wrangler_file_id for this will not be the mapping file,
+      // so it will be deleted when the file is deleted
+      this.insertWranglerDocument.call(this, {
+        document_type: "sample_label_map",
+        contents: mappingContents,
+      });
+    }
+
+    return mappingContents.sample_label;
+  }
+}
+
+function wrangleSampleThenUUID (text) {
+  var wrangledLabel = Wrangler.wrangleSampleLabel(text);
+
+  if (!wrangledLabel) {
+    wrangledLabel = wrangleSampleUUID.call(this, text);
+  }
+
+  return wrangledLabel;
+}
+
+// sets this.sampleLabels
+RectangularGeneAssay.prototype.setSampleLabels = function (brokenTabs) {
+  var wrangledLabel;
+  this.sampleLabels = [];
+  for (var column = 1; column < brokenTabs.length; column++) {
+
+    wrangledLabel = wrangleSampleThenUUID.call(this, brokenTabs[column]);
+
+    // if it's a 2-column file, also check the file name for the sample label
+    if (brokenTabs.length === 2 && !wrangledLabel) {
+      wrangledLabel = wrangleSampleThenUUID.call(this, this.blob.original.name);
+      if (!wrangledLabel) {
+        throw "Could not parse sample label from header line or file name";
+      }
+    }
+
+    if (!wrangledLabel) {
+      throw "Could not parse sample label in column " + column;
+    }
+    this.sampleLabels.push(wrangledLabel);
+  }
+};
+
+// Ensures all sample labels have a record in Clinical_Info and are also in
+// the study. Also makes sure all Patient_IDs are in the study.
+// TODO: add wrangler documents warning the user of inserting into
+// both studies and Clinical_Info
+RectangularGeneAssay.prototype.ensureClinicalExists = function () {
+  var patientLabels = [];
+
+  for (var index in this.sampleLabels) {
+    var Sample_ID = this.sampleLabels[index];
+    var Patient_ID = Wrangler.wranglePatientLabel(Sample_ID);
+
+    var clinical = {
+      CRF: "Clinical_Info",
+      Study_ID: this.submission.options.study_label,
+      Patient_ID: Patient_ID,
+      Sample_ID: Sample_ID,
+    };
+
+    CRFs.upsert(clinical, {
+      $set: clinical
+    });
+
+    patientLabels.push(Patient_ID);
+  }
+
+  Studies.update({
+    id: this.submission.options.study_label
+  }, {
+    $addToSet: {
+      Sample_IDs: {
+        $each: this.sampleLabels
+      },
+      Patient_IDs: {
+        $each: patientLabels
+      }
+    }
+  });
+};
+
+// map a gene label into HUGO namespace
+RectangularGeneAssay.prototype.mapGeneLabel = function (originalGeneLabel) {
+  var mappedGeneLabel = this.geneMapping[originalGeneLabel];
+
+  // make sure the user knows we're ignoring/mapping the gene if applicable
+  if (!mappedGeneLabel) {
+    if (this.wranglerPeek) {
+      this.insertWranglerDocument.call(this, {
+        document_type: 'ignored_genes',
+        contents: {
+          gene: originalGeneLabel
+        }
+      });
+    }
+    return; // ignore the gene
+  } else if (mappedGeneLabel !== originalGeneLabel) {
+    if (this.wranglerPeek) {
+      this.insertWranglerDocument.call(this, {
+        document_type: 'mapped_genes',
+        contents: {
+          gene_in_file: originalGeneLabel,
+          mapped_gene: mappedGeneLabel
+        }
+      });
+    }
+  }
+
+  return mappedGeneLabel;
+};

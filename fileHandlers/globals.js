@@ -53,3 +53,13 @@ validateNumberStrings = function (strings) {
     }
   }
 };
+
+errorResultResolver = function (deferred) {
+  return function (error, result) {
+    if (error) {
+      deferred.reject(error);
+    } else {
+      deferred.resolve(result);
+    }
+  };
+};
