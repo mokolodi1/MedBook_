@@ -14,6 +14,7 @@ Jobs.attachSchema(new SimpleSchema({
       "RunViper",
       "ExportFile",
       "ReloadGenesCollection",
+      "GeneTranscriptMappings",
     ],
   },
   user_id: { type: Meteor.ObjectID },
@@ -84,7 +85,7 @@ function onlyAdminCollaboration (user_id, doc) {
 
   return user.profile &&
       user.profile.collaborations instanceof Array &&
-      user.profile.collaborations.indexOf("admin") >= 0 &&
+      user.profile.collaborations.indexOf("Admin") >= 0 &&
       doc.status === "creating" || doc.status === "waiting";
 }
 
