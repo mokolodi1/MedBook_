@@ -41,8 +41,8 @@ Moko.ensureIndex(Expression2, {
   Collaborations: 1,
 });
 
-getNormalizationLabel = function (slug) {
-  return GeneExpression.simpleSchema().schema()['values.' + slug].label;
+getNormalizationLabel = function (collection, slug) {
+  return collection.simpleSchema().schema()['values.' + slug].label;
 };
 
 validateNumberStrings = function (strings) {

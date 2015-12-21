@@ -2,6 +2,8 @@ WranglerFileTypes = {};
 
 FileHandler = function (options) {
   console.log("options:", options);
+
+  // TODO: move these out of options and into functions
   if (options.wrangler_file_id) {
     this.wranglerFile = WranglerFiles.findOne(options.wrangler_file_id);
     if (!this.wranglerFile) {

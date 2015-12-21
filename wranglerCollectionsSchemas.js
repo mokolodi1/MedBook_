@@ -35,7 +35,9 @@ WranglerFiles.attachSchema(new SimpleSchema({
     type: String,
     allowedValues: [
       "gene_expression",
+      "isoform_expression",
       "network",
+      "metadata",
     ],
     optional: true,
   },
@@ -100,10 +102,12 @@ WranglerDocuments.attachSchema(new SimpleSchema({
       "mapped_genes",
       "ignored_genes",
       "sample_normalization",
-      "gene_expression_data_exists",
+      "expression_data_exists",
       "sample_label_map",
       "new_network",
       "source_level_interactions",
+      "ignored_transcript",
+      "transcript_version_mismatch",
     ],
   },
   contents: {

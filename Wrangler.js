@@ -136,29 +136,36 @@ var options = _.map(allowedValues, function (normalization) {
     label: geneExpressionValues['values.' + normalization].label,
   };
 });
+// use a doc so that it doesn't have a clone to the same object (I don't think)
+var expressionSchemaDoc = {
+  normalization: {
+    type: String,
+    allowedValues: allowedValues,
+    autoform: {
+      options: options,
+    },
+  }
+};
 
 Wrangler.fileTypes = {
   RectangularGeneExpression: {
     description: "Rectangular matrix gene expression",
-    schema: new SimpleSchema({
-      normalization: {
-        type: String,
-        allowedValues: allowedValues,
-        autoform: {
-          options: options,
-        },
-      }
-    }),
+    schema: new SimpleSchema(expressionSchemaDoc),
+  },
+  RectangularIsoformExpression: {
+    description: "Rectangular matrix isoform expression",
+    schema: new SimpleSchema(expressionSchemaDoc),
   },
   BD2KSampleLabelMap: {
     description: "Sample label mapping (BD2K pipeline)",
   },
-  ArachneRegulon: {
-    description: "Arachne generated adjacancy matrix weighted by mutual information",
-    schema: new SimpleSchema({
-      network_name: {
-        type: String, // TODO: add some kind of autocomplete
-      },
-    }),
-  }
+  // // NOTE: people can still run it, but the client picklist won't show it
+  // ArachneRegulon: {
+  //   description: "Arachne generated adjacancy matrix weighted by mutual information",
+  //   schema: new SimpleSchema({
+  //     network_name: {
+  //       type: String, // TODO: add some kind of autocomplete
+  //     },
+  //   }),
+  // }
 };

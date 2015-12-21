@@ -4,6 +4,7 @@ function GeneTranscriptMappings (blob_id) {
   TabSeperatedFile.call(this, {
     blob_id: blob_id
   });
+  console.log("lksjdfjlksdf");
 }
 
 GeneTranscriptMappings.prototype = Object.create(TabSeperatedFile.prototype);
@@ -17,12 +18,12 @@ GeneTranscriptMappings.prototype.parseLine = function (brokenTabs, lineNumber, l
   this.ensureRectangular.call(this, brokenTabs, lineNumber);
 
   if (lineNumber === 1) { // header line
-    this.transcriptLabelIndex = brokenTabs.indexOf("Transcript ID")
+    this.transcriptLabelIndex = brokenTabs.indexOf("Transcript ID");
     if (this.transcriptLabelIndex === -1) {
       throw 'Could not find header column "Transcript ID"';
     }
 
-    this.geneLabelIndex = brokenTabs.indexOf("Gene name")
+    this.geneLabelIndex = brokenTabs.indexOf("Gene name");
     if (this.geneLabelIndex === -1) {
       throw 'Could not find header column "Gene name"';
     }
@@ -31,9 +32,14 @@ GeneTranscriptMappings.prototype.parseLine = function (brokenTabs, lineNumber, l
     this.unableToMap = 0;
   } else {
     var label = brokenTabs[this.geneLabelIndex];
+    var labelAndVersion = brokenTabs[this.transcriptLabelIndex].split(".");
+    var newTranscript = {
+      label: labelAndVersion[0],
+      version: parseInt(labelAndVersion[1], 10),
+    };
     var modifier = {
       $addToSet: {
-        transcript_labels: brokenTabs[this.transcriptLabelIndex].split(".")[0]
+        transcripts: newTranscript
       }
     };
 

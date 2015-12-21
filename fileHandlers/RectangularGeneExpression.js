@@ -4,12 +4,29 @@ function RectangularGeneExpression (wrangler_file_id) {
     wrangler_file_id: wrangler_file_id
   });
 
+  this.loadGeneMappings.call(this);
+
   this.setSubmissionType.call(this, 'gene_expression');
 }
 
 RectangularGeneExpression.prototype =
     Object.create(RectangularGeneAssay.prototype);
 RectangularGeneExpression.prototype.constructor = RectangularGeneExpression;
+
+RectangularGeneExpression.prototype.checkDataExists = function (sample_label) {
+  var query = {
+    sample_label: sample_label,
+  };
+  query["values." + this.wranglerFile.options.normalization] = { $exists: true };
+
+  // TODO: add index for findOne
+  if (GeneExpression.findOne(query)) {
+    return true;
+  }
+};
+
+RectangularGeneExpression.prototype.getNormalizationLabel =
+    _.partial(getNormalizationLabel, GeneExpression);
 
 function getSetObject (parsedValue) {
   // calculate autoValues ;)
@@ -38,54 +55,21 @@ RectangularGeneExpression.prototype.parseLine =
 
   this.ensureRectangular.call(this, brokenTabs, lineNumber);
 
-  var index; // used in loops
-  var sample_label; // used multiple times
-
   if (lineNumber === 1) { // header line
-    if (brokenTabs.length < 2) {
-      throw "Expected 2+ column tab file, got " + brokenTabs.length +
-          " column tab file";
-    }
+    this.verifyAtLeastTwoColumns.call(this, brokenTabs);
 
     // wrangle sample labels
     this.setSampleLabels.call(this, brokenTabs);
     console.log("this.sampleLabels:", this.sampleLabels);
 
     // add the sample_labels to the studies table if necessary
-    if (!this.wranglerPeek) {
-      this.ensureClinicalExists.call(this);
-    }
+    this.ensureClinicalExists.call(this);
 
     if (this.wranglerPeek) {
-      this.gene_count = 0;
+      this.line_count = 0;
 
-      // check to see if gene_expression already has data like this
-
-      // TODO: search for collaboration, study
-      // NOTE: currently any user can figure out if a certain
-      //       sample has gene_expression data.
-      var normalization = this.wranglerFile.options.normalization;
-      var normalizationLabel = getNormalizationLabel(normalization);
-      for (index in this.sampleLabels) {
-        sample_label = this.sampleLabels[index];
-
-        var query = {
-          sample_label: sample_label,
-        };
-        query["values." + normalization] = { $exists: true };
-
-        // TODO: add index for findOne
-        if (GeneExpression.findOne(query)) {
-          this.insertWranglerDocument.call(this, {
-            document_type: 'gene_expression_data_exists',
-            contents: {
-              file_name: this.blob.original.name,
-              sample_label: sample_label,
-              normalization: normalizationLabel,
-            }
-          });
-        }
-      }
+      // check to see if collection already has data like this
+      this.alertDataExists.call(this);
     }
   } else { // rest of file
     var expressionStrings = brokenTabs.slice(1);
@@ -100,17 +84,17 @@ RectangularGeneExpression.prototype.parseLine =
 
     // map the gene based on synonymes and previouses
     var gene_label = this.mapGeneLabel.call(this, brokenTabs[0]);
-    if (!gene_label) {
-      return; // ignore the gene
+    if (!gene_label) { // ignore the gene if it doesn't map
+      return;
     }
 
     if (this.wranglerPeek) {
-      this.gene_count++;
+      this.line_count++;
     } else {
       // insert into GeneExpression
       var bulk = GeneExpression.rawCollection().initializeUnorderedBulkOp();
-      for (index in expressionStrings) {
-        sample_label = this.sampleLabels[index];
+      for (var index in expressionStrings) {
+        var sample_label = this.sampleLabels[index];
 
         // TODO: check on simpleschema (merge setObject, query)
 
@@ -138,25 +122,5 @@ Moko.ensureIndex(GeneExpression, {
   gene_label: 1,
   sample_label: 1,
 });
-
-RectangularGeneExpression.prototype.endOfFile = function () {
-  if (this.wranglerPeek) {
-    var normalization = this.wranglerFile.options.normalization;
-    var normalization_description = getNormalizationLabel(normalization);
-
-    for (var index in this.sampleLabels) {
-      var sample_label = this.sampleLabels[index];
-
-      this.insertWranglerDocument.call(this, {
-        document_type: 'sample_normalization',
-        contents: {
-          sample_label: sample_label,
-          normalization_description: normalization_description,
-          gene_count: this.gene_count,
-        }
-      });
-    }
-  }
-};
 
 WranglerFileTypes.RectangularGeneExpression = RectangularGeneExpression;

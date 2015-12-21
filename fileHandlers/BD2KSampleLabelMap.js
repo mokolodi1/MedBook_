@@ -5,7 +5,7 @@ function BD2KSampleLabelMap (wrangler_file_id) {
   });
 
   // TODO: remove this (?)
-  this.setSubmissionType.call(this, 'gene_expression');
+  this.setSubmissionType.call(this, 'metadata');
 }
 
 BD2KSampleLabelMap.prototype = Object.create(TabSeperatedFile.prototype);

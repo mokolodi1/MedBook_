@@ -1,22 +1,29 @@
 RectangularGeneAssay = function (options) {
   TabSeperatedFile.call(this, options);
+};
 
+RectangularGeneAssay.prototype = Object.create(TabSeperatedFile.prototype);
+RectangularGeneAssay.prototype.constructor = RectangularGeneAssay;
+
+RectangularGeneAssay.prototype.loadGeneMapping = function () {
   var self = this;
 
   this.geneMapping = {}; // for use in validateGeneLabel
   function addGeneMapping (attribute, newValue) {
     if (self.geneMapping[attribute]) {
-      console.log('geneMapping[' + attribute + '] overridden from ' +
-          self.geneMapping[attribute] + ' to ' + newValue);
+      // NOTE: should never be run (see condition in addMappingsInArray)
+      console.log("geneMapping[" + attribute + "] overridden from " +
+          self.geneMapping[attribute] + " to " + newValue);
     }
 
-    // prefer mapping gene ==> gene
+    // prefer mapping gene ==> gene (rather than synonym ==> gene)
+    // see order of loading below
     if (self.geneMapping[attribute] !== attribute) {
       self.geneMapping[attribute] = newValue;
     }
   }
 
-  console.log('loading valid genes');
+  console.log("loading valid genes");
 
   // this.geneMapping["asdf"] = "asdf"
   Genes.find({}).forEach(function (doc) {
@@ -39,8 +46,31 @@ RectangularGeneAssay = function (options) {
   console.log("done loading valid genes");
 };
 
-RectangularGeneAssay.prototype = Object.create(TabSeperatedFile.prototype);
-RectangularGeneAssay.prototype.constructor = RectangularGeneAssay;
+RectangularGeneAssay.prototype.loadTranscriptMapping = function () {
+  var self = this;
+  this.transcriptMapping = {};
+
+  function addTranscriptMapping(transcriptLabel, geneObject) {
+    self.transcriptMapping[transcriptLabel] = geneObject;
+  }
+
+  console.log("loading valid transcripts...");
+  Genes.find({}, {
+      fields: { gene_label: 1, transcripts: 1 }
+    }).forEach(function (doc) {
+      _.each(doc.transcripts, function (transcript) {
+        self.transcriptMapping[transcript.label] = doc;
+      });
+    });
+  console.log("done loading valid transcripts");
+};
+
+RectangularGeneAssay.prototype.verifyAtLeastTwoColumns = function (brokenTabs) {
+  if (brokenTabs.length < 2) {
+    throw "Expected 2+ column tab file, got " + brokenTabs.length +
+        " column tab file";
+  }
+};
 
 function wrangleSampleUUID (text) {
   var mappingContents;
@@ -116,38 +146,67 @@ RectangularGeneAssay.prototype.setSampleLabels = function (brokenTabs) {
 // TODO: add wrangler documents warning the user of inserting into
 // both studies and Clinical_Info
 RectangularGeneAssay.prototype.ensureClinicalExists = function () {
-  var patientLabels = [];
+  if (!this.wranglerPeek) {
+    var patientLabels = [];
 
-  for (var index in this.sampleLabels) {
-    var Sample_ID = this.sampleLabels[index];
-    var Patient_ID = Wrangler.wranglePatientLabel(Sample_ID);
+    for (var index in this.sampleLabels) {
+      var Sample_ID = this.sampleLabels[index];
+      var Patient_ID = Wrangler.wranglePatientLabel(Sample_ID);
 
-    var clinical = {
-      CRF: "Clinical_Info",
-      Study_ID: this.submission.options.study_label,
-      Patient_ID: Patient_ID,
-      Sample_ID: Sample_ID,
-    };
+      var clinical = {
+        CRF: "Clinical_Info",
+        Study_ID: this.submission.options.study_label,
+        Patient_ID: Patient_ID,
+        Sample_ID: Sample_ID,
+      };
 
-    CRFs.upsert(clinical, {
-      $set: clinical
-    });
+      CRFs.upsert(clinical, {
+        $set: clinical
+      });
 
-    patientLabels.push(Patient_ID);
-  }
-
-  Studies.update({
-    id: this.submission.options.study_label
-  }, {
-    $addToSet: {
-      Sample_IDs: {
-        $each: this.sampleLabels
-      },
-      Patient_IDs: {
-        $each: patientLabels
-      }
+      patientLabels.push(Patient_ID);
     }
-  });
+
+    Studies.update({
+      id: this.submission.options.study_label
+    }, {
+      $addToSet: {
+        Sample_IDs: {
+          $each: this.sampleLabels
+        },
+        Patient_IDs: {
+          $each: patientLabels
+        }
+      }
+    });
+  }
+};
+
+RectangularGeneAssay.prototype.checkDataExists = function (sample_label) {
+  throw "checkDataExists function not overridden";
+};
+
+// TODO: search for collaboration, study
+// NOTE: currently any user can figure out if a certain
+//       sample has gene_expression data.
+// NOTE: only should be run when this.wranglerPeek true
+RectangularGeneAssay.prototype.alertDataExists = function () {
+  var normalization = this.wranglerFile.options.normalization;
+  var normalizationLabel = this.getNormalizationLabel(normalization);
+  for (var index in this.sampleLabels) {
+    sample_label = this.sampleLabels[index];
+
+    if (this.checkDataExists.call(this, sample_label)) {
+      this.insertWranglerDocument.call(this, {
+        document_type: "expression_data_exists",
+        contents: {
+          file_name: this.blob.original.name,
+          sample_label: sample_label,
+          normalization: normalizationLabel,
+        }
+      });
+    }
+  }
 };
 
 // map a gene label into HUGO namespace
@@ -158,7 +217,7 @@ RectangularGeneAssay.prototype.mapGeneLabel = function (originalGeneLabel) {
   if (!mappedGeneLabel) {
     if (this.wranglerPeek) {
       this.insertWranglerDocument.call(this, {
-        document_type: 'ignored_genes',
+        document_type: "ignored_genes",
         contents: {
           gene: originalGeneLabel
         }
@@ -168,7 +227,7 @@ RectangularGeneAssay.prototype.mapGeneLabel = function (originalGeneLabel) {
   } else if (mappedGeneLabel !== originalGeneLabel) {
     if (this.wranglerPeek) {
       this.insertWranglerDocument.call(this, {
-        document_type: 'mapped_genes',
+        document_type: "mapped_genes",
         contents: {
           gene_in_file: originalGeneLabel,
           mapped_gene: mappedGeneLabel
@@ -178,4 +237,24 @@ RectangularGeneAssay.prototype.mapGeneLabel = function (originalGeneLabel) {
   }
 
   return mappedGeneLabel;
+};
+
+RectangularGeneAssay.prototype.endOfFile = function () {
+  if (this.wranglerPeek) {
+    var normalization = this.wranglerFile.options.normalization;
+    var normalization_description = this.getNormalizationLabel(normalization);
+
+    for (var index in this.sampleLabels) {
+      var sample_label = this.sampleLabels[index];
+
+      this.insertWranglerDocument.call(this, {
+        document_type: "sample_normalization",
+        contents: {
+          sample_label: sample_label,
+          normalization_description: normalization_description,
+          line_count: this.line_count,
+        }
+      });
+    }
+  }
 };
