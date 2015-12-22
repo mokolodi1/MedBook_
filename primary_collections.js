@@ -88,71 +88,9 @@ var patientsSchema = new SimpleSchema({
   }
 });
 
-var geneValuePair = new SimpleSchema({
-  "gene_id": { type: String },
-  "value": { type: Number, decimal: true },
-  "p_value": { type: Number, decimal: true, optional: true },
-  "probability": { type: Number, decimal: true, optional: true }
-});
 
-var signaturesSchema = new SimpleSchema({
-  // update with fields from cohortSignatureSchema (?)
-  // TODO: add training set
-  "description": { type: String }, // ABL1_kinase_viper_v4
-  "type": { type: String },
-  "algorithm": { type: String },
-  "label": { type: String },
-  "contrast_id": { type: Meteor.ObjectID, optional: true },
-  "gene_label": { type: String, optional: true },
-  "dense_weights": { type: [geneValuePair], optional: true },
-  "sparse_weights": { type: [geneValuePair], optional: true },
-  "version": { type: Number, optional: true },
-});
 
-var cohortSignatureSchema = new SimpleSchema({
-  "signature_id": { type: Meteor.ObjectID, optional: true }, // should it be optional?
-  "type": {
-    type: String,
-    allowedValues: [
-      "tf",
-      "kinase",
-      "drug",
-      "mutation",
-      "other",
-    ],
-  },
-  "algorithm": { type: String }, // ex. viper
-  "label": { type: String }, // ex. "KEAP1 non-silent mutation"
-  training_set: { type: String }, // ex. "TCGA LUAD expression non-silent tumors vs. silent tumors"
-  input_data_normalization: {
-    type: String,
-    allowedValues: [
-      "quantile_normalized_counts",
 
-    ],
-  },
-  input_data_type: {
-    type: String,
-    // allowedValues: [
-    //   "RNA-Seq",
-    //   "microarray",
-    //   "RNA-Seq or microarray",
-    //
-    // ],
-  },
-  "samples": { // contains data
-    type: [
-      new SimpleSchema({
-        "sample_label": { type: String },
-        "value": { type: Number, decimal: true },
-        // optional because we might not have a report for it
-        "patient_label": { type: String, optional: true },
-      })
-    ]
-  },
-
-  "gene_label": { type: String, optional: true },
-});
 
 var studyAndCollaboration = new SimpleSchema({
   "study_label": { type: String },
@@ -376,72 +314,10 @@ var qualityControlPlotSchema = new SimpleSchema([
 
 
 
-
-
-var contrastSchema = new SimpleSchema({
-    name: {
-        type: String,
-        label: "Name",
-        max: 200
-    },
-    studyID: {
-        type: String,
-        label: "Study"
-    },
-  collaborations: {
-    type: [String]
-  },
-  group1: {
-      type: String,
-      label: "Group1"
-  },
-  group2: {
-      type: String,
-      label: "Group2"
-  },
-  list1: {
-      type: [String],
-      label: "List of Samples for Group1"
-  },
-  list2: {
-      type: [String],
-      label: "List of Samples for Group2"
-  },
-  userId: {
-    type: String
-  },
-  default_signature_id: {
-    type: Object,
-    blackbox: true,
-    optional: true,
-  },
-  default_signature_name: {
-    type: String,
-    optional: true
-  },
-  default_signature_version: {
-      type: Number,
-      decimal: true,
-      unique: false
-  }
-});
-
-
-
-
-
-
 // declare the collections
 
 Patients = new Meteor.Collection("patients");
 Patients.attachSchema(patientsSchema);
-
-Signatures = new Meteor.Collection("signatures");
-Signatures.attachSchema(signaturesSchema);
-
-// TODO: think about changing to signature_scores
-CohortSignatures = new Meteor.Collection("cohort_signatures");
-CohortSignatures.attachSchema(cohortSignatureSchema);
 
 Mutations = new Meteor.Collection("mutations");
 Mutations.attachSchema(mutationSchema);
@@ -451,11 +327,6 @@ Mutations.attachSchema(mutationSchema);
 //
 // Studies = new Meteor.Collection("studies");
 // Studies.attachSchema(studiesSchema);
-
-
-
-Contrast = new Meteor.Collection('contrast');
-Contrast.attachSchema(contrastSchema);
 
 // not really data
 
