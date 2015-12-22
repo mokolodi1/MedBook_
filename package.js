@@ -28,6 +28,10 @@ Package.onUse(function(api) {
   // api.addFiles('GeneExpressionSummary.js');
   // api.export('GeneExpressionSummary');
 
+  api.addFiles('IsoformExpression.js');
+  api.export('IsoformExpression');
+  // api.export('ExpressionIsoform');
+
   api.addFiles('Jobs.js');
   api.export('Jobs');
 

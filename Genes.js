@@ -16,7 +16,15 @@ Genes.attachSchema(new SimpleSchema({
 
   // TODO: ask Robert why some don't have this defined
   chromosome: { type: String, optional: true }, // ex. 15q11.2
-  transcript_labels: { type: [String], optional: true },
+  transcripts: {
+    type: [
+      new SimpleSchema({
+        label: { type: String },
+        version: { type: Number }
+      })
+    ],
+    optional: true
+  },
 
   locus_type: { type: String },
   locus_group: { type: String },
