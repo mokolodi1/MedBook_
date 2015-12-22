@@ -4,8 +4,7 @@ function RectangularGeneExpression (wrangler_file_id) {
     wrangler_file_id: wrangler_file_id
   });
 
-  this.loadGeneMappings.call(this);
-
+  this.loadGeneMapping.call(this);
   this.setSubmissionType.call(this, 'gene_expression');
 }
 
@@ -58,18 +57,14 @@ RectangularGeneExpression.prototype.parseLine =
   if (lineNumber === 1) { // header line
     this.verifyAtLeastTwoColumns.call(this, brokenTabs);
 
-    // wrangle sample labels
-    this.setSampleLabels.call(this, brokenTabs);
+    this.setSampleLabels.call(this, brokenTabs); // wrangle sample labels
     console.log("this.sampleLabels:", this.sampleLabels);
 
-    // add the sample_labels to the studies table if necessary
-    this.ensureClinicalExists.call(this);
+    this.ensureClinicalExists.call(this); // add the sample_labels to the studies table if necessary
 
     if (this.wranglerPeek) {
       this.line_count = 0;
-
-      // check to see if collection already has data like this
-      this.alertDataExists.call(this);
+      this.alertDataExists.call(this); // check to see if collection already has data like this
     }
   } else { // rest of file
     var expressionStrings = brokenTabs.slice(1);

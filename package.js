@@ -1,6 +1,6 @@
 Package.describe({
   name: 'medbook:wrangler-collections',
-  version: '0.0.14',
+  version: '0.0.15',
   // Brief, one-line summary of the package.
   summary: 'Collections and such relating to Wrangler',
   // URL to the Git repository containing the source code for this package.
@@ -19,7 +19,7 @@ Package.onUse(function(api) {
   api.use('aldeed:simple-schema@1.3.3');
   api.use('aldeed:autoform@5.5.1');
   api.use("mokolodi1:helpers@0.0.3");
-  api.use('medbook:primary-collections@0.0.8');
+  api.use('medbook:primary-collections@0.0.11');
 
   // the definitions are loaded first so that indexes can be ensured in
   // the file handlers

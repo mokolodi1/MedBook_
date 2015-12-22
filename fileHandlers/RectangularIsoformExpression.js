@@ -4,7 +4,6 @@ function RectangularIsoformExpression (wrangler_file_id) {
     wrangler_file_id: wrangler_file_id,
   });
 
-  this.loadGeneMapping.call(this);
   this.loadTranscriptMapping.call(this);
   this.setSubmissionType.call(this, 'isoform_expression');
 }
@@ -58,18 +57,14 @@ RectangularIsoformExpression.prototype.parseLine =
   if (lineNumber === 1) { // header line
     this.verifyAtLeastTwoColumns.call(this, brokenTabs);
 
-    // wrangle sample labels
-    this.setSampleLabels.call(this, brokenTabs);
+    this.setSampleLabels.call(this, brokenTabs); // wrangle sample labels
     console.log("this.sampleLabels:", this.sampleLabels);
 
-    // add the sample_labels to the studies table if necessary
-    this.ensureClinicalExists.call(this);
+    this.ensureClinicalExists.call(this); // add the sample_labels to the studies table if necessary
 
     if (this.wranglerPeek) {
       this.line_count = 0;
-
-      // check to see if collection already has data like this
-      this.alertDataExists.call(this);
+      this.alertDataExists.call(this); // check to see if collection already has data like this
     }
   } else { // rest of file
     var expressionStrings = brokenTabs.slice(1);
@@ -77,68 +72,40 @@ RectangularIsoformExpression.prototype.parseLine =
 
     // try to find the gene based on the transcript label
     var geneTranscript = brokenTabs[0].split("/");
-    var originalGeneLabel = geneTranscript[0];
+    var gene_in_file = geneTranscript[0];
     var splitIsoformId = geneTranscript[1].split(".");
     var transcript_label = splitIsoformId[0];
+    // NOTE: I thought about mapping the isoform version (bumping it to match)
+    // what we have on file for the gene), but that kind of mapping is
+    // unnecessary. Splitting the transcript_label and _version up into two
+    // fields means that queries can merge versions if they choose to do so.
+    var transcript_version = parseInt(splitIsoformId[1], 10);
 
-    // update expression2 isoform equivalent
-    // NOTE: this will be deprecated soon
-    if (!this.wranglerPeek) {
-      // insert into expression2 without mapping or anything
-      // console.log("need to write expression_isoform insert method");
-      // Expression2Insert.call(this, brokenTabs[0], this.sampleLabels, expressionStrings);
-    }
+    // // update expression2 isoform equivalent
+    // // NOTE: this will be deprecated soon
+    // if (!this.wranglerPeek) {
+    //   // insert into expression2 without mapping or anything
+    //   // console.log("need to write expression_isoform insert method");
+    //   // Expression2Insert.call(this, brokenTabs[0], this.sampleLabels, expressionStrings);
+    // }
 
     var associatedGene = this.transcriptMapping[transcript_label];
-
-    if (!associatedGene) {
-      if (this.wranglerPeek) {
-        var geneKnown = this.geneMapping[originalGeneLabel] ? "known" : "unknown";
-        this.insertWranglerDocument.call(this, {
-          document_type: "ignored_transcript",
-          contents: {
-            transcript_id: geneTranscript[1],
-            gene_label: originalGeneLabel,
-            gene_known: geneKnown,
-          }
-        });
-      }
-      // don't continue: ignore
-      return;
+    var gene_label; // NOTE: gene_label only set when it's a valid gene
+    if (associatedGene) {
+      gene_label = associatedGene.gene_label;
     }
+    // TODO: perhaps use the gene information in the file and put it through
+    // this.geneMapping
 
-    // NOTE: we're using associatedGene.gene_label as the right one
-    if (associatedGene.gene_label !== originalGeneLabel) {
-      if (this.wranglerPeek) {
-        this.insertWranglerDocument.call(this, {
-          document_type: "mapped_genes",
-          contents: {
-            gene_in_file: originalGeneLabel,
-            mapped_gene: associatedGene.gene_label,
-          }
-        });
-      }
+    if (this.wranglerPeek && gene_label && gene_label !== gene_in_file) {
+      this.insertWranglerDocument.call(this, {
+        document_type: "mapped_genes",
+        contents: {
+          gene_in_file: gene_in_file,
+          mapped_gene: gene_label,
+        }
+      });
     }
-
-    var transcript_version = _.findWhere(associatedGene.transcripts, {
-      label: transcript_label
-    }).version;
-    if (this.wranglerPeek) {
-      var version_in_file = parseInt(splitIsoformId[1], 10);
-      if (transcript_version !== version_in_file) {
-        this.insertWranglerDocument.call(this, {
-          document_type: "transcript_version_mismatch",
-          contents: {
-            transcript_label: transcript_label,
-            version_in_file: version_in_file,
-            transcript_version: transcript_version,
-          }
-        });
-      }
-    }
-
-    // TODO: check if transcriptVersion matches isoform matched in associatedGene,
-    // otherwise add a document
 
     if (this.wranglerPeek) {
       this.line_count++;
@@ -150,15 +117,23 @@ RectangularIsoformExpression.prototype.parseLine =
 
         // TODO: check on simpleschema (merge setObject, query)
 
-        var setObject = getSetObject.call(this, parseFloat(expressionStrings[index]));
-        bulk.find({
+        var query = {
           study_label: this.submission.options.study_label,
           collaborations: [this.submission.options.collaboration_label],
-          gene_label: associatedGene.gene_label,
           transcript_label: transcript_label,
           transcript_version: transcript_version,
           sample_label: sample_label,
-        }).upsert().updateOne({
+        };
+        // so that gene_label does not exist, not set to null (simpleschema
+        // changes undefined values to null)
+        if (gene_label) {
+          _.extend(query, {
+            gene_label: gene_label
+          });
+        }
+
+        var setObject = getSetObject.call(this, parseFloat(expressionStrings[index]));
+        bulk.find(query).upsert().updateOne({
           $set: setObject
         });
       }
@@ -170,7 +145,6 @@ RectangularIsoformExpression.prototype.parseLine =
   }
 };
 
-// TODO: change this
 Moko.ensureIndex(IsoformExpression, {
   study_label: 1,
   collaborations: 1,
