@@ -51,9 +51,8 @@ Wrangler.wrangleSampleLabel = function (text) {
   // match TCGA sample labels (e.g. "TCGA-02-0055-01A-01R-1849-01")
   // https://wiki.nci.nih.gov/display/TCGA/TCGA+barcode
   // http://regexr.com/3c1b7
-  var tcgaRegex =
-  /TCGA-[A-Z0-9]{2}-[A-Z0-9]{1,4}-[0-9]{2}[A-Z]-[0-9]{2}[DGHRTWX]-[A-Z0-9]{4}-[0-9]{2}/g;
-  matches = text.match(tcgaRegex);
+  // whole barcode: /TCGA-[A-Z0-9]{2}-[A-Z0-9]{1,4}-[0-9]{2}[A-Z]-[0-9]{2}[DGHRTWX]-[A-Z0-9]{4}-[0-9]{2}/g;
+  matches = text.match(/TCGA-[A-Z0-9]{2}-[A-Z0-9]{1,4}-[0-9]{2}/g);
   if (matches) {
     return matches[0];
   }
@@ -97,6 +96,18 @@ Wrangler.wrangleSampleLabel = function (text) {
   if (ohsu) {
     return ohsu[0];
   }
+
+  // http://regexr.com/3cfg4
+  var olena = text.match(/POG[0-9]{3}(_|-)[A-Z0-9]{2,4}/g);
+  if (olena) {
+    return olena[0];
+  }
+
+  // http://regexr.com/3cfi0
+  var target = text.match(/TARGET-[0-9]{2}-[A-Z]{6}-[0-9]{2}(.m|.r|)/g);
+  if (target) {
+    return target[0];
+  }
 };
 
 Wrangler.wranglePatientLabel = function (text) {
@@ -115,12 +126,26 @@ Wrangler.wranglePatientLabel = function (text) {
     return matches[0];
   }
 
+  // http://regexr.com/3cfg4 (sample label link)
+  var olena = text.match(/POG[0-9]{3}/g);
+  if (olena) {
+    return olena[0];
+  }
+
+  // see matching sample label regex for examples
+  var target = text.match(/TARGET-[0-9]{2}-[A-Z]{6}/g);
+  if (target) {
+    return target[0];
+  }
+
+  // NOTE: default for now is to return the text with which the function was
+  // called. This function is usually called with the sample label.
   return text;
 };
 
 // for RectangularGeneExpression schema
-var geneExpressionValues = GeneExpression.simpleSchema().schema();
-var normalizationKeys = _.filter(Object.keys(geneExpressionValues),
+var geneExpressionSchema = GeneExpression.simpleSchema().schema();
+var normalizationKeys = _.filter(Object.keys(geneExpressionSchema),
     function (value) {
   // check if it has 'values.' at the beginning
   return value.slice(0, 7) === 'values.' &&
@@ -133,7 +158,7 @@ var allowedValues = _.map(normalizationKeys, function (value) {
 var options = _.map(allowedValues, function (normalization) {
   return {
     value: normalization,
-    label: geneExpressionValues['values.' + normalization].label,
+    label: geneExpressionSchema['values.' + normalization].label,
   };
 });
 // use a doc so that it doesn't have a clone to the same object (I don't think)
