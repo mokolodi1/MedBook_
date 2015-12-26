@@ -52,6 +52,11 @@ Wrangler.wrangleSampleLabel = function (text) {
   // https://wiki.nci.nih.gov/display/TCGA/TCGA+barcode
   // http://regexr.com/3c1b7
   // whole barcode: /TCGA-[A-Z0-9]{2}-[A-Z0-9]{1,4}-[0-9]{2}[A-Z]-[0-9]{2}[DGHRTWX]-[A-Z0-9]{4}-[0-9]{2}/g;
+  //
+  // NOTE: I removed the vial letter from this because if someone reads the
+  // docs, having the vial letter is not necessary. This is not consistant
+  // with what is currently loaded in expression2. When we move to
+  // gene_expression this problem will be gone :)
   matches = text.match(/TCGA-[A-Z0-9]{2}-[A-Z0-9]{1,4}-[0-9]{2}/g);
   if (matches) {
     return matches[0];
@@ -104,7 +109,7 @@ Wrangler.wrangleSampleLabel = function (text) {
   }
 
   // http://regexr.com/3cfi0
-  var target = text.match(/TARGET-[0-9]{2}-[A-Z]{6}-[0-9]{2}(.m|.r|)/g);
+  var target = text.match(/TARGET-[0-9]{2}-[A-Z]{6}-[0-9]{2}/g);
   if (target) {
     return target[0];
   }
@@ -193,4 +198,160 @@ Wrangler.fileTypes = {
   //     },
   //   }),
   // }
+};
+
+// Wrangler.reviewPanels
+
+var ignoredGenesPanel = {
+  name: "ignored_genes",
+  title: "Invalid genes",
+  description: "The following genes were found to be invalid and will be ignored.",
+  css_class: "panel-warning",
+  columns: [
+    { heading: "Gene", attribute: "gene" },
+  ],
+};
+
+var newSampleForStudy = {
+  name: "new_sample_for_study",
+  title: "New sample label",
+  description: "The selected study currently has no record of the "+
+      "following samples. They will be added to the study's list of " +
+      "sample labels.",
+  columns: [
+    // TODO
+    { heading: "Sample", attribute: "sample_label", header_of_row: true },
+    { heading: "Normalization", attribute: "normalization" },
+    { heading: "File name", attribute: "file_name" },
+  ],
+};
+
+var expressionDataExists = {
+  name: "expression_data_exists",
+  title: "Data already exists",
+  description: "The following samples already have expression " +
+      "data in MedBook. It's possible you don't have access to their " +
+      "data because you are not in the correct collaborations.",
+  css_class: "panel-danger",
+  columns: [
+    { heading: "Sample", attribute: "sample_label", header_of_row: true },
+    { heading: "Normalization", attribute: "normalization" },
+    { heading: "File name", attribute: "file_name" },
+  ],
+};
+
+var sampleLabelMap = {
+  name: "sample_label_map",
+  title: "Sample label mapping",
+  description: "The following sample labels will be mapped from " +
+      "UUIDs to sample labels.",
+  css_class: "panel-default",
+  columns: [
+    {
+      heading: "MedBook sample label",
+      attribute: "sample_label",
+      header_of_row: true
+    },
+    { heading: "Original sample label", attribute: "original_sample_label" },
+    { heading: "Sample UUID", attribute: "sample_uuid" },
+  ],
+};
+
+var mappedGenes = {
+  name: "mapped_genes",
+  title: "Mapped genes",
+  description: "After mapping from transcript ID to gene name, these" +
+      " genes will be renamed for consistancy within MedBook.",
+  css_class: "panel-default",
+  columns: [
+    { heading: "Gene in file", attribute: "gene_in_file" },
+    { heading: "MedBook gene name", attribute: "mapped_gene" },
+  ],
+};
+
+Wrangler.reviewPanels = {
+  gene_expression: [
+    {
+      name: "sample_normalization",
+      title: "Gene counts",
+      css_class: "panel-default",
+      columns: [
+        {
+          heading: "Sample label",
+          attribute: "sample_label",
+          header_of_row: true
+        },
+        { heading: "Normalization", attribute: "normalization_description" },
+        { heading: "Genes defined", attribute: "line_count" },
+      ],
+    },
+    newSampleForStudy,
+    expressionDataExists,
+    sampleLabelMap,
+    ignoredGenesPanel,
+    {
+      name: "mapped_genes",
+      title: "Mapped genes",
+      description: "These genes are valid but are going to be mapped " +
+          "into MedBook gene namespace.",
+      css_class: "panel-default",
+      columns: [
+        { heading: "Gene in file", attribute: "gene_in_file" },
+        { heading: "MedBook gene name", attribute: "mapped_gene" },
+      ],
+    },
+  ],
+  isoform_expression: [
+    {
+      name: "sample_normalization",
+      title: "Isoform counts",
+      css_class: "panel-default",
+      columns: [
+        {
+          heading: "Sample label",
+          attribute: "sample_label",
+          header_of_row: true
+        },
+        { heading: "Normalization", attribute: "normalization_description" },
+        { heading: "Isoforms defined", attribute: "line_count" },
+      ],
+    },
+    newSampleForStudy,
+    expressionDataExists,
+    sampleLabelMap,
+    mappedGenes,
+  ],
+  network: [
+    {
+      name: "new_network",
+      title: "New networks",
+      description: "I need to write a description",
+      css_class: "panel-default",
+      columns: [
+        { heading: "Network name", attribute: "name", header_of_row: true },
+        { heading: "Version", attribute: "version" },
+        { heading: "File name", attribute: "file_name" },
+      ],
+    },
+    {
+      name: "source_level_interactions",
+      title: "Gene interactions",
+      description: "I need to write a description",
+      css_class: "panel-default",
+      columns: [
+        { heading: "Source gene", attribute: "source_label", header_of_row: true },
+        { heading: "Target count", attribute: "target_count" },
+        { heading: "Minimum weight", attribute: "min_weight" },
+        { heading: "Maximum weight", attribute: "max_weight" },
+        { heading: "Average weight", attribute: "mean_weight" },
+        { heading: "Network name", attribute: "network_name" },
+        { heading: "Network version", attribute: "network_version" },
+      ],
+    },
+    ignoredGenesPanel,
+    mappedGenes,
+  ],
+  metadata: [
+    sampleLabelMap,
+  ],
 };
