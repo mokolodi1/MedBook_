@@ -17,9 +17,10 @@ Signatures.attachSchema(new SimpleSchema({
   user_id: { type: String },
   collaborations: { type: String },
 
-  label: { type: String }, // ex. "ABL1_kinase_viper_v4"
+  // label: { type: String }, // ex. "ABL1_kinase_viper_v4"
   version: { type: Number, optional: true },
 
+  name: { type: String }, // ex. "ABL1_kinase_viper_v4"
   description: { type: String }, // "KEAP1 non-silent mutation"
   gene_label: { type: String, optional: true },
 

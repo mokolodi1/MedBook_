@@ -13,7 +13,6 @@ Contrasts.attachSchema(new SimpleSchema({
   name: { type: String },
   description: { type: String },
 
-  // TODO: ask Robert if I can change the names here
   first_name: { type: String }, // group1
   first_samples: { type: [sampleSchema] }, // list1
   second_name: { type: String }, // group2
