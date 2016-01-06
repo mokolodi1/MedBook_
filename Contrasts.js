@@ -10,7 +10,7 @@ Contrasts.attachSchema(new SimpleSchema({
   user_id: { type: String },
   collaborations: { type: [String] },
 
-  label: { type: String },
+  contrast_label: { type: String },
   version: { type: Number, min: 1 },
   description: { type: String },
 

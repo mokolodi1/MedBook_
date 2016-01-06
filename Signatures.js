@@ -17,8 +17,25 @@ Signatures.attachSchema(new SimpleSchema({
   user_id: { type: String },
   collaborations: { type: String },
 
-  label: { type: String }, // ex. "ABL1_kinase_viper_v4"
-  version: { type: Number, min: 1 },
+  // label, version uniquely identify signature
+  signature_label: { type: String }, // ex. "ABL1_kinase_viper_v4"
+  signature_version: { type: Number, min: 1 },
+  signature_type: {
+    type: String,
+    allowedValues: [
+      "tf",
+      "kinase",
+      "drug",
+      "mutation",
+      "other",
+    ],
+  },
+  signature_algorithm: {
+    type: String,
+    allowedValues: [
+      "viper"
+    ],
+  },
 
   description: { type: String }, // "KEAP1 non-silent mutation"
   gene_label: { type: String, optional: true },
@@ -31,23 +48,6 @@ Signatures.attachSchema(new SimpleSchema({
   lower_name: { type: String, optional: true },
   lower_threshold: { type: String, optional: true },
   lower_training_samples: { type: [sampleSchema], optional: true },
-
-  type: {
-    type: String,
-    allowedValues: [
-      "tf",
-      "kinase",
-      "drug",
-      "mutation",
-      "other",
-    ],
-  },
-  algorithm: {
-    type: String,
-    allowedValues: [
-      "viper"
-    ],
-  },
 
   // NOTE: dense/sparse weights stored as seperate signatures?
   gene_weights: { type: [geneValuePair], optional: true },
