@@ -27,6 +27,8 @@ Package.onUse(function(api) {
   api.addFiles("IsoformExpression.js");
   api.export("IsoformExpression");
   // api.export("ExpressionIsoform"); // old version of IsoformExpression
+  api.addFiles("GeneAnnotation.js");
+  api.export("GeneAnnotation");
 
   // Workbench collections (contrast ==> signature ==> signature scores)
   api.addFiles("Contrasts.js");
