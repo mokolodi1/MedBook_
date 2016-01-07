@@ -204,7 +204,25 @@ Wrangler.fileTypes = {
         label: "Update or create new",
       },
       contrast_label: { type: String, label: "Contrast name" },
-      description: { type: String },
+      description: {
+        type: String,
+        optional: true,
+        custom: function () {
+          if (this.field("update_or_create").value === "create") {
+            // inserts
+            if (!this.operator) {
+              if (!this.isSet || this.value === null || this.value === "") return "required";
+            }
+
+            // updates
+            else if (this.isSet) {
+              if (this.operator === "$set" && this.value === null || this.value === "") return "required";
+              if (this.operator === "$unset") return "required";
+              if (this.operator === "$rename") return "required";
+            }
+          }
+        }
+      },
     }),
   }
   // // NOTE: people can still run it, but the client picklist won't show it
