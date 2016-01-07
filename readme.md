@@ -115,6 +115,11 @@ Given the above security scenario should result in the following record access f
 ![resulting-access](https://raw.githubusercontent.com/clinical-meteor/clinical-collaborations/master/docs/Collaboration%20Scenario%20-%20Resulting%20Access.PNG)
 
 ========================================
+#### Acknowledgements  
+
+This package was funded through the gracious support of the UC Santa Cruz Medbook team.
+
+========================================
 #### Licensing  
 
 MIT.  Use as you will.  
