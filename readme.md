@@ -111,6 +111,7 @@ The clinical:collaborations package uses the following security scenario for tes
 
 ![security-schema](https://raw.githubusercontent.com/clinical-meteor/clinical-collaborations/master/docs/Collaboration%20Scenario.PNG)
 
+![resulting-access](https://raw.githubusercontent.com/clinical-meteor/clinical-collaborations/master/docs/Collaboration%20Scenario%20-%20Resulting%20Access.PNG)
 
 ========================================
 #### Licensing  
