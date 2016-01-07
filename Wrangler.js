@@ -179,11 +179,11 @@ var expressionSchemaDoc = {
 
 Wrangler.fileTypes = {
   RectangularGeneExpression: {
-    description: "Rectangular matrix gene expression",
+    description: "Gene expression rectangular matrix",
     schema: new SimpleSchema(expressionSchemaDoc),
   },
   RectangularIsoformExpression: {
-    description: "Rectangular matrix isoform expression",
+    description: "Isoform expression rectangular matrix",
     // NOTE: uses same normalizations as GeneExpression, which is okay for now
     schema: new SimpleSchema(expressionSchemaDoc),
   },
@@ -200,8 +200,7 @@ Wrangler.fileTypes = {
           "update",
           "create",
         ],
-        defaultValue: "create",
-        label: "Update or create new",
+        label: "Update or create",
       },
       contrast_label: { type: String, label: "Contrast name" },
       description: {
