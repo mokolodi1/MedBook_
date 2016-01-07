@@ -29,6 +29,34 @@ meteor add clinical:collaborations
 }
 ````
 
+
+========================================
+#### Creating a Collaboration
+
+```js
+Collaborations.create({
+  name: "SampleCollab",
+  description: "Lorem ipsum...",
+  isUnlisted: false,
+  requiresAdministratorApproval: false,
+  collaborators: ['janedoe@test.org'],
+  administrators: ['janedoe@test.org'],
+  invitations: [],
+  requests: []
+})
+```
+========================================
+#### Filtering Publications to include Associated Collaborations
+
+```js
+Meteor.publish("studies", function (studyId) {
+  var associatedCollaborations = Meteor.users.findOne({username: "camron"}).getAssociatedCollaborations();
+  return Studies.findOne({
+    collaborations: {$in: associatedCollaborations} 
+  });
+});
+```
+
 ========================================
 #### Collaboration Object
 
