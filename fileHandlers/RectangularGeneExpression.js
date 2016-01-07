@@ -55,12 +55,21 @@ RectangularGeneExpression.prototype.parseLine =
   this.ensureRectangular.call(this, brokenTabs, lineNumber);
 
   if (lineNumber === 1) { // header line
-    this.verifyAtLeastTwoColumns.call(this, brokenTabs);
+    if (brokenTabs.length < 2) {
+      throw "Expected 2+ column tab file, got " + brokenTabs.length +
+          " column tab file";
+    }
 
     this.setSampleLabels.call(this, brokenTabs); // wrangle sample labels
     console.log("this.sampleLabels:", this.sampleLabels);
 
-    this.ensureClinicalExists.call(this); // add the sample_labels to the studies table if necessary
+    // TODO: run all the time when we get the study_label before the peek
+    if (!this.wranglerPeek) {
+      for (var sampleIndex in this.sampleLabels) {
+        var sampleLabel = this.sampleLabels[sampleIndex];
+        ensureClinicalExists.call(this, this.submission.options.study_label, sampleLabel);
+      }
+    }
 
     if (this.wranglerPeek) {
       this.line_count = 0;

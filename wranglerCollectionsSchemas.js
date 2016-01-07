@@ -38,6 +38,7 @@ WranglerFiles.attachSchema(new SimpleSchema({
       "isoform_expression",
       "network",
       "metadata",
+      "contrast",
     ],
     optional: true,
   },
@@ -108,6 +109,9 @@ WranglerDocuments.attachSchema(new SimpleSchema({
       "source_level_interactions",
       "ignored_transcript",
       "transcript_version_mismatch",
+      "contrast_summary",
+      "new_clinical_data",
+      "contrast_sample",
     ],
   },
   contents: {

@@ -184,11 +184,29 @@ Wrangler.fileTypes = {
   },
   RectangularIsoformExpression: {
     description: "Rectangular matrix isoform expression",
+    // NOTE: uses same normalizations as GeneExpression, which is okay for now
     schema: new SimpleSchema(expressionSchemaDoc),
   },
   BD2KSampleLabelMap: {
     description: "Sample label mapping (BD2K pipeline)",
   },
+  ContrastMatrix: {
+    description: "Contrast matrix",
+    schema: new SimpleSchema({
+      collaboration_label: { type: String },
+      update_or_create: {
+        type: String,
+        allowedValues: [
+          "update",
+          "create",
+        ],
+        defaultValue: "create",
+        label: "Update or create new",
+      },
+      contrast_label: { type: String, label: "Contrast name" },
+      description: { type: String },
+    }),
+  }
   // // NOTE: people can still run it, but the client picklist won't show it
   // ArachneRegulon: {
   //   description: "Arachne generated adjacancy matrix weighted by mutual information",
@@ -209,20 +227,6 @@ var ignoredGenesPanel = {
   css_class: "panel-warning",
   columns: [
     { heading: "Gene", attribute: "gene" },
-  ],
-};
-
-var newSampleForStudy = {
-  name: "new_sample_for_study",
-  title: "New sample label",
-  description: "The selected study currently has no record of the "+
-      "following samples. They will be added to the study's list of " +
-      "sample labels.",
-  columns: [
-    // TODO
-    { heading: "Sample", attribute: "sample_label", header_of_row: true },
-    { heading: "Normalization", attribute: "normalization" },
-    { heading: "File name", attribute: "file_name" },
   ],
 };
 
@@ -269,6 +273,20 @@ var mappedGenes = {
   ],
 };
 
+var newClinicalData = {
+  name: "new_clinical_data",
+  title: "New clinical data",
+  description: "Medbook does not have clinical information for the " +
+      "following samples/patients. Clinical_Info and the " +
+      "studies collection will be updated include them.",
+  css_class: "panel-danger",
+  columns: [
+    { heading: "Study", attribute: "study_label" },
+    { heading: "Patient ID", attribute: "patient_label" },
+    { heading: "Sample ID", attribute: "sample_label" },
+  ],
+};
+
 Wrangler.reviewPanels = {
   gene_expression: [
     {
@@ -285,7 +303,7 @@ Wrangler.reviewPanels = {
         { heading: "Genes defined", attribute: "line_count" },
       ],
     },
-    newSampleForStudy,
+    newClinicalData,
     expressionDataExists,
     sampleLabelMap,
     ignoredGenesPanel,
@@ -316,7 +334,7 @@ Wrangler.reviewPanels = {
         { heading: "Isoforms defined", attribute: "line_count" },
       ],
     },
-    newSampleForStudy,
+    newClinicalData,
     expressionDataExists,
     sampleLabelMap,
     mappedGenes,
@@ -350,6 +368,37 @@ Wrangler.reviewPanels = {
     },
     ignoredGenesPanel,
     mappedGenes,
+  ],
+  contrast: [
+    {
+      name: "contrast_summary",
+      title: "Contrasts",
+      description: "These contrasts will be inserted/updated.",
+      css_class: "panel-default",
+      columns: [
+        { heading: "Contrast name", attribute: "contrast_label" },
+        { heading: "Version", attribute: "version" },
+        { heading: "Description", attribute: "description" },
+        { heading: "Group A name", attribute: "a_name" },
+        { heading: "Group A sample count", attribute: "a_samples_count" },
+        { heading: "Group B name", attribute: "b_name" },
+        { heading: "Group B sample count", attribute: "b_samples_count" },
+      ],
+    },
+    {
+      name: "contrast_sample",
+      title: "Contrasts data",
+      description: "Contrast group assignments",
+      css_class: "panel-default",
+      columns: [
+        { heading: "Contrast name", attribute: "contrast_label" },
+        { heading: "Version", attribute: "contrast_version" },
+        { heading: "Study", attribute: "study_label" },
+        { heading: "Sample ID", attribute: "sample_label" },
+        { heading: "Group", attribute: "group_name" },
+      ],
+    },
+    newClinicalData,
   ],
   metadata: [
     sampleLabelMap,

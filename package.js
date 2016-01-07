@@ -41,6 +41,7 @@ Package.onUse(function(api) {
     'fileHandlers/RectangularGeneExpression.js',
     'fileHandlers/RectangularIsoformExpression.js',
     'fileHandlers/BD2KSampleLabelMap.js',
+    'fileHandlers/ContrastMatrix.js',
     'fileHandlers/ArachneRegulon.js',
 
     // Admin stuff

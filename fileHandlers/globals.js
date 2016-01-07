@@ -63,3 +63,52 @@ errorResultResolver = function (deferred) {
     }
   };
 };
+
+// Ensures all sample labels have a record in Clinical_Info and are also in
+// the study. Also makes sure all Patient_IDs are in the study.
+// TODO: add wrangler documents warning the user of inserting into
+// both studies and Clinical_Info
+ensureClinicalExists = function (Study_ID, Sample_ID) {
+  console.log("Study_ID, Sample_ID:", Study_ID, Sample_ID);
+  var Patient_ID = Wrangler.wranglePatientLabel(Sample_ID);
+
+  var clinical = {
+    CRF: "Clinical_Info",
+    Study_ID: Study_ID,
+    Patient_ID: Patient_ID,
+    Sample_ID: Sample_ID,
+  };
+
+  if (this.wranglerPeek) {
+    var studiesQuery = {
+      id: Study_ID,
+      Sample_IDs: Sample_ID,
+      Patient_IDs: Patient_ID,
+    };
+
+    // NOTE: this may require indexes
+    if (!CRFs.findOne(clinical) || !Studies.findOne(studiesQuery)) {
+      this.insertWranglerDocument.call(this, {
+        document_type: "new_clinical_data",
+        contents: {
+          study_label: Study_ID,
+          patient_label: Patient_ID,
+          sample_label: Sample_ID,
+        },
+      });
+    }
+  } else {
+    CRFs.upsert(clinical, {
+      $set: clinical
+    });
+
+    Studies.update({
+      id: Study_ID
+    }, {
+      $addToSet: {
+        Sample_IDs: Sample_ID,
+        Patient_IDs: Patient_ID,
+      }
+    });
+  }
+};

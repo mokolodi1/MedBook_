@@ -65,13 +65,6 @@ RectangularGeneAssay.prototype.loadTranscriptMapping = function () {
   console.log("done loading valid transcripts");
 };
 
-RectangularGeneAssay.prototype.verifyAtLeastTwoColumns = function (brokenTabs) {
-  if (brokenTabs.length < 2) {
-    throw "Expected 2+ column tab file, got " + brokenTabs.length +
-        " column tab file";
-  }
-};
-
 function wrangleSampleUUID (text) {
   var mappingContents;
   var submissionIds = [];
@@ -138,47 +131,6 @@ RectangularGeneAssay.prototype.setSampleLabels = function (brokenTabs) {
       throw "Could not parse sample label in column " + column;
     }
     this.sampleLabels.push(wrangledLabel);
-  }
-};
-
-// Ensures all sample labels have a record in Clinical_Info and are also in
-// the study. Also makes sure all Patient_IDs are in the study.
-// TODO: add wrangler documents warning the user of inserting into
-// both studies and Clinical_Info
-RectangularGeneAssay.prototype.ensureClinicalExists = function () {
-  if (!this.wranglerPeek) {
-    var patientLabels = [];
-
-    for (var index in this.sampleLabels) {
-      var Sample_ID = this.sampleLabels[index];
-      var Patient_ID = Wrangler.wranglePatientLabel(Sample_ID);
-
-      var clinical = {
-        CRF: "Clinical_Info",
-        Study_ID: this.submission.options.study_label,
-        Patient_ID: Patient_ID,
-        Sample_ID: Sample_ID,
-      };
-
-      CRFs.upsert(clinical, {
-        $set: clinical
-      });
-
-      patientLabels.push(Patient_ID);
-    }
-
-    Studies.update({
-      id: this.submission.options.study_label
-    }, {
-      $addToSet: {
-        Sample_IDs: {
-          $each: this.sampleLabels
-        },
-        Patient_IDs: {
-          $each: patientLabels
-        }
-      }
-    });
   }
 };
 
