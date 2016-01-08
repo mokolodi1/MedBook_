@@ -1,6 +1,6 @@
 Package.describe({
   name: "medbook:primary-collections",
-  version: "0.0.12",
+  version: "0.0.13",
   // Brief, one-line summary of the package.
   summary: "Primary collections and schemas for MedBook",
   // URL to the Git repository containing the source code for this package.
