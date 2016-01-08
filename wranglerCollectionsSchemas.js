@@ -102,8 +102,8 @@ WranglerDocuments.attachSchema(new SimpleSchema({
     allowedValues: [
       "mapped_genes",
       "ignored_genes",
-      "sample_normalization",
-      "expression_data_exists",
+      "assay_sample_summary",
+      "sample_data_exists",
       "sample_label_map",
       "new_network",
       "source_level_interactions",

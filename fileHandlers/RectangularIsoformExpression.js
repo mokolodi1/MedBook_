@@ -1,31 +1,36 @@
 // TODO: change this to accept options instead of wrangler_file_id
 function RectangularIsoformExpression (wrangler_file_id) {
-  RectangularGeneAssay.call(this, {
+  TabSeperatedFile.call(this, {
     wrangler_file_id: wrangler_file_id,
   });
 
-  this.loadTranscriptMapping.call(this);
+  loadTranscriptMapping.call(this);
   this.setSubmissionType.call(this, 'isoform_expression');
 }
 
 RectangularIsoformExpression.prototype =
-    Object.create(RectangularGeneAssay.prototype);
+    Object.create(TabSeperatedFile.prototype);
 RectangularIsoformExpression.prototype.constructor = RectangularIsoformExpression;
 
-RectangularIsoformExpression.prototype.checkDataExists = function (sample_label) {
-  var query = {
-    sample_label: sample_label,
-  };
-  query["values." + this.wranglerFile.options.normalization] = { $exists: true };
+function loadTranscriptMapping () {
+  var self = this;
+  this.transcriptMapping = {};
 
-  // TODO: add index for findOne
-  if (IsoformExpression.findOne(query)) {
-    return true;
+  function addTranscriptMapping(transcriptLabel, geneObject) {
+    self.transcriptMapping[transcriptLabel] = geneObject;
   }
-};
 
-RectangularIsoformExpression.prototype.getNormalizationLabel =
-    _.partial(getNormalizationLabel, IsoformExpression);
+  console.log("loading valid transcripts...");
+  Genes.find({}, {
+      fields: { gene_label: 1, transcripts: 1 }
+    }).forEach(function (doc) {
+      _.each(doc.transcripts, function (transcript) {
+        self.transcriptMapping[transcript.label] = doc;
+      });
+    });
+  console.log("done loading valid transcripts");
+}
+
 
 function getSetObject (parsedValue) {
   // calculate autoValues ;)
@@ -60,7 +65,7 @@ RectangularIsoformExpression.prototype.parseLine =
           " column tab file";
     }
 
-    this.setSampleLabels.call(this, brokenTabs); // wrangle sample labels
+    setSampleLabels.call(this, brokenTabs); // wrangle sample labels
     console.log("this.sampleLabels:", this.sampleLabels);
 
     // TODO: run all the time when we get the study_label before the peek
@@ -73,7 +78,20 @@ RectangularIsoformExpression.prototype.parseLine =
 
     if (this.wranglerPeek) {
       this.line_count = 0;
-      this.alertDataExists.call(this); // check to see if collection already has data like this
+      alertIfSampleDataExists.call(this,
+          IsoformExpression.simpleSchema().schema()
+              ['values.' + this.wranglerFile.options.normalization].label,
+          function (sample_label) {
+            var query = {
+              sample_label: sample_label,
+            };
+            query["values." + this.wranglerFile.options.normalization] = { $exists: true };
+
+            // TODO: add index for findOne
+            if (IsoformExpression.findOne(query)) {
+              return true;
+            }
+          });
     }
   } else { // rest of file
     var expressionStrings = brokenTabs.slice(1);
@@ -89,14 +107,6 @@ RectangularIsoformExpression.prototype.parseLine =
     // unnecessary. Splitting the transcript_label and _version up into two
     // fields means that queries can merge versions if they choose to do so.
     var transcript_version = parseInt(splitIsoformId[1], 10);
-
-    // // update expression2 isoform equivalent
-    // // NOTE: this will be deprecated soon
-    // if (!this.wranglerPeek) {
-    //   // insert into expression2 without mapping or anything
-    //   // console.log("need to write expression_isoform insert method");
-    //   // Expression2Insert.call(this, brokenTabs[0], this.sampleLabels, expressionStrings);
-    // }
 
     var associatedGene = this.transcriptMapping[transcript_label];
     var gene_label; // NOTE: gene_label only set when it's a valid gene
@@ -162,5 +172,11 @@ Moko.ensureIndex(IsoformExpression, {
   transcript_version: 1,
   sample_label: 1,
 });
+
+RectangularIsoformExpression.prototype.endOfFile = function () {
+  var dataType = IsoformExpression.simpleSchema().schema()
+      ['values.' + this.wranglerFile.options.normalization].label;
+  addExpressionSummaryDoc.call(this, dataType);
+};
 
 WranglerFileTypes.RectangularIsoformExpression = RectangularIsoformExpression;

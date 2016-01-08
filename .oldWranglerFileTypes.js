@@ -310,7 +310,7 @@ if (Meteor.isServer) {
 //     for (var index in this.sampleLabels) {
 //       this.insertWranglerDocument.call(this, {
 //         submission_type: "gene_expression",
-//         document_type: "sample_normalization",
+//         document_type: "assay_sample_summary",
 //         contents: {
 //           sample_label: this.sampleLabels[index],
 //           normalization: normalization,
@@ -371,7 +371,7 @@ if (Meteor.isServer) {
 //     for (var index in this.sampleLabels) {
 //       this.insertWranglerDocument.call(this, {
 //         submission_type: "gene_expression",
-//         document_type: "sample_normalization",
+//         document_type: "assay_sample_summary",
 //         contents: {
 //           sample_label: this.sampleLabels[index],
 //           normalization: normalization,
@@ -453,7 +453,7 @@ if (Meteor.isServer) {
 //     for (var index in this.sampleLabels) {
 //       this.insertWranglerDocument.call(this, {
 //         submission_type: "gene_expression",
-//         document_type: "sample_normalization",
+//         document_type: "assay_sample_summary",
 //         contents: {
 //           sample_label: this.sampleLabels[index],
 //           normalization: normalization,

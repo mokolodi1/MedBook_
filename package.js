@@ -37,7 +37,6 @@ Package.onUse(function(api) {
     'fileHandlers/globals.js',
     'fileHandlers/FileHandler.js',
     'fileHandlers/TabSeperatedFile.js',
-    'fileHandlers/RectangularGeneAssay.js',
     'fileHandlers/RectangularGeneExpression.js',
     'fileHandlers/RectangularIsoformExpression.js',
     'fileHandlers/BD2KSampleLabelMap.js',

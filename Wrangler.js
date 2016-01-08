@@ -247,16 +247,16 @@ var ignoredGenesPanel = {
   ],
 };
 
-var expressionDataExists = {
-  name: "expression_data_exists",
+var sampleDataExists = {
+  name: "sample_data_exists",
   title: "Data already exists",
-  description: "The following samples already have expression " +
+  description: "The following samples already have " +
       "data in MedBook. It's possible you don't have access to their " +
       "data because you are not in the correct collaborations.",
   css_class: "panel-danger",
   columns: [
     { heading: "Sample", attribute: "sample_label", header_of_row: true },
-    { heading: "Normalization", attribute: "normalization" },
+    { heading: "Data type", attribute: "data_type" },
     { heading: "File name", attribute: "file_name" },
   ],
 };
@@ -307,7 +307,7 @@ var newClinicalData = {
 Wrangler.reviewPanels = {
   gene_expression: [
     {
-      name: "sample_normalization",
+      name: "assay_sample_summary",
       title: "Gene counts",
       css_class: "panel-default",
       columns: [
@@ -316,12 +316,12 @@ Wrangler.reviewPanels = {
           attribute: "sample_label",
           header_of_row: true
         },
-        { heading: "Normalization", attribute: "normalization_description" },
+        { heading: "Data type", attribute: "data_type" },
         { heading: "Genes defined", attribute: "line_count" },
       ],
     },
     newClinicalData,
-    expressionDataExists,
+    sampleDataExists,
     sampleLabelMap,
     ignoredGenesPanel,
     {
@@ -338,7 +338,7 @@ Wrangler.reviewPanels = {
   ],
   isoform_expression: [
     {
-      name: "sample_normalization",
+      name: "assay_sample_summary",
       title: "Isoform counts",
       css_class: "panel-default",
       columns: [
@@ -347,12 +347,12 @@ Wrangler.reviewPanels = {
           attribute: "sample_label",
           header_of_row: true
         },
-        { heading: "Normalization", attribute: "normalization_description" },
+        { heading: "Data type", attribute: "data_type" },
         { heading: "Isoforms defined", attribute: "line_count" },
       ],
     },
     newClinicalData,
-    expressionDataExists,
+    sampleDataExists,
     sampleLabelMap,
     mappedGenes,
   ],
