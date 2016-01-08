@@ -122,7 +122,13 @@ RectangularGeneAssay.prototype.parseLine =
     this.updateOldStuff.call(this, brokenTabs, expressionStrings);
 
     // map the gene based on synonymes and previouses
-    var gene_label = mapGeneLabel.call(this, brokenTabs[0]);
+    unmappedGeneLabel = brokenTabs[0];
+    // http://regexr.com/3chqf
+    var chromosomeSuffix = unmappedGeneLabel.match(/\w+?(?=\|chr[0-9]{1,2})/);
+    if (chromosomeSuffix) {
+      unmappedGeneLabel = chromosomeSuffix[0];
+    }
+    var gene_label = mapGeneLabel.call(this, unmappedGeneLabel);
     if (!gene_label) { // ignore the gene if it doesn't map
       return;
     }

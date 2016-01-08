@@ -148,44 +148,64 @@ Wrangler.wranglePatientLabel = function (text) {
   return text;
 };
 
-// for RectangularGeneExpression schema
-var geneExpressionSchema = GeneExpression.simpleSchema().schema();
-var normalizationKeys = _.filter(Object.keys(geneExpressionSchema),
-    function (value) {
-  // check if it has 'values.' at the beginning
-  return value.slice(0, 7) === 'values.' &&
-      value !== "values.quantile_counts_log";
-});
-var allowedValues = _.map(normalizationKeys, function (value) {
-  // 'values.raw_counts' ==> 'raw_counts'
-  return value.slice(7);
-});
-var options = _.map(allowedValues, function (normalization) {
-  return {
-    value: normalization,
-    label: geneExpressionSchema['values.' + normalization].label,
-  };
-});
-// use a doc so that it doesn't have a clone to the same object (I don't think)
-var expressionSchemaDoc = {
-  normalization: {
-    type: String,
-    allowedValues: allowedValues,
-    autoform: {
-      options: options,
-    },
-  }
-};
+// for expression collection schemas
+function makeExpressionSchema (collection) {
+  var schema = collection.simpleSchema().schema();
+  var normalizationKeys = _.filter(Object.keys(schema),
+      function (value) {
+    // check if it has 'values.' at the beginning
+    return value.slice(0, 7) === 'values.' &&
+        value !== "values.quantile_counts_log";
+  });
+  var allowedValues = _.map(normalizationKeys, function (value) {
+    // 'values.raw_counts' ==> 'raw_counts'
+    return value.slice(7);
+  });
+  var options = _.map(allowedValues, function (normalization) {
+    return {
+      value: normalization,
+      label: schema['values.' + normalization].label,
+    };
+  });
+  // use a doc so that it doesn't have a clone to the same object (I don't think)
+  return new SimpleSchema({
+    normalization: {
+      type: String,
+      allowedValues: allowedValues,
+      autoform: {
+        options: options,
+      },
+    }
+  });
+}
+
+function makeAnnotationSchema (collection, allowedValues) {
+  var schema = collection.simpleSchema().schema();
+  var options = _.map(allowedValues, function (type) {
+    return {
+      value: type,
+      label: schema[type].label,
+    };
+  });
+  return new SimpleSchema({
+    annotation_type: {
+      type: String,
+      allowedValues: allowedValues,
+      autoform: {
+        options: options,
+      },
+    }
+  });
+}
 
 Wrangler.fileTypes = {
   RectangularGeneExpression: {
     description: "Gene expression rectangular matrix",
-    schema: new SimpleSchema(expressionSchemaDoc),
+    schema: makeExpressionSchema(GeneExpression),
   },
   RectangularIsoformExpression: {
     description: "Isoform expression rectangular matrix",
-    // NOTE: uses same normalizations as GeneExpression, which is okay for now
-    schema: new SimpleSchema(expressionSchemaDoc),
+    schema: makeExpressionSchema(IsoformExpression),
   },
   BD2KSampleLabelMap: {
     description: "Sample label mapping (BD2K pipeline)",
@@ -223,7 +243,13 @@ Wrangler.fileTypes = {
         }
       },
     }),
-  }
+  },
+  "RectangularGeneAnnotation": {
+    description: "Gene annotation rectangular matrix",
+    schema: makeAnnotationSchema(GeneAnnotation, [
+      "gistic_copy_number"
+    ]),
+  },
   // // NOTE: people can still run it, but the client picklist won't show it
   // ArachneRegulon: {
   //   description: "Arachne generated adjacancy matrix weighted by mutual information",
@@ -233,191 +259,4 @@ Wrangler.fileTypes = {
   //     },
   //   }),
   // }
-};
-
-// Wrangler.reviewPanels
-
-var ignoredGenesPanel = {
-  name: "ignored_genes",
-  title: "Invalid genes",
-  description: "The following genes were found to be invalid and will be ignored.",
-  css_class: "panel-warning",
-  columns: [
-    { heading: "Gene", attribute: "gene" },
-  ],
-};
-
-var sampleDataExists = {
-  name: "sample_data_exists",
-  title: "Data already exists",
-  description: "The following samples already have " +
-      "data in MedBook. It's possible you don't have access to their " +
-      "data because you are not in the correct collaborations.",
-  css_class: "panel-danger",
-  columns: [
-    { heading: "Sample", attribute: "sample_label", header_of_row: true },
-    { heading: "Data type", attribute: "data_type" },
-    { heading: "File name", attribute: "file_name" },
-  ],
-};
-
-var sampleLabelMap = {
-  name: "sample_label_map",
-  title: "Sample label mapping",
-  description: "The following sample labels will be mapped from " +
-      "UUIDs to sample labels.",
-  css_class: "panel-default",
-  columns: [
-    {
-      heading: "MedBook sample label",
-      attribute: "sample_label",
-      header_of_row: true
-    },
-    { heading: "Original sample label", attribute: "original_sample_label" },
-    { heading: "Sample UUID", attribute: "sample_uuid" },
-  ],
-};
-
-var mappedGenes = {
-  name: "mapped_genes",
-  title: "Mapped genes",
-  description: "After mapping from transcript ID to gene name, these" +
-      " genes will be renamed for consistancy within MedBook.",
-  css_class: "panel-default",
-  columns: [
-    { heading: "Gene in file", attribute: "gene_in_file" },
-    { heading: "MedBook gene name", attribute: "mapped_gene" },
-  ],
-};
-
-var newClinicalData = {
-  name: "new_clinical_data",
-  title: "New clinical data",
-  description: "Medbook does not have clinical information for the " +
-      "following samples/patients. Clinical_Info and the " +
-      "studies collection will be updated include them.",
-  css_class: "panel-danger",
-  columns: [
-    { heading: "Study", attribute: "study_label" },
-    { heading: "Patient ID", attribute: "patient_label" },
-    { heading: "Sample ID", attribute: "sample_label" },
-  ],
-};
-
-Wrangler.reviewPanels = {
-  gene_expression: [
-    {
-      name: "assay_sample_summary",
-      title: "Gene counts",
-      css_class: "panel-default",
-      columns: [
-        {
-          heading: "Sample label",
-          attribute: "sample_label",
-          header_of_row: true
-        },
-        { heading: "Data type", attribute: "data_type" },
-        { heading: "Genes defined", attribute: "line_count" },
-      ],
-    },
-    newClinicalData,
-    sampleDataExists,
-    sampleLabelMap,
-    ignoredGenesPanel,
-    {
-      name: "mapped_genes",
-      title: "Mapped genes",
-      description: "These genes are valid but are going to be mapped " +
-          "into MedBook gene namespace.",
-      css_class: "panel-default",
-      columns: [
-        { heading: "Gene in file", attribute: "gene_in_file" },
-        { heading: "MedBook gene name", attribute: "mapped_gene" },
-      ],
-    },
-  ],
-  isoform_expression: [
-    {
-      name: "assay_sample_summary",
-      title: "Isoform counts",
-      css_class: "panel-default",
-      columns: [
-        {
-          heading: "Sample label",
-          attribute: "sample_label",
-          header_of_row: true
-        },
-        { heading: "Data type", attribute: "data_type" },
-        { heading: "Isoforms defined", attribute: "line_count" },
-      ],
-    },
-    newClinicalData,
-    sampleDataExists,
-    sampleLabelMap,
-    mappedGenes,
-  ],
-  network: [
-    {
-      name: "new_network",
-      title: "New networks",
-      description: "I need to write a description",
-      css_class: "panel-default",
-      columns: [
-        { heading: "Network name", attribute: "name", header_of_row: true },
-        { heading: "Version", attribute: "version" },
-        { heading: "File name", attribute: "file_name" },
-      ],
-    },
-    {
-      name: "source_level_interactions",
-      title: "Gene interactions",
-      description: "I need to write a description",
-      css_class: "panel-default",
-      columns: [
-        { heading: "Source gene", attribute: "source_label", header_of_row: true },
-        { heading: "Target count", attribute: "target_count" },
-        { heading: "Minimum weight", attribute: "min_weight" },
-        { heading: "Maximum weight", attribute: "max_weight" },
-        { heading: "Average weight", attribute: "mean_weight" },
-        { heading: "Network name", attribute: "network_name" },
-        { heading: "Network version", attribute: "network_version" },
-      ],
-    },
-    ignoredGenesPanel,
-    mappedGenes,
-  ],
-  contrast: [
-    {
-      name: "contrast_summary",
-      title: "Contrasts",
-      description: "These contrasts will be inserted/updated.",
-      css_class: "panel-default",
-      columns: [
-        { heading: "Contrast name", attribute: "contrast_label" },
-        { heading: "Version", attribute: "version" },
-        { heading: "Description", attribute: "description" },
-        { heading: "Group A name", attribute: "a_name" },
-        { heading: "Group A sample count", attribute: "a_samples_count" },
-        { heading: "Group B name", attribute: "b_name" },
-        { heading: "Group B sample count", attribute: "b_samples_count" },
-      ],
-    },
-    {
-      name: "contrast_sample",
-      title: "Contrasts data",
-      description: "Contrast group assignments",
-      css_class: "panel-default",
-      columns: [
-        { heading: "Contrast name", attribute: "contrast_label" },
-        { heading: "Version", attribute: "contrast_version" },
-        { heading: "Study", attribute: "study_label" },
-        { heading: "Sample ID", attribute: "sample_label" },
-        { heading: "Group", attribute: "group_name" },
-      ],
-    },
-    newClinicalData,
-  ],
-  metadata: [
-    sampleLabelMap,
-  ],
 };

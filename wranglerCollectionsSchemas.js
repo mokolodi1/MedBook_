@@ -35,6 +35,7 @@ WranglerFiles.attachSchema(new SimpleSchema({
     type: String,
     allowedValues: [
       "gene_expression",
+      "gene_annotation",
       "isoform_expression",
       "network",
       "metadata",
@@ -89,6 +90,14 @@ WranglerFiles.attachSchema(new SimpleSchema({
   // uncompressed_from_id: { type: Meteor.ObjectID, optional: true },
 }));
 
+// allowedValues for document_type in WranglerDocuments
+var panelNames = [];
+_.each(Wrangler.reviewPanels, function (fileTypes) {
+  _.each(fileTypes, function (panel) {
+    panelNames.push(panel.name);
+  });
+});
+
 WranglerDocuments.attachSchema(new SimpleSchema({
   submission_id: { type: Meteor.ObjectID },
   user_id: { type: Meteor.ObjectID },
@@ -99,20 +108,7 @@ WranglerDocuments.attachSchema(new SimpleSchema({
   },
   document_type: {
     type: String,
-    allowedValues: [
-      "mapped_genes",
-      "ignored_genes",
-      "assay_sample_summary",
-      "sample_data_exists",
-      "sample_label_map",
-      "new_network",
-      "source_level_interactions",
-      "ignored_transcript",
-      "transcript_version_mismatch",
-      "contrast_summary",
-      "new_clinical_data",
-      "contrast_sample",
-    ],
+    allowedValues: _.uniq(panelNames),
   },
   contents: {
     type: Object,

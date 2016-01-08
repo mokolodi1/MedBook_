@@ -9,25 +9,6 @@ RectangularGeneExpression.prototype =
     Object.create(RectangularGeneAssay.prototype);
 RectangularGeneExpression.prototype.constructor = RectangularGeneExpression;
 
-function getSetObject (parsedValue) {
-  // calculate autoValues ;)
-  var values = {};
-  values[this.wranglerFile.options.normalization] = parsedValue;
-  var onlyValues = {
-    values: values
-  };
-  GeneExpression.simpleSchema().clean(onlyValues);
-  values = onlyValues.values; // squeaky clean
-
-  var setObject = {};
-  var keys = Object.keys(onlyValues.values);
-  _.each(keys, function (normalization) {
-    setObject['values.' + normalization] = values[normalization];
-  });
-
-  return setObject;
-}
-
 RectangularGeneExpression.prototype.alertIfSampleDataExists = function () {
   alertIfSampleDataExists.call(this,
       GeneExpression.simpleSchema().schema()
@@ -89,6 +70,25 @@ RectangularGeneExpression.prototype.updateOldStuff =
   }
 };
 
+function getSetObject (parsedValue) {
+  // calculate autoValues ;)
+  var values = {};
+  values[this.wranglerFile.options.normalization] = parsedValue;
+  var onlyValues = {
+    values: values
+  };
+  GeneExpression.simpleSchema().clean(onlyValues);
+  values = onlyValues.values; // squeaky clean
+
+  var setObject = {};
+  var keys = Object.keys(onlyValues.values);
+  _.each(keys, function (normalization) {
+    setObject['values.' + normalization] = values[normalization];
+  });
+
+  return setObject;
+}
+
 RectangularGeneExpression.prototype.insertToCollection =
     function (gene_label, expressionStrings) {
   // insert into GeneExpression
@@ -120,11 +120,10 @@ Moko.ensureIndex(GeneExpression, {
   sample_label: 1,
 });
 
-
-WranglerFileTypes.RectangularGeneExpression = RectangularGeneExpression;
-
 RectangularGeneExpression.prototype.endOfFile = function () {
   var dataType = GeneExpression.simpleSchema().schema()
       ['values.' + this.wranglerFile.options.normalization].label;
   addExpressionSummaryDoc.call(this, dataType);
 };
+
+WranglerFileTypes.RectangularGeneExpression = RectangularGeneExpression;

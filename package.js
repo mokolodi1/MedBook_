@@ -19,7 +19,7 @@ Package.onUse(function(api) {
   api.use("aldeed:simple-schema@1.3.3");
   api.use("aldeed:autoform@5.5.1");
   api.use("mokolodi1:helpers@0.0.3");
-  api.use("medbook:primary-collections@0.0.12");
+  api.use("medbook:primary-collections@0.0.13");
 
   // the definitions are loaded first so that indexes can be ensured in
   // the file handlers
@@ -38,8 +38,9 @@ Package.onUse(function(api) {
     "fileHandlers/FileHandler.js",
     "fileHandlers/TabSeperatedFile.js",
     "fileHandlers/RectangularGeneAssay.js",
-    
+
     "fileHandlers/RectangularGeneExpression.js",
+    "fileHandlers/RectangularGeneAnnotation.js",
     "fileHandlers/RectangularIsoformExpression.js",
     "fileHandlers/BD2KSampleLabelMap.js",
     "fileHandlers/ContrastMatrix.js",
@@ -51,7 +52,8 @@ Package.onUse(function(api) {
   ], "server");
   api.export("WranglerFileTypes", "server");
 
-  api.addFiles("Wrangler.js"); // both
+  api.addFiles("Wrangler.js");
+  api.addFiles("reviewPanels.js");
   api.export("Wrangler");
 
   api.addFiles("wranglerCollectionsSchemas.js");
