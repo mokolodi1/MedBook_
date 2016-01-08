@@ -30,7 +30,6 @@ errorResultResolver = function (deferred) {
 // TODO: add wrangler documents warning the user of inserting into
 // both studies and Clinical_Info
 ensureClinicalExists = function (Study_ID, Sample_ID) {
-  console.log("Study_ID, Sample_ID:", Study_ID, Sample_ID);
   var Patient_ID = Wrangler.wranglePatientLabel(Sample_ID);
 
   var clinical = {
