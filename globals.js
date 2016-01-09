@@ -18,12 +18,12 @@ createWriteStream = function (destination) {
 
 checkOptions = function (options, schema) {
   if (!options) {
-    throw "no options provided";
+    throw new Error("no options provided");
   }
 
   try {
-    check(options, schema)
+    check(options, schema);
   } catch (e) {
-    throw "incorrect options: " + e;
+    throw new Error("incorrect options: " + e);
   }
 };

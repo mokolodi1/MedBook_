@@ -1,4 +1,12 @@
+BaseExporter = function () {};
+
+BaseExporter.prototype = {};
+
 function niceWrite (writeStream, toWrite) {
+  // NOTE: might need to break toWrite into multiple strings
+  if (toWrite.length > 10000) {
+    console.log("break toWrite into multiple strings");
+  }
   var keepWriting = writeStream.write(toWrite);
   if (keepWriting) {
     // return a promise that has already been resolved
@@ -12,38 +20,47 @@ function niceWrite (writeStream, toWrite) {
   });
 }
 
-BaseExporter = function (destination, options) {
+BaseExporter.prototype.run = function (destination, options) {
   var self = this;
 
-  self.init.call(self, options);
-
-  var deferred = Q.defer();
-
-  self.writeStream = createWriteStream(destination);
-  var lineNumber = 1; // starts at 1
-
-  function writeNextLine () {
-    var chunks = [];
-    self.getLine.call(self, function (chunk) {
-      chunks.push(chunk);
-    }, lineNumber);
-
-    if (chunks.length) {
-      lineNumber++;
-      // write all chunks, wait for drain (if necessary), call itself
-      niceWrite(self.writeStream, chunks.join("") + "\n")
-        .then(writeNextLine);
-    } else {
-      // end the write stream, close the file
-      self.writeStream.end(deferred.resolve);
+  return new Q.Promise(function (resolve, reject) {
+    // make sure it's being called with new keyword
+    if (!self.init) {
+      console.log("not called with new keyword");
+      throw new Error("not called with new keyword");
     }
-  }
-  writeNextLine(); // kick off the writing
 
-  return deferred.promise;
+    console.log("before init call");
+    self.init.call(self, options);
+    console.log("after init call");
+
+    self.writeStream = createWriteStream(destination);
+    var lineNumber = 1; // starts at 1
+
+    function writeNextLine () {
+      var chunks = [];
+      var lineMaybePromise = self.getLine.call(self, function (chunk) {
+        chunks.push(chunk);
+      }, lineNumber);
+
+      Q(lineMaybePromise)
+        .then(function () {
+          if (chunks.length) {
+            lineNumber++;
+            // write all chunks, wait for drain (if necessary), call itself
+            niceWrite(self.writeStream, chunks.join("") + "\n")
+              .then(writeNextLine)
+              .catch(reject);
+          } else {
+            // end the write stream, close the file
+            self.writeStream.end(resolve);
+          }
+        });
+    }
+    writeNextLine(); // kick off the writing
+  });
 };
 
-BaseExporter.prototype = {};
 BaseExporter.prototype.init = function (write, lineNumber) {
   throw new Error("init not overridden");
 };

@@ -1,14 +1,14 @@
 function LimmaPhenotype (destination, options) {
-  checkOptions(options, new SimpleSchema({
-    contrastId: { type: String }
-  }));
-
   return BaseExporter.call(this, destination, options);
 }
 LimmaPhenotype.prototype = Object.create(BaseExporter.prototype);
 LimmaPhenotype.prototype.constructor = LimmaPhenotype;
 
 LimmaPhenotype.prototype.init = function (options) {
+  checkOptions(options, new SimpleSchema({
+    contrastId: { type: String }
+  }));
+
   var self = this;
 
   var contrast = Contrasts.findOne(options.contrastId);

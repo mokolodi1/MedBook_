@@ -17,6 +17,7 @@ Package.onUse(function(api) {
 
   api.use("underscore");
   api.use("aldeed:simple-schema@1.3.3");
+  api.use("meteorhacks:aggregate@1.3.0");
   api.use("medbook:primary-collections@0.0.13");
 
   api.addFiles("globals.js", "server");
@@ -25,7 +26,8 @@ Package.onUse(function(api) {
   api.addFiles([
     "export/Export.js",
     "export/BaseExporter.js",
-    "export/LimmaPhenotype.js"
+    "export/LimmaPhenotype.js",
+    "export/GeneExpressionMatrix.js",
   ], "server");
   api.export("Export", "server");
 });
