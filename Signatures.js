@@ -13,6 +13,32 @@ var sampleSchema = new SimpleSchema({
   patient_label: { type: String, optional: true },
 });
 
+// calculate allowedValues for training_normalization
+var schema = GeneExpression.simpleSchema().schema();
+var normalizationKeys = _.filter(Object.keys(schema),
+    function (value) {
+  // check if it has 'values.' at the beginning
+  return value.slice(0, 7) === 'values.';
+});
+var allowedValues = _.map(normalizationKeys, function (value) {
+  // 'values.raw_counts' ==> 'raw_counts'
+  return value.slice(7);
+});
+var options = _.map(allowedValues, function (normalization) {
+  return {
+    value: normalization,
+    label: schema['values.' + normalization].label,
+  };
+});
+var training_normalization = {
+  type: String,
+  allowedValues: allowedValues,
+  autoform: {
+    options: options,
+  },
+  optional: true,
+};
+
 Signatures.attachSchema(new SimpleSchema({
   user_id: { type: String },
   collaborations: { type: String },
@@ -48,6 +74,8 @@ Signatures.attachSchema(new SimpleSchema({
   lower_name: { type: String, optional: true },
   lower_threshold: { type: String, optional: true },
   lower_training_samples: { type: [sampleSchema], optional: true },
+
+  training_normalization: training_normalization,
 
   // NOTE: dense/sparse weights stored as seperate signatures?
   gene_weights: { type: [geneValuePair], optional: true },
