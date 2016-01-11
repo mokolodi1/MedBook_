@@ -21,62 +21,29 @@ var apps = null;
 var auth = null;
 var final = null;
 var config = null;
-
-
-
 var MongoDB = null;
 
-var MongoDBstates = ["unknown", "dead", "live", "connecting", "lost"]
-var MongoDBstate = "unknown";
-
+var mongoCheckInterval = null;
 
 function mongoCheck() {
-    if (MongoDB == null)
-	MongoClient.connect(config.daemons.mongodb.MONGO_URL, function(err, db) {
-	  if (db == null) {
-	      console.log("still dead after connect");
-	      MongoDBstate = "dead";
-	  } else {
-	      MongoDB = db;
-	      MongoDBstate = "connecting";
-	  }
-	}) 
-      else MongoDB.admin().ping(function(err, pingResult) {
-	  if (pingResult && pingResult.ok == 1)
-	      MongoDBstate = "live";
-	  else {
-	      MongoDBstate = "lost";
-	  }
-      });
-    if (MongoDBstate == "dead" || MongoDBstate == "connecting" || MongoDBstate == "lost")
-	launchMongoDB();
-    // console.log("mongoCheck", MongoDBstate);
-    return MongoDBstate;
+    if (MongoDB == null){
+	var mongoUrl = "mongodb://mongo:" + process.env.MONGO_PORT_27017_TCP_PORT + "/MedBook";
+	// defaults to auto_reconnect
+	// http://mongodb.github.io/node-mongodb-native/driver-articles/mongoclient.html#mongoclient-connect
+	MongoClient.connect(mongoUrl, function(err, db) {
+	    if (db == null) {
+		console.log("still dead after connect");
+	    } else {
+		console.log("successfully connected to Mongo");
+		MongoDB = db;
+		//interval is failing to clear, annoying but not a huge deal
+		//maybe related http://stackoverflow.com/questions/30465977/node-clearinterval-only-clearing-intervalobject-scoped-to-method-it-was-assigned
+		clearInterval(mongoCheckInterval);
+	    }
+	});
+    }
 }
-// setInterval(mongoCheck, 5000);
-
-
-/*
-[daemons]
-   [daemons.mongodb]
-   MONGO_URL= "mongodb://localhost:27017/MedBook"
-   cwd = "/"
-   run = "/Users/tedgoldstein/Downloads/mongodb-osx-x86_64-2.6.10/bin/mongod"
-   uid = "tedgoldstein"
-*/
-
-function launchMongoDB() {
- var cmd =  config.daemons.mongodb.run.split(" ");
- console.log("launch mongodb", cmd);
- var child = forever.start(cmd, {
-     silent : true,
-     fork: true,
-     killTree: false,
-     max: 1,
- });
-}
-
-
+mongoCheckInterval = setInterval(mongoCheck, 1000);
 
 function launch(app, res) {
  console.log("Gateway launching", app.route, app.cwd, app.run);
@@ -110,7 +77,6 @@ function launch(app, res) {
      console.error('Forever detected script exited with code ' + code);
  });
 }
-
 
 var SECRET;
 function changeSecret() {
@@ -158,14 +124,14 @@ getApp = function(req) {
 
 
 readMenu = function() {
-  menuFile = fs.readFileSync("/data/MedBook/Gateway/menu.html");
-  reloadFile = fs.readFileSync("/data/MedBook/Gateway/reload.html");
+  menuFile = fs.readFileSync("menu.html");
+  reloadFile = fs.readFileSync("reload.html");
 };
 
 readMenu();
 
 
-postScriptFilename = "/data/MedBook/Gateway/postScript.js";
+postScriptFilename = "postScript.js";
 readPostScript = function() {
   postScript = fs.readFileSync(postScriptFilename);
 };
