@@ -30,12 +30,10 @@ BaseExporter.prototype.run = function (destination, options) {
       throw new Error("not called with new keyword");
     }
 
-    console.log("before init call");
     self.init.call(self, options);
-    console.log("after init call");
 
     self.writeStream = createWriteStream(destination);
-    var lineNumber = 1; // starts at 1
+    var lineNumber = 1; // careful: starts at 1
 
     function writeNextLine () {
       var chunks = [];

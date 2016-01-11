@@ -96,12 +96,10 @@ GeneExpressionMatrix.prototype.init = function (options) {
     }
   });
   self.geneLabels.sort();
-  console.log("self.geneLabels:", self.geneLabels);
 };
 
 function writeDataLine (write, gene_label) {
   // write gene
-  console.log("gene_label:", gene_label);
   write(gene_label);
 
   // write line contents by way of recursive callbacks
