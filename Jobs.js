@@ -89,6 +89,7 @@ function onlyAdminCollaboration (user_id, doc) {
       doc.status === "creating" || doc.status === "waiting";
 }
 
+// we don't want a user to be able to create a "ReloadGenesCollection" job
 Jobs.allow({
   insert: onlyAdminCollaboration,
   update: onlyAdminCollaboration,
