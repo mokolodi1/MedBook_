@@ -17,10 +17,12 @@
   "author": "Ted Goldstein",
   "bugs": {},
   "dependencies": {
+    "cookies": "^0.5.1",
+    "forever-monitor":"^1.7.0",
     "http-proxy": "*",
     "https": "*",
     "mongodb": "^2.0.46",
     "randomstring": "*",
-    "toml": "*"
+    "toml": "^2.3.0"
   }
 }
