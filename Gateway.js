@@ -19,7 +19,6 @@ var configuration = null;
 var routes = null;
 var apps = null;
 var auth = null;
-var final = null;
 var config = null;
 var MongoDB = null;
 
@@ -27,7 +26,7 @@ var mongoCheckInterval = null;
 
 function mongoCheck() {
     if (MongoDB == null){
-	var mongoUrl = "mongodb://mongo:" + process.env.MONGO_PORT_27017_TCP_PORT + "/MedBook";
+	var mongoUrl = "mongodb://mongo:27017/MedBook";
 	// defaults to auto_reconnect
 	// http://mongodb.github.io/node-mongodb-native/driver-articles/mongoclient.html#mongoclient-connect
 	MongoClient.connect(mongoUrl, function(err, db) {
@@ -44,39 +43,6 @@ function mongoCheck() {
     }
 }
 mongoCheckInterval = setInterval(mongoCheck, 1000);
-
-function launch(app, res) {
- console.log("Gateway launching", app.route, app.cwd, app.run);
- var cmd =  app.run.split(" ");
- console.log("launch", cmd);
- var child = forever.start(cmd, {
-     silent : true,
-     fork: true,
-     killTree: false,
-     env: {
-	PORT : app.port,
-	ROUTE : app.route,
-        MONGO_URL : config.daemons.mongodb.MONGO_URL,
-     },
-     cwd : app.cwd,
-     max: 3,
- });
-
- child.on('forever watch:restart', function(info) {
-     if (res) res.write('Restaring script because ' + info.file + ' changed');
-     console.error('Restaring script because ' + info.file + ' changed');
- });
-
- child.on('forever restart', function() {
-     if (res) res.write('Forever restarting script for ' + child.times + ' time');
-     console.error('Forever restarting script for ' + child.times + ' time');
- });
-
- child.on('forever exit:code', function(code) {
-     if (res) res.write('Forever detected script exited with code ' + code);
-     console.error('Forever detected script exited with code ' + code);
- });
-}
 
 var SECRET;
 function changeSecret() {
@@ -98,30 +64,20 @@ reloadFile = null;
 postScript = null;
 
 
-getPort = function(req) {
+var getTarget = function(req) {
     var a = req.url.split("/");
     if (a.length > 1) {
-        var p = routes["/" + a[1]];
-        if (p) {
-            // console.log("getPort", req.url, p);
-            return p;
-        }
+        var service = routes["/" + a[1]];
+	if (service){
+	    var target = "http://" + service.containerName + ":" + service.port;
+	} else {
+	    //fall through to telescope
+	    var telescope = config.apps.Telescope;
+	    var target = "http://" + telescope.containerName + ":" + telescope.port;
+	}
+	return target;
     }
-    // console.log("getPort final", req.url, final);
-    return final;
 }
-
-getApp = function(req) {
-    var a = req.url.split("/");
-    if (a.length > 1) {
-        var p = apps["/" + a[1]];
-        if (p) {
-            return p;
-        }
-    }
-    return config.final;
-}
-
 
 readMenu = function() {
   menuFile = fs.readFileSync("menu.html");
@@ -196,23 +152,22 @@ run = function() {
 
   configApp(args[0]);
 
-  function forward(req, res) {
-        var port = getPort(req);
-        if (req.url.indexOf("/xena") == 0) {
+    function forward(req, res) {
+	var target = getTarget(req);
+	if (req.url.indexOf("/xena") == 0) {
             // console.log("xena directing to port", port, "mapping url", req.url, "to", req.url.replace("/xena","/"));
             req.url =  req.url.replace("/xena","");
         }
         proxy.web(req, res, {
-          target: "http://localhost:"+port,
+            target: target,
         },function(e){
-          log_error(e,req);
-	  console.log("web error", e);
-	  launch(getApp(req), res);
-	  res.writeHead(500, { 'Content-Type': 'text/html' });
-          res.write(reloadFile, "binary");
-	  res.end();
-      });
-  }
+            log_error(e,req);
+	    console.log("web error", e);
+	    res.writeHead(500, { 'Content-Type': 'text/html' });
+            res.write(reloadFile, "binary");
+	    res.end();
+	});
+    }
 
   function signIn(req, res) {
       var host = null;
@@ -337,13 +292,11 @@ run = function() {
 
 
   server.on('upgrade',function(req,res){
-    var port = getPort(req);
+    var target = getTarget(req);
     proxy.ws(req, res, {
-      target: "http://localhost:" + port,
+      target: target,
     },function(e){
       log_error(e, req);
-	launch(getApp(req));
-
 	console.log("WS ERROR", e);
 	/*
 	res.writeHead(500, {
@@ -394,33 +347,12 @@ configApp = function(path) {
   apps = {};
   auth = {};
   final = config.final.port
-  pingable = [];
 
   for (appName in config.apps) {
     var ca = config.apps[appName];
-    routes[ca.route] = ca.port;
+    routes[ca.route] = ca;
     apps[ca.route] = ca;
-    if (ca.ping)
-	pingable.push(ca)
     auth[ca.route] = ca.auth;
-  }
-
-  function relaunch() {
-       if (mongoCheck() == "LIVE") // if mongo is not live, don't bother checking anything else.
-	   pingable.map(function(app) {
-	       if (app.ping)
-		   http.get("http://localhost:" + app.port + app.ping, function(res) {
-		       console.log("Alive", app.route || app.daemon, " ping " + res.statusCode);
-		   }).on('error', function(e) {
-		       console.log("DEAD", app.route || app.daemon, " ping " + e.message);
-		       launch(app, null);
-		   });
-	   });
-  }
-
-  if (parseInt(config.server.pingIntervalMS)) {
-      console.log( "pinging every", config.server.pingIntervalMS);
-      setInterval(relaunch, config.server.pingIntervalMS);
   }
 };
 
