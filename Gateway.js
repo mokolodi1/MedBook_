@@ -31,7 +31,7 @@ function mongoCheck() {
 	// http://mongodb.github.io/node-mongodb-native/driver-articles/mongoclient.html#mongoclient-connect
 	MongoClient.connect(mongoUrl, function(err, db) {
 	    if (db == null) {
-		console.log("still dead after connect");
+		console.log("Error connecting to mongo", err);
 	    } else {
 		console.log("successfully connected to Mongo");
 		MongoDB = db;
