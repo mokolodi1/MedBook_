@@ -11,6 +11,7 @@ Jobs.attachSchema(new SimpleSchema({
       "SubmitWranglerSubmission",
       "FinishWranglerSubmission",
       "RunLimma",
+      "RunApplySignature",
       "RunViper",
       "ExportFile",
       "ReloadGenesCollection",
