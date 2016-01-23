@@ -21,9 +21,10 @@
    route = "/CRF"
    cwd = "../MedBook-CRFs/"
    run = "/bin/sh -c ./run.sh"
-   port = 10002
+   port = 3000
    menuPosition = 1
    menuItem = "Forms"
+   containerName = "crfs"
 
    [apps.Telescope]
    auth = false
