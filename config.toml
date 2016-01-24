@@ -49,9 +49,10 @@
    cwd = "../Medbook-Fusion5"
    ping = "/fusion/packages/reload.js"
    run = "/bin/sh -c ./run"
-   port = 10011
+   port = 3000
    menuPosition = 5
    menuItem = "Data Fusion"
+   containerName="fusion"
 
 
    [apps.cbioportal]
