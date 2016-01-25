@@ -10,34 +10,33 @@ function ContrastMatrix (wrangler_file_id) {
 ContrastMatrix.prototype = Object.create(TabSeperatedFile.prototype);
 ContrastMatrix.prototype.constructor = ContrastMatrix;
 
-function ensureZeroOne (zeroOrOne) {
-  return zeroOrOne === "1" || zeroOrOne === "0";
-}
-
 // returns "a" or "b", validates last two fields in brokenTabs
+// also sets this.newContrast.a/b_name
 function getGroup (brokenTabs) {
-  ensureZeroOne(brokenTabs[2]);
-  ensureZeroOne(brokenTabs[3]);
+  var groupName = brokenTabs[2];
+  console.log("groupName:", groupName);
 
-  var samplesGroup;
-  if (brokenTabs[2] === "1") {
-    samplesGroup = "a";
+  if (!this.newContrast.a_name) {
+    // must be group a because it's the first one
+    this.newContrast.a_name = groupName;
+    console.log("this.newContrast.a_name:", this.newContrast.a_name);
+    return "a";
+  }
+  if (groupName === this.newContrast.a_name) {
+    return "a";
   }
 
-  if (brokenTabs[3] === "1") {
-    if (samplesGroup) {
-      throw "Sample " + brokenTabs[1] + " in study " + brokenTabs[0] +
-          " can't be in both groups.";
-    }
-    samplesGroup = "b";
+  if (!this.newContrast.b_name) {
+    // it's the second new name we've found, thus it must be group b
+    this.newContrast.b_name = groupName;
+    return "b";
+  }
+  if (groupName === this.newContrast.b_name) {
+    return "b";
   }
 
-  if (!samplesGroup) {
-    throw "No group assignment for sample " + brokenTabs[1] + " in study " +
-        brokenTabs[0] + ".";
-  }
-
-  return samplesGroup;
+  throw "Third group found: " + groupName + " for sample " + brokenTabs[1] +
+      " in study " + brokenTabs[0] + ".";
 }
 
 ContrastMatrix.prototype.parseLine =
@@ -49,8 +48,8 @@ ContrastMatrix.prototype.parseLine =
   this.ensureRectangular.call(this, brokenTabs, lineNumber);
 
   if (lineNumber === 1) { // header line
-    if (brokenTabs.length !== 4) {
-      throw "Expected 4 column tab file, got " + brokenTabs.length +
+    if (brokenTabs.length !== 3) {
+      throw "Expected 3 column tab file, got " + brokenTabs.length +
           " column tab file";
     }
 
@@ -76,9 +75,8 @@ ContrastMatrix.prototype.parseLine =
       contrast_label: contrast_label,
       version: version,
       description: description,
-      a_name: brokenTabs[2],
+      // a/b_name set in getGroup
       a_samples: [],
-      b_name: brokenTabs[3],
       b_samples: [],
     };
   } else { // rest of file
@@ -99,7 +97,9 @@ ContrastMatrix.prototype.parseLine =
     ensureClinicalExists.call(this, study_label, sample_label);
     var patient_label = Wrangler.wranglePatientLabel(sample_label);
 
-    var group = getGroup(brokenTabs);
+    var group = getGroup.call(this, brokenTabs);
+    console.log("group:", group);
+    console.log("this.newContrast:", this.newContrast);
     this.newContrast[group + "_samples"].push({
       study_label: study_label,
       sample_label: sample_label,
@@ -122,9 +122,11 @@ ContrastMatrix.prototype.parseLine =
 };
 
 ContrastMatrix.prototype.endOfFile = function () {
-  if (this.newContrast.a_samples.length === 0 ||
-      this.newContrast.b_samples.length === 0) {
-    throw "Each group must have at least one sample.";
+  console.log("this.newContrast:", this.newContrast);
+
+  if (!this.newContrast.a_name ||
+      !this.newContrast.b_name) {
+    throw "At least two groups must be defined in the file";
   }
 
   if (this.wranglerPeek) {
