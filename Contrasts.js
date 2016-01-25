@@ -11,7 +11,7 @@ Contrasts.attachSchema(new SimpleSchema({
   collaborations: { type: [String] },
 
   contrast_label: { type: String },
-  version: { type: Number, min: 1 },
+  contrast_version: { type: Number, min: 1 },
   description: { type: String },
 
   a_name: { type: String }, // group1
