@@ -1,10 +1,10 @@
 Package.describe({
   name: 'medbook:wrangler-collections',
-  version: '0.0.19',
+  version: '0.0.20',
   // Brief, one-line summary of the package.
-  summary: "Collections and such relating to Wrangler",
+  summary: "Collections and import adapters for Wrangler",
   // URL to the Git repository containing the source code for this package.
-  git: "",
+  git: "https://github.com/UCSC-MedBook/MedBook-wrangler-collections",
   // By default, Meteor will default to using README.md for documentation.
   // To avoid submitting documentation, set this field to null.
   documentation: null
@@ -19,7 +19,7 @@ Package.onUse(function(api) {
   api.use("aldeed:simple-schema@1.3.3");
   api.use("aldeed:autoform@5.5.1");
   api.use("mokolodi1:helpers@0.0.3");
-  api.use("medbook:primary-collections@0.0.13");
+  api.use("medbook:primary-collections@0.0.14");
 
   // the definitions are loaded first so that indexes can be ensured in
   // the file handlers
