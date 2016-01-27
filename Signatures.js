@@ -69,6 +69,11 @@ Signatures.attachSchema(new SimpleSchema({
     ],
   },
 
+  // from Robert's email
+  // there are two different ideas here:
+  // 1) data type: type of data used in the dot product - see my list below
+  // 2) clinical feature type: type of clinical variable that the signature is trained on - drug, mutation, disease state.
+
   // // this is for linking to more information about a gene or drug
   // link_label: { type: String, optional: true, }, // previously gene_label
   // link_type: {
