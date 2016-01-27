@@ -20,12 +20,14 @@ function sampleQueryArray () {
 GeneExpressionMatrix.prototype.init = function (options) {
   // make sure options okay
 
-  // pick training_normalization field, rename it to normalization
-  var normalization = Signatures.simpleSchema()
-    .pick(["training_normalization"])
-    .schema()
-    .training_normalization;
+  // // pick training_normalization field, rename it to normalization
+  // var normalization = Signatures.simpleSchema()
+  //   .pick(["training_normalization"])
+  //   .schema()
+  //   .training_normalization;
 
+  // NOTE: you should be able to pass in a normalization, but I've removed
+  // it for now
   checkOptions(options, new SimpleSchema({
     samples: {
       type: [
@@ -36,7 +38,7 @@ GeneExpressionMatrix.prototype.init = function (options) {
         })
       ]
     },
-    normalization: normalization,
+    // normalization: normalization,
   }));
   if (!options.normalization) {
     options.normalization = "quantile_counts";
