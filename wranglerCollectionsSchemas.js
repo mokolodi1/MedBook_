@@ -21,6 +21,18 @@ WranglerSubmissions.attachSchema(new SimpleSchema({
   },
 }));
 
+// allowedValues for submission_type in WranglerFiles
+var submissionTypes = [];
+// allowedValues for document_type in WranglerDocuments
+var panelNames = [];
+_.each(Wrangler.reviewPanels, function (fileTypes, key) {
+  submissionTypes.push(key);
+
+  _.each(fileTypes, function (panel) {
+    panelNames.push(panel.name);
+  });
+});
+
 var fileTypeNames = _.map(Wrangler.fileTypes, function (value, file_type) {
   return {
     file_type: file_type,
@@ -38,8 +50,9 @@ WranglerFiles.attachSchema(new SimpleSchema({
       "gene_annotation",
       "isoform_expression",
       "network",
-      "metadata",
       "contrast",
+      "signature",
+      "metadata",
     ],
     optional: true,
   },
@@ -89,14 +102,6 @@ WranglerFiles.attachSchema(new SimpleSchema({
   // // refers to Blobs
   // uncompressed_from_id: { type: Meteor.ObjectID, optional: true },
 }));
-
-// allowedValues for document_type in WranglerDocuments
-var panelNames = [];
-_.each(Wrangler.reviewPanels, function (fileTypes) {
-  _.each(fileTypes, function (panel) {
-    panelNames.push(panel.name);
-  });
-});
 
 WranglerDocuments.attachSchema(new SimpleSchema({
   submission_id: { type: Meteor.ObjectID },

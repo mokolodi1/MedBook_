@@ -146,7 +146,7 @@ Wrangler.reviewPanels = {
       css_class: "panel-default",
       columns: [
         { heading: "Contrast name", attribute: "contrast_label" },
-        { heading: "Version", attribute: "version" },
+        { heading: "Version", attribute: "contrast_version" },
         { heading: "Description", attribute: "description" },
         { heading: "Group A name", attribute: "a_name" },
         { heading: "Group A sample count", attribute: "a_samples_count" },
@@ -168,6 +168,35 @@ Wrangler.reviewPanels = {
       ],
     },
     newClinicalData,
+  ],
+  signature: [
+    {
+      name: "signature_summary",
+      title: "Signatures",
+      description: "These signatures will be inserted/updated.",
+      css_class: "panel-default",
+      columns: [
+        { heading: "Signature name", attribute: "signature_label" },
+        { heading: "Version", attribute: "signature_version" },
+        { heading: "Description", attribute: "description" },
+        { heading: "Algorithm", attribute: "algorithm" },
+        { heading: "Features type", attribute: "features_type" },
+      ],
+    },
+    {
+      name: "feature_summary",
+      title: "Features",
+      description: "List of features with their corresponding values",
+      css_class: "panel-default",
+      columns: [
+        { heading: "Signature name", attribute: "signature_label" },
+        { heading: "Version", attribute: "signature_version" },
+        { heading: "Feature", attribute: "feature_label" },
+        { heading: "Value", attribute: "value" },
+        { heading: "P-value", attribute: "p_value" },
+        { heading: "FDR", attribute: "false_discovery_rate" },
+      ],
+    },
   ],
   metadata: [
     sampleLabelMap,

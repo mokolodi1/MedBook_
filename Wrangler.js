@@ -198,6 +198,31 @@ function makeAnnotationSchema (collection, allowedValues) {
   });
 }
 
+var requiredOnCreate = function () {
+  if (this.field("update_or_create").value === "create") {
+    // inserts
+    if (!this.operator) {
+      if (!this.isSet || this.value === null || this.value === "") return "required";
+    }
+
+    // updates
+    else if (this.isSet) {
+      if (this.operator === "$set" && this.value === null || this.value === "") return "required";
+      if (this.operator === "$unset") return "required";
+      if (this.operator === "$rename") return "required";
+    }
+  }
+};
+
+var update_or_create = {
+  type: String,
+  allowedValues: [
+    "update",
+    "create",
+  ],
+  label: "Update or create",
+};
+
 Wrangler.fileTypes = {
   RectangularGeneExpression: {
     description: "Gene expression rectangular matrix",
@@ -207,6 +232,12 @@ Wrangler.fileTypes = {
     description: "Isoform expression rectangular matrix",
     schema: makeExpressionSchema(IsoformExpression),
   },
+  "RectangularGeneAnnotation": {
+    description: "Gene annotation rectangular matrix",
+    schema: makeAnnotationSchema(GeneAnnotation, [
+      "gistic_copy_number"
+    ]),
+  },
   BD2KSampleLabelMap: {
     description: "Sample label mapping (BD2K pipeline)",
   },
@@ -214,42 +245,37 @@ Wrangler.fileTypes = {
     description: "Contrast matrix",
     schema: new SimpleSchema({
       collaboration_label: { type: String },
-      update_or_create: {
-        type: String,
-        allowedValues: [
-          "update",
-          "create",
-        ],
-        label: "Update or create",
-      },
+      update_or_create: update_or_create,
       contrast_label: { type: String, label: "Contrast name" },
       description: {
         type: String,
         optional: true,
-        custom: function () {
-          if (this.field("update_or_create").value === "create") {
-            // inserts
-            if (!this.operator) {
-              if (!this.isSet || this.value === null || this.value === "") return "required";
-            }
-
-            // updates
-            else if (this.isSet) {
-              if (this.operator === "$set" && this.value === null || this.value === "") return "required";
-              if (this.operator === "$unset") return "required";
-              if (this.operator === "$rename") return "required";
-            }
-          }
-        }
+        custom: requiredOnCreate
       },
     }),
   },
-  "RectangularGeneAnnotation": {
-    description: "Gene annotation rectangular matrix",
-    schema: makeAnnotationSchema(GeneAnnotation, [
-      "gistic_copy_number"
-    ]),
+  LimmaSignature: {
+    description: "Limma signature",
+    schema: new SimpleSchema({
+      collaboration_label: { type: String },
+      update_or_create: update_or_create,
+      signature_label: { type: String, label: "Signature name" },
+      description: {
+        type: String,
+        optional: true,
+        custom: requiredOnCreate
+      },
+      algorithm: _.extend(Signatures.simpleSchema().schema().algorithm, {
+        optional: true,
+        custom: requiredOnCreate,
+      }),
+      features_type: _.extend(Signatures.simpleSchema().schema().features_type, {
+        optional: true,
+        custom: requiredOnCreate,
+      }),
+    }),
   },
+
   // // NOTE: people can still run it, but the client picklist won't show it
   // ArachneRegulon: {
   //   description: "Arachne generated adjacancy matrix weighted by mutual information",

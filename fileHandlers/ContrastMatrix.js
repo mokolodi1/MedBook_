@@ -14,12 +14,10 @@ ContrastMatrix.prototype.constructor = ContrastMatrix;
 // also sets this.newContrast.a/b_name
 function getGroup (brokenTabs) {
   var groupName = brokenTabs[2];
-  console.log("groupName:", groupName);
 
   if (!this.newContrast.a_name) {
     // must be group a because it's the first one
     this.newContrast.a_name = groupName;
-    console.log("this.newContrast.a_name:", this.newContrast.a_name);
     return "a";
   }
   if (groupName === this.newContrast.a_name) {
@@ -54,16 +52,20 @@ ContrastMatrix.prototype.parseLine =
     }
 
     var contrast_label = this.wranglerFile.options.contrast_label;
+    console.log("contrast_label:", contrast_label);
     var existingContrast = Contrasts.findOne({
       // TODO: what other criteria is there?
       contrast_label: contrast_label,
-    }, {
-      sort: { version: -1 }
-    });
-    var version = 1;
+    }, { sort: { contrast_version: -1 } });
+    var contrast_version = 1;
     var description;
     if (existingContrast) {
-      version = existingContrast.version + 1;
+      // TODO: doesn't have test coverage
+      if (this.wranglerFile.options.update_or_create === "create") {
+        throw "Contrast with that name already exists";
+      }
+
+      contrast_version = existingContrast.contrast_version + 1;
       description = existingContrast.description;
     } else {
       description = this.wranglerFile.options.description;
@@ -73,7 +75,7 @@ ContrastMatrix.prototype.parseLine =
       user_id: this.wranglerFile.user_id,
       collaborations: [this.wranglerFile.options.collaboration_label],
       contrast_label: contrast_label,
-      version: version,
+      contrast_version: contrast_version,
       description: description,
       // a/b_name set in getGroup
       a_samples: [],
@@ -98,8 +100,6 @@ ContrastMatrix.prototype.parseLine =
     var patient_label = Wrangler.wranglePatientLabel(sample_label);
 
     var group = getGroup.call(this, brokenTabs);
-    console.log("group:", group);
-    console.log("this.newContrast:", this.newContrast);
     this.newContrast[group + "_samples"].push({
       study_label: study_label,
       sample_label: sample_label,
@@ -111,7 +111,7 @@ ContrastMatrix.prototype.parseLine =
         document_type: "contrast_sample",
         contents: {
           contrast_label: this.newContrast.contrast_label,
-          contrast_version: this.newContrast.version,
+          contrast_version: this.newContrast.contrast_version,
           study_label: study_label,
           sample_label: sample_label,
           group_name: this.newContrast[group + "_name"],
@@ -122,8 +122,6 @@ ContrastMatrix.prototype.parseLine =
 };
 
 ContrastMatrix.prototype.endOfFile = function () {
-  console.log("this.newContrast:", this.newContrast);
-
   if (!this.newContrast.a_name ||
       !this.newContrast.b_name) {
     throw "At least two groups must be defined in the file";
@@ -134,7 +132,7 @@ ContrastMatrix.prototype.endOfFile = function () {
       document_type: "contrast_summary",
       contents: {
         contrast_label: this.newContrast.contrast_label,
-        version: this.newContrast.version,
+        contrast_version: this.newContrast.contrast_version,
         description: this.newContrast.description,
         a_name: this.newContrast.a_name,
         b_name: this.newContrast.b_name,
