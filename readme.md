@@ -52,7 +52,7 @@ Collaborations.create({
 Meteor.publish("studies", function (studyId) {
   var associatedCollaborations = Meteor.users.findOne({username: "camron"}).getAssociatedCollaborations();
   return Studies.findOne({
-    collaborations: {$in: associatedCollaborations} 
+    collaborations: {$in: associatedCollaborations}
   });
 });
 ```
@@ -107,7 +107,7 @@ For the latest API specs, please visit [http://clinical-docs.meteor.com](http://
 ========================================
 #### Collaboration Model
 
-The clinical:collaborations package uses the following security scenario for testing and verification testing.  It should be stressed that a **bottom-up** collaboration model is used; meaning the users associated with the collaboration at the 'top' of the model have the least access to individual projects, but the widest influence. This is not a command-and-control hierarchy.  It's is a distributed collaboration network. 
+The clinical:collaborations package uses the following security scenario for testing and verification testing.  It should be stressed that a **bottom-up** collaboration model is used; meaning the users associated with the collaboration at the 'top' of the model have the least access to individual projects, but the widest influence. This is not a command-and-control hierarchy.  It's is a distributed collaboration network.
 
 ![security-schema](https://raw.githubusercontent.com/clinical-meteor/clinical-collaborations/master/docs/Collaboration%20Scenario.PNG)
 
@@ -122,4 +122,4 @@ This package was funded through the gracious support of the UC Santa Cruz Medboo
 ========================================
 #### Licensing  
 
-MIT.  Use as you will.  
+![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)
