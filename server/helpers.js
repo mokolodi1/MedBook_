@@ -154,6 +154,6 @@ moi = function () {
 //     }
 //
 //     var collaborations = Object.keys(collaborationSet).sort();
-//     ret = Meteor.users.update( user._id, {$set: { "profile.collaborations": collaborations}});
+//     ret = Meteor.users.update( user._id, {$set: { "collaborations": collaborations}});
 //     return collaborations;
 // }

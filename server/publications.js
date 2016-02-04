@@ -3,8 +3,8 @@ Meteor.publish('collaborations', function() {
     var user = Meteor.users.findOne({_id: this.userId});
 
     if (user) {
-      if (user.profile) {
-        if (user.profile.collaborations) {
+      if (user) {
+        if (user.collaborations) {
 
           // return the user's private collaborations and any public collaborations
           return Collaborations.find(
@@ -14,8 +14,8 @@ Meteor.publish('collaborations', function() {
                 [
                   {isUnlisted: true}, // here to show the true branch
                   {$or: [
-                    {collaborators: {$in: user.profile.collaborations}},
-                    {administrators: {$in: user.profile.collaborations}},
+                    {collaborators: {$in: user.collaborations}},
+                    {administrators: {$in: user.collaborations}},
                     {collaborators: {$in: getEmailsForId(this.userId)}},
                     {administrators: {$in: getEmailsForId(this.userId)}}
                   ]}
