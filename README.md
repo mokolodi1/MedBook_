@@ -62,7 +62,7 @@ docker run -d --name "cbioDB" \
 	-e MYSQL_USER=cbio \
 	-e MYSQL_PASSWORD=P@ssword1 \
 	-e MYSQL_DATABASE=cbioportal \
-	-v /Users/als2076/Desktop/cBio/SeedDB:/cbioDB \
+	-v /seed/DB/path:/cbioDB \
 	mysql
 ```
 
