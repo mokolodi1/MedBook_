@@ -1,15 +1,26 @@
-clinical:collaborations
-======================================
+medbook:collaborations
+========================================
 
 Collaboration based security architecture (similar to Roles and Friends) using a bottom-up collaboration model.
 
 ========================================
-#### Installation  
+## Installation
 
 ````
-meteor add clinical:collaborations
+meteor add medbook:collaborations
 ````
 
+========================================
+## UI overview
+
+#### Default sharing UI
+![Default share UI](/images/default_share.png?raw=true)
+
+#### Advanced sharing UI
+![Advanced share UI](/images/advanced_share.png?raw=true)
+
+#### Link sharing UI
+![Link sharing UI](/images/link_sharing.png?raw=true)
 
 ========================================
 #### Collaboration Schema
