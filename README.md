@@ -43,6 +43,8 @@ cBioPortal requires MySQL to be installed.
 
 ### Option 1 | MySQL running in Host
 
+-- Add instructions on how to run on host
+
 ### Option 2 | MySQL running with Docker
 
 
