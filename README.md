@@ -38,6 +38,9 @@ Docker is an open-source project that automates the deployment of applications i
 
 cBioPortal requires MySQL to be installed.
 
+
+# Work In Progress...
+
 ### Option 1 | MySQL running in Host
 
 ### Option 2 | MySQL running with Docker
@@ -89,10 +92,10 @@ Start the cBioPortal Container
 docker run -d --name "cbio" \
 	--restart=always \
 	--net=cbio-net \
-	-p 80:8080 \
+	-p 8080:8080 \
 	-v /custom_config/folder_path/:/custom_config/ \
 	-v /customization/folder_path/:/custom_files/ \
 	-v /logs/folder_path/:/cbio_logs/ \
 	-v /studies/path:/cbio_studies/ \
-	dtr.weill.cornell.edu/ipm/cbio
+	elementolab/cbioportal:0.1
 ```
