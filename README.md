@@ -4,8 +4,8 @@
 
 This project is an open source dockerized automated build implementation of the cBioPortal developed by MSKCC, enabling researchers to create their own internal version of cBioPortal with a single command line.
 
-[Github Project](https://github.com/ElementoLab/cbioportal)
--- Add Docker Automated Build from elementolab
+[Github Project](https://github.com/ElementoLab/cbioportal)    
+[Docker Automated Build](https://hub.docker.com/r/elementolab/cbioportal/)
 
 ## What is cBioPortal?
 
