@@ -46,11 +46,22 @@ Collaborations.create({
 })
 ```
 ========================================
-#### Filtering Publications to include Associated Collaborations
+#### What collaborations am I in (directly)?
 
 ```js
+
+  var user = Meteor.users.findOne({_id: Meteor.user().userId})
+  var myCollaborations = Collaborations.find( collaborations: user.defaultEmail() }).fetch();
+});
+```
+
+========================================
+#### Filtering Publications to include Associated Collaborations (very efficent)
+
+```js
+
 Meteor.publish("studies", function (studyId) {
-  var associatedCollaborations = Meteor.users.findOne({username: "camron"}).getAssociatedCollaborations();
+  var associatedCollaborations = Meteor.users.findOne({_id: this.userId}).getAssociatedCollaborations();
   return Studies.findOne({
     collaborations: {$in: associatedCollaborations}
   });
@@ -60,7 +71,6 @@ Meteor.publish("studies", function (studyId) {
 ========================================
 #### Collaboration Object
 
-For the latest API specs, please visit [http://clinical-docs.meteor.com](http://clinical-docs.meteor.com)
 
 
 ````js

@@ -1,42 +1,23 @@
 Meteor.publish('collaborations', function() {
-  if (this.userId === null){
-    var user = Meteor.users.findOne({_id: this.userId});
+    var collaborations =  [];
+    if (this.userId != null)
+	collaborations = Meteor.users.findOne({_id: this.userId}).getAssociatedCollaborations();
 
-    if (user) {
-      if (user) {
-        if (user.collaborations) {
-
-          // return the user's private collaborations and any public collaborations
-          return Collaborations.find(
-            {$or: [
-              {isUnlisted: false}, // allows people to join
-              {$and:
-                [
-                  {isUnlisted: true}, // here to show the true branch
-                  {$or: [
-                    {collaborators: {$in: user.collaborations}},
-                    {administrators: {$in: user.collaborations}},
-                    {collaborators: {$in: getEmailsForId(this.userId)}},
-                    {administrators: {$in: getEmailsForId(this.userId)}}
-                  ]}
-                ]
-              }
-            ]});
-        } else {
-          // couldn't find the user's collaborations, so only show the public ones
-          return Collaborations.find( {isUnlisted: false} );
-        }
-      } else {
-          // couldn't find the user's collaborations, so only show the public ones
-        return Collaborations.find( {isUnlisted: false} );
-      }
-    } else {
-          // couldn't find the user's collaborations, so only show the public ones
-      return Collaborations.find( {isUnlisted: false} );
-    }
-  } else {
-    // couldn't find the user's collaborations, so only show the public ones
-    return Collaborations.find( {isUnlisted: false} );
-  }
+    if (collaborations == null || collaborations.length == 0)
+	return Collaborations.find( {isUnlisted: false} );
+    else
+	return Collaborations.find(
+	    {$or: [
+		{isUnlisted: false}, // allows people to join
+		{$and:
+		    [
+			{isUnlisted: true}, // here to show the true branch
+			{$or: [
+			    {collaborators:  {$in: collaborations}},
+			    {administrators: {$in: collaborations}},
+			]}
+		    ]
+		}
+	    ]});
 
 });
