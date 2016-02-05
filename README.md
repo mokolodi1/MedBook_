@@ -75,7 +75,7 @@ docker exec -it cbioDB /bin/bash
 gunzip cbioportal-seed.sql.gz
 
 ```bash
-mysql --user=cbio --password=P@ssword1 cbioportal  < /cbioDB/cbioportal-seed.sqldocker
+mysql --user=cbio --password=P@ssword1 cbioportal  < /cbioDB/cbioportal-seed.sql
 ```
 
 [MySQL Docker Hub] (https://hub.docker.com/_/mysql/)    
