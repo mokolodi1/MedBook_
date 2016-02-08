@@ -10,6 +10,11 @@ Package.describe({
   documentation: "README.md"
 });
 
+function addAndExport (api, name) {
+  api.addFiles(name + ".js");
+  api.export(name);
+}
+
 Package.onUse(function(api) {
   api.versionsFrom("1.1.0.3");
 
@@ -18,25 +23,25 @@ Package.onUse(function(api) {
   api.use("aldeed:autoform@4.2.2 || 5.0.0");
   api.use("underscore");
 
-  // genomic expression
-  api.addFiles("GeneExpression.js");
-  api.export("GeneExpression");
+  api.addFiles("globals.js");
+
+  // base collections
+  addAndExport(api, "Samples");
+  addAndExport(api, "SampleGroups");
+  addAndExport(api, "Contrasts");
+
+  // genomic base data
+  addAndExport(api, "GeneExpression");
   api.export("Expression2");
   // api.addFiles("GeneExpressionSummary.js");
   // api.export("GeneExpressionSummary");
-  api.addFiles("IsoformExpression.js");
-  api.export("IsoformExpression");
+  addAndExport(api, "IsoformExpression");
   // api.export("ExpressionIsoform"); // old version of IsoformExpression
-  api.addFiles("GeneAnnotation.js");
-  api.export("GeneAnnotation");
+  addAndExport(api, "GeneAnnotation");
 
-  // Workbench collections (contrast ==> signature ==> signature scores)
-  api.addFiles("Contrasts.js");
-  api.export("Contrasts");
-  api.addFiles("Signatures.js");
-  api.export("Signatures");
-  api.addFiles("SignatureScores.js");
-  api.export("SignatureScores");
+  // genomic-based collections
+  addAndExport(api, "Signatures");
+  addAndExport(api, "SignatureScores");
 
   // networks
   api.addFiles("Networks.js");
@@ -45,16 +50,13 @@ Package.onUse(function(api) {
   api.export("NetworkInteractions");
 
   // utility collections
-  api.addFiles("Genes.js");
-  api.export("Genes");
-  api.addFiles("Jobs.js");
-  api.export("Jobs");
+  addAndExport(api, "Genes");
+  addAndExport(api, "Jobs");
 
   // blobs
   api.use("cfs:gridfs@0.0.33");
   api.use("cfs:standard-packages@0.5.9");
-  api.addFiles("Blobs.js");
-  api.export("Blobs");
+  addAndExport(api, "Blobs");
   api.export("BlobStore", "server");
 
   // Older stuff below this line
@@ -62,8 +64,6 @@ Package.onUse(function(api) {
   api.addFiles("primary_collections.js");
 
   api.export("Studies");
-  api.export("Collabs"); // it won"t work when called Collaborations
-  api.export("Collaboration");
 
   api.export("Patients");
 

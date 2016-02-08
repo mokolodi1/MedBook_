@@ -30,7 +30,7 @@ Jobs.attachSchema(new SimpleSchema({
   },
 
   // optional fields
-  "prerequisite_job_ids": {
+  prerequisite_job_ids: {
     type: [Meteor.ObjectID],
     defaultValue: [],
   },
@@ -42,29 +42,9 @@ Jobs.attachSchema(new SimpleSchema({
   },
 
   // automatically generated fields
-  "date_created": {
-    type: Date,
-    // https://github.com/aldeed/meteor-collection2#autovalue
-    autoValue: function() {
-      if (this.isInsert) {
-        return new Date();
-      } else if (this.isUpsert) {
-        return { $setOnInsert: new Date() };
-      } else {
-        this.unset();  // Prevent user from supplying their own value
-      }
-    },
-  },
-  "date_modified": {
-    type: Date,
-    autoValue: function () {
-      if (this.isSet) {
-        return;
-      }
-      return new Date();
-    },
-  },
-  "status": {
+  date_created: { type: Date, autoValue: dateCreatedAutoValue },
+  date_modified: { type: Date, autoValue: dateModifiedAutoValue },
+  status: {
     type: String,
     allowedValues: [
       "creating",
@@ -75,9 +55,9 @@ Jobs.attachSchema(new SimpleSchema({
     ],
     defaultValue: "waiting",
   },
-  "retry_count": { type: Number, defaultValue: 0 },
+  retry_count: { type: Number, defaultValue: 0 },
   // can be set even if status is not "error"
-  "error_description": { type: String, optional: true },
+  error_description: { type: String, optional: true },
   stack_trace: { type: String, optional: true },
 }));
 
