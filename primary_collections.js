@@ -338,5 +338,3 @@ QualityControlPlots.attachSchema(qualityControlPlotSchema);
 Clinical_Info = new Meteor.Collection("Clinical_Info");
 
 Studies = new Meteor.Collection("studies");
-Collabs = new Meteor.Collection("collaboration"); // pls
-Collaboration = Collabs;
