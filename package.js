@@ -62,8 +62,6 @@ Package.onUse(function(api) {
   api.addFiles("primary_collections.js");
 
   api.export("Studies");
-  api.export("Collabs"); // it won"t work when called Collaborations
-  api.export("Collaboration");
 
   api.export("Patients");
 
