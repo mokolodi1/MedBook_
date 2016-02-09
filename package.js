@@ -20,10 +20,10 @@ Package.onUse(function (api) {
     'accounts-password@1.1.1',
     'aldeed:simple-schema@1.3.3',
     'aldeed:collection2@2.5.0',
-    'grove:less@0.1.1',
-    'http@1.1.0',
+    // 'grove:less@0.1.1',
+    // 'http@1.1.0',
     'underscore@1.0.3',
-    'yasaricli:slugify@0.0.7',
+    // 'yasaricli:slugify@0.0.7',
     'clinical:base-model@1.3.0',
     'matb33:collection-hooks@0.8.1',
     'clinical:user-model@1.4.1'
@@ -48,8 +48,7 @@ Package.onUse(function (api) {
     'lib/collection.collaborations.js',
     'lib/object.collaboration.js',
     'lib/object.user.js',
-    'lib/extentions.js',
-    //'lib/object.user.js'
+    // 'lib/extentions.js',
   ]);
 
   api.addFiles([
@@ -62,7 +61,6 @@ Package.onUse(function (api) {
 
 
   api.export([
-    'Schemas',
     'Collaborations',
     'Collaboration'
   ]);
