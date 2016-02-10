@@ -1,4 +1,3 @@
-Collaborations = new Meteor.Collection("collaboration");
 Collaborations.attachSchema(new SimpleSchema({
   name: { type: String, unique: true },
   description: { type: String },

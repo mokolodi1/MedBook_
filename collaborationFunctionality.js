@@ -1,12 +1,66 @@
-// This transform function simply adds some functionality to the objects
-// returned by Collaborations.find or .findOne
+// Meteor.users "_transform"
 
-// add the transform to the collection
-Collaborations._transform = function (doc) {
-  doc.getAssociatedCollaborators = _.partial(getAssociatedCollaborators, doc);
-  doc.getAssociatedCollaborations = _.partial(getAssociatedCollaborations, doc);
-  return doc;
+findUser = function (userId) {
+  console.log("_transform!");
+  var user = Meteor.users.findOne(userId);
+
+  if (!user) {
+    throw new Meteor.Error("user-not-found", "No use exists with that _id");
+  }
+
+  user.getCollaborations = _.partial(getCollaborations, user);
+
+  console.log("user in findUser:", user);
+  return user;
 };
+
+/**
+ * @summary Update and return the list of collaborations to which this user
+ *          has access.
+ * @locus Server
+ * @memberOf User
+ * @name getCollaborations
+ * @version 1.2.3
+ * @returns {Array}
+ * @example
+ * ```js
+ * Meteor.users.findOne(this.userId).getCollaborations()
+ * ```
+ */
+function getCollaborations (userDoc) {
+  if (!userDoc.collaborations || !userDoc.collaborations.personal) {
+    throw new Meteor.Error("User document must have collaborations");
+  }
+
+  // this seems kind of hacky...
+  var collaborations = getAssociatedCollaborations({
+    name: userDoc.collaborations.personal
+  });
+
+  Meteor.users.update(userDoc._id, {
+    $set: {
+      "collaborations.memberOf": collaborations
+    }
+  });
+
+  return collaborations;
+}
+
+// =============================================================================
+
+// Collaborations
+
+// there is a transform on the server
+Collaborations = new Meteor.Collection("collaboration", {
+  transform: function (doc) {
+    // NOTE: this might break things by not using `return new Collaboration(doc)`.
+    // I didn't want to do that before because I didn't think it'd work, and now
+    // I'm too lazy to change it. Feel free to!
+    doc.getAssociatedCollaborators = _.partial(getAssociatedCollaborators, doc);
+    doc.getAssociatedCollaborations = _.partial(getAssociatedCollaborations, doc);
+    return doc;
+  }
+});
 
 /**
  * @summary Traverse the collaboration graph downwards.
@@ -86,6 +140,7 @@ function getAssociatedCollaborations (doc) {
   // the graph of collaborations we want to return
   // This is stored as an object because objects are dictionaries.
   var associatedCollaborations = {};
+  associatedCollaborations[doc.name] = 1;
 
   // the dynamic queue of tree nodes that we're going to parse through,
   // starting with the current one

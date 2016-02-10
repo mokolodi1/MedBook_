@@ -1,4 +1,3 @@
-
 Package.describe({
   name: 'medbook:collaborations',
   version: '2.3.4',
@@ -14,18 +13,25 @@ Package.onUse(function (api) {
   api.use("tracker@1.0.7");
   api.use("underscore");
 
+  // attaching the schema to Collaborations
   api.use("aldeed:simple-schema@1.3.3");
   api.use("aldeed:collection2@2.3.3");
-  api.use("aldeed:autoform@4.2.2 || 5.0.0");
+  // api.use("aldeed:autoform@4.2.2 || 5.0.0");
 
-  api.addFiles("collections.js");
-  api.export("Collaborations");
+  // Collaborations is defined in client.js
+  api.addFiles("client.js", "client");
 
   // api.addFiles("client.js", "client");
   api.addFiles([
     "server.js",
-    "collaborationsTransform.js",
+    "collaborationFunctionality.js",
   ], "server");
+  api.export("findUser");
+
+  api.addFiles([
+    "both.js",
+  ], ["client", "server"]);
+  api.export("Collaborations"); // defined seperately on client/server
 });
 
 
