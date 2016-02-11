@@ -1,8 +1,8 @@
 var ignoredGenesPanel = {
   name: "ignored_genes",
   title: "Invalid genes",
-  description: "The following genes were found to be invalid and will be ignored.",
-  css_class: "panel-warning",
+  description: "The following genes are not valid HUGO genes and will be not be imported.",
+  css_class: "panel-danger",
   columns: [
     { heading: "Gene", attribute: "gene" },
   ],
