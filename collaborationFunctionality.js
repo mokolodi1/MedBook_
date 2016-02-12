@@ -17,7 +17,8 @@ MedBook.findUser = function (userId) {
 };
 
 /**
- * @summary Return whether a user has access to an object
+ * @summary Return whether a user has access to an object by checking either
+ *          the `collaborations` array or the `user_id` field.
  * @locus Server
  * @memberOf User
  * @name hasAccess
@@ -32,21 +33,35 @@ MedBook.findUser = function (userId) {
  * ```
  */
 function hasAccess (obj) {
-  if (!obj || !obj.collaborations) {
+  // if the object is falsey or doesn't have one of the things we can check
+  // for access (collaborations or user_id), return false
+  if (!obj || (!obj.collaborations && !obj.user_id)) {
     return false;
   }
 
-  // convert obj.collaborations into a hash map
-  var collabObj = _.reduce(obj.collaborations, function (memo, name) {
-    memo[name] = true;
-    return memo;
-  }, {});
+  // default to checking the user_id
+  // if user_id is defined but doesn't match, continue
+  if (obj.user_id && obj.user_id === this._id) {
+    return true;
+  }
 
-  // check to see if the user is a member
-  var memberOf = this.getCollaborations.call(this);
-  return _.some(memberOf, function (name) {
-    return collabObj[name];
-  });
+  if (obj.collaborations) {
+    // convert obj.collaborations into a hash map for fast access
+    var collabObj = _.reduce(obj.collaborations, function (memo, name) {
+      memo[name] = true;
+      return memo;
+    }, {});
+
+    // check to see if there is an intersection between the obj collaborations
+    // and the user's collaborations
+    var userCollaborations = this.getCollaborations.call(this);
+    return _.some(userCollaborations, function (name) {
+      return collabObj[name];
+    });
+  }
+
+  // couldn't verify access
+  return false;
 }
 
 /**
