@@ -1,6 +1,6 @@
 Package.describe({
   name: 'medbook:collaborations',
-  version: '2.3.4',
+  version: '2.4.0',
   summary: 'Collaboration based security architecture (similar to Roles and Friends)',
   git: 'https://github.com/UCSC-MedBook/collaborations',
   documentation: 'README.md'
