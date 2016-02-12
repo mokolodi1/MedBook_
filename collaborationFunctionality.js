@@ -63,7 +63,7 @@ function hasAccess (obj) {
  */
 function ensureAccess (obj) {
   if (!obj || !obj.collaborations) {
-    throw new Meteor.Error("internal-error");
+    throw new Meteor.Error("permission-denied");
   }
 
   if (this.hasAccess.call(this, obj)) {
