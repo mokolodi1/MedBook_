@@ -1,18 +1,77 @@
 // Meteor.users "_transform"
-
-findUser = function (userId) {
-  console.log("_transform!");
+// does a findOne on Meteor.users and adds some useful functions to that
+MedBook.findUser = function (userId) {
   var user = Meteor.users.findOne(userId);
 
   if (!user) {
     throw new Meteor.Error("user-not-found", "No use exists with that _id");
   }
 
-  user.getCollaborations = _.partial(getCollaborations, user);
+  _.extend(user, {
+    getCollaborations: getCollaborations,
+    hasAccess: hasAccess,
+    ensureAccess: ensureAccess,
+  });
 
-  console.log("user in findUser:", user);
   return user;
 };
+
+/**
+ * @summary Return whether a user has access to an object
+ * @locus Server
+ * @memberOf User
+ * @name hasAccess
+ * @version 1.2.3
+ * @returns {boolean}
+ * @example
+ * ```js
+ * if (MedBook.findUser(userId).hasAccess(someObject)) {
+ *   // do something
+ * }
+ }
+ * ```
+ */
+function hasAccess (obj) {
+  if (!obj || !obj.collaborations) {
+    return false;
+  }
+
+  // convert obj.collaborations into a hash map
+  var collabObj = _.reduce(obj.collaborations, function (memo, name) {
+    memo[name] = true;
+    return memo;
+  }, {});
+
+  // check to see if the user is a member
+  var memberOf = this.getCollaborations.call(this);
+  return _.some(memberOf, function (name) {
+    return collabObj[name];
+  });
+}
+
+/**
+ * @summary Ensure a user has access to an object. (otherwise throw an Error)
+ * @locus Server
+ * @memberOf User
+ * @name ensureAccess
+ * @version 1.2.3
+ * @returns {boolean}
+ * @example
+ * ```js
+ * MedBook.findUser(userId).ensureAccess(SampleGroups.findOne(sampleGroupId));
+ * ```
+ */
+function ensureAccess (obj) {
+  if (!obj || !obj.collaborations) {
+    throw new Meteor.Error("internal-error");
+  }
+
+  if (this.hasAccess.call(this, obj)) {
+    return true;
+  } else {
+    throw new Meteor.Error("permission-denied");
+  }
+}
 
 /**
  * @summary Update and return the list of collaborations to which this user
@@ -24,20 +83,20 @@ findUser = function (userId) {
  * @returns {Array}
  * @example
  * ```js
- * Meteor.users.findOne(this.userId).getCollaborations()
+ * MedBook.findUser(userId).getCollaborations()
  * ```
  */
-function getCollaborations (userDoc) {
-  if (!userDoc.collaborations || !userDoc.collaborations.personal) {
+function getCollaborations () {
+  if (!this.collaborations || !this.collaborations.personal) {
     throw new Meteor.Error("User document must have collaborations");
   }
 
   // this seems kind of hacky...
   var collaborations = getAssociatedCollaborations({
-    name: userDoc.collaborations.personal
+    name: this.collaborations.personal
   });
 
-  Meteor.users.update(userDoc._id, {
+  Meteor.users.update(this._id, {
     $set: {
       "collaborations.memberOf": collaborations
     }

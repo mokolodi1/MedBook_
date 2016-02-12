@@ -18,6 +18,9 @@ Package.onUse(function (api) {
   api.use("aldeed:collection2@2.3.3");
   // api.use("aldeed:autoform@4.2.2 || 5.0.0");
 
+  api.use("medbook:namespace@0.0.2");
+  api.imply("medbook:namespace@0.0.2");
+
   // Collaborations is defined in client.js
   api.addFiles("client.js", "client");
 
@@ -26,7 +29,6 @@ Package.onUse(function (api) {
     "server.js",
     "collaborationFunctionality.js",
   ], "server");
-  api.export("findUser");
 
   api.addFiles([
     "both.js",
