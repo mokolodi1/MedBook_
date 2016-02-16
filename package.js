@@ -18,10 +18,13 @@ function addAndExport (api, name) {
 Package.onUse(function(api) {
   api.versionsFrom("1.1.0.3");
 
-  api.use("aldeed:simple-schema@1.3.3");
-  api.use("aldeed:collection2@2.3.3");
-  api.use("aldeed:autoform@4.2.2 || 5.0.0");
-  api.use("underscore");
+  api.use([
+    "aldeed:simple-schema@1.3.3",
+    "aldeed:collection2@2.3.3",
+    "aldeed:autoform@4.2.2 || 5.0.0",
+    "underscore",
+    "medbook:namespace@0.0.2",
+  ]);
 
   api.addFiles("globals.js");
 
@@ -62,13 +65,12 @@ Package.onUse(function(api) {
   // Older stuff below this line
 
   api.addFiles("primary_collections.js");
-
   api.export("Studies");
-
   api.export("Patients");
-
   api.export("CohortSignatures");
   api.export("Mutations");
+
+  api.addFiles("attachToNamespace.js");
 });
 
 Package.onTest(function(api) {
