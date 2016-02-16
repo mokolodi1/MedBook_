@@ -45,19 +45,25 @@
                       button="addCollab"}}
                 {{/if}}
 
+                {{! NOTE: these conditional expressions are structured so that
+                    it doesn't say loading if there's old data to show}}
                 {{#if length searchUsers}}
                   <h5>Matching people</h5>
                   {{> collabsListCollabs cursor=searchUsers button="addCollab"}}
+                {{else}}
+                  {{#unless usersSubReady}}
+                    <h5>Matching people</h5>
+                    <p class="help-block">
+                      Loading...
+                    </p>
+                  {{/unless}}
                 {{/if}}
 
                 {{#if bothEmpty searchCollaborations searchUsers}}
+                  {{! #ifs nested to act like an && }}
                   {{#if usersSubReady}}
                     <p class="help-block">
                       No users or collaborations match your search.
-                    </p>
-                  {{else}}
-                    <p class="help-block">
-                      Loading...
                     </p>
                   {{/if}}
                 {{/if}}
@@ -108,7 +114,11 @@
       <button type="button"
           class="remove-collab pull-right btn btn-danger btn-xs">
         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-        Remove
+        {{#if getInstanceReactive "removeClicked"}}
+          Really remove?
+        {{else}}
+          Remove
+        {{/if}}
       </button>
     {{/if}}
 

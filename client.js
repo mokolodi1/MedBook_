@@ -11,13 +11,8 @@ Tracker.autorun(function () {
   }
 });
 
-// These functions are client-only versions of those on the server.
-// They grant the client permission to just about everything.
-
-hasAccess = function (objOrName) {
-  return true; // lol
-};
-
+// This is the client-side version of this function. The full definition and
+// documentation are with the server-side version.
 getCollaborations = function () {
   return this.collaborations.memberOf;
 };

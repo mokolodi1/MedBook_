@@ -80,8 +80,14 @@ Meteor.methods({
 
     collection.update(singleObject.objectId, {
       $pull: {
-        "collaborations": collabName
+        collaborations: collabName
       }
+    });
+
+    // remove if there's no collaborations left
+    collection.remove({
+      _id: singleObject.objectId,
+      collaborations: { $size: 0 },
     });
   },
 });

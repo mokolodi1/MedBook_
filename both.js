@@ -62,12 +62,7 @@ findUsersPersonalCollabs = function (searchText) {
 
 // Meteor.users "_transform"
 // does a findOne on Meteor.users and adds some useful functions to that
-MedBook.findUser = function (userId, securityOkay) {
-  if (!securityOkay) {
-    console.log("don't forget to do a security check on the method/publish");
-    console.log("new Error().stack:", new Error().stack);
-  }
-
+MedBook.findUser = function (userId) {
   var user = Meteor.users.findOne(userId);
 
   if (user) {
@@ -84,7 +79,7 @@ MedBook.findUser = function (userId, securityOkay) {
 };
 
 MedBook.ensureUser = function (userId) {
-  var user = MedBook.findUser(userId, true);
+  var user = MedBook.findUser(userId);
 
   if (!user) {
     throw new Meteor.Error("not-logged-in", "Please log in.");
@@ -92,6 +87,67 @@ MedBook.ensureUser = function (userId) {
 
   return user;
 };
+
+/**
+ * @summary Return whether a user has access to an object or collaboration name.
+ *          For objects, this is done by checking either the `collaborations`
+ *          array or the `user_id` field.
+ * @locus Both
+ * @memberOf User
+ * @returns {boolean}
+ * @example
+ * ```js
+ * if (MedBook.findUser(userId).hasAccess(someObject)) {
+ *   // do something
+ * }
+ * if (MedBook.findUser(userId).hasAccess("collaboration name")) {
+ *   // do something
+ * }
+ *
+ * ```
+ */
+function hasAccess (objOrName) {
+  // If objOrName is a name, create a "fake" object with only the
+  // collaborations field. Otherwise just continue on as usual...
+  var obj;
+  if (typeof objOrName === "string") {
+    obj = {
+      collaborations: [objOrName]
+    };
+  } else {
+    obj = objOrName;
+  }
+
+  // if the object is falsey or doesn't have one of the things we can check
+  // for access (collaborations or user_id), return false
+  if (!obj || (!obj.collaborations && !obj.user_id)) {
+    return false;
+  }
+
+  // default to checking the user_id
+  // if user_id is defined but doesn't match, continue
+  if (obj.user_id && obj.user_id === this._id) {
+    return true;
+  }
+
+  if (obj.collaborations) {
+    // convert obj.collaborations into a hash map for fast access
+    var collabObj = _.reduce(obj.collaborations, function (memo, name) {
+      memo[name] = true;
+      return memo;
+    }, {});
+
+    // check to see if there is an intersection between the obj collaborations
+    // and the user's collaborations
+    var userCollaborations = this.getCollaborations.call(this);
+    return _.some(userCollaborations, function (name) {
+      return collabObj[name];
+    });
+  }
+
+  // couldn't verify access
+  return false;
+}
 
 /**
  * @summary Ensure a user has access to an object or collaboration
@@ -105,10 +161,10 @@ MedBook.ensureUser = function (userId) {
  * MedBook.findUser(userId).ensureAccess("collaboration name");
  * ```
  */
-ensureAccess = function (objOrName) {
+function ensureAccess (objOrName) {
   if (this.hasAccess.call(this, objOrName)) {
     return true;
   } else {
     throw new Meteor.Error("permission-denied");
   }
-};
+}

@@ -166,6 +166,12 @@ Template.collabsListCollabs.helpers({
 
 // Template.collabsDisplayCollab
 
+Template.collabsDisplayCollab.onCreated(function () {
+  var instance = this;
+
+  instance.removeClicked = new ReactiveVar(false);
+});
+
 Template.collabsDisplayCollab.helpers({
   trimUserIfNecessary: function (collab) {
     if (collab.startsWith("user:")) {
@@ -177,9 +183,52 @@ Template.collabsDisplayCollab.helpers({
 
 Template.collabsDisplayCollab.events({
   "click .remove-collab": function (event, instance) {
-    var singleObject = instance.parent(2).data;
-    Meteor.call("/collaborations/removeCollab",
-        singleObject, instance.data.collab);
+    var removeClicked = instance.removeClicked;
+
+    function actuallyRemove() {
+
+    }
+
+    if (removeClicked.get()) {
+      // check to see if they're goig to still have access afterwards
+      var tryRemove = instance.parent(2).currObj.get(); // test object
+      var removeName = instance.data.collab;
+      var removeIndex = tryRemove.collaborations.indexOf(removeName);
+      tryRemove.collaborations.splice(removeIndex, 1); // remove it
+
+      var user = MedBook.findUser(Meteor.userId());
+
+      // if they're not going to have access, make sure they're okay with that
+      var accessAfterwards = user.hasAccess(tryRemove);
+      if (!accessAfterwards) {
+        var stillRemove = window.confirm("After removing this collaboration, " +
+            "you will no longer have access to the object. Are you sure " +
+            "you want to continue?");
+        if (!stillRemove) {
+          removeClicked.set(false);
+          return; // quit
+        }
+      }
+
+      // actually do the remove
+      var singleObject = instance.parent(2).data;
+      Meteor.call("/collaborations/removeCollab",
+          singleObject, instance.data.collab);
+
+      // hide the modal if they no longer have access
+      if (!accessAfterwards) {
+        Modal.hide(instance.parent(2));
+      }
+    } else {
+      removeClicked.set(true);
+
+      // wait until propogation finishes before registering event handler
+      Meteor.defer(function () {
+        $("html").one("click",function() {
+          removeClicked.set(false);
+        });
+      });
+    }
   },
   "click .add-collab": function (event, instance) {
     var singleObject = instance.parent(2).data;
