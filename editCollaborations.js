@@ -26,7 +26,6 @@ Template.collabsEditCollaborations.onCreated(function () {
     var collection =
         MedBook.Collections[Template.currentData().collectionString];
     instance.currObj.set(collection.findOne({_id: instance.data.objectId}));
-    console.log("instance.currObj.get():", instance.currObj.get());
   });
 
   // whether #collabs-search is focussed
@@ -186,6 +185,12 @@ Template.collabsDisplayCollab.events({
     var singleObject = instance.parent(2).data;
     Meteor.call("/collaborations/addCollab",
         singleObject, instance.data.collab);
+
+    // close search thing
+    instance.parent(2).searchCollabShow.set(false);
+    $("#collabs-search")[0].value = "";
+    // set this because there's no "keyup" event to reset it
+    instance.parent(2).searchCollabText.set("");
   },
 });
 
