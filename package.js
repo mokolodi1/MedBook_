@@ -1,6 +1,6 @@
 Package.describe({
   name: 'medbook:wrangler-collections',
-  version: '0.0.21',
+  version: '0.0.22',
   // Brief, one-line summary of the package.
   summary: "Collections and import adapters for Wrangler",
   // URL to the Git repository containing the source code for this package.
