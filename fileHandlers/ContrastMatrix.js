@@ -72,7 +72,6 @@ ContrastMatrix.prototype.parseLine =
     }
 
     this.newContrast = {
-      user_id: this.wranglerFile.user_id,
       collaborations: [this.wranglerFile.options.collaboration_label],
       contrast_label: contrast_label,
       contrast_version: contrast_version,

@@ -198,6 +198,18 @@ Wrangler.reviewPanels = {
       ],
     },
   ],
+  mutation: [
+    {
+      name: "mutation_summary",
+      title: "Mutations",
+      description: "These mutation documents will be loaded",
+      css_class: "panel-default",
+      columns: [
+        { heading: "Sample ID", attribute: "sample_label" },
+        { heading: "Mutation count", attribute: "mutation_count" },
+      ],
+    },
+  ],
   metadata: [
     sampleLabelMap,
   ],

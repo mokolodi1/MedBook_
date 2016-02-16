@@ -275,6 +275,17 @@ Wrangler.fileTypes = {
       }),
     }),
   },
+  MutationVCF: {
+    description: "VCF Mutation",
+    schema: new SimpleSchema({
+      collaboration_label: { type: String },
+      description: {
+        type: String,
+        optional: true,
+        custom: requiredOnCreate
+      },
+    }),
+  },
 
   // // NOTE: people can still run it, but the client picklist won't show it
   // ArachneRegulon: {

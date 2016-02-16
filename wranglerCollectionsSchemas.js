@@ -52,6 +52,7 @@ WranglerFiles.attachSchema(new SimpleSchema({
       "network",
       "contrast",
       "signature",
+      "mutation",
       "metadata",
     ],
     optional: true,
@@ -120,18 +121,6 @@ WranglerDocuments.attachSchema(new SimpleSchema({
     blackbox: true,
   },
 }));
-
-
-
-ensureSubmissionEditable = function (userId, submission_id) {
-  var submission = WranglerSubmissions.findOne(submission_id);
-  if (submission.user_id !== userId) {
-    throw new Meteor.Error("submission-not-available",
-        "The submission _id provided does not exist or is not available" +
-        " to you");
-  }
-  return submission;
-};
 
 WranglerSubmissions.allow({
   insert: function (userId, doc) {
