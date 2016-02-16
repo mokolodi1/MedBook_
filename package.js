@@ -24,7 +24,7 @@ Package.onUse(function (api) {
     "medbook:primary-collections@0.0.15",
     "mokolodi1:helpers@0.0.9",
     "twbs:bootstrap@3.3.6",
-    "aldeed:template-extension@4.0.0",
+    "aldeed:template-extension@3.4.3 || 4.0.0",
     "peppelg:bootstrap-3-modal@1.0.4", // to make the modal show up
     "reactive-var",
     // "sacha:spin@2.3.1",
