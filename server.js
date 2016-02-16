@@ -19,6 +19,73 @@ Meteor.publish("/collaborations/user", function (userId) {
   });
 });
 
+// publish a single object with collaboration security
+Meteor.publish("/collaborations/singleObject", function (singleObject) {
+  check(singleObject, singleObjectSchema);
+
+  var user = MedBook.ensureUser(this.userId);
+  var collection = MedBook.Collections[singleObject.collectionString];
+  var obj = collection.findOne(singleObject.objectId);
+  user.ensureAccess(obj);
+
+  return collection.find({
+    _id: singleObject.objectId
+  });
+});
+
+// publish the users collection
+Meteor.publish("/collaborations/searchUsers", function (searchText) {
+  check(searchText, String);
+
+  return findUsersPersonalCollabs(searchText);
+});
+
+Meteor.methods({
+  "/collaborations/addCollab": function (singleObject, collabName) {
+    check(singleObject, singleObjectSchema);
+    check(collabName, String);
+
+    var user = MedBook.ensureUser(this.userId);
+    var collection = MedBook.Collections[singleObject.collectionString];
+    var obj = collection.findOne(singleObject.objectId);
+    user.ensureAccess(obj);
+
+    // if not a personal collaboration, make sure we have access
+    // NOTE: anyone can add data to anyone's personal collaboration
+    if (!collabName.startsWith("user:")) {
+      user.ensureAccess(collabName);
+    }
+
+    collection.update(singleObject.objectId, {
+      $push: {
+        "collaborations": collabName
+      }
+    });
+  },
+  "/collaborations/removeCollab": function (singleObject, collabName) {
+    check(singleObject, singleObjectSchema);
+    check(collabName, String);
+
+    var user = MedBook.ensureUser(this.userId);
+    var collection = MedBook.Collections[singleObject.collectionString];
+    var obj = collection.findOne(singleObject.objectId);
+    user.ensureAccess(obj);
+
+    // if not a personal collaboration, make sure we have access
+    // NOTE: anyone can add data to anyone's personal collaboration
+    // NOTE: can't remove collaborations you don't have access to
+    if (!collabName.startsWith("user:")) {
+      user.ensureAccess(collabName);
+    }
+
+    collection.update(singleObject.objectId, {
+      $pull: {
+        "collaborations": collabName
+      }
+    });
+  },
+});
+
 // Accounts.onCreateUser is called each time a user is created. This code
 // ensures that user.collaborations is setup correctly.
 Accounts.onCreateUser(function (options, user) {

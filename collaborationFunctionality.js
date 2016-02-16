@@ -1,38 +1,33 @@
-// Meteor.users "_transform"
-// does a findOne on Meteor.users and adds some useful functions to that
-MedBook.findUser = function (userId) {
-  var user = Meteor.users.findOne(userId);
-
-  if (!user) {
-    throw new Meteor.Error("user-not-found", "No use exists with that _id");
-  }
-
-  _.extend(user, {
-    getCollaborations: getCollaborations,
-    hasAccess: hasAccess,
-    ensureAccess: ensureAccess,
-  });
-
-  return user;
-};
-
 /**
- * @summary Return whether a user has access to an object by checking either
- *          the `collaborations` array or the `user_id` field.
+ * @summary Return whether a user has access to an object or collaboration name.
+ *          For objects, this is done by checking either the `collaborations`
+ *          array or the `user_id` field.
  * @locus Server
  * @memberOf User
- * @name hasAccess
- * @version 1.2.3
  * @returns {boolean}
  * @example
  * ```js
  * if (MedBook.findUser(userId).hasAccess(someObject)) {
  *   // do something
  * }
- }
+ * if (MedBook.findUser(userId).hasAccess("collaboration name")) {
+ *   // do something
+ * }
+ *
  * ```
  */
-function hasAccess (obj) {
+hasAccess = function (objOrName) {
+  // If objOrName is a name, create a "fake" object with only the
+  // collaborations field. Otherwise just continue on as usual...
+  var obj;
+  if (typeof objOrName === "string") {
+    obj = {
+      collaborations: [objOrName]
+    };
+  } else {
+    obj = objOrName;
+  }
+
   // if the object is falsey or doesn't have one of the things we can check
   // for access (collaborations or user_id), return false
   if (!obj || (!obj.collaborations && !obj.user_id)) {
@@ -62,46 +57,20 @@ function hasAccess (obj) {
 
   // couldn't verify access
   return false;
-}
-
-/**
- * @summary Ensure a user has access to an object. (otherwise throw an Error)
- * @locus Server
- * @memberOf User
- * @name ensureAccess
- * @version 1.2.3
- * @returns {boolean}
- * @example
- * ```js
- * MedBook.findUser(userId).ensureAccess(SampleGroups.findOne(sampleGroupId));
- * ```
- */
-function ensureAccess (obj) {
-  if (!obj || !obj.collaborations) {
-    throw new Meteor.Error("permission-denied");
-  }
-
-  if (this.hasAccess.call(this, obj)) {
-    return true;
-  } else {
-    throw new Meteor.Error("permission-denied");
-  }
-}
+};
 
 /**
  * @summary Update and return the list of collaborations to which this user
  *          has access.
  * @locus Server
  * @memberOf User
- * @name getCollaborations
- * @version 1.2.3
  * @returns {Array}
  * @example
  * ```js
  * MedBook.findUser(userId).getCollaborations()
  * ```
  */
-function getCollaborations () {
+getCollaborations = function () {
   if (!this.collaborations || !this.collaborations.personal) {
     throw new Meteor.Error("User document must have collaborations");
   }
@@ -118,7 +87,7 @@ function getCollaborations () {
   });
 
   return collaborations;
-}
+};
 
 // =============================================================================
 
@@ -141,8 +110,6 @@ Collaborations = new Meteor.Collection("collaboration", {
  *          Returns the collaborators that have access to this collaboration.
  * @locus Server
  * @memberOf Collaboration
- * @name getAssociatedCollaborators
- * @version 1.2.3
  * @returns {Array}
  * @example
  * ```js
@@ -200,8 +167,6 @@ function getAssociatedCollaborators (doc) {
  *          Returns the collaborations that a given collaborator has access to.
  * @locus Server
  * @memberOf Collaboration
- * @name getAssociatedCollaborations
- * @version 1.2.3
  * @returns {Array}
  * @example
  * ```js

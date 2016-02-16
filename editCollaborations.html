@@ -1,0 +1,132 @@
+<template name="collabsEditCollaborations">
+  <div class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h4 class="modal-title">
+            Edit collaborations
+            {{#if loadedObject}}
+              for {{> collabsDescriptionText}}
+            {{/if}}
+          </h4>
+        </div>
+
+        <div class="modal-body">
+          {{#if loadedObject}}
+            <h5>Add</h5>
+            <div class="row">
+              <div class="form-group">
+                <div class="col-xs-{{#if searchCollabShow}}10{{else}}12{{/if}}">
+                  <input id="collabs-search"
+                      class="form-control" type="text"
+                      placeholder="Search for users or collaborations...">
+                </div>
+                {{#if searchCollabShow}}
+                  <div class="col-xs-2">
+                    <button id="cancel-search" class="btn btn-primary"
+                        type="button">
+                      Cancel
+                    </button>
+                  </div>
+                {{/if}}
+              </div>
+            </div>
+
+            {{#if getInstanceReactive "searchCollabShow"}}
+              {{#if searchBlank}}
+                <p class="help-block">
+                  Start typing to search for users or collaborations...
+                </p>
+              {{else}}
+                {{#if length searchCollaborations}}
+                  <h5>Matching collaborations</h5>
+                  {{> collabsListCollabs cursor=searchCollaborations
+                      button="addCollab"}}
+                {{/if}}
+
+                {{#if length searchUsers}}
+                  <h5>Matching people</h5>
+                  {{> collabsListCollabs cursor=searchUsers button="addCollab"}}
+                {{/if}}
+
+                {{#if bothEmpty searchCollaborations searchUsers}}
+                  {{#if usersSubReady}}
+                    <p class="help-block">
+                      No users or collaborations match your search.
+                    </p>
+                  {{else}}
+                    <p class="help-block">
+                      Loading...
+                    </p>
+                  {{/if}}
+                {{/if}}
+              {{/if}}
+            {{else}}
+              {{#if length nonPersonalCollabs}}
+                <h5>Collaborations</h5>
+                {{> collabsListCollabs cursor=nonPersonalCollabs
+                    button="removeCollab"}}
+              {{/if}}
+
+              {{#if length personalCollabs}}
+                <h5>People</h5>
+                {{> collabsListCollabs cursor=personalCollabs
+                    button="removeCollab"}}
+              {{/if}}
+            {{/if}}
+          {{else}}
+            {{> spinner}}
+          {{/if}}
+        </div>
+
+        {{#unless searchCollabShow}}
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">
+              Done
+            </button>
+          </div>
+        {{/unless}}
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="collabsListCollabs">
+  <ul class="list-group">
+    {{#each cursor}}
+      {{> collabsDisplayCollab collab=this button=button}}
+    {{/each}}
+  </ul>
+</template>
+
+<template name="collabsDisplayCollab">
+  <li class="list-group-item">
+    {{trimUserIfNecessary collab}}
+
+    {{#if compare button "removeCollab"}}
+      <button type="button"
+          class="remove-collab pull-right btn btn-danger btn-xs">
+        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        Remove
+      </button>
+    {{/if}}
+
+    {{#if compare button "addCollab"}}
+      <button type="button"
+          class="add-collab pull-right btn btn-info btn-xs">
+        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+        Add
+      </button>
+    {{/if}}
+  </li>
+</template>
+
+<template name="collabsDescriptionText">
+  {{#with currObj}}
+    {{! NOTE: collectionString still works b/c it's in a helper}}
+    {{#if compare collectionString "SampleGroups"}}
+      <b>{{sample_group_label}}</b> version <b>{{sample_group_version}}</b>
+    {{/if}}
+  {{/with}}
+</template>

@@ -10,3 +10,14 @@ Tracker.autorun(function () {
     Meteor.subscribe("/collaborations/user", userId);
   }
 });
+
+// These functions are client-only versions of those on the server.
+// They grant the client permission to just about everything.
+
+hasAccess = function (objOrName) {
+  return true; // lol
+};
+
+getCollaborations = function () {
+  return this.collaborations.memberOf;
+};
