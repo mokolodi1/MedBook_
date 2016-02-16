@@ -13,15 +13,4 @@ GeneAnnotation.attachSchema(new SimpleSchema({
     label: "GISTIC copy number",
     optional: true,
   },
-
-  // annotations: { // TODO: is this necessary?
-  //   type: new SimpleSchema({
-  //     gistic_copy_number: {
-  //       type: Number, decimal: true,
-  //       label: "GISTIC copy number",
-  //       optional: true,
-  //     },
-  //   }),
-  //   optional: true, // simply because collection2 can't do upserts
-  // },
 }));

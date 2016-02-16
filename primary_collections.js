@@ -186,6 +186,14 @@ var mutationSchema = new SimpleSchema([
     "gene_label": { type: String },
     "sample_label": { type: String },
 
+    mutation_caller: {
+      type: String,
+      allowedValues: [
+        "MuTect",
+        "MuSE",
+      ],
+    },
+
     "chromosome": { type: String },
     "effect_impact": { type: String },
 
@@ -264,21 +272,6 @@ var mutationSchema = new SimpleSchema([
     // "effects": { type: [Object], label:"Predicted effects Effect ( Effect_Impact | Functional_Class | Codon_Change | Amino_Acid_change| Amino_Acid_length | Gene_Name | Transcript_BioType | Gene_Coding | Transcript_ID | Exon  | GenotypeNum [ | ERRORS | WARNINGS ] )" , optional:true }
   }
 ]);
-mutationSchema.fieldOrder = [
-  // TODO: ugh
-  "gene_label",
-  "sample_label",
-  "mutation_type",
-
-  "effect_impact",
-
-  "reference_allele",
-  "variant_allele",
-
-  "chromosome",
-  "start_position",
-  "end_position",
-];
 
 
 
