@@ -7,7 +7,6 @@ var sampleSchema = new SimpleSchema({
 });
 
 SampleGroups.attachSchema(new SimpleSchema({
-  user_id: { type: String },
   collaborations: { type: [String] },
 
   date_created: { type: Date, autoValue: dateCreatedAutoValue },

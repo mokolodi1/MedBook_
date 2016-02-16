@@ -7,7 +7,6 @@ var sampleSchema = new SimpleSchema({
 });
 
 Contrasts.attachSchema(new SimpleSchema({
-  user_id: { type: String },
   collaborations: { type: [String] },
 
   contrast_label: { type: String },
