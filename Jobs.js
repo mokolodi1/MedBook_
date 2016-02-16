@@ -16,6 +16,7 @@ Jobs.attachSchema(new SimpleSchema({
       "ExportFile",
       "ReloadGenesCollection",
       "GeneTranscriptMappings",
+      "UpDownGenes",
     ],
   },
   user_id: { type: Meteor.ObjectID },
