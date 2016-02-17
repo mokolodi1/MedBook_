@@ -25,7 +25,7 @@ Collaborations.attachSchema(new SimpleSchema({
   isUnlisted: { type: Boolean },
   invitations: { type: [String], optional: true },
   requests: { type: [String], optional: true },
-  requiresAdministratorApprovalToJoin: { type: Boolean }
+  adminApprovalRequired: { type: Boolean }
 }));
 
 

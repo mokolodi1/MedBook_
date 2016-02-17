@@ -33,7 +33,7 @@ getCollaborations = function () {
 // Collaborations
 
 // there is a transform on the server
-Collaborations = new Meteor.Collection("collaboration", {
+Collaborations = new Meteor.Collection("collaborations", {
   transform: function (doc) {
     // NOTE: this might break things by not using `return new Collaboration(doc)`.
     // I didn't want to do that before because I didn't think it'd work, and now
