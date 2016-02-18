@@ -22,10 +22,10 @@ singleObjectSchema = new SimpleSchema({
 });
 
 
-// bring up the modal that allows you to edit the collaborations of an object
+// bring up the modal that allows you to edit the collaborators of an object
 MedBook.editCollaborations =
     function (collectionString, objectId, editingField) {
-  if (!editingField) {
+  if (!editingField) { // default: works for most objects
     editingField = "collaborations";
   }
 

@@ -215,10 +215,16 @@ Template.collabsDisplayCollab.events({
       // actually do the remove
       var singleObject = instance.parent(2).data;
       Meteor.call("/collaborations/pullCollaborator",
-          singleObject, instance.data.collab);
+          singleObject, instance.data.collab, function (error, result) {
+        if (error && error.error === "no-collaborators-would-remain") {
+          alert("You cannot remove the last " + editingField.slice(0, -1) +
+              " from the object as no one would have access to it. " +
+              "To delete the object, use the delete button.");
+        }
+      });
 
       // hide the modal if they no longer have access
-      if (!accessAfterwards) {
+      if (scaryMessage) {
         Modal.hide(instance.parent(2));
       }
     } else {

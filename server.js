@@ -93,6 +93,20 @@ Meteor.methods({
       user.ensureAccess(collabName);
     }
 
+    // Make sure they're not removing the last collaborator of the
+    // list (this would in practice "delete") the object by making
+    // it impossible to access.
+    // Removing all from "collaborators" is okay because the admins can still
+    // access the object.
+    var currentCollabs = obj[singleObject.editingField];
+    if (singleObject.editingField !== "collaborators" &&
+        currentCollabs.length === 1 && currentCollabs[0] === collabName) {
+      throw new Meteor.Error("no-collaborators-would-remain",
+          "By removing the last collaborator, the object would become " +
+          "impossible to access.");
+    }
+
+    // actually do the remove
     var pullObject = {};
     pullObject[singleObject.editingField] = collabName;
     collection.update(singleObject.objectId, {
