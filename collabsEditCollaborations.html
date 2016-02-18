@@ -5,9 +5,10 @@
 
         <div class="modal-header">
           <h4 class="modal-title">
-            Edit collaborations
             {{#if loadedObject}}
-              for {{> collabsDescriptionText}}
+              {{> collabsModalTitle}}
+            {{else}}
+              Edit collaborations
             {{/if}}
           </h4>
         </div>
@@ -132,11 +133,13 @@
   </li>
 </template>
 
-<template name="collabsDescriptionText">
-  {{#with currObj}}
-    {{! NOTE: collectionString still works b/c it's in a helper}}
-    {{#if compare collectionString "SampleGroups"}}
-      <b>{{sample_group_label}}</b> version <b>{{sample_group_version}}</b>
-    {{/if}}
-  {{/with}}
+<template name="collabsModalTitle">
+  {{#if compare collectionString "SampleGroups"}}
+    Edit collaborations for
+    <b>{{currObj.sample_group_label}}</b> version <b>{{currObj.sample_group_version}}</b>
+  {{/if}}
+
+  {{#if compare collectionString "Collaborations"}}
+    Edit <b>{{editingField}}</b> for <b>{{currObj.name}}</b>
+  {{/if}}
 </template>

@@ -245,13 +245,10 @@ Template.collabsDisplayCollab.events({
   },
 });
 
-// Template.collabsDescriptionText
+// Template.collabsModalTitle
 
-Template.collabsDescriptionText.helpers({
+Template.collabsModalTitle.helpers({
   currObj: function () {
     return Template.instance().parent().currObj.get();
-  },
-  collectionString: function () { // for use within a #with
-    return Template.instance().data.collectionString;
   },
 });
