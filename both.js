@@ -1,7 +1,50 @@
+// used to validate the object used to describe a single object when a user
+// is editing its collaborations
+singleObjectSchema = new SimpleSchema({
+  collectionString: {
+    type: String,
+    allowedValues: [
+      "SampleGroups",
+      "Collaborations",
+    ],
+  },
+  objectId: { type: String },
+  editingField: {
+    type: String,
+    allowedValues: [
+      "collaborations",
+      "collaborators",
+      "administrators",
+    ],
+    // TODO: custom: only allow collaborators/administrators
+    // if collectionString === "Collaborations"
+  },
+});
+
+
+// bring up the modal that allows you to edit the collaborations of an object
+MedBook.editCollaborations =
+    function (collectionString, objectId, editingField) {
+  if (!editingField) {
+    editingField = "collaborations";
+  }
+
+  var singleObject = {
+    collectionString: collectionString,
+    objectId: objectId,
+    editingField: editingField,
+  };
+  check(singleObject, singleObjectSchema);
+
+  Modal.show("collabsEditCollaborations", singleObject, {
+    keyboard: false // don't close on ESC key
+  });
+};
+
 // custom validation error message for when the collaboration name starts
 // with "user:"
 SimpleSchema.messages({
-  nameCantStartWithUser: "Name can't start with \"user:\"",
+  collabNameCantStartWithUser: "Collaboration mames can't start with \"user:\"",
 });
 // attach the schema to collaborations seperately from defining it because it's
 // defined seperately on the server and client
@@ -13,34 +56,26 @@ Collaborations.attachSchema(new SimpleSchema({
       // don't allow name to start with "user:"
       var name = this.value;
       if (name.startsWith("user:")) {
-        return "nameCantStartWithUser";
+        return "collabNameCantStartWithUser";
       }
     },
   },
   description: { type: String },
 
   collaborators: { type: [String] },
+  // if there are no administrators, the collaboration is considered deleted
+  // and cannot be managed or recreated
   administrators: { type: [String] },
 
-  isUnlisted: { type: Boolean },
+  isUnlisted: { type: Boolean, label: "Unlisted" },
   invitations: { type: [String], optional: true },
   requests: { type: [String], optional: true },
-  adminApprovalRequired: { type: Boolean }
-}));
-
-
-
-// used to validate the object used to describe a single object when a user
-// is editing its collaborations
-singleObjectSchema = new SimpleSchema({
-  collectionString: {
-    type: String,
-    allowedValues: [
-      "SampleGroups",
-    ],
+  adminApprovalRequired: {
+    type: Boolean,
+    label: "Admin approval required to join",
   },
-  objectId: { type: String },
-});
+}));
+MedBook.Collections.Collaborations = Collaborations;
 
 
 // Search Meteor.users for where collaborations.personal contains searchText.
@@ -72,6 +107,8 @@ MedBook.findUser = function (userId) {
       getCollaborations: getCollaborations,
       hasAccess: hasAccess,
       ensureAccess: ensureAccess,
+      isAdmin: isAdmin,
+      ensureAdmin: ensureAdmin,
     });
   }
 
@@ -89,6 +126,73 @@ MedBook.ensureUser = function (userId) {
 };
 
 /**
+ * @summary Return whether a user is an administrator of a collaboration.
+ * @locus Both
+ * @memberOf User
+ * @returns {boolean}
+ * @example
+ * ```js
+ * if (MedBook.findUser(userId).isAdmin("collaboration name")) {
+ *   // do something
+ * }
+ * if (MedBook.findUser(userId).isAdmin(collaborationObject)) {
+ *   // do something
+ * }
+ * ```
+ */
+function isAdmin(collaborationOrName) {
+  var collaboration;
+
+  if (typeof collaborationOrName === "string") {
+    collaboration = Collaborations.findOne({name: collaborationOrName});
+  } else {
+    collaboration = collaborationOrName;
+  }
+
+  if (!collaboration.administrators) {
+    return false;
+  }
+
+  // convert the collaborations the user is a part of into a hash table for
+  // quick access
+  var userCollabs = this.getCollaborations.call(this);
+  var userCollabObj = _.reduce(userCollabs, function (memo, collabName) {
+    memo[collabName] = true;
+    return memo;
+  }, {});
+
+  // loop through the list of administrators and check if the user is a
+  // member of any of them
+  return _.some(collaboration.administrators, function (collabName) {
+    return userCollabObj[collabName];
+  });
+}
+
+/**
+ * @summary Ensure a user is an administrator of a collaboration. If the user
+ *          is not an administrator, throw an error.
+ * @locus Both
+ * @memberOf User
+ * @returns {boolean}
+ * @example
+ * ```js
+ * MedBook.findUser(userId).ensureAdmin("collaboration name");
+ * // security-protected code
+ *
+ * // or
+ * MedBook.findUser(userId).ensureAdmin(collaborationObject);
+ * // security-protected code
+ * ```
+ */
+function ensureAdmin(collaborationOrName) {
+  if (this.isAdmin.call(this, collaborationOrName)) {
+    return true;
+  } else {
+    throw new Meteor.Error("permission-denied");
+  }
+}
+
+/**
  * @summary Return whether a user has access to an object or collaboration name.
  *          For objects, this is done by checking either the `collaborations`
  *          array or the `user_id` field.
@@ -97,13 +201,12 @@ MedBook.ensureUser = function (userId) {
  * @returns {boolean}
  * @example
  * ```js
- * if (MedBook.findUser(userId).hasAccess(someObject)) {
- *   // do something
- * }
- * if (MedBook.findUser(userId).hasAccess("collaboration name")) {
- *   // do something
- * }
+ * MedBook.findUser(userId).ensureAccess(SampleGroups.findOne(sampleGroupId));
+ * // security-protected code
  *
+ * // or
+ * MedBook.findUser(userId).ensureAccess("collaboration name");
+ * // security-protected code
  * ```
  */
 function hasAccess (objOrName) {
@@ -132,8 +235,8 @@ function hasAccess (objOrName) {
 
   if (obj.collaborations) {
     // convert obj.collaborations into a hash map for fast access
-    var collabObj = _.reduce(obj.collaborations, function (memo, name) {
-      memo[name] = true;
+    var collabObj = _.reduce(obj.collaborations, function (memo, collabName) {
+      memo[collabName] = true;
       return memo;
     }, {});
 
@@ -158,7 +261,11 @@ function hasAccess (objOrName) {
  * @example
  * ```js
  * MedBook.findUser(userId).ensureAccess(SampleGroups.findOne(sampleGroupId));
+ * // security-protected code
+ *
+ * // or
  * MedBook.findUser(userId).ensureAccess("collaboration name");
+ * // security-protected code
  * ```
  */
 function ensureAccess (objOrName) {

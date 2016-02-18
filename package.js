@@ -35,8 +35,8 @@ Package.onUse(function (api) {
 
   api.addFiles([
     "client.js",
-    "editCollaborations.html",
-    "editCollaborations.js",
+    "collabsEditCollaborations.html",
+    "collabsEditCollaborations.js",
   ], "client");
 
   api.addFiles([

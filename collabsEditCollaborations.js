@@ -1,16 +1,3 @@
-// bring up the modal that allows you to edit the collaborations of an object
-MedBook.editCollaborations = function (collectionString, objectId) {
-  var singleObject = {
-    collectionString: collectionString,
-    objectId: objectId,
-  };
-  check(singleObject, singleObjectSchema);
-
-  Modal.show("collabsEditCollaborations", singleObject, {
-    keyboard: false // don't close on ESC key
-  });
-};
-
 // Template.collabsEditCollaborations
 
 Template.collabsEditCollaborations.onCreated(function () {
@@ -85,12 +72,12 @@ Template.collabsEditCollaborations.helpers({
 
   // collaboration helpers
   nonPersonalCollabs: function () {
-    var collaborations = Template.instance().currObj.get().collaborations;
-    return _.filter(collaborations, lodash.negate(isPersonal));
+    var collaborators = Template.instance().currObj.get()[this.editingField];
+    return _.filter(collaborators, lodash.negate(isPersonal));
   },
   personalCollabs: function () {
-    var collaborations = Template.instance().currObj.get().collaborations;
-    return _.filter(collaborations, isPersonal);
+    var collaborators = Template.instance().currObj.get()[this.editingField];
+    return _.filter(collaborators, isPersonal);
   },
   searchCollaborations: function () {
     var memberOf = Meteor.user().collaborations.memberOf;
@@ -185,25 +172,40 @@ Template.collabsDisplayCollab.events({
   "click .remove-collab": function (event, instance) {
     var removeClicked = instance.removeClicked;
 
-    function actuallyRemove() {
-
-    }
-
     if (removeClicked.get()) {
+      var singleObject = instance.parent(2).data;
+
       // check to see if they're goig to still have access afterwards
       var tryRemove = instance.parent(2).currObj.get(); // test object
       var removeName = instance.data.collab;
-      var removeIndex = tryRemove.collaborations.indexOf(removeName);
-      tryRemove.collaborations.splice(removeIndex, 1); // remove it
+      var editingField = singleObject.editingField;
+      var removeIndex = tryRemove[editingField].indexOf(removeName);
+      tryRemove[editingField].splice(removeIndex, 1); // remove it
 
       var user = MedBook.findUser(Meteor.userId());
 
       // if they're not going to have access, make sure they're okay with that
-      var accessAfterwards = user.hasAccess(tryRemove);
-      if (!accessAfterwards) {
-        var stillRemove = window.confirm("After removing this collaboration, " +
-            "you will no longer have access to the object. Are you sure " +
-            "you want to continue?");
+      var scaryMessage = null;
+      if (editingField === "collaborations") { // regular object
+        // TODO: figure out a better word for "object"
+        if (!user.hasAccess(tryRemove)) {
+          scaryMessage = "After removing this collaboration, " +
+              "you will no longer have access to this object. Are you sure " +
+              "you want to continue?";
+        }
+      } else if (editingField === "administrators") {
+        if (!user.isAdmin(tryRemove)) {
+          scaryMessage = "After removing this collaboration, " +
+              "you will no longer be an administrator. Are you sure " +
+              "you want to continue?";
+        }
+      } else if (editingField === "collaborators") {
+        // that's okay: they can always add themselves back, right?
+      }
+
+      // show the scary message (if present) and cancel if they get scared
+      if (scaryMessage) {
+        var stillRemove = window.confirm(scaryMessage);
         if (!stillRemove) {
           removeClicked.set(false);
           return; // quit
@@ -212,7 +214,7 @@ Template.collabsDisplayCollab.events({
 
       // actually do the remove
       var singleObject = instance.parent(2).data;
-      Meteor.call("/collaborations/removeCollab",
+      Meteor.call("/collaborations/pullCollaborator",
           singleObject, instance.data.collab);
 
       // hide the modal if they no longer have access
@@ -232,7 +234,7 @@ Template.collabsDisplayCollab.events({
   },
   "click .add-collab": function (event, instance) {
     var singleObject = instance.parent(2).data;
-    Meteor.call("/collaborations/addCollab",
+    Meteor.call("/collaborations/pushCollaborator",
         singleObject, instance.data.collab);
 
     // close search thing
