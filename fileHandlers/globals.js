@@ -41,7 +41,7 @@ ensureClinicalExists = function (Study_ID, Sample_ID) {
 
   if (this.wranglerPeek) {
     var studiesQuery = {
-      id: Study_ID,
+      study_label: Study_ID,
       Sample_IDs: Sample_ID,
       Patient_IDs: Patient_ID,
     };
@@ -63,7 +63,7 @@ ensureClinicalExists = function (Study_ID, Sample_ID) {
     });
 
     Studies.update({
-      id: Study_ID
+      study_label: Study_ID
     }, {
       $addToSet: {
         Sample_IDs: Sample_ID,

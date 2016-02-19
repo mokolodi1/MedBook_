@@ -19,7 +19,7 @@ Package.onUse(function(api) {
   api.use("aldeed:simple-schema@1.3.3");
   api.use("aldeed:autoform@5.5.1");
   api.use("mokolodi1:helpers@0.0.3");
-  api.use("medbook:primary-collections@0.0.16");
+  api.use("medbook:primary-collections@0.0.17");
 
   // the definitions are loaded first so that indexes can be ensured in
   // the file handlers

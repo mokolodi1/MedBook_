@@ -1,12 +1,12 @@
-var ignoredGenesPanel = {
-  name: "ignored_genes",
-  title: "Invalid genes",
-  description: "The following genes are not valid HUGO genes and will be not be imported.",
-  css_class: "panel-danger",
-  columns: [
-    { heading: "Gene", attribute: "gene" },
-  ],
-};
+// var ignoredGenesPanel = {
+//   name: "ignored_genes",
+//   title: "Invalid genes",
+//   description: "The following genes are not valid HUGO genes and will be not be imported.",
+//   css_class: "panel-danger",
+//   columns: [
+//     { heading: "Gene", attribute: "gene" },
+//   ],
+// };
 
 var sampleDataExists = {
   name: "sample_data_exists",
@@ -39,15 +39,15 @@ var sampleLabelMap = {
   ],
 };
 
-var mappedGenesNoDescription = {
-  name: "mapped_genes",
-  title: "Mapped genes",
-  css_class: "panel-default",
-  columns: [
-    { heading: "Gene in file", attribute: "gene_in_file" },
-    { heading: "MedBook gene name", attribute: "mapped_gene" },
-  ],
-};
+// var mappedGenesNoDescription = {
+//   name: "mapped_genes",
+//   title: "Mapped genes",
+//   css_class: "panel-default",
+//   columns: [
+//     { heading: "Gene in file", attribute: "gene_in_file" },
+//     { heading: "MedBook gene name", attribute: "mapped_gene" },
+//   ],
+// };
 
 function assaySampleSummary (lineCountHeading) {
   return {
@@ -85,11 +85,11 @@ var geneAssayPanels = [
   newClinicalData,
   sampleDataExists,
   sampleLabelMap,
-  ignoredGenesPanel,
-  _.extend(mappedGenesNoDescription, {
-    description: "These genes are valid but are going to be mapped " +
-        "into MedBook gene namespace."
-  }),
+  // ignoredGenesPanel,
+  // _.extend(mappedGenesNoDescription, {
+  //   description: "These genes are valid but are going to be mapped " +
+  //       "into MedBook gene namespace."
+  // }),
 ];
 
 Wrangler.reviewPanels = {
@@ -100,10 +100,10 @@ Wrangler.reviewPanels = {
     newClinicalData,
     sampleDataExists,
     sampleLabelMap,
-    _.extend(mappedGenesNoDescription, {
-      description: "After mapping from transcript ID to gene name, these " +
-          "genes will be renamed for consistancy within MedBook.",
-    }),
+    // _.extend(mappedGenesNoDescription, {
+    //   description: "After mapping from transcript ID to gene name, these " +
+    //       "genes will be renamed for consistancy within MedBook.",
+    // }),
   ],
   network: [
     {
@@ -132,11 +132,11 @@ Wrangler.reviewPanels = {
         { heading: "Network version", attribute: "network_version" },
       ],
     },
-    ignoredGenesPanel,
-    _.extend(mappedGenesNoDescription, {
-      description: "These genes are valid but are going to be mapped " +
-          "into MedBook gene namespace."
-    }),
+    // ignoredGenesPanel,
+    // _.extend(mappedGenesNoDescription, {
+    //   description: "These genes are valid but are going to be mapped " +
+    //       "into MedBook gene namespace."
+    // }),
   ],
   contrast: [
     {

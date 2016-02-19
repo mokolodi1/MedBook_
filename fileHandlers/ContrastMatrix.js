@@ -86,7 +86,7 @@ ContrastMatrix.prototype.parseLine =
     // check studies to see if the collaboration has access
     var collaboration_label = this.wranglerFile.options.collaboration_label;
     var study = Studies.findOne({
-      id: study_label,
+      study_label: study_label,
       collaborations: collaboration_label,
     });
     if (!study) {
