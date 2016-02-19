@@ -42,6 +42,7 @@ Package.onUse(function(api) {
   addAndExport(api, "IsoformExpression");
   // api.export("ExpressionIsoform"); // old version of IsoformExpression
   addAndExport(api, "GeneAnnotation");
+  addAndExport(api, "Mutations");
 
   // genomic-based collections
   addAndExport(api, "Signatures");
