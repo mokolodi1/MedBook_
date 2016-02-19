@@ -128,10 +128,7 @@ Meteor.methods({
 
 
 
-
-// Accounts.onCreateUser is called each time a user is created. This code
-// ensures that user.collaborations is setup correctly.
-Accounts.onCreateUser(function (options, user) {
+function getDefaultCollabs (user) {
   var email_address = user.emails[0].address;
   var personal = "user:" + email_address;
 
@@ -139,17 +136,35 @@ Accounts.onCreateUser(function (options, user) {
     throw new Meteor.Error("Can't figure out email address from user obj");
   }
 
-  user.collaborations = {
+  return {
     email_address: email_address,
     personal: personal,
     memberOf: [personal],
   };
+}
+
+// Accounts.onCreateUser is called each time a user is created. This code
+// ensures that user.collaborations is setup correctly.
+Accounts.onCreateUser(function (options, user) {
+  user.collaborations = getDefaultCollabs(user);
 
   // We still want the default hook's 'profile' behavior.
   if (options.profile) {
     user.profile = options.profile;
   }
 
-  console.log("user:", user);
   return user;
+});
+
+// make absolutely sure user.collaborations is set
+Accounts.onLogin(function (loginObj) {
+  var collabs = loginObj.user.collaborations;
+  // also check "email_address" and "personal" just in case
+  if (!collabs || !collabs.email_address || !collabs.personal) {
+    Meteor.users.update(user._id, {
+      $set: {
+        collaborations: getDefaultCollabs(user),
+      }
+    });
+  }
 });

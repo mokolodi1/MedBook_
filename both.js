@@ -6,6 +6,7 @@ singleObjectSchema = new SimpleSchema({
     allowedValues: [
       "SampleGroups",
       "Collaborations",
+      "Studies",
     ],
   },
   objectId: { type: String },
