@@ -10,7 +10,7 @@ var normalValue = {
 
 GeneExpression.attachSchema(new SimpleSchema({
   study_label: { type: String, optional: true },
-  collaborations: { type: [String] },
+  collaborations: { type: [String], min: 1 },
   gene_label: { type: String },
 
   sample_label: { type: String },

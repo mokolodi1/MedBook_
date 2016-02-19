@@ -29,6 +29,7 @@ Package.onUse(function(api) {
   api.addFiles("globals.js");
 
   // base collections
+  addAndExport(api, "Studies");
   addAndExport(api, "Samples");
   addAndExport(api, "SampleGroups");
   addAndExport(api, "Contrasts");

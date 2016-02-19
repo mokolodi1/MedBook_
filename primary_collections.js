@@ -317,9 +317,6 @@ Mutations.attachSchema(mutationSchema);
 
 // Pathways = new Meteor.Collection("pathways");
 // Pathways.attachSchema(pathwaySchema);
-//
-// Studies = new Meteor.Collection("studies");
-// Studies.attachSchema(studiesSchema);
 
 // not really data
 
@@ -329,5 +326,3 @@ QualityControlPlots.attachSchema(qualityControlPlotSchema);
 // noooo there are no schemas for these
 
 Clinical_Info = new Meteor.Collection("Clinical_Info");
-
-Studies = new Meteor.Collection("studies");
