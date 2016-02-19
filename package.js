@@ -1,6 +1,6 @@
 Package.describe({
   name: 'medbook:collaborations',
-  version: '2.4.10',
+  version: '2.4.11',
   summary: 'Collaboration based security architecture (similar to Roles and Friends)',
   git: 'https://github.com/UCSC-MedBook/collaborations',
   documentation: 'README.md'
@@ -21,7 +21,7 @@ Package.onUse(function (api) {
     "aldeed:collection2@2.3.3 || 2.7.0", // don't know if that's necessary
     // api.use("aldeed:autoform@4.2.2 || 5.0.0");
     "medbook:namespace@0.0.2",
-    "medbook:primary-collections@0.0.16",
+    "medbook:primary-collections@0.0.17",
     "mokolodi1:helpers@0.0.10",
     "twbs:bootstrap@3.3.6",
     "aldeed:template-extension@3.4.3 || 4.0.0",
