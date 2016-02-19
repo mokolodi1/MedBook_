@@ -28,6 +28,16 @@ Mutations.attachSchema(new SimpleSchema({
   },
 
   chromosome: { type: String },
+  mutation_type: {
+    type: String,
+    allowedValues: [
+      "SNP",
+      // "MNP",
+      "INS",
+      "DEL",
+      "COMPLEX",
+    ],
+  },
   reference_allele: { type: String },
   variant_allele: { type: [String] },
 
@@ -88,8 +98,6 @@ Mutations.attachSchema(new SimpleSchema({
 
 
   // // TODO: add these perhaps
-
-  // "mutation_type": { type: String, label: "SNP, MNP, INS, DEL, or COMPLEX" },
 
   // "mutation_impact": { type: String, optional: true },
   // "mutation_impact_score": { type: Number, optional: true },
