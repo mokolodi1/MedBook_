@@ -7,6 +7,15 @@ var normalValue = {
   min: 0,
 };
 
+var statsSchema = new SimpleSchema({
+  type: new SimpleSchema({
+    average: { type: Number },
+    std_dev: { type: Number },
+    // TODO: Ted
+  }),
+  optional: true,
+});
+
 Expression3 = new Meteor.Collection("expression3");
 Expression3.attachSchema(new SimpleSchema({
   study_label: { type: String, optional: true },
@@ -18,7 +27,7 @@ Expression3.attachSchema(new SimpleSchema({
     label: "Quantile normalized counts",
   }, normalValue),
   quantile_counts_log: _.extend({
-    label: "Quantile normalized counts log2",
+    label: "Quantile normalized counts log2(x+1)",
     max: 100,
     autoValue: function () {
       var quantileCounts = this.siblingField('quantile_counts');
@@ -38,4 +47,15 @@ Expression3.attachSchema(new SimpleSchema({
   fpkm: _.extend({
     label: "RPKM (Reads Per Kilobase of transcript per Million mapped reads)",
   }, normalValue),
+
+  stats: {
+    type: new SimpleSchema({
+      quantile_counts: statsSchema,
+      quantile_counts_log: statsSchema,
+      raw_counts: statsSchema,
+      tpm: statsSchema,
+      fpkm: statsSchema,
+    }),
+    optional: true,
+  },
 }));

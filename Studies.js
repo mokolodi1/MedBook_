@@ -8,9 +8,10 @@ SimpleSchema.messages({
   ]
 });
 
-var samplesSchema = {
+var samplesSchema = new SimpleSchema({
   type: [String],
-};
+  optional: true
+});
 
 Studies.attachSchema(new SimpleSchema({
   collaborations: { type: [String], min: 1 },
@@ -30,11 +31,18 @@ Studies.attachSchema(new SimpleSchema({
   gene_expression_samples: {
     type: new SimpleSchema({
       quantile_counts: samplesSchema,
-      quantile_counts_log: samplesSchema
-      raw_counts: samplesSchema
-      tpm: samplesSchema
-      fpkm: samplesSchema
+      quantile_counts_log: samplesSchema,
+      raw_counts: samplesSchema,
+      tpm: samplesSchema,
+      fpkm: samplesSchema,
     }),
+    optional: true,
+  },
+
+  patients: {
+    type: [new SimpleSchema({
+      samples: { type: [String] }, // sample_labels
+    })],
     optional: true,
   },
 }));

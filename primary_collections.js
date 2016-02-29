@@ -92,20 +92,6 @@ var patientsSchema = new SimpleSchema({
 
 
 
-var studyAndCollaboration = new SimpleSchema({
-  "study_label": { type: String },
-  "collaboration_label": { type: String },
-});
-
-
-
-
-// var studiesSchema = new SimpleSchema({
-//   "_id": { type: Meteor.ObjectID },
-//   "study_label": { type: String },
-//   "study_sites": { type: [String] },
-//   "patient_ids": { type: [Meteor.ObjectID] },
-// });
 
 //
 // TODO: do signatureAlgorithm primary collection schema
