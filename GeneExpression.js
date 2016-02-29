@@ -1,5 +1,4 @@
 GeneExpression = new Meteor.Collection("gene_expression");
-Expression2 = new Meteor.Collection("expression2");
 
 var normalValue = {
   type: Number,

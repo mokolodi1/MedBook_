@@ -35,10 +35,10 @@ Package.onUse(function(api) {
   addAndExport(api, "Contrasts");
 
   // genomic base data
-  addAndExport(api, "GeneExpression");
-  api.export("Expression2");
-  // api.addFiles("GeneExpressionSummary.js");
-  // api.export("GeneExpressionSummary");
+  addAndExport(api, "GeneExpression"); // NOTE: deprecated
+  addAndExport(api, "Expression3");
+  api.export("Expression2"); // NOTE: deprecated
+
   addAndExport(api, "IsoformExpression");
   // api.export("ExpressionIsoform"); // old version of IsoformExpression
   addAndExport(api, "GeneAnnotation");
