@@ -909,7 +909,11 @@ if __name__ == "__main__":
                         key_found = True
                         event['startDate'] = form['Consent Date']
                         event['headline'] = "Start of Study"
-                        event['text'] = "<p>"+str(form['Age'])+" yo "+form['Race']+" Male<p>"+"Study Site: "+form['Study Site']
+                        try:
+                            age = str(form['Age'])
+                        except:
+                            age = "NA"
+                        event['text'] = "<p>"+age+" yo "+form['Race']+" Male<p>"+"Study Site: "+form['Study Site']
                         event['tag'] = "History"
                         event['asset'] = {}
                         sample_list[sample]['timeline']['date'].append(event)
@@ -1056,8 +1060,11 @@ if __name__ == "__main__":
                                 except:
                                     drugs = ""
                                     pass
-                                event['text'] = "<p>Biopsy site: <b>"+f['Site'][index]+"</b><p> "+other+ drugs + "</b><p>Segment: <b>"+f['Segment'][index]+"</b>"
-                                site = f['Site']
+                                try:
+                                    site = f['Site'][index]
+                                except:
+                                    site = "NA"
+                                event['text'] = "<p>Biopsy site: <b>"+site+"</b><p> "+other+ drugs + "</b><p>Segment: <b>"+f['Segment'][index]+"</b>"
                                 biopsy_site['site'] = site
                                 biopsy_site['id'] = sample
                                 b_key = 'Biopsy'
