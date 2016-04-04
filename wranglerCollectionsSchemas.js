@@ -168,10 +168,8 @@ getCollectionByName = function(collectionName) {
       return GeneExpression;
     case "superpathways":
       return Superpathways;
-    case "gene_expression":
-      return GeneExpression;
     default:
-      console.log("couldn't find appropriate schema");
+      throw new Error("couldn't find appropriate schema");
       return null;
   }
 };

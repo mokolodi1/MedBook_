@@ -44,16 +44,7 @@ MutationVCF.prototype.parse = function () {
   // NOTE: one of these is not used at the end, depending on whether
   // this.wranglerPeek is true.
   var mutation_count = 0;
-  var bulkPromises = [];
   var mutationBulk = Mutations.rawCollection().initializeUnorderedBulkOp();
-
-  function executeAndReset() {
-    console.log("executing:", mutation_count);
-    var deferred = Q.defer();
-    bulkPromises.push(deferred.promise);
-    mutationBulk.execute(errorResultResolver(deferred));
-    mutationBulk = Mutations.rawCollection().initializeUnorderedBulkOp();
-  }
 
   return Q.Promise(function (resolve, reject) {
     self.blobAsString()
@@ -186,15 +177,12 @@ MutationVCF.prototype.parse = function () {
               });
 
               mutationBulk.insert(mutationDoc);
-
-              if (mutation_count % 20000 === 0) {
-                executeAndReset();
-              }
             }
           }
         }
 
         console.log("before wranglerPeek split");
+
         if (self.wranglerPeek) {
           self.insertWranglerDocument.call(self, {
             document_type: "mutation_summary",
@@ -207,13 +195,13 @@ MutationVCF.prototype.parse = function () {
           resolve();
         } else {
           console.log("execute bulk");
-          executeAndReset();
-
-          Q.all(bulkPromises)
-            .done(function (values) {
-              resolve();
-            })
-            .catch(reject);
+          mutationBulk.execute(function (error, result) {
+            if (error) {
+              reject(error);
+            } else {
+              resolve({});
+            }
+          });
         }
       }, reject));
   });
