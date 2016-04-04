@@ -5,14 +5,31 @@
 ```js
 Meteor.methods({
   removeSampleGroup: function (sampleGroupId) {
-    check(sampleGroupId, String); // throws match error
+    check(sampleGroupId, String); // can throw match error
 
-    var user = MedBook.findUser(Meteor.userId()); // throws "user-not-found"
+    var user = MedBook.findUser(Meteor.userId()); // can throw "user-not-found"
     var sampleGroup = SampleGroups.findOne(sampleGroupId);
-    // throws "permission-denied" if no access or invalid sampleGroup
+    // can throw "permission-denied" if no access or invalid sampleGroup
     user.ensureAccess(sampleGroup);
 
     SampleGroups.remove(sampleGroupId); // we made it!
   },
+});
+```
+
+### To bring up a modal to edit the collaborations of an object:
+
+```js
+MedBook.editCollaborations("SampleGroups", sampleGroupId);
+```
+
+### To subscribe to a single object with collaboration security
+
+```js
+var sampleGroupId = SampleGroups.findOne();
+
+Meteor.subscribe("/collaborations/singleObject", {
+  collectionString: "SampleGroups",
+  objectId: sampleGroupId,
 });
 ```

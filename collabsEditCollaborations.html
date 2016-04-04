@@ -1,0 +1,145 @@
+<template name="collabsEditCollaborations">
+  <div class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h4 class="modal-title">
+            {{#if loadedObject}}
+              {{> collabsModalTitle}}
+            {{else}}
+              Edit collaborations
+            {{/if}}
+          </h4>
+        </div>
+
+        <div class="modal-body">
+          {{#if loadedObject}}
+            <h5>Add</h5>
+            <div class="row">
+              <div class="form-group">
+                <div class="col-xs-{{#if searchCollabShow}}10{{else}}12{{/if}}">
+                  <input id="collabs-search"
+                      class="form-control" type="text"
+                      placeholder="Search for users or collaborations...">
+                </div>
+                {{#if searchCollabShow}}
+                  <div class="col-xs-2">
+                    <button id="cancel-search" class="btn btn-primary"
+                        type="button">
+                      Cancel
+                    </button>
+                  </div>
+                {{/if}}
+              </div>
+            </div>
+
+            {{#if getInstanceReactive "searchCollabShow"}}
+              {{#if searchBlank}}
+                <p class="help-block">
+                  Start typing to search for users or collaborations...
+                </p>
+              {{else}}
+                {{#if length searchCollaborations}}
+                  <h5>Matching collaborations</h5>
+                  {{> collabsListCollabs cursor=searchCollaborations
+                      button="addCollab"}}
+                {{/if}}
+
+                {{! NOTE: these conditional expressions are structured so that
+                    it doesn't say loading if there's old data to show}}
+                {{#if length searchUsers}}
+                  <h5>Matching people</h5>
+                  {{> collabsListCollabs cursor=searchUsers button="addCollab"}}
+                {{else}}
+                  {{#unless usersSubReady}}
+                    <h5>Matching people</h5>
+                    <p class="help-block">
+                      Loading...
+                    </p>
+                  {{/unless}}
+                {{/if}}
+
+                {{#if bothEmpty searchCollaborations searchUsers}}
+                  {{! #ifs nested to act like an && }}
+                  {{#if usersSubReady}}
+                    <p class="help-block">
+                      No users or collaborations match your search.
+                    </p>
+                  {{/if}}
+                {{/if}}
+              {{/if}}
+            {{else}}
+              {{#if length nonPersonalCollabs}}
+                <h5>Collaborations</h5>
+                {{> collabsListCollabs cursor=nonPersonalCollabs
+                    button="removeCollab"}}
+              {{/if}}
+
+              {{#if length personalCollabs}}
+                <h5>People</h5>
+                {{> collabsListCollabs cursor=personalCollabs
+                    button="removeCollab"}}
+              {{/if}}
+            {{/if}}
+          {{else}}
+            {{> spinner}}
+          {{/if}}
+        </div>
+
+        {{#unless searchCollabShow}}
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">
+              Done
+            </button>
+          </div>
+        {{/unless}}
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="collabsListCollabs">
+  <ul class="list-group">
+    {{#each cursor}}
+      {{> collabsDisplayCollab collab=this button=button}}
+    {{/each}}
+  </ul>
+</template>
+
+<template name="collabsDisplayCollab">
+  <li class="list-group-item">
+    {{trimUserIfNecessary collab}}
+
+    {{#if compare button "removeCollab"}}
+      <button type="button"
+          class="remove-collab pull-right btn btn-danger btn-xs">
+        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        {{#if getInstanceReactive "removeClicked"}}
+          Really remove?
+        {{else}}
+          Remove
+        {{/if}}
+      </button>
+    {{/if}}
+
+    {{#if compare button "addCollab"}}
+      <button type="button"
+          class="add-collab pull-right btn btn-info btn-xs">
+        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+        Add
+      </button>
+    {{/if}}
+  </li>
+</template>
+
+<template name="collabsModalTitle">
+  {{#if compare collectionString "SampleGroups"}}
+    Edit collaborations for
+    <b>{{currObj.sample_group_label}}</b> version <b>{{currObj.sample_group_version}}</b>
+  {{/if}}
+
+  {{#if compare collectionString "Collaborations"}}
+    Edit <b>{{editingField}}</b> for <b>{{currObj.name}}</b>
+  {{/if}}
+</template>

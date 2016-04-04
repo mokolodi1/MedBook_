@@ -1,6 +1,6 @@
 Package.describe({
   name: 'medbook:collaborations',
-  version: '2.4.0',
+  version: '2.4.11',
   summary: 'Collaboration based security architecture (similar to Roles and Friends)',
   git: 'https://github.com/UCSC-MedBook/collaborations',
   documentation: 'README.md'
@@ -11,20 +11,34 @@ Package.onUse(function (api) {
 
   api.use("accounts-base@1.2.0");
   api.use("tracker@1.0.7");
-  api.use("underscore");
 
-  // attaching the schema to Collaborations
-  api.use("aldeed:simple-schema@1.3.3");
-  api.use("aldeed:collection2@2.3.3");
-  // api.use("aldeed:autoform@4.2.2 || 5.0.0");
+  // NOTE: have to load lodash first
+  api.use("erasaur:meteor-lodash@4.0.0");
+  api.use("underscore@1.0.3");
 
-  api.use("medbook:namespace@0.0.2");
+  api.use([
+    "aldeed:simple-schema@1.3.3", // attaching the schema to Collaborations
+    "aldeed:collection2@2.3.3 || 2.7.0", // don't know if that's necessary
+    // api.use("aldeed:autoform@4.2.2 || 5.0.0");
+    "medbook:namespace@0.0.2",
+    "medbook:primary-collections@0.0.17",
+    "mokolodi1:helpers@0.0.10",
+    "twbs:bootstrap@3.3.6",
+    "aldeed:template-extension@3.4.3 || 4.0.0",
+    "peppelg:bootstrap-3-modal@1.0.4", // to make the modal show up
+    "reactive-var@1.0.5",
+    // "sacha:spin@2.3.1",
+  ]);
   api.imply("medbook:namespace@0.0.2");
 
-  // Collaborations is defined in client.js
-  api.addFiles("client.js", "client");
+  api.use("templating@1.1.1", "client");
 
-  // api.addFiles("client.js", "client");
+  api.addFiles([
+    "client.js",
+    "collabsEditCollaborations.html",
+    "collabsEditCollaborations.js",
+  ], "client");
+
   api.addFiles([
     "server.js",
     "collaborationFunctionality.js",
@@ -40,7 +54,7 @@ Package.onUse(function (api) {
 
 
 Package.onTest(function (api) {
-  api.versionsFrom('1.1.0.2');
+  api.versionsFrom('1.1.0.3');
 
   // console.log("No tests yet :(");
 });

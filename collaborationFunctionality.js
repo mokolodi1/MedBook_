@@ -1,92 +1,15 @@
-// Meteor.users "_transform"
-// does a findOne on Meteor.users and adds some useful functions to that
-MedBook.findUser = function (userId) {
-  var user = Meteor.users.findOne(userId);
-
-  if (!user) {
-    throw new Meteor.Error("user-not-found", "No use exists with that _id");
-  }
-
-  _.extend(user, {
-    getCollaborations: getCollaborations,
-    hasAccess: hasAccess,
-    ensureAccess: ensureAccess,
-  });
-
-  return user;
-};
-
-/**
- * @summary Return whether a user has access to an object
- * @locus Server
- * @memberOf User
- * @name hasAccess
- * @version 1.2.3
- * @returns {boolean}
- * @example
- * ```js
- * if (MedBook.findUser(userId).hasAccess(someObject)) {
- *   // do something
- * }
- }
- * ```
- */
-function hasAccess (obj) {
-  if (!obj || !obj.collaborations) {
-    return false;
-  }
-
-  // convert obj.collaborations into a hash map
-  var collabObj = _.reduce(obj.collaborations, function (memo, name) {
-    memo[name] = true;
-    return memo;
-  }, {});
-
-  // check to see if the user is a member
-  var memberOf = this.getCollaborations.call(this);
-  return _.some(memberOf, function (name) {
-    return collabObj[name];
-  });
-}
-
-/**
- * @summary Ensure a user has access to an object. (otherwise throw an Error)
- * @locus Server
- * @memberOf User
- * @name ensureAccess
- * @version 1.2.3
- * @returns {boolean}
- * @example
- * ```js
- * MedBook.findUser(userId).ensureAccess(SampleGroups.findOne(sampleGroupId));
- * ```
- */
-function ensureAccess (obj) {
-  if (!obj || !obj.collaborations) {
-    throw new Meteor.Error("permission-denied");
-  }
-
-  if (this.hasAccess.call(this, obj)) {
-    return true;
-  } else {
-    throw new Meteor.Error("permission-denied");
-  }
-}
-
 /**
  * @summary Update and return the list of collaborations to which this user
  *          has access.
  * @locus Server
  * @memberOf User
- * @name getCollaborations
- * @version 1.2.3
  * @returns {Array}
  * @example
  * ```js
  * MedBook.findUser(userId).getCollaborations()
  * ```
  */
-function getCollaborations () {
+getCollaborations = function () {
   if (!this.collaborations || !this.collaborations.personal) {
     throw new Meteor.Error("User document must have collaborations");
   }
@@ -103,14 +26,14 @@ function getCollaborations () {
   });
 
   return collaborations;
-}
+};
 
 // =============================================================================
 
 // Collaborations
 
 // there is a transform on the server
-Collaborations = new Meteor.Collection("collaboration", {
+Collaborations = new Meteor.Collection("collaborations", {
   transform: function (doc) {
     // NOTE: this might break things by not using `return new Collaboration(doc)`.
     // I didn't want to do that before because I didn't think it'd work, and now
@@ -126,8 +49,6 @@ Collaborations = new Meteor.Collection("collaboration", {
  *          Returns the collaborators that have access to this collaboration.
  * @locus Server
  * @memberOf Collaboration
- * @name getAssociatedCollaborators
- * @version 1.2.3
  * @returns {Array}
  * @example
  * ```js
@@ -185,8 +106,6 @@ function getAssociatedCollaborators (doc) {
  *          Returns the collaborations that a given collaborator has access to.
  * @locus Server
  * @memberOf Collaboration
- * @name getAssociatedCollaborations
- * @version 1.2.3
  * @returns {Array}
  * @example
  * ```js
