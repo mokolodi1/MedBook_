@@ -5,13 +5,12 @@ Samples.attachSchema(new SimpleSchema({
   sample_label: { type: String },
   patient_label: { type: String },
 
-  gene_expression_loaded: { type: Boolean, defaultValue: false },
-  gene_expression_collaborations: {
-    type: [String],
+  tumor_map_bookmarks: {
+    type: new SimpleSchema({
+      gene_expression: { type: String, optional: true },
+      // copy_number: { type: String, optional: true },
+      // mutations: { type: String, optional: true },
+    }),
     optional: true,
-    custom: function () {
-      return requiredIfTrue.call(this,
-          this.field("gene_expression_loaded").value);
-    },
   },
 }));

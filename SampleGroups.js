@@ -3,7 +3,6 @@ SampleGroups = new Meteor.Collection("sample_groups");
 var sampleSchema = new SimpleSchema({
   study_label: { type: String },
   sample_label: { type: String },
-  patient_label: { type: String, optional: true },
 });
 
 SampleGroups.attachSchema(new SimpleSchema({
@@ -48,28 +47,28 @@ SampleGroups.attachSchema(new SimpleSchema({
         },
         total_samples_count: { type: Number, min: 0 }, // before filtering
 
-        // filters: {
-        //   type: [
-        //     new SimpleSchema({
-        //       type: {
-        //         type: String,
-        //         allowedValues: [
-        //           "CRF",
-        //           "sample_label_search",
-        //           "sample_label_list",
-        //           "has_gene_expression",
-        //           "has_isoform_expression",
-        //           // etc.
-        //         ]
-        //       },
-        //       info: {
-        //         type: Object,
-        //         blackbox: true,
-        //       }
-        //     })
-        //   ],
-        //   optional: true, // not present ==> include all samples in a study
-        // },
+        filters: {
+          type: [
+            new SimpleSchema({
+              type: {
+                type: String,
+                allowedValues: [
+                  "CRF",
+                  "sample_label_search",
+                  "sample_label_list",
+                  "has_gene_expression",
+                  "has_isoform_expression",
+                  // etc.
+                ]
+              },
+              info: {
+                type: Object,
+                blackbox: true,
+              }
+            })
+          ],
+          optional: true, // not present ==> include all samples in a study
+        },
       })
     ],
     optional: true,

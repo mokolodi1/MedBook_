@@ -7,14 +7,14 @@ var normalValue = {
   min: 0,
 };
 
-var statsSchema = new SimpleSchema({
+var statsSchema = {
   type: new SimpleSchema({
     average: { type: Number },
     std_dev: { type: Number },
     // TODO: Ted
   }),
   optional: true,
-});
+};
 
 Expression3 = new Meteor.Collection("expression3");
 Expression3.attachSchema(new SimpleSchema({
@@ -29,14 +29,15 @@ Expression3.attachSchema(new SimpleSchema({
   quantile_counts_log: _.extend({
     label: "Quantile normalized counts log2(x+1)",
     max: 100,
-    autoValue: function () {
-      var quantileCounts = this.siblingField('quantile_counts');
-      if (quantileCounts.isSet) {
-        return Math.log(quantileCounts.value + 1) / Math.LN2;
-      } else {
-        this.unset();
-      }
-    }
+    // // pulled from GeneExpression where it was just for one value
+    // autoValue: function () {
+    //   var quantileCounts = this.siblingField('quantile_counts');
+    //   if (quantileCounts.isSet) {
+    //     return Math.log(quantileCounts.value + 1) / Math.LN2;
+    //   } else {
+    //     this.unset();
+    //   }
+    // }
   }, normalValue),
   raw_counts: _.extend({
     label: "Raw counts",
