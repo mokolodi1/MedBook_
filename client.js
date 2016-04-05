@@ -1,5 +1,5 @@
 // no transform on the client
-Collaborations = new Meteor.Collection("collaborations");
+Collaborations = new Meteor.Collection("collaboration");
 
 // We need this so that we get the extra fields in the user objects
 Tracker.autorun(function () {

@@ -33,7 +33,7 @@ getCollaborations = function () {
 // Collaborations
 
 // there is a transform on the server
-Collaborations = new Meteor.Collection("collaborations", {
+Collaborations = new Meteor.Collection("collaboration", {
   transform: function (doc) {
     // NOTE: this might break things by not using `return new Collaboration(doc)`.
     // I didn't want to do that before because I didn't think it'd work, and now
@@ -131,9 +131,10 @@ function getAssociatedCollaborations (doc) {
     var collaborator = collaborationLookupQueue[i];
 
     // find collaborations that have this one as a collaborator
-    var parentCollaborations = Collaborations.find({
-      collaborators: doc.name,
-    }, {
+    var query = {
+      collaborators: collaborator,
+    };
+    var parentCollaborations = Collaborations.find(query, {
       fields: { name: 1 } // speed-up
     }).fetch();
     var parentCollaborationNames = _.pluck(parentCollaborations, "name");

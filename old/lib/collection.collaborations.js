@@ -6,7 +6,7 @@
  * @class
  * @example
  * ```js
- * Collaborations = new Meteor.Collection("collaborations");
+ * Collaborations = new Meteor.Collection("collaboration");
  * ```
  */
 Collaborations = new Mongo.Collection("collaboration");
