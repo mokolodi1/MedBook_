@@ -26,7 +26,7 @@ Expression3.attachSchema(new SimpleSchema({
   quantile_counts: _.extend({
     label: "Quantile normalized counts",
   }, normalValue),
-  quantile_counts_log: _.extend({
+  rsem_quan_log2: _.extend({
     label: "Quantile normalized counts log2(x+1)",
     max: 100,
     // // pulled from GeneExpression where it was just for one value
@@ -49,14 +49,14 @@ Expression3.attachSchema(new SimpleSchema({
     label: "RPKM (Reads Per Kilobase of transcript per Million mapped reads)",
   }, normalValue),
 
-  stats: {
-    type: new SimpleSchema({
-      quantile_counts: statsSchema,
-      quantile_counts_log: statsSchema,
-      raw_counts: statsSchema,
-      tpm: statsSchema,
-      fpkm: statsSchema,
-    }),
-    optional: true,
-  },
+  // stats: {
+  //   type: new SimpleSchema({
+  //     quantile_counts: statsSchema,
+  //     quantile_counts_log: statsSchema,
+  //     raw_counts: statsSchema,
+  //     tpm: statsSchema,
+  //     fpkm: statsSchema,
+  //   }),
+  //   optional: true,
+  // },
 }));

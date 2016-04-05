@@ -33,6 +33,7 @@ Package.onUse(function(api) {
   addAndExport(api, "Samples");
   addAndExport(api, "SampleGroups");
   addAndExport(api, "Contrasts");
+  addAndExport(api, "CRFs");
 
   // genomic base data
   addAndExport(api, "GeneExpression"); // NOTE: deprecated
