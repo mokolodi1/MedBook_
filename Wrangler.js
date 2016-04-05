@@ -113,6 +113,12 @@ Wrangler.wrangleSampleLabel = function (text) {
   if (target) {
     return target[0];
   }
+
+  // CKCC's K10_S6 pattern: http://regexr.com/3d5g9
+  var ckcc = text.match(/K[0-9]{1,3}_S[0-9]{1,3}/g);
+  if (ckcc) {
+    return ckcc[0];
+  }
 };
 
 Wrangler.wranglePatientLabel = function (text) {
