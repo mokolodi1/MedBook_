@@ -161,7 +161,7 @@ Accounts.onLogin(function (loginObj) {
   var collabs = loginObj.user.collaborations;
   // also check "email_address" and "personal" just in case
   if (!collabs || !collabs.email_address || !collabs.personal) {
-    Meteor.users.update(user._id, {
+    Meteor.users.update(loginObj.user._id, {
       $set: {
         collaborations: getDefaultCollabs(user),
       }
