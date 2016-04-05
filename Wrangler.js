@@ -226,7 +226,29 @@ var update_or_create = {
 Wrangler.fileTypes = {
   RectangularGeneExpression: {
     description: "Gene expression rectangular matrix",
-    schema: makeExpressionSchema(GeneExpression),
+    schema: new SimpleSchema({
+      normalization: {
+        type: String,
+        // TODO: autogenerate these
+        allowedValues: [
+          "rsem_quan_log2",
+          "quantile_counts",
+        ],
+        autoform: {
+          options: [
+            // // NOTE: don't show for now...
+            // {
+            //   value: "rsem_quan_log2",
+            //   label: "Quantile normalized counts log2(x+1)",
+            // },
+            {
+              value: "quantile_counts",
+              label: "Quantile normalized counts",
+            },
+          ],
+        },
+      }
+    }),
   },
   RectangularIsoformExpression: {
     description: "Isoform expression rectangular matrix",

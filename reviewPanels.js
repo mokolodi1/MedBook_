@@ -10,10 +10,10 @@
 
 var sampleDataExists = {
   name: "sample_data_exists",
-  title: "Data already exists",
-  description: "The following samples already have " +
-      "data in MedBook. It's possible you don't have access to their " +
-      "data because you are not in the correct collaborations.",
+  title: "DO NOT LOAD THIS DATA!!!! D:",
+  description: "DO NOT LOAD THIS DATA. " +
+      "It will break things and I will have to fix them. " +
+      "Contact Teo at mokolodi1@gmail.com for more info.",
   css_class: "panel-danger",
   columns: [
     { heading: "Sample", attribute: "sample_label", header_of_row: true },

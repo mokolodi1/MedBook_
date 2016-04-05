@@ -81,10 +81,11 @@ RectangularGeneAssay.prototype.constructor = RectangularGeneAssay;
 //
 //   return mappedGeneLabel;
 // }
-
-RectangularGeneAssay.prototype.updateOldStuff = function () {
-  // no old stuff to do :)
-};
+// // NOTE: how to use the above function
+// var gene_label = mapGeneLabel.call(this, gene_label);
+// if (!gene_label) { // ignore the gene if it doesn't map
+//   return;
+// }
 
 RectangularGeneAssay.prototype.parseLine =
     function (brokenTabs, lineNumber, line) {
@@ -113,8 +114,16 @@ RectangularGeneAssay.prototype.parseLine =
 
     if (this.wranglerPeek) {
       this.line_count = 0;
-      this.alertIfSampleDataExists.call(this);
     }
+
+    // NOTE: used to run only if this.wranglerPeek
+    this.alertIfSampleDataExists.call(this);
+
+    // keep track of the genes we've seen
+    this.geneLabels = [];
+    this.geneLabelIndex = {};
+
+    this.beforeParsing.call(this);
   } else { // rest of file
     var expressionStrings = brokenTabs.slice(1);
     validateNumberStrings(expressionStrings);
@@ -122,16 +131,15 @@ RectangularGeneAssay.prototype.parseLine =
     this.updateOldStuff.call(this, brokenTabs, expressionStrings);
 
     // map the gene based on synonymes and previouses
-    unmappedGeneLabel = brokenTabs[0];
-    // http://regexr.com/3chqf
-    var chromosomeSuffix = unmappedGeneLabel.match(/\w+?(?=\|chr[0-9]{1,2})/);
+    var gene_label = brokenTabs[0];
+    // remove stuff after "|" ("MYC|ch3")  http://regexr.com/3chqf
+    var chromosomeSuffix = gene_label.match(/\w+?(?=\|chr[0-9]{1,2})/);
     if (chromosomeSuffix) {
-      unmappedGeneLabel = chromosomeSuffix[0];
+      gene_label = chromosomeSuffix[0];
     }
-    // var gene_label = mapGeneLabel.call(this, unmappedGeneLabel);
-    // if (!gene_label) { // ignore the gene if it doesn't map
-    //   return;
-    // }
+
+    this.geneLabels.push(gene_label);
+    this.geneLabelIndex[gene_label] = 1;
 
     if (this.wranglerPeek) {
       this.line_count++;
@@ -140,3 +148,8 @@ RectangularGeneAssay.prototype.parseLine =
     }
   }
 };
+
+// set up non-required functions to be _.noops
+RectangularGeneAssay.prototype.beforeParsing = function () {};
+RectangularGeneAssay.prototype.endOfFile = function () {};
+RectangularGeneAssay.prototype.updateOldStuff = function () {};

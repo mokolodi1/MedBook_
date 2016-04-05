@@ -75,19 +75,17 @@ ensureClinicalExists = function (Study_ID, Sample_ID) {
 
 // adds a assay_sample_summary document, at the end of an expression file
 addExpressionSummaryDoc = function (data_type) {
-  if (this.wranglerPeek) {
-    for (var index in this.sampleLabels) {
-      var sample_label = this.sampleLabels[index];
+  for (var index in this.sampleLabels) {
+    var sample_label = this.sampleLabels[index];
 
-      this.insertWranglerDocument.call(this, {
-        document_type: "assay_sample_summary",
-        contents: {
-          sample_label: sample_label,
-          data_type: data_type,
-          line_count: this.line_count,
-        }
-      });
-    }
+    this.insertWranglerDocument.call(this, {
+      document_type: "assay_sample_summary",
+      contents: {
+        sample_label: sample_label,
+        data_type: data_type,
+        line_count: this.line_count,
+      }
+    });
   }
 };
 
@@ -96,11 +94,11 @@ addExpressionSummaryDoc = function (data_type) {
 // NOTE: currently any user can figure out if a certain
 //       sample has gene_expression data.
 alertIfSampleDataExists = function (data_type, checkDataExists) {
-  if (this.wranglerPeek) {
-    for (var index in this.sampleLabels) {
-      sample_label = this.sampleLabels[index];
+  for (var index in this.sampleLabels) {
+    sample_label = this.sampleLabels[index];
 
-      if (checkDataExists.call(this, sample_label)) {
+    if (checkDataExists.call(this, sample_label)) {
+      if (this.wranglerPeek) {
         this.insertWranglerDocument.call(this, {
           document_type: "sample_data_exists",
           contents: {
@@ -109,6 +107,8 @@ alertIfSampleDataExists = function (data_type, checkDataExists) {
             data_type: data_type,
           }
         });
+      } else {
+        throw "Some data already exists in the database.";
       }
     }
   }

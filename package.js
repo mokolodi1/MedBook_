@@ -28,11 +28,6 @@ Package.onUse(function(api) {
   api.export("WranglerDocuments");
   api.export("WranglerFiles");
 
-  // TODO: move this to primary-collections once I get the validation code
-  // from Ted
-  api.addFiles("collections.js");
-  api.export("CRFs");
-
   api.addFiles([
     "fileHandlers/globals.js",
     "fileHandlers/FileHandler.js",
