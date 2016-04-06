@@ -116,7 +116,6 @@ RectangularGeneAssay.prototype.parseLine =
       this.line_count = 0;
     }
 
-    // NOTE: used to run only if this.wranglerPeek
     this.alertIfSampleDataExists.call(this);
 
     // keep track of the genes we've seen

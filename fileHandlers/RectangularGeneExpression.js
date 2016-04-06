@@ -9,18 +9,114 @@ RectangularGeneExpression.prototype =
     Object.create(RectangularGeneAssay.prototype);
 RectangularGeneExpression.prototype.constructor = RectangularGeneExpression;
 
+RectangularGeneExpression.prototype.beforeParsing = function () {
+  // make sure we're dealing with quantile_counts/quantile_counts_log
+  var normalization = this.wranglerFile.options.normalization;
+  console.log("normalization:", normalization);
+  if (normalization !== "quantile_counts" &&
+      normalization !== "rsem_quan_log2") {
+    throw new Error("Normalizations other than quantile counts and " +
+        "quantile counts log are not supported");
+  }
+
+  if (!this.wranglerPeek) {
+    // maintain referential integrity between "studies" and "expression3"
+
+    console.log("starting referential integrity maintenance" +
+      " (studies ==> expression3)");
+    var study_label = this.submission.options.study_label;
+
+    var study = Studies.findOne({id: study_label});
+
+    // remove expression3Doc.rsem_quan_log2 array values not associated with
+    // a sample in study.gene_expression
+    var sampleArray = []; // default if gene_expression undefined
+    if (study.gene_expression) {
+      sampleArray = study.gene_expression;
+    }
+    sampleLength = sampleArray.length;
+
+    // "To use the $slice modifier, it must appear with the $each modifier.
+    // You can pass an empty array [] to the $each modifier such that only
+    // the $slice modifier has an effect."
+    // - https://docs.mongodb.org/manual/reference/operator/update/slice/
+    Expression3.update({
+      study_label: study_label,
+      $where: function () { return this.rsem_quan_log2.length !== sampleLength; },
+    }, {
+      $push: {
+        rsem_quan_log2: {
+          $each: [],
+          $slice: sampleLength
+        }
+      }
+    }, { multi: true });
+
+    // regenerate study.gene_expression_index from study.gene_expression,
+    // compare to current index
+
+    var currentIndex = study.gene_expression_index;
+    if (!currentIndex) {
+      currentIndex = {};
+    }
+    var correctIndex = {};
+
+    for (var i = 0; i < sampleLength; i++) {
+      correctIndex[sampleArray[i]] = i;
+    }
+    if (!_.isEqual(correctIndex, currentIndex)) {
+      console.log("There was a discrepancy between the gene_expression_index " +
+          "in the study and the 'correct' index.");
+      console.log("currentIndex !== correctIndex (!!!)");
+      console.log("study.gene_expression:", sampleArray);
+      console.log("currentIndex:", currentIndex);
+      console.log("correctIndex:", correctIndex);
+
+      console.log("setting to correctIndex...");
+      Studies.update({id: study_label}, {
+        $set: {
+          gene_expression_index: correctIndex
+        }
+      });
+    }
+
+    console.log("done with referential integrity maintenance");
+
+
+
+    // lock the study for wrangling, tell them to try again if it's already locked
+
+    var securedLock = Studies.update({
+      id: study_label,
+      gene_expression_wrangling: { $ne: true },
+    }, {
+      $set: {
+        gene_expression_wrangling: true,
+      }
+    });
+    if (securedLock !== 1) {
+      throw "Someone is already wrangling data for this study. " +
+          "Please try again in a few minutes. " +
+          "If you continue to see this message, " +
+          "contact Teo at mokolodi1@gmail.com";
+    }
+  }
+};
+
 RectangularGeneExpression.prototype.alertIfSampleDataExists = function () {
   alertIfSampleDataExists.call(this,
       "Quantile normalized counts log2(x+1)",
       function (sample_label) {
+        // TODO: add back study_label (taken out because we don't have it
+        // the first time around)
         return Studies.findOne({
-          study_label: this.wranglerFile.options.study_label,
+          // study_label: this.wranglerFile.options.study_label,
           gene_expression: sample_label,
         });
       });
 };
 Moko.ensureIndex(Studies, {
-  study_label: 1,
+  // study_label: 1,
   gene_expression: 1,
 });
 
@@ -70,82 +166,72 @@ RectangularGeneExpression.prototype.updateOldStuff =
 
 RectangularGeneExpression.prototype.insertToCollection =
     function (gene_label, expressionStrings) {
-  // make sure we're dealing with quantile_counts (not already transformed)
-  if (this.wranglerFile.options.normalization !== "quantile_counts") {
-    throw new Error("Normalizations other than quantile counts are not supported");
-  }
-
   // convert expressionStrings into numbers, convert log2 transforms
-  var log2Floats = _.map(expressionStrings, function (value) {
-    var float = parseFloat(value);
-    return Math.log(float + 1) / Math.LN2;
+  var normalization = this.wranglerFile.options.normalization;
+  var log2Values = _.map(expressionStrings, function (value) {
+    var numberVal = parseFloat(value);
+
+    if (normalization === "rsem_quan_log2") {
+      return numberVal;
+    } else {
+      return Math.log(numberVal + 1) / Math.LN2;
+    }
   });
 
-  var bulk = Expression3.rawCollection().initializeUnorderedBulkOp();
-
-  bulk.find({
+  Expression3.upsert({
     study_label: this.submission.options.study_label,
     gene_label: gene_label,
-  }).upsert().updateOne({
-    $push: { rsem_quan_log2: { $each: log2Floats } }
+  }, {
+    $push: { rsem_quan_log2: { $each: log2Values } }
   });
-
-  var deferred = Q.defer();
-  bulk.execute(errorResultResolver(deferred));
-  return deferred.promise;
 };
 Moko.ensureIndex(Expression3, {
   study_label: 1,
   gene_label: 1,
 });
 
-RectangularGeneExpression.prototype.beforeParsing = function () {
-  if (!this.wranglerPeek) {
-    // maintain referential integrity between "studies" and "expression3"
-    console.log("starting referential integrity maintenance" +
-      " (studies ==> expression3)");
-
-    var study_label = this.submission.options.study_label;
-    var study = Studies.findOne({id: study_label});
-
-    // remove expression3Doc.rsem_quan_log2 array values not associated with
-    // a sample in study.gene_expression
-    var sampleLength = study.gene_expression.length;
-
-    // "To use the $slice modifier, it must appear with the $each modifier.
-    // You can pass an empty array [] to the $each modifier such that only
-    // the $slice modifier has an effect."
-    // - https://docs.mongodb.org/manual/reference/operator/update/slice/
-    Expression3.update({
-      study_label: "prad_wcdt",
-      $where: function () { return this.rsem_quan_log2.length !== sampleLength; },
-    }, {
-      $push: {
-        rsem_quan_log2: {
-          $each: [],
-          $slice: sampleLength
-        }
-      }
-    }, { multi: true });
-
-    // regenerate study.gene_expression_index from study.gene_expression
-    // TODO: do we need this?
-
-    console.log("done with referential integrity maintenance");
-  }
-};
-
 RectangularGeneExpression.prototype.endOfFile = function () {
-  // do a bunch of gene validation
-
   // make sure there's no duplicates in the genes
+
   var sortedGenes = Object.keys(this.geneLabelIndex).sort();
   if (this.geneLabels.length !== sortedGenes.length) {
-    console.log("duplicate genes :(");
-    throw "Duplicate genes!";
+    // there were duplicates... now on to figure out what they were!
+
+    // NOTE: sorting here could technically break things later if we assume
+    // it hasn't been sorted
+    this.geneLabels.sort();
+
+    var maxDuplicates = 5;
+    var duplicates = [];
+    for (var i = 1; i < this.geneLabels.length; i++) {
+      var current = this.geneLabels[i];
+
+      // only show a duplicate once
+      if (duplicates[duplicates.length - 1] === current) {
+        continue;
+      }
+
+      // if a duplicate, add it to the list
+      if (this.geneLabels[i - 1] === current) {
+        duplicates.push(current);
+      }
+
+      // actually look for maxDuplicates + 1 so we know if we need a "..."
+      if (duplicates > maxDuplicates) {
+        break;
+      }
+    }
+
+    var duplicatesString = duplicates.slice(0, 5).join(", ");
+    if (duplicates.length > maxDuplicates) {
+      duplicatesString += "...";
+    }
+
+    throw "Duplicate genes: " + duplicatesString;
   }
 
   // check to make sure the genes match up with existing data
+
   if (!this.wranglerPeek) {
     var study_label = this.submission.options.study_label;
     var study = Studies.findOne({id: study_label});
@@ -172,9 +258,8 @@ RectangularGeneExpression.prototype.endOfFile = function () {
           $set: { gene_expression_genes: existingDistinctGenes }
         }, function (error, result) {
           if (error) {
-            console.log("gene_expression_genes error:", error);
+            console.log("gene_expression_genes update error:", error);
           }
-          console.log("gene_expression_genes result:", result);
         });
 
         studyGenes = existingDistinctGenes;
@@ -206,16 +291,21 @@ RectangularGeneExpression.prototype.endOfFile = function () {
 
   if (this.wranglerPeek) {
     // add a summary doc
-    var dataType = GeneExpression.simpleSchema().schema()
-        ['values.' + this.wranglerFile.options.normalization].label;
+    var dataType = "Quantile normalized counts log2(x+1)";
     addExpressionSummaryDoc.call(this, dataType);
   } else {
     // update data in studies
 
-    var sampleCount = study.gene_expression.length;
-    var setObject = {};
-    _.each(this.sampleLabels, function (value, index) {
-      setObject["gene_expression_index." + value] = sampleCount + index;
+    var sampleCount = 0; // default to 0
+    if (study.gene_expression) {
+      sampleCount = study.gene_expression.length;
+    }
+
+    var setObject = {
+      gene_expression_wrangling: false // unlock for others
+    };
+    _.each(this.sampleLabels, function (sample_label, index) {
+      setObject["gene_expression_index." + sample_label] = sampleCount + index;
     });
 
     // If this one atomic operation fails or we don't get to it while loading

@@ -242,11 +242,10 @@ Wrangler.fileTypes = {
         ],
         autoform: {
           options: [
-            // // NOTE: don't show for now...
-            // {
-            //   value: "rsem_quan_log2",
-            //   label: "Quantile normalized counts log2(x+1)",
-            // },
+            {
+              value: "rsem_quan_log2",
+              label: "Quantile normalized counts log2(x+1)",
+            },
             {
               value: "quantile_counts",
               label: "Quantile normalized counts",
