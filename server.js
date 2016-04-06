@@ -163,7 +163,7 @@ Accounts.onLogin(function (loginObj) {
   if (!collabs || !collabs.email_address || !collabs.personal) {
     Meteor.users.update(loginObj.user._id, {
       $set: {
-        collaborations: getDefaultCollabs(user),
+        collaborations: getDefaultCollabs(loginObj.user),
       }
     });
   }
