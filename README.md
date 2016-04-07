@@ -17,12 +17,6 @@ Meteor.methods({
 });
 ```
 
-### To bring up a modal to edit the collaborations of an object:
-
-```js
-MedBook.editCollaborations("SampleGroups", sampleGroupId);
-```
-
 ### To subscribe to a single object with collaboration security
 
 ```js

@@ -19,29 +19,20 @@ Package.onUse(function (api) {
   api.use([
     "aldeed:simple-schema@1.3.3", // attaching the schema to Collaborations
     "aldeed:collection2@2.3.3 || 2.7.0", // don't know if that's necessary
-    // api.use("aldeed:autoform@4.2.2 || 5.0.0");
     "medbook:namespace@0.0.2",
     "medbook:primary-collections@0.0.17",
     "mokolodi1:helpers@0.0.10",
-    "twbs:bootstrap@3.3.6",
-    "aldeed:template-extension@3.4.3 || 4.0.0",
-    "peppelg:bootstrap-3-modal@1.0.4", // to make the modal show up
-    "reactive-var@1.0.5",
-    // "sacha:spin@2.3.1",
   ]);
   api.imply("medbook:namespace@0.0.2");
 
-  api.use("templating@1.1.1", "client");
 
   api.addFiles([
     "client.js",
-    "collabsEditCollaborations.html",
-    "collabsEditCollaborations.js",
   ], "client");
 
   api.addFiles([
-    "server.js",
     "collaborationFunctionality.js",
+    "server.js",
   ], "server");
 
   api.addFiles([
