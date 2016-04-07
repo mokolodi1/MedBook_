@@ -16,7 +16,7 @@
 
 To fetch a MedBook user object, use `MedBook.findUser()`.
 
-While it is technically possible to attach a transform to the Meteor.users collection (`Meteor.users._transform = ...`), this approach is not recommended. [See here for more info](https://github.com/meteor/meteor/issues/810#issuecomment-15069258).
+While it is technically possible to attach a transform directly to the Meteor.users collection (`Meteor.users._transform = ...`), this approach is not recommended. [See here for more info](https://github.com/meteor/meteor/issues/810#issuecomment-15069258).
 
 ```js
 // outside publish functions
@@ -100,6 +100,6 @@ Meteor.methods({
 
 ## The Collaboration object
 
-Two methods are available on the server for objects fetched from the Collaborations collection (ex. `Collaborations.findOne()`).  `getAssociatedCollaborators` does a downwards tree traversal, returning a list of collaborations (including personal collaborations) that have access to the source collaboration. `getAssociatedCollaborations` does an upwards tree traversal, returning a list of collaborations that the source collaboration has access to. Both of these functions return an array of collaboration name strings.
+Two methods are available on the server for objects fetched from the Collaborations collection (ex. `Collaborations.findOne()`).  `getAssociatedCollaborators` does a downwards tree traversal, returning a list of collaborations (including personal collaborations) that have access to the source collaboration. `getAssociatedCollaborations` does an upwards tree traversal, returning a list of collaborations that the source collaboration has access to. Both of these functions take no parameters and return an array of collaboration name strings.
 
 These two functions are provided for `medbook:collaboration`'s internal API and advanced users. Use them with care!
