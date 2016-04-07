@@ -56,11 +56,15 @@ Collaborations = new Meteor.Collection("collaboration", {
  * ```
  */
 function getAssociatedCollaborators (doc) {
-  // TRANSITIVE CLOSURE QUEUE METHOD (even after Teo's changes?)
+  // TRANSITIVE CLOSURE QUEUE METHOD
 
   // the graph of collaborators we want to return (collaboration names)
   // This is stored as an object because objects are dictionaries.
   var associatedCollaborators = {};
+
+  // add the current collaboration
+  // TODO: is this the behaviour we want?
+  associatedCollaborations[doc.name] = 1;
 
   // the dynamic queue of tree nodes that we're going to parse through
   // NOTE: list of collaboration names
@@ -73,7 +77,10 @@ function getAssociatedCollaborators (doc) {
   // for each node in our queue
   for (var i = 0; i < collaborationLookupQueue.length; i++) {
     // look it up in the collection
-    var currentCollaboration = Collaborations.findOne({name: collaborationLookupQueue[i]});
+    var currentCollaborationName = collaborationLookupQueue[i];
+    var currentCollaboration = Collaborations.findOne({
+      name: currentCollaborationName
+    });
 
     if (currentCollaboration && currentCollaboration.collaborators) {
       // look through the collaborators
@@ -81,23 +88,26 @@ function getAssociatedCollaborators (doc) {
         // save the current collaborator name to a variable
         var collaborationName = currentCollaboration.collaborators[index];
 
-        // add nodes (non-leaves, non-users) to the lookup queue
-        if (!collaborationName.startsWith("user:")) {
+        // add nodes (non-leaves aka non-users) to the lookup queue, but
+        // only if we haven't seen them before
+        if (!collaborationName.startsWith("user:") &&
+            !associatedCollaborators[collaborationName]) {
           collaborationLookupQueue.push(collaborationName);
         }
 
         // make sure each one is in associatedCollaborators
-        // NOTE: a collaborator can be added to associatedCollaborators twice if
-        //       it is part of a collaboration two different ways, which is
+        // NOTE: a collaborator can be added to associatedCollaborators twice
+        //       if it is part of a collaboration two different ways, which is
         //       why associatedCollaborators is stored as a dictionary.
         associatedCollaborators[collaborationName] = 1;
       }
     } else {
-      throw new Error("Invalid collaborator name:" + collaborationLookupQueue[i]);
+      console.log('Invalid collaboration name "' + currentCollaborationName +
+          '" found in getAssociatedCollaborators for "' + doc.name + '"');
     }
   }
 
-  // when all done, return the graph
+  // when all done, return the graph as an array
   return Object.keys(associatedCollaborators);
 }
 
@@ -113,7 +123,7 @@ function getAssociatedCollaborators (doc) {
  * ```
  */
 function getAssociatedCollaborations (doc) {
-  // TRANSITIVE CLOSURE QUEUE METHOD (even after Teo's changes?)
+  // TRANSITIVE CLOSURE QUEUE METHOD
 
   // the graph of collaborations we want to return
   // This is stored as an object because objects are dictionaries.
@@ -131,10 +141,9 @@ function getAssociatedCollaborations (doc) {
     var collaborator = collaborationLookupQueue[i];
 
     // find collaborations that have this one as a collaborator
-    var query = {
+    var parentCollaborations = Collaborations.find({
       collaborators: collaborator,
-    };
-    var parentCollaborations = Collaborations.find(query, {
+    }, {
       fields: { name: 1 } // speed-up
     }).fetch();
     var parentCollaborationNames = _.pluck(parentCollaborations, "name");
@@ -154,6 +163,6 @@ function getAssociatedCollaborations (doc) {
     }
   }
 
-  // when all done, return the graph
+  // when all done, return the graph as an array
   return Object.keys(associatedCollaborations);
 }
