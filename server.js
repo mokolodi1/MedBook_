@@ -52,12 +52,13 @@ Accounts.onCreateUser(function (options, user) {
 
 // make absolutely sure user.collaborations is set
 Accounts.onLogin(function (loginObj) {
-  var collabs = loginObj.user.collaborations;
+  var user = loginObj.user;
+  var collabs = user.collaborations;
   // also check "email_address" and "personal" just in case
   if (!collabs || !collabs.email_address || !collabs.personal) {
-    Meteor.users.update(loginObj.user._id, {
+    Meteor.users.update(user._id, {
       $set: {
-        collaborations: getDefaultCollabs(loginObj.user),
+        collaborations: getDefaultCollabs(user),
       }
     });
   }

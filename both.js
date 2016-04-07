@@ -45,7 +45,8 @@ MedBook.findUser = function (userId) {
     _.extend(user, {
       // getCollaborations is global in the package
       // and is defined seperately on the client and server
-      getCollaborations: getCollaborations,
+      personalCollaboration: personalCollaboration,
+      getCollaborations: getCollaborations, // different on client/server
       hasAccess: hasAccess,
       ensureAccess: ensureAccess,
       isAdmin: isAdmin,
@@ -55,6 +56,10 @@ MedBook.findUser = function (userId) {
 
   return user;
 };
+
+function personalCollaboration () {
+  return this.collaborations.personal;
+}
 
 MedBook.ensureUser = function (userId) {
   var user = MedBook.findUser(userId);
