@@ -2,8 +2,10 @@ FROM ubuntu:14.04
 MAINTAINER Mike Risse
 
 RUN apt-get update
-RUN apt-get install -y curl patch python
-RUN curl https://install.meteor.com | /bin/sh
+RUN apt-get install -y curl patch python build-essential imagemagick
+ADD installMeteor.sh /tmp/installMeteor.sh
+RUN sh /tmp/installMeteor.sh
+
 ADD packages /app/.meteor/packages
 ADD release /app/.meteor/release 
 WORKDIR /app
@@ -16,8 +18,6 @@ WORKDIR /app
 EXPOSE 3000
 ENV PORT 3000
 
-RUN apt-get update
-RUN apt-get install -y build-essential
 
 ONBUILD ADD ./webapp /app
 ONBUILD RUN mkdir /bundle
@@ -26,4 +26,4 @@ ONBUILD WORKDIR /build/bundle/programs/server
 ONBUILD RUN `find ~/.meteor -path "*dev_bundle/bin/npm" | grep "1.1.3"` install
 ONBUILD WORKDIR /build/bundle
 
-CMD ["node", "main.js"]
+CMD `find ~/.meteor -path "*dev_bundle/bin/node" | grep "1.1.3"` main.js
