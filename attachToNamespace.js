@@ -19,4 +19,5 @@ MedBook.Collections = {
   Patients: Patients,
   CohortSignatures: CohortSignatures,
   Mutations: Mutations,
+  CRFs: CRFs,
 };

@@ -1,6 +1,6 @@
 Package.describe({
   name: "medbook:primary-collections",
-  version: "0.0.17",
+  version: "0.0.18",
   // Brief, one-line summary of the package.
   summary: "Primary collections and schemas for MedBook",
   // URL to the Git repository containing the source code for this package.
@@ -9,6 +9,10 @@ Package.describe({
   // To avoid submitting documentation, set this field to null.
   documentation: "README.md"
 });
+
+// we use mime in Blobs.js but I guess we don't need a version number (??)
+// Npm.depends({"mime": "1.2.0"});
+// var mime = Meteor.npmRequire("mime");
 
 function addAndExport (api, name) {
   api.addFiles(name + ".js");
@@ -78,6 +82,6 @@ Package.onUse(function(api) {
 
 Package.onTest(function(api) {
   // nope
-  api.use("tinytest");
-  api.addFiles("primary_collections_tests.js");
+  // api.use("tinytest");
+  // api.addFiles("primary_collections_tests.js");
 });

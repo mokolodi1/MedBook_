@@ -22,11 +22,13 @@ Studies.attachSchema(new SimpleSchema({
     label: "Study ID",
   },
   name: { type: String },
-  short_name: { type: String, max: 12 },
-  description: { type: String },
+  short_name: { type: String, max: 16 },
+  description: { type: String, optional: true },
 
-  Sample_IDs: { type: [String], defaultValue: [] },
-  PatientIDs: { type: [String], defaultValue: [] },
+  tables: { type: [String] },
+
+  Sample_IDs: { type: [String], defaultValue: [], optional: true },
+  Patient_IDs: { type: [String], defaultValue: [], optional: true },
 
   gene_expression: { type: [String], optional: true },
   gene_expression_index: { type: Object, blackbox: true, optional: true },
@@ -65,7 +67,7 @@ Studies.attachSchema(new SimpleSchema({
   patients: {
     type: [new SimpleSchema({
       patient_label: { type: String },
-      samples: { type: [String] }, // sample_labels
+      sample_labels: { type: [String], optional: true, defaultValue: [] },
     })],
     optional: true,
   },

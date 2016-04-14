@@ -1,0 +1,15 @@
+{
+    "_id" : "manually_created_sample_group",
+    "name" : "Manually created sample group",
+    "version" : 1,
+    "studies" : [
+        {
+            "study_label" : "prad_wcdt",
+            "sample_labels" : [
+                "DTB-135Pro",
+                "DTB-060",
+                "DTB-061"
+            ]
+        }
+    ]
+}
