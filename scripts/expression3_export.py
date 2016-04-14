@@ -75,6 +75,8 @@ def export_with_id(db, sampleGroupId):
         # increment the study index
         studyIndex += 1
 
+    # add a line return at the end
+    sys.stdout.write("\n")
 
 def main():
     argv = sys.argv
