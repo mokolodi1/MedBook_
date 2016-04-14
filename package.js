@@ -1,6 +1,6 @@
 Package.describe({
   name: 'medbook:referential-integrity',
-  version: '0.0.1',
+  version: '0.0.2',
   // Brief, one-line summary of the package.
   summary: "Maintains referential integrity for MedBook collections",
   // URL to the Git repository containing the source code for this package.
@@ -16,7 +16,7 @@ Package.onUse(function(api) {
   api.use("underscore");
   api.use("meteorhacks:aggregate@1.3.0");
 
-  api.use("medbook:primary-collections@0.0.17");
+  api.use("medbook:primary-collections@0.0.19");
   api.use("medbook:namespace@0.0.2");
 
   api.addFiles([
