@@ -22,7 +22,7 @@ def export_with_id(db, sampleGroupId):
     #       because we mutate it (only sort, for now)
     sampleGroupStudies = sampleGroup["studies"]
 
-    # make sure sampleGroupStudies is sorted by sample_label
+    # make sure sampleGroupStudies is sorted by study_label
     sampleGroupStudies = sorted(sampleGroupStudies,
             key=lambda study: study["study_label"])
 
@@ -30,49 +30,66 @@ def export_with_id(db, sampleGroupId):
     # # make sure the sample labels are sorted within each study
     # for index, value in enumerate(sampleGroupStudies):
     #     sampleGroupStudies[index]
+    studyLabels = [study["study_label"] for study in sampleGroupStudies]
+    studies = list(db["studies"].find({"id": { "$in": studyLabels }}).sort([
+        ("id", pymongo.ASCENDING)
+    ]))
 
-    # TODO: make sure we're dealing with the same gene set
+    # make sure we're dealing with the same gene set for each study
+    # TODO
+    if len(sampleGroupStudies) > 1:
+        print "Need to make sure we're dealing with the same gene set for each study"
+        sys.exit(1)
+    geneSet = studies[0]["gene_expression_genes"]
+
     # TODO: make sure there are no sample label collisions
 
     # print out the header line
 
-    sys.stdout.write("Gene\t")
+    sys.stdout.write("Gene")
 
     for study in sampleGroupStudies:
         for sampleLabel in study["sample_labels"]:
             sys.stdout.write("\t" + sampleLabel)
 
-    # print out the data
+    # print out the data (non-header line)
 
-    studyLabels = [study["study_label"] for study in sampleGroupStudies]
-
+    # sort by gene_label and then study_label
     cursor = db["expression3"].find({ "study_label": { "$in": studyLabels } }).sort([
         ("gene_label", pymongo.ASCENDING),
         ("study_label", pymongo.ASCENDING)
     ])
 
-    studies = db["studies"].find({"id": { "$in": studyLabels }}).sort([
-        ("id", pymongo.ASCENDING)
-    ])
-    currentGene = ""
-    studyIndex = len(studyLabels) # make sure we get a doc for each study
+    # make sure we have the right number of documents
+    if cursor.count() != len(studies) * len(geneSet):
+        print "Got wrong number of documents!"
+        sys.exit(1)
+
+    # make absolutely sure the order of the studies matches the order of the
+    # studies in the sample group
+    for i in range(len(studies)):
+        if studies[i]["id"] != sampleGroupStudies[i]["study_label"]:
+            print "Order of studies not equal to order of sample group studies"
+            sys.exit(1)
+
+    # actually write the stuff
+    studyIndex = 0 # keep track of which study we're looking at
+    firstStudyLabel = studies[0]["id"]
     for doc in cursor:
         # check to see if we're on a new gene
-        if currentGene != doc["gene_label"]:
-            # make sure we've seen all the studies
-            if studyIndex != len(studyLabels):
-                print "Missing expression3 doc for one or more studies"
-                sys.exit(1)
-
-            currentGene = doc["gene_label"]
+        if doc["study_label"] == firstStudyLabel:
             studyIndex = 0
-            sys.stdout.write("\n" + currentGene + "\t")
+            sys.stdout.write("\n" + doc["gene_label"] + "\t")
 
-        # write data for this study
-        dataStrings = [str(data) for data in doc["rsem_quan_log2"]]
+        # write data for this doc
+        currentStudy = studies[studyIndex]
+        dataStrings = []
+        for sampleLabel in sampleGroupStudies[studyIndex]["sample_labels"]:
+            index = currentStudy["gene_expression_index"][sampleLabel]
+            dataStrings.append(str(doc["rsem_quan_log2"][index]))
+
         sys.stdout.write("\t" + "\t".join(dataStrings))
 
-        # increment the study index
         studyIndex += 1
 
     # add a line return at the end
