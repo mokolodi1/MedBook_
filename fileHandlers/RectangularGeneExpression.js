@@ -20,69 +20,12 @@ RectangularGeneExpression.prototype.beforeParsing = function () {
   }
 
   if (!this.wranglerPeek) {
-    // maintain referential integrity between "studies" and "expression3"
-
-    console.log("starting referential integrity maintenance" +
-      " (studies ==> expression3)");
     var study_label = this.submission.options.study_label;
 
-    var study = Studies.findOne({id: study_label});
-
-    // remove expression3Doc.rsem_quan_log2 array values not associated with
-    // a sample in study.gene_expression
-    var sampleArray = []; // default if gene_expression undefined
-    if (study.gene_expression) {
-      sampleArray = study.gene_expression;
-    }
-    sampleLength = sampleArray.length;
-
-    // "To use the $slice modifier, it must appear with the $each modifier.
-    // You can pass an empty array [] to the $each modifier such that only
-    // the $slice modifier has an effect."
-    // - https://docs.mongodb.org/manual/reference/operator/update/slice/
-    Expression3.update({
-      study_label: study_label,
-      $where: function () { return this.rsem_quan_log2.length !== sampleLength; },
-    }, {
-      $push: {
-        rsem_quan_log2: {
-          $each: [],
-          $slice: sampleLength
-        }
-      }
-    }, { multi: true });
-
-    // regenerate study.gene_expression_index from study.gene_expression,
-    // compare to current index
-
-    var currentIndex = study.gene_expression_index;
-    if (!currentIndex) {
-      currentIndex = {};
-    }
-    var correctIndex = {};
-
-    for (var i = 0; i < sampleLength; i++) {
-      correctIndex[sampleArray[i]] = i;
-    }
-    if (!_.isEqual(correctIndex, currentIndex)) {
-      console.log("There was a discrepancy between the gene_expression_index " +
-          "in the study and the 'correct' index.");
-      console.log("currentIndex !== correctIndex (!!!)");
-      console.log("study.gene_expression:", sampleArray);
-      console.log("currentIndex:", currentIndex);
-      console.log("correctIndex:", correctIndex);
-
-      console.log("setting to correctIndex...");
-      Studies.update({id: study_label}, {
-        $set: {
-          gene_expression_index: correctIndex
-        }
-      });
-    }
-
-    console.log("done with referential integrity maintenance");
-
-
+    // maintain referential integrity between "studies" and "expression3"
+    MedBook.referentialIntegrity.studies_expression3({
+      id: study_label
+    });
 
     // lock the study for wrangling, tell them to try again if it's already locked
 
@@ -191,9 +134,10 @@ Moko.ensureIndex(Expression3, {
 });
 
 RectangularGeneExpression.prototype.endOfFile = function () {
+  var sortedGenes = Object.keys(this.geneLabelIndex).sort();
+
   // make sure there's no duplicates in the genes
 
-  var sortedGenes = Object.keys(this.geneLabelIndex).sort();
   if (this.geneLabels.length !== sortedGenes.length) {
     // there were duplicates... now on to figure out what they were!
 
@@ -235,44 +179,19 @@ RectangularGeneExpression.prototype.endOfFile = function () {
   if (!this.wranglerPeek) {
     var study_label = this.submission.options.study_label;
     var study = Studies.findOne({id: study_label});
-
-    // make sure we have gene_expression_genes is set
-    // if studyGenes starts out falsey, it's set down below
     var studyGenes = study.gene_expression_genes;
+
+    // if study.gene_expression_genes isn't set, make this file's genes
+    // the master set
     if (!studyGenes) {
-      // gene_expression_genes has never been set...
+      // NOTE: node hangs if we try to do this update through the non-raw
+      // collection because the array is so large (20,000+ elements)
+      Studies.rawCollection().update({id: study_label}, {
+        $set: { gene_expression_genes: sortedGenes }
+      });
 
-      if (Expression3.findOne({ study_label: study_label })) {
-        // there's existing data, so let's make sure we match that
-
-        // get a sorted list of all of the distinct `gene_label`s in Expression3
-        // for this study
-        var existingDistinctGenes = Expression3.aggregate([
-          {$match: {study_label: study_label}},
-          {$group: {_id: ":)", "genes": {$addToSet: "$gene_label"}}}
-        ])[0].genes.sort();
-
-        // NOTE: node hangs if we try to do this update through the non-raw
-        // collection
-        Studies.rawCollection().update({id: study_label}, {
-          $set: { gene_expression_genes: existingDistinctGenes }
-        }, function (error, result) {
-          if (error) {
-            console.log("gene_expression_genes update error:", error);
-          }
-        });
-
-        studyGenes = existingDistinctGenes;
-        console.log(
-            "gene_expression_genes calculated from existing Expression3 data");
-      } else {
-        // use this sample's data as the master geneset
-        Studies.update({id: study_label}, {
-          $set: { gene_expression_genes: sortedGenes }
-        });
-        studyGenes = sortedGenes;
-        console.log("this file's genes are now the master geneset for this study");
-      }
+      studyGenes = sortedGenes;
+      console.log("this file's genes are now the master geneset for this study");
     }
 
     // compare the genes in the file to gene_expression_genes
