@@ -44,8 +44,9 @@ Package.onUse(function (api) {
 
 
 
-Package.onTest(function (api) {
-  api.versionsFrom('1.1.0.3');
-
-  // console.log("No tests yet :(");
-});
+// Package.onTest(function (api) {
+//   api.versionsFrom('1.1.0.3');
+//   api.use(["meteor-file", "tinytest", "test-helpers"])
+//
+//   api.addFiles("tests.js");
+// });
