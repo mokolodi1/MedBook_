@@ -69,11 +69,8 @@ def export_with_id(db, sampleGroupId):
             sys.stdout.write("\n" + currentGene + "\t")
 
         # write data for this study
-        currentStudy = studies[studyIndex]
-        for sampleLabel in sampleGroupStudies[studyIndex]["sample_labels"]:
-            index = currentStudy["gene_expression_index"][sampleLabel]
-            data = doc["rsem_quan_log2"][index]
-            sys.stdout.write("\t" + str(data))
+        dataStrings = [str(data) for data in doc["rsem_quan_log2"]]
+        sys.stdout.write("\t" + "\t".join(dataStrings))
 
         # increment the study index
         studyIndex += 1
