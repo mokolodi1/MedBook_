@@ -81,7 +81,6 @@ var getTarget = function(req) {
 
 readMenu = function() {
   menuFile = fs.readFileSync("menu.html");
-  reloadFile = fs.readFileSync("reload.html");
 };
 
 readMenu();

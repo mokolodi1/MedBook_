@@ -9,9 +9,7 @@
 [apps]
    [apps.CRFs]
    auth = false
-   route = "/CRF"
-   cwd = "../MedBook-CRFs/"
-   run = "/bin/sh -c ./run.sh"
+   route = "/crfs"
    port = 3000
    menuPosition = 1
    menuItem = "Forms"
