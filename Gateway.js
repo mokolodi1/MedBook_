@@ -163,7 +163,7 @@ run = function() {
             log_error(e,req);
 	    console.log("web error", e);
 	    res.writeHead(500, { 'Content-Type': 'text/html' });
-            res.write(reloadFile, "binary");
+            res.write("Target " + target + " not available at the moment..");
 	    res.end();
 	});
     }

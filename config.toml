@@ -9,7 +9,7 @@
 [apps]
    [apps.CRFs]
    auth = false
-   route = "/crfs"
+   route = "/CRF"
    port = 3000
    menuPosition = 1
    menuItem = "Forms"
