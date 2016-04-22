@@ -108,7 +108,7 @@ RectangularGeneAssay.prototype.parseLine =
     if (!this.wranglerPeek) {
       for (var sampleIndex in this.sampleLabels) {
         var sampleLabel = this.sampleLabels[sampleIndex];
-        ensureClinicalExists.call(this, this.submission.options.study_label, sampleLabel);
+        ensureSampleExists.call(this, this.submission.options.study_label, sampleLabel);
       }
     }
 

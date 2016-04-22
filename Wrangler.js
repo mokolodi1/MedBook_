@@ -230,6 +230,12 @@ var update_or_create = {
 };
 
 Wrangler.fileTypes = {
+  PatientSampleMapping: {
+    description: "Patient sample mapping",
+    schema: new SimpleSchema({
+      study_label: { type: String },
+    }),
+  },
   RectangularGeneExpression: {
     description: "Gene expression rectangular matrix",
     schema: new SimpleSchema({
@@ -255,64 +261,63 @@ Wrangler.fileTypes = {
       }
     }),
   },
-  RectangularIsoformExpression: {
-    description: "Isoform expression rectangular matrix",
-    schema: makeExpressionSchema(IsoformExpression),
-  },
-  "RectangularGeneAnnotation": {
-    description: "Gene annotation rectangular matrix",
-    schema: makeAnnotationSchema(GeneAnnotation, [
-      "gistic_copy_number"
-    ]),
-  },
-  BD2KSampleLabelMap: {
-    description: "Sample label mapping (BD2K pipeline)",
-  },
-  ContrastMatrix: {
-    description: "Contrast matrix",
-    schema: new SimpleSchema({
-      collaboration_label: { type: String },
-      update_or_create: update_or_create,
-      contrast_label: { type: String, label: "Contrast name" },
-      description: {
-        type: String,
-        optional: true,
-        custom: requiredOnCreate
-      },
-    }),
-  },
-  LimmaSignature: {
-    description: "Limma signature",
-    schema: new SimpleSchema({
-      collaboration_label: { type: String },
-      update_or_create: update_or_create,
-      signature_label: { type: String, label: "Signature name" },
-      description: {
-        type: String,
-        optional: true,
-        custom: requiredOnCreate
-      },
-      algorithm: _.extend(Signatures.simpleSchema().schema().algorithm, {
-        optional: true,
-        custom: requiredOnCreate,
-      }),
-      features_type: _.extend(Signatures.simpleSchema().schema().features_type, {
-        optional: true,
-        custom: requiredOnCreate,
-      }),
-    }),
-  },
-  MutationVCF: {
-    description: "VCF Mutation",
-    schema: new SimpleSchema({
-      collaboration_label: { type: String },
-      description: {
-        type: String,
-        optional: true,
-        custom: requiredOnCreate
-      },
-    }),
-  },
+
+  // RectangularIsoformExpression: {
+  //   description: "Isoform expression rectangular matrix",
+  //   schema: makeExpressionSchema(IsoformExpression),
+  // },
+  // "RectangularGeneAnnotation": {
+  //   description: "Gene annotation rectangular matrix",
+  //   schema: makeAnnotationSchema(GeneAnnotation, [
+  //     "gistic_copy_number"
+  //   ]),
+  // },
+  //
+  // ContrastMatrix: {
+  //   description: "Contrast matrix",
+  //   schema: new SimpleSchema({
+  //     collaboration_label: { type: String },
+  //     update_or_create: update_or_create,
+  //     contrast_label: { type: String, label: "Contrast name" },
+  //     description: {
+  //       type: String,
+  //       optional: true,
+  //       custom: requiredOnCreate
+  //     },
+  //   }),
+  // },
+  // LimmaSignature: {
+  //   description: "Limma signature",
+  //   schema: new SimpleSchema({
+  //     collaboration_label: { type: String },
+  //     update_or_create: update_or_create,
+  //     signature_label: { type: String, label: "Signature name" },
+  //     description: {
+  //       type: String,
+  //       optional: true,
+  //       custom: requiredOnCreate
+  //     },
+  //     algorithm: _.extend(Signatures.simpleSchema().schema().algorithm, {
+  //       optional: true,
+  //       custom: requiredOnCreate,
+  //     }),
+  //     features_type: _.extend(Signatures.simpleSchema().schema().features_type, {
+  //       optional: true,
+  //       custom: requiredOnCreate,
+  //     }),
+  //   }),
+  // },
+  // MutationVCF: {
+  //   description: "VCF Mutation",
+  //   schema: new SimpleSchema({
+  //     collaboration_label: { type: String },
+  //     description: {
+  //       type: String,
+  //       optional: true,
+  //       custom: requiredOnCreate
+  //     },
+  //   }),
+  // },
 
   // // NOTE: people can still run it, but the client picklist won't show it
   // ArachneRegulon: {

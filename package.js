@@ -36,12 +36,12 @@ Package.onUse(function(api) {
     "fileHandlers/RectangularGeneAssay.js",
 
     "fileHandlers/RectangularGeneExpression.js",
-    "fileHandlers/RectangularGeneAnnotation.js",
-    "fileHandlers/RectangularIsoformExpression.js",
-    "fileHandlers/BD2KSampleLabelMap.js",
-    "fileHandlers/ContrastMatrix.js",
-    "fileHandlers/LimmaSignature.js",
-    "fileHandlers/MutationVCF.js",
+    // "fileHandlers/RectangularGeneAnnotation.js",
+    // "fileHandlers/RectangularIsoformExpression.js",
+    "fileHandlers/PatientSampleMapping.js",
+    // "fileHandlers/ContrastMatrix.js",
+    // "fileHandlers/LimmaSignature.js",
+    // "fileHandlers/MutationVCF.js",
     // "fileHandlers/ArachneRegulon.js", // not ready yet
 
     // Admin stuff

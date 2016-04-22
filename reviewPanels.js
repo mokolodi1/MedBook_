@@ -23,19 +23,15 @@ var sampleDataExists = {
 };
 
 var sampleLabelMap = {
-  name: "sample_label_map",
-  title: "Sample label mapping",
-  description: "The following sample labels will be mapped from " +
-      "UUIDs to sample labels.",
+  name: "patient_sample_map",
+  title: "Patient sample mapping",
+  description: "The following patient sample mappings will be created.",
   css_class: "panel-default",
   columns: [
-    {
-      heading: "MedBook sample label",
-      attribute: "sample_label",
-      header_of_row: true
-    },
-    { heading: "Original sample label", attribute: "original_sample_label" },
-    { heading: "Sample UUID", attribute: "sample_uuid" },
+    { heading: "Study", attribute: "study_label" },
+    { heading: "Patient", attribute: "patient_label" },
+    { heading: "Sample", attribute: "sample_label" },
+    { heading: "Change", attribute: "change_description" },
   ],
 };
 
@@ -66,25 +62,25 @@ function assaySampleSummary (lineCountHeading) {
   };
 }
 
-var newClinicalData = {
-  name: "new_clinical_data",
-  title: "New clinical data",
-  description: "Medbook does not have clinical information for the " +
-      "following samples/patients. Clinical_Info and the " +
-      "studies collection will be updated include them.",
-  css_class: "panel-danger",
-  columns: [
-    { heading: "Study", attribute: "study_label" },
-    { heading: "Patient ID", attribute: "patient_label" },
-    { heading: "Sample ID", attribute: "sample_label" },
-  ],
-};
+// var newClinicalData = {
+//   name: "new_clinical_data",
+//   title: "New clinical data",
+//   description: "Medbook does not have clinical information for the " +
+//       "following samples/patients. Clinical_Info and the " +
+//       "studies collection will be updated include them.",
+//   css_class: "panel-danger",
+//   columns: [
+//     { heading: "Study", attribute: "study_label" },
+//     { heading: "Patient ID", attribute: "patient_label" },
+//     { heading: "Sample ID", attribute: "sample_label" },
+//   ],
+// };
 
 var geneAssayPanels = [
   assaySampleSummary("Gene count"),
-  newClinicalData,
+  // newClinicalData,
   sampleDataExists,
-  sampleLabelMap,
+  // sampleLabelMap,
   // ignoredGenesPanel,
   // _.extend(mappedGenesNoDescription, {
   //   description: "These genes are valid but are going to be mapped " +
@@ -97,9 +93,9 @@ Wrangler.reviewPanels = {
   gene_annotation: geneAssayPanels,
   isoform_expression: [
     assaySampleSummary("Isoform count"),
-    newClinicalData,
+    // newClinicalData,
     sampleDataExists,
-    sampleLabelMap,
+    // sampleLabelMap,
     // _.extend(mappedGenesNoDescription, {
     //   description: "After mapping from transcript ID to gene name, these " +
     //       "genes will be renamed for consistancy within MedBook.",
@@ -167,7 +163,7 @@ Wrangler.reviewPanels = {
         { heading: "Group", attribute: "group_name" },
       ],
     },
-    newClinicalData,
+    // newClinicalData,
   ],
   signature: [
     {
