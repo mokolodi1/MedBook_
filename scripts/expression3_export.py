@@ -15,9 +15,7 @@ import sys
 import getopt
 import pymongo
 
-def export_with_id(db, sampleGroupId):
-    sampleGroup = db["sample_groups"].find_one({ "_id": sampleGroupId })
-
+def export_from_object(db, sampleGroup):
     # NOTE: from this point on, don't reference sampleGroup["studies"]
     #       because we mutate it (only sort, for now)
     sampleGroupStudies = sampleGroup["studies"]
@@ -88,7 +86,7 @@ def export_with_id(db, sampleGroupId):
             index = currentStudy["gene_expression_index"][sampleLabel]
             dataStrings.append(str(doc["rsem_quan_log2"][index]))
 
-        sys.stdout.write("\t" + "\t".join(dataStrings))
+        sys.stdout.write("\t".join(dataStrings))
 
         studyIndex += 1
 
@@ -109,7 +107,23 @@ def main():
             sys.exit(1)
 
         sampleGroupId = argv[index]
-        export_with_id(db, sampleGroupId)
+        sampleGroup = db["sample_groups"].find_one({ "_id": sampleGroupId })
+        export_from_object(db, sampleGroup)
+        sys.exit(0)
+    elif "--study_label" in argv and "--sample_label" in argv:
+        studyIndex = argv.index("--study_label") + 1
+        sampleIndex = argv.index("--sample_label") + 1
+
+        # pretend we have a sample group
+        export_from_object(db, {
+            "studies": [
+                {
+                    "study_label": argv[studyIndex],
+                    "sample_labels": [ argv[sampleIndex] ]
+                }
+            ]
+        })
+
         sys.exit(0)
 
     print __doc__
