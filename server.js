@@ -23,17 +23,21 @@ Meteor.publish("/collaborations/user", function (userId) {
 
 
 function getDefaultCollabs (user) {
-  var email_address = user.emails[0].address;
-  var personal = "user:" + email_address;
-
-  if (!email_address) {
-    throw new Meteor.Error("Can't figure out email address from user obj");
+  var email_address;
+  if (user.emails) {
+    email_address = user.emails[0].address;
+  } else if (user.services && user.services.google) {
+    email_address = user.services.google.email;
+  } else {
+    throw new Meteor.Error("Don't know where to find email.");
   }
+
+  var personal = "user:" + email_address;
 
   return {
     email_address: email_address,
     personal: personal,
-    memberOf: [personal],
+    memberOf: [ personal ],
   };
 }
 

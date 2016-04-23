@@ -1,7 +1,8 @@
 // custom validation error message for when the collaboration name starts
 // with "user:"
 SimpleSchema.messages({
-  collabNameCantStartWithUser: "Collaboration mames can't start with \"user:\"",
+  collabNameCantStartWithUser: "Collaboration names can't start with \"user:\"",
+  collabNameCantHaveAmpersand: "Collaboration names can't contain \"@\"",
 });
 // attach the schema to collaborations seperately from defining it because it's
 // defined seperately on the server and client
@@ -10,18 +11,25 @@ Collaborations.attachSchema(new SimpleSchema({
     type: String,
     unique: true,
     custom: function () {
-      // don't allow name to start with "user:"
       var name = this.value;
-      if (name.startsWith("user:")) {
+
+      if (name.startsWith("user:")) { // don't allow name to start with "user:"
         return "collabNameCantStartWithUser";
+      }
+
+      if (name.indexOf("@") !== -1) { // don't allow name to contain "@"
+        return "collabNameCantHaveAmpersand";
       }
     },
   },
   description: { type: String },
 
-  collaborators: { type: [String] },
-  // if there are no administrators, the collaboration is considered deleted
-  // and cannot be managed or recreated
+  collaborators: { type: [String], defaultValue: [] },
+
+  // If there are no administrators, the collaboration is considered deleted
+  // and cannot be managed or recreated. This is important because we don't
+  // want someone to be able to recreate a collaboration that has been deleted
+  // in case there are reminant links to it that haven't been deleted.
   administrators: { type: [String] },
 
   isUnlisted: { type: Boolean, label: "Unlisted" },
