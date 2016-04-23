@@ -6,7 +6,6 @@
 * 3. If study.gene_expression_genes isn't defined, calculate it from
 *    documents in expression3
 */
-console.log("loading!");
 MedBook.referentialIntegrity.studies_expression3 = function (studiesQuery) {
   console.log("starting referential integrity maintenance" +
       " (studies ==> expression3)");
