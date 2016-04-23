@@ -25,7 +25,7 @@ Package.onUse(function(api) {
   api.use([
     "aldeed:simple-schema@1.3.3",
     "aldeed:collection2@2.3.3",
-    "aldeed:autoform@4.2.2 || 5.0.0",
+    "aldeed:autoform@4.2.2 || 5.0.0 || 5.1.2",
     "underscore",
     "medbook:namespace@0.0.2",
   ]);

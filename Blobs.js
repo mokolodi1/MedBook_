@@ -36,16 +36,18 @@ Blobs = new FS.Collection("blobs", {
 
 // users can only modify their own documents
 Blobs.allow({
-  insert: function (userId, doc) {
-    return userId === doc.metadata.user_id;
-  },
-  update: function(userId, doc, fields, modifier) {
-    return userId === doc.metadata.user_id;
-  },
-  remove: function (userId, doc) {
-    return userId === doc.metadata.user_id;
-  },
+  // insert: function (userId, doc) {
+  //   return userId === doc.metadata.user_id;
+  // },
+  // update: function(userId, doc, fields, modifier) {
+  //   return userId === doc.metadata.user_id;
+  // },
+  // remove: function (userId, doc) {
+  //   return userId === doc.metadata.user_id;
+  // },
+  // anyone can download a blob if they have the _id
   download: function (userId, doc) {
-    return userId === doc.metadata.user_id;
+    return true;
+    // return userId === doc.metadata.user_id;
   }
 });
