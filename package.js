@@ -15,6 +15,7 @@ Package.onUse(function(api) {
 
   api.use("underscore");
   api.use("meteorhacks:aggregate@1.3.0");
+  api.use("mokolodi1:helpers@0.0.11");
 
   api.use("medbook:primary-collections@0.0.19");
   api.use("medbook:namespace@0.0.2");

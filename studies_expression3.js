@@ -18,6 +18,12 @@ MedBook.referentialIntegrity.studies_expression3 = function (studiesQuery) {
     var study_label = study.id;
     console.log("study_label:", study_label);
 
+    // remove expression3 documents that don't have any data
+    Expression3.remove({
+      study_label: study_label,
+      rsem_quan_log2: { $size:  0 }
+    });
+
     // remove expression3Doc.rsem_quan_log2 array values not associated with
     // a sample in study.gene_expression
 
@@ -110,3 +116,9 @@ MedBook.referentialIntegrity.studies_expression3 = function (studiesQuery) {
 
   console.log("done with referential integrity maintenance");
 };
+
+// for removing empty entries
+Moko.ensureIndex(Expression3, {
+  study_label: 1,
+  rsem_quan_log2: 1,
+});
