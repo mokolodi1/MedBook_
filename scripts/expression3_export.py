@@ -38,7 +38,7 @@ def export_from_object(db, sampleGroup):
     if len(sampleGroupStudies) > 1:
         print "Need to make sure we're dealing with the same gene set for each study"
         sys.exit(1)
-    geneSet = studies[0]["gene_expression_genes"]
+    # geneSet = studies[0]["gene_expression_genes"]
 
     # TODO: make sure there are no sample label collisions
 
@@ -57,11 +57,6 @@ def export_from_object(db, sampleGroup):
         ("gene_label", pymongo.ASCENDING),
         ("study_label", pymongo.ASCENDING)
     ])
-
-    # make sure we have the right number of documents
-    if cursor.count() != len(studies) * len(geneSet):
-        print "Got wrong number of documents!"
-        sys.exit(1)
 
     # make absolutely sure the order of the studies matches the order of the
     # studies in the sample group
