@@ -236,6 +236,12 @@ Wrangler.fileTypes = {
       study_label: { type: String },
     }),
   },
+  SampleLabelDefinition: {
+    description: "Sample ID definition",
+    schema: new SimpleSchema({
+      study_label: { type: String },
+    }),
+  },
   RectangularGeneExpression: {
     description: "Gene expression rectangular matrix",
     schema: new SimpleSchema({

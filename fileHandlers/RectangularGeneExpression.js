@@ -121,12 +121,39 @@ RectangularGeneExpression.prototype.insertToCollection =
     }
   });
 
-  Expression3.upsert({
+  // If we've already seen this gene before, average with existing data.
+  // Otherwise, just do a regular insert
+
+  var expressionQuery = {
     study_label: this.submission.options.study_label,
     gene_label: gene_label,
-  }, {
-    $push: { rsem_quan_log2: { $each: log2Values } }
-  });
+  };
+
+  var seenCount = this.geneLabelIndex[gene_label];
+  if (seenCount) {
+    var allData = Expression3.findOne(query).rsem_quan_log2;
+    var startIndex = allData.length - 1 - log2Values.length;
+
+    console.log("existing data:", existingData);
+    console.log("log2Values:", log2Values);
+    for (var i = 0; i < oldData.length; i++) {
+      var allDataIndex = i + startIndex;
+      // do the average
+      var averaged = (allData[allDataIndex] * seenCount + log2Values[i]) /
+          (seenCount + 1);
+      allData[allDataIndex] = averaged;
+    }
+    console.log("data:", existingData);
+
+    // put the data back into the existing data and update...
+    Expression3.update(expressionQuery, {
+      rsem_quan_log2: allData
+    });
+  } else {
+    Expression3.upsert(expressionQuery, {
+      $push: { rsem_quan_log2: { $each: log2Values } }
+    });
+  }
 };
 Moko.ensureIndex(Expression3, {
   study_label: 1,
@@ -136,43 +163,43 @@ Moko.ensureIndex(Expression3, {
 RectangularGeneExpression.prototype.endOfFile = function () {
   var sortedGenes = Object.keys(this.geneLabelIndex).sort();
 
-  // make sure there's no duplicates in the genes
-
-  if (this.geneLabels.length !== sortedGenes.length) {
-    // there were duplicates... now on to figure out what they were!
-
-    // NOTE: sorting here could technically break things later if we assume
-    // it hasn't been sorted
-    this.geneLabels.sort();
-
-    var maxDuplicates = 5;
-    var duplicates = [];
-    for (var i = 1; i < this.geneLabels.length; i++) {
-      var current = this.geneLabels[i];
-
-      // only show a duplicate once
-      if (duplicates[duplicates.length - 1] === current) {
-        continue;
-      }
-
-      // if a duplicate, add it to the list
-      if (this.geneLabels[i - 1] === current) {
-        duplicates.push(current);
-      }
-
-      // actually look for maxDuplicates + 1 so we know if we need a "..."
-      if (duplicates > maxDuplicates) {
-        break;
-      }
-    }
-
-    var duplicatesString = duplicates.slice(0, 5).join(", ");
-    if (duplicates.length > maxDuplicates) {
-      duplicatesString += "...";
-    }
-
-    throw "Duplicate genes: " + duplicatesString;
-  }
+  // // make sure there's no duplicates in the genes
+  //
+  // if (this.geneLabels.length !== sortedGenes.length) {
+  //   // there were duplicates... now on to figure out what they were!
+  //
+  //   // NOTE: sorting here could technically break things later if we assume
+  //   // it hasn't been sorted
+  //   this.geneLabels.sort();
+  //
+  //   var maxDuplicates = 5;
+  //   var duplicates = [];
+  //   for (var i = 1; i < this.geneLabels.length; i++) {
+  //     var current = this.geneLabels[i];
+  //
+  //     // only show a duplicate once
+  //     if (duplicates[duplicates.length - 1] === current) {
+  //       continue;
+  //     }
+  //
+  //     // if a duplicate, add it to the list
+  //     if (this.geneLabels[i - 1] === current) {
+  //       duplicates.push(current);
+  //     }
+  //
+  //     // actually look for maxDuplicates + 1 so we know if we need a "..."
+  //     if (duplicates > maxDuplicates) {
+  //       break;
+  //     }
+  //   }
+  //
+  //   var duplicatesString = duplicates.slice(0, 5).join(", ");
+  //   if (duplicates.length > maxDuplicates) {
+  //     duplicatesString += "...";
+  //   }
+  //
+  //   throw "Duplicate genes: " + duplicatesString;
+  // }
 
   // check to make sure the genes match up with existing data
 

@@ -119,7 +119,6 @@ RectangularGeneAssay.prototype.parseLine =
     this.alertIfSampleDataExists.call(this);
 
     // keep track of the genes we've seen
-    this.geneLabels = [];
     this.geneLabelIndex = {};
 
     this.beforeParsing.call(this);
@@ -137,14 +136,17 @@ RectangularGeneAssay.prototype.parseLine =
       gene_label = chromosomeSuffix[0];
     }
 
-    this.geneLabels.push(gene_label);
-    this.geneLabelIndex[gene_label] = 1;
-
     if (this.wranglerPeek) {
       this.line_count++;
     } else {
-      return this.insertToCollection.call(this, gene_label, expressionStrings);
+      this.insertToCollection.call(this, gene_label, expressionStrings);
     }
+
+    // add one to the gene label index
+    if (!this.geneLabelIndex[gene_label]) {
+      this.geneLabelIndex[gene_label] = 0;
+    }
+    this.geneLabelIndex[gene_label]++;
   }
 };
 

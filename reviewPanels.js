@@ -22,19 +22,6 @@ var sampleDataExists = {
   ],
 };
 
-var sampleLabelMap = {
-  name: "patient_sample_map",
-  title: "Patient sample mapping",
-  description: "The following patient sample mappings will be created.",
-  css_class: "panel-default",
-  columns: [
-    { heading: "Study", attribute: "study_label" },
-    { heading: "Patient", attribute: "patient_label" },
-    { heading: "Sample", attribute: "sample_label" },
-    { heading: "Change", attribute: "change_description" },
-  ],
-};
-
 // var mappedGenesNoDescription = {
 //   name: "mapped_genes",
 //   title: "Mapped genes",
@@ -80,7 +67,6 @@ var geneAssayPanels = [
   assaySampleSummary("Gene count"),
   // newClinicalData,
   sampleDataExists,
-  // sampleLabelMap,
   // ignoredGenesPanel,
   // _.extend(mappedGenesNoDescription, {
   //   description: "These genes are valid but are going to be mapped " +
@@ -95,7 +81,6 @@ Wrangler.reviewPanels = {
     assaySampleSummary("Isoform count"),
     // newClinicalData,
     sampleDataExists,
-    // sampleLabelMap,
     // _.extend(mappedGenesNoDescription, {
     //   description: "After mapping from transcript ID to gene name, these " +
     //       "genes will be renamed for consistancy within MedBook.",
@@ -207,6 +192,27 @@ Wrangler.reviewPanels = {
     },
   ],
   metadata: [
-    sampleLabelMap,
+    {
+      name: "patient_sample_map",
+      title: "Patient sample mapping",
+      description: "The following patient sample mappings will be created.",
+      css_class: "panel-default",
+      columns: [
+        { heading: "Study", attribute: "study_label" },
+        { heading: "Patient", attribute: "patient_label" },
+        { heading: "Sample", attribute: "sample_label" },
+        { heading: "Change", attribute: "change_description" },
+      ],
+    },
+    {
+      name: "new_sample_label",
+      title: "New sample ID",
+      description: "The following sample IDs will be added.",
+      css_class: "panel-default",
+      columns: [
+        { heading: "Study", attribute: "study_label" },
+        { heading: "Sample", attribute: "sample_label" },
+      ],
+    },
   ],
 };
