@@ -14,8 +14,6 @@ PatientSampleMapping.prototype.constructor = PatientSampleMapping;
 PatientSampleMapping.prototype.parseLine = function (brokenTabs, lineNumber, line) {
   this.ensureRectangular.call(this, brokenTabs, lineNumber);
 
-  var study = Studies.findOne({id: this.wranglerFile.options.study_label});
-
   var patient_label = brokenTabs[0];
   var sample_label = brokenTabs[1];
 
@@ -31,6 +29,9 @@ PatientSampleMapping.prototype.parseLine = function (brokenTabs, lineNumber, lin
     return;
   }
 
+  // refetch the study every time in case "patients" is defined for the
+  // first time (for example)
+  var study = Studies.findOne({id: this.wranglerFile.options.study_label});
   var patient = _.findWhere(study.patients, { patient_label: patient_label });
 
   var wranglerDocUpdate = {
@@ -44,7 +45,7 @@ PatientSampleMapping.prototype.parseLine = function (brokenTabs, lineNumber, lin
 
   if (patient) {
     var sampleExists = false;
-    if (patient && patient.sample_labels.indexOf(sample_label) > -1) {
+    if (patient.sample_labels.indexOf(sample_label) > -1) {
       sampleExists = true;
     }
 
@@ -103,7 +104,18 @@ PatientSampleMapping.prototype.parseLine = function (brokenTabs, lineNumber, lin
   }
 
   // also add to Patient_IDs/Sample_IDs
-  if (!this.wranglerPeek) {
+  if (this.wranglerPeek) {
+    // warn the user if we've never seen the samples before
+    if (study.Sample_IDs.indexOf(sample_label) === -1) {
+      this.insertWranglerDocument({
+        document_type: "new_sample_label",
+        contents: {
+          study_label: study.id,
+          sample_label: sample_label,
+        },
+      });
+    }
+  } else {
     Studies.update(study._id, {
       $addToSet: {
         Patient_IDs: patient_label,

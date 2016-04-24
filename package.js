@@ -39,6 +39,7 @@ Package.onUse(function(api) {
     // "fileHandlers/RectangularGeneAnnotation.js",
     // "fileHandlers/RectangularIsoformExpression.js",
     "fileHandlers/PatientSampleMapping.js",
+    "fileHandlers/SampleLabelDefinition.js",
     // "fileHandlers/ContrastMatrix.js",
     // "fileHandlers/LimmaSignature.js",
     // "fileHandlers/MutationVCF.js",

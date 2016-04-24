@@ -76,7 +76,7 @@ errorResultResolver = function (deferred) {
 ensureSampleExists = function (study_label, sample_label) {
   var study = Studies.findOne({
     id: study_label,
-    "patients.sample_labels": sample_label,
+    Sample_IDs: sample_label,
   });
 
   if (!study) {

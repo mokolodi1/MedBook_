@@ -68,6 +68,13 @@ FileHandler.prototype.insertWranglerDocument = function (typeAndContents) {
   });
 };
 
+Moko.ensureIndex(WranglerDocuments, {
+  submission_id: 1,
+  user_id: 1,
+  document_type: 1,
+  contents: 1,
+});
+
 FileHandler.prototype.blobAsString = function() {
   var self = this;
   return new Q.Promise(function (resolve, reject) {
@@ -89,10 +96,3 @@ FileHandler.prototype.setSubmissionType = function (submission_type) {
     }
   });
 };
-
-Moko.ensureIndex(WranglerDocuments, {
-  submission_id: 1,
-  user_id: 1,
-  document_type: 1,
-  contents: 1,
-});
