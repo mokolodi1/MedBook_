@@ -40,7 +40,7 @@ Collaborations.attachSchema(new SimpleSchema({
     label: "Admin approval required to join",
   },
 }));
-MedBook.Collections.Collaborations = Collaborations;
+MedBook.collections.Collaborations = Collaborations;
 
 
 
