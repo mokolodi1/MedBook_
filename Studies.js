@@ -16,18 +16,20 @@ var samplesSchema = {
 Studies.attachSchema(new SimpleSchema({
   collaborations: { type: [String], min: 1 },
 
-  id: {
+  id: { // TODO: change to study_label
     type: String,
     regEx: alphaNumeric,
     label: "Study ID",
   },
   name: { type: String },
-  short_name: { type: String, max: 16 },
+  // short_name: { type: String, max: 16 },
   description: { type: String, optional: true },
 
   tables: { type: [String] },
 
+  // TODO: change to sample_labels
   Sample_IDs: { type: [String], defaultValue: [], optional: true },
+  // TODO: remove (?)
   Patient_IDs: { type: [String], defaultValue: [], optional: true },
 
   gene_expression: { type: [String], optional: true },
@@ -39,6 +41,7 @@ Studies.attachSchema(new SimpleSchema({
     defaultValue: false,
     optional: true
   },
+  // TODO:
   // gene_expression: {
   //   type: new SimpleSchema({
   //     samples: {

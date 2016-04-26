@@ -1,4 +1,4 @@
-MedBook.Collections = {
+MedBook.collections = {
   Samples: Samples,
   SampleGroups: SampleGroups,
   Contrasts: Contrasts,
