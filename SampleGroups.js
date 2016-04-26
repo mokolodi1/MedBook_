@@ -1,12 +1,29 @@
 SampleGroups = new Meteor.Collection("sample_groups");
 
+// Filter types:
+// "CRF",
+// "sample_label_search",
+// "sample_label_list",
+// "has_gene_expression",
+// "has_isoform_expression",
+// // etc.
+
+// attribute = filter["type"]
+var filterOptionsSchemas = {
+  sample_label_list: new SimpleSchema({
+    sample_labels: { type: [String] },
+  }),
+};
+SimpleSchema.messages({
+  filterOptionsInvalid: "Options provided in a filter are invalid",
+});
+
 SampleGroups.attachSchema(new SimpleSchema({
-  collaborations: { type: [String] },
-
-  date_created: { type: Date, autoValue: dateCreatedAutoValue },
-
   name: { type: String },
   version: { type: Number, min: 1 },
+  date_created: { type: Date, autoValue: dateCreatedAutoValue },
+
+  collaborations: { type: [String] },
 
   // samples: {
   //   type: [
@@ -46,36 +63,35 @@ SampleGroups.attachSchema(new SimpleSchema({
             }
           },
         },
-        // unfiltered_samples_count: {
-        //   type: Number,
-        //   min: 0,
-        //   optional: true,
-        // },
 
-        // filters: {
-        //   type: [
-        //     new SimpleSchema({
-        //       type: {
-        //         type: String,
-        //         allowedValues: [
-        //           "CRF",
-        //           "sample_label_search",
-        //           "sample_label_list",
-        //           "has_gene_expression",
-        //           "has_isoform_expression",
-        //           // etc.
-        //         ]
-        //       },
-        //       info: {
-        //         type: Object,
-        //         blackbox: true,
-        //       }
-        //     })
-        //   ],
-        //   optional: true, // not present ==> include all samples in a study
-        // },
+        filters: {
+          type: [
+            new SimpleSchema({
+              type: {
+                type: String,
+                allowedValues: Object.keys(filterOptionsSchemas),
+              },
+              options: {
+                type: Object,
+                blackbox: true,
+                custom: function () {
+                  var type = this.siblingField("type").value;
+                  var isValid = filterOptionsSchemas[type]
+                      .newContext()
+                      .validate(this.value);
+
+                  if (!isValid) {
+                    return "filterOptionsInvalid";
+                  }
+                },
+              },
+            })
+          ],
+          defaultValue: [],
+          optional: true, // not present ==> include all samples in a study
+        },
       })
     ],
-    optional: true,
+    min: 1
   },
 }));
