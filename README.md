@@ -39,14 +39,14 @@ To get the personal collaboration associated with a user, use `user.personalColl
 
 ```js
 let user = MedBook.ensureUser(Meteor.userId());
-let userCollab = user.personalCollaboration(); // "user:username@domain.suffix"
+let userCollab = user.personalCollaboration(); // "username@domain.suffix"
 ```
 
 To get a list of the collaborations a user is a part of, use `getCollaborations`. On both client and server, this returns `user.collaborations.memberOf`, however on the server this list is updated before it is returned. (Internally, `collaboration.getAssociatedCollaborators()` is used.) Currently, the `memberOf` list is updated every time this function is called. In the future, we may add throttling to this update function (ex. updating only a minute after the last update).
 ```js
 let user = MedBook.ensureUser(Meteor.userId());
 let collaborations = user.getCollaborations();
-// ex. ["user:test@test.com", "Testing lab UCSC", "Cool RNA-Seq project"]
+// ex. ["test@test.com", "Testing lab UCSC", "Cool RNA-Seq project"]
 ```
 
 To check if a user has access to an object, use `hasAccess` (returns boolean). To throw an error if the user doesn't have access, use `ensureAccess`. These functions take one parameter: either a collaboration object or a collaboration name (string). Use `ensureAccess` unless you need to do something if the user doesn't have access.

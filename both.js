@@ -1,7 +1,4 @@
-// custom validation error message for when the collaboration name starts
-// with "user:"
 SimpleSchema.messages({
-  collabNameCantStartWithUser: "Collaboration names can't start with \"user:\"",
   collabNameCantHaveAmpersand: "Collaboration names can't contain \"@\"",
 });
 // attach the schema to collaborations seperately from defining it because it's
@@ -12,10 +9,6 @@ Collaborations.attachSchema(new SimpleSchema({
     unique: true,
     custom: function () {
       var name = this.value;
-
-      if (name.startsWith("user:")) { // don't allow name to start with "user:"
-        return "collabNameCantStartWithUser";
-      }
 
       if (name.indexOf("@") !== -1) { // don't allow name to contain "@"
         return "collabNameCantHaveAmpersand";

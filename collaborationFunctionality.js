@@ -90,7 +90,7 @@ function getAssociatedCollaborators (doc) {
 
         // add nodes (non-leaves aka non-users) to the lookup queue, but
         // only if we haven't seen them before
-        if (!collaborationName.startsWith("user:") &&
+        if (collaborationName.indexOf("@") === -1 &&
             !associatedCollaborators[collaborationName]) {
           collaborationLookupQueue.push(collaborationName);
         }

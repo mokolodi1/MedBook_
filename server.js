@@ -32,7 +32,7 @@ function getDefaultCollabs (user) {
     throw new Meteor.Error("Don't know where to find email.");
   }
 
-  var personal = "user:" + email_address;
+  var personal = email_address;
 
   return {
     email_address: email_address,
