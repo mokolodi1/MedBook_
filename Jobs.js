@@ -1,23 +1,38 @@
 Jobs = new Meteor.Collection("jobs");
 
+// TODO: implement job schemas
+
+// NOTE: attributes = name of jobs
+var jobSchemas = {
+  "ParseWranglerFile": null,
+  "SubmitWranglerFile": null,
+  "SubmitWranglerSubmission": null,
+  "FinishWranglerSubmission": null,
+  "RunLimma": null,
+  "RunApplySignature": null,
+  "RunViper": null,
+  "ExportFile": null,
+  "ReloadGenesCollection": null,
+  "GeneTranscriptMappings": null,
+  "UpDownGenes": {
+    args: new SimpleSchema({
+      study_label: { type: String },
+      patient_label: { type: String },
+      sample_label: { type: String },
+      sample_group_id: { type: String },
+      sample_group_name: { type: String },
+      iqr_multiplier: { type: Number, decimal: true },
+    }),
+    output: null,
+  },
+}
+
 Jobs.attachSchema(new SimpleSchema({
   // fields needed to insert a Job
   name: {
     type: String,
     // TODO: depend on Jobs package
-    allowedValues: [
-      "ParseWranglerFile",
-      "SubmitWranglerFile",
-      "SubmitWranglerSubmission",
-      "FinishWranglerSubmission",
-      "RunLimma",
-      "RunApplySignature",
-      "RunViper",
-      "ExportFile",
-      "ReloadGenesCollection",
-      "GeneTranscriptMappings",
-      "UpDownGenes",
-    ],
+    allowedValues: Object.keys(jobSchemas),
   },
   user_id: { type: Meteor.ObjectID },
   args: { // input
