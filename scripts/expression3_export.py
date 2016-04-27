@@ -4,12 +4,11 @@
 
 Usage:
 ./expression3_export.py --sample_group_id [sample group _id]
+./expression3_export.py --study_label [study label] --sample_label [sample label]
 
 Dependancies:
 pymongo
 """
-
-#./expression3_export.py --sample_label [sample label] --study_label [study label] [output]"""
 
 import sys
 import getopt
