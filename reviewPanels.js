@@ -215,4 +215,17 @@ Wrangler.reviewPanels = {
       ],
     },
   ],
+  gene_set_collection: [
+    {
+      name: "new_gene_set_collection",
+      title: "Gene sets",
+      description: "The following gene set collections will be imported",
+      css_class: "panel-default",
+      columns: [
+        { heading: "Name", attribute: "name" },
+        { heading: "Description", attribute: "description" },
+        { heading: "Gene set count", attribute: "gene_set_count" },
+      ],
+    }
+  ],
 };

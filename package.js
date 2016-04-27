@@ -15,6 +15,7 @@ Npm.depends({"binary-search": "1.2.0"});
 Package.onUse(function(api) {
   api.versionsFrom("1.1.0.3");
 
+  api.use("accounts-base@1.2.0");
   api.use("underscore");
   api.use("aldeed:simple-schema@1.3.3");
   api.use("aldeed:autoform@5.5.1");
@@ -44,6 +45,8 @@ Package.onUse(function(api) {
     // "fileHandlers/LimmaSignature.js",
     // "fileHandlers/MutationVCF.js",
     // "fileHandlers/ArachneRegulon.js", // not ready yet
+
+    "fileHandlers/GeneSetCollection.js",
 
     // Admin stuff
     "fileHandlers/HGNCGeneList.js",

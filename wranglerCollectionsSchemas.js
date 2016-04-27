@@ -54,6 +54,7 @@ WranglerFiles.attachSchema(new SimpleSchema({
       "signature",
       "mutation",
       "metadata",
+      "gene_set_collection",
     ],
     optional: true,
   },

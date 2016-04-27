@@ -267,6 +267,13 @@ Wrangler.fileTypes = {
       }
     }),
   },
+  GeneSetCollection: {
+    description: "Gene sets file (.gmt)",
+    schema: new SimpleSchema({
+      name: { type: String },
+      description: { type: String },
+    }),
+  },
 
   // RectangularIsoformExpression: {
   //   description: "Isoform expression rectangular matrix",
