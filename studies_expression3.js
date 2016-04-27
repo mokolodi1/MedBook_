@@ -116,9 +116,3 @@ MedBook.referentialIntegrity.studies_expression3 = function (studiesQuery) {
 
   console.log("done with referential integrity maintenance");
 };
-
-// for removing empty entries
-Moko.ensureIndex(Expression3, {
-  study_label: 1,
-  rsem_quan_log2: 1,
-});
