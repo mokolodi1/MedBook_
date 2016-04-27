@@ -59,6 +59,10 @@ Package.onUse(function(api) {
   api.export("NetworkElements");
   api.export("NetworkInteractions");
 
+  // gene sets
+  addAndExport(api, "GeneSetCollections");
+  addAndExport(api, "GeneSets");
+
   // utility collections
   addAndExport(api, "Genes");
   addAndExport(api, "Jobs");
