@@ -112,3 +112,13 @@ Meteor.methods({
 Two methods are available on the server for objects fetched from the Collaborations collection (ex. `Collaborations.findOne()`).  `getAssociatedCollaborators` does a downwards tree traversal, returning a list of collaborations (including personal collaborations) that have access to the source collaboration. `getAssociatedCollaborations` does an upwards tree traversal, returning a list of collaborations that the source collaboration has access to. Both of these functions take no parameters and return an array of collaboration name strings.
 
 These two functions are provided for `medbook:collaboration`'s internal API and advanced users. Use them with care!
+
+## Use case questions
+
+### Who needs access to run analysis? Who can see analysis results?
+
+Currently a user has to have access to every study that is in a sample group in order to run an analysis in PatientCare. If one user runs an analysis with data that they have access to but others don’t, who should be able to see the results? Alternatively, if a user shares a sample group with a user that doesn't have access to some of the data in the sample group, can that user run analyses with that sample group? (My gut feeling says no.)
+
+### Can a user over-share?
+
+Can a user share a document with a collaboration they don’t have access to? One possible hiccup of enforcing a policy like this is that when someone updates a sample group shared with a distant collaboration the distant collaboration wouldn't have access to the updated group.
