@@ -16,6 +16,8 @@
 
 To fetch a MedBook user object, use `MedBook.findUser()`. To throw an error if the user is not logged in, use `MedBook.ensureUser()`. You should use `ensureUser` unless you need to do something if no user is logged in.
 
+On the client, `MedBook.findUser()` only returns the contents of `Meteor.user()` once the subscription loading the `user.collaborations` attribute is ready.
+
 While it is technically possible to attach a transform directly to the Meteor.users collection (`Meteor.users._transform = ...`), this approach is not recommended. [See here for more info](https://github.com/meteor/meteor/issues/810#issuecomment-15069258).
 
 ```js
@@ -105,6 +107,16 @@ Meteor.methods({
     Collaborations.remove({name: collaborationName});
   }
 });
+```
+
+### Client-side data loading
+
+`medbook:collaborations` uses a subscription to load the `collaborations` attribute of a user to the client-side seperate from the usual Meteor.user() subscription. Because of this, protecting UI code that requires user attributes with `{{currentUser}}` is not sufficient. Instead, use `{{currentMedBookUser}}`, which returns `MedBook.findUser(Meteor.userId())`.
+
+```handlebars
+{{#if currentMedBookUser}}
+  {{! do something which requires user.collaborations to be loaded}}
+{{/if}}
 ```
 
 ## The Collaboration object

@@ -9,6 +9,7 @@ Package.describe({
 Package.onUse(function (api) {
   api.versionsFrom('1.1.0.3');
 
+  api.use("reactive-var");
   api.use("accounts-base@1.2.0");
   api.use("tracker@1.0.7");
 

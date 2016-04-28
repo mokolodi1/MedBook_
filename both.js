@@ -35,12 +35,31 @@ Collaborations.attachSchema(new SimpleSchema({
 }));
 MedBook.collections.Collaborations = Collaborations;
 
+// I don't necessarily like how this is loaded on both the client and server
+// but putting this code in a Meteor.isClient is the cleanest way I can think
+// of sharing the userSub with MedBook.findUser.
+if (Meteor.isClient) {
+  // Available in MedBook.findUser function; set within this block.
+  // Needs to be a ReactiveVar because the subscription could change
+  // if the user logs out/in
+  var userSub = new ReactiveVar();
 
+  // We need this so that we get the extra fields in the user objects
+  Tracker.autorun(function () {
+    var user = Meteor.user(); // makes it reactive :)
 
-// Meteor.users "_transform"
+    userSub.set(Meteor.subscribe("/collaborations/user"));
+  });
+}
+
 // does a findOne on Meteor.users and adds some useful functions to that
 MedBook.findUser = function (userId) {
   var user = Meteor.users.findOne(userId);
+
+  // if we're on the client return null until we have all the data loaded
+  if (Meteor.isClient && !userSub.get().ready()) {
+    return null;
+  }
 
   if (user) {
     _.extend(user, {

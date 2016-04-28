@@ -1,14 +1,6 @@
 // Publish logged-in user's collaborations so client-side checks can work.
 // This is how alanning:roles does it, too.
-Meteor.publish("/collaborations/user", function (userId) {
-  check(userId, String);
-
-  // We don't technically need them to pass Meteor.userId(), but for now let's.
-  // Also, this should really only be used in package code anyways...
-  if (userId !== this.userId) {
-    throw new Meteor.Error("Don't do that.");
-  }
-
+Meteor.publish("/collaborations/user", function () {
   if (!this.userId) {
     this.ready();
     return;
