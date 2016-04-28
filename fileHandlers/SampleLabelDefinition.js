@@ -40,6 +40,15 @@ SampleLabelDefinition.prototype.parseLine = function (brokenTabs, lineNumber, li
       Studies.update(this.study._id, {
         $addToSet: { Sample_IDs: sample_label },
       });
+
+      // insert into CRFs... yuck yuck
+      var crfDoc = {
+        CRF: "Clinical_Info",
+        Study_ID: study.id,
+        Patient_ID: patient_label,
+        Sample_ID: sample_label,
+      };
+      CRFs.upsert(crfDoc, { $set: crfDoc });
     }
   }
 };
