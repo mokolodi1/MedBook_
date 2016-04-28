@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM node:0.10.44
 MAINTAINER Mike Risse
 
 RUN apt-get update
@@ -10,8 +10,8 @@ ADD packages /app/.meteor/packages
 ADD release /app/.meteor/release 
 WORKDIR /app
 RUN meteor build .
-ADD patch /tmp/patch
-RUN patch /root/.meteor/packages/meteor-tool/.1.1.3.*os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/tools/files.js  /tmp/patch
+# ADD patch /tmp/patch
+# RUN patch /root/.meteor/packages/meteor-tool/1.1.10.*os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/tools/files.js  /tmp/patch
 
 WORKDIR /app
 
@@ -23,7 +23,8 @@ ONBUILD ADD ./webapp /app
 ONBUILD RUN mkdir /bundle
 ONBUILD RUN meteor build --directory /build
 ONBUILD WORKDIR /build/bundle/programs/server
-ONBUILD RUN `find ~/.meteor -path "*dev_bundle/bin/npm" | grep "1.1.3"` install
+
+ONBUILD RUN npm install
 ONBUILD WORKDIR /build/bundle
 
-CMD `find ~/.meteor -path "*dev_bundle/bin/node" | grep "1.1.3"` main.js
+CMD node main.js
