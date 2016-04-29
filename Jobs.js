@@ -8,13 +8,11 @@ var jobSchemas = {
   "SubmitWranglerFile": null,
   "SubmitWranglerSubmission": null,
   "FinishWranglerSubmission": null,
-  "RunLimma": null,
-  "RunApplySignature": null,
-  "RunViper": null,
   "ExportFile": null,
   "ReloadGenesCollection": null,
   "GeneTranscriptMappings": null,
-  "UpDownGenes": {
+
+  UpDownGenes: {
     args: new SimpleSchema({
       study_label: { type: String },
       patient_label: { type: String },
@@ -22,6 +20,15 @@ var jobSchemas = {
       sample_group_id: { type: String },
       sample_group_name: { type: String },
       iqr_multiplier: { type: Number, decimal: true },
+    }),
+    output: null,
+  },
+  RunLimmaGSEA: {
+    args: new SimpleSchema({
+      sample_group_id_a: { type: String },
+      sample_group_id_b: { type: String },
+      limma_top_genes_count: { type: Number, min: 1 },
+      gene_set_collection_id: { type: String },
     }),
     output: null,
   },
