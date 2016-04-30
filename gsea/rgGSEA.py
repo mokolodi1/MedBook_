@@ -1,18 +1,20 @@
+#! /usr/bin/env python
+
 """
 April 2013
 eeesh GSEA does NOT respect the mode flag!
 
-Now realise that the creation of the input rank file for gsea needs to take the lowest p value for duplicate 
-feature names. To make Ish's life easier, remove duplicate gene ids from any gene set to stop GSEA from 
+Now realise that the creation of the input rank file for gsea needs to take the lowest p value for duplicate
+feature names. To make Ish's life easier, remove duplicate gene ids from any gene set to stop GSEA from
 barfing.
 
 October 14 2012
 Amazingly long time to figure out that GSEA fails with useless error message if any filename contains a dash "-"
 eesh.
 
-Added history .gmt source - requires passing a faked name to gsea 
+Added history .gmt source - requires passing a faked name to gsea
 Wrapper for GSEA http://www.broadinstitute.org/gsea/index.jsp
-Started Feb 22 
+Started Feb 22
 Copyright 2012 Ross Lazarus
 All rights reserved
 Licensed under the LGPL
@@ -37,8 +39,6 @@ python /data/extended/galaxy/tools/rgenetics/rgGSEA.py --input_tab "/data/extend
 --gsea_jar "/data/extended/galaxy/tool-data/shared/jars/gsea2-2.0.12.jar"
 --output_dir "/data/extended/galaxy/database/job_working_directory/027/27311/dataset_34455_files" --mode "Max_probe"
  --title " actaearly-Controlearly-actalate-Controllate_interpro_GSEA" --builtin_gmt "/data/genomes/gsea/3.1/IPR_DOMAIN.gmt"
-
-
 """
 import optparse
 import tempfile
@@ -65,8 +65,8 @@ def fix_subdir(adir,destdir):
     if os.path.exists(adir):
         for (d,dirs,files) in os.path.walk(adir):
             for f in files:
-                sauce = os.path.join(d,f) 
-                shutil.copy(sauce,destdir)   
+                sauce = os.path.join(d,f)
+                shutil.copy(sauce,destdir)
     """
 
     def fixAffycrap(apath=''):
@@ -78,7 +78,7 @@ def fix_subdir(adir,destdir):
         """
         html = []
         try:
-            html = open(apath,'r').readlines()       
+            html = open(apath,'r').readlines()
         except:
              return html
         for i,row in enumerate(html):
@@ -126,25 +126,25 @@ def getFileString(fpath, outpath):
             size = ' (%1.1f KB)' % (n/2**10)
         elif n > 0:
             size = ' (%d B)' % (int(n))
-        s = '%s %s' % (fpath, size) 
+        s = '%s %s' % (fpath, size)
     return s
 
 class gsea_wrapper:
     """
     GSEA java desktop client has a CL interface. CL can be gleaned by clicking the 'command line' button after setting up an analysis
     We don't want gsea to do the analysis but it can read .rnk files containing rows of identifiers and an evidence weight such as the signed t statistic from limma for differential expression
-(vgalaxy)rlazarus@iaas1:~/public_html/idle_illumina_analysis$ cat gseaHumanREFSEQ.sh 
+(vgalaxy)rlazarus@iaas1:~/public_html/idle_illumina_analysis$ cat gseaHumanREFSEQ.sh
 #!/bin/bash
 for RNK in `ls *.rnk`
 do
 DIRNAME=${RNK%.*}
 echo $DIRNAME
-qsub -cwd -b y java -Xmx4096m -cp /data/app/bin/gsea2-2.07.jar xtools.gsea.GseaPreranked -gmx ../msigdb.v3.0.symbols.gmt -collapse true -mode Max_probe -norm meandiv 
--nperm 1000 -rnk $RNK -scoring_scheme weighted -rpt_label $RNK -chip ../RefSeq_human.chip -include_only_symbols true -make_sets true -plot_top_x 20 -rnd_seed timestamp 
+qsub -cwd -b y java -Xmx4096m -cp /data/app/bin/gsea2-2.07.jar xtools.gsea.GseaPreranked -gmx ../msigdb.v3.0.symbols.gmt -collapse true -mode Max_probe -norm meandiv
+-nperm 1000 -rnk $RNK -scoring_scheme weighted -rpt_label $RNK -chip ../RefSeq_human.chip -include_only_symbols true -make_sets true -plot_top_x 20 -rnd_seed timestamp
 -set_max 500 -set_min 15 -zip_report false -out gseaout/${DIRNAME} -gui false
 done
     """
-    
+
     def __init__(self,myName=None,opts=None):
         """ setup cl for gsea
         """
@@ -171,7 +171,7 @@ done
 #            pass
 
         fakeRanks = '%s.rnk' % fakeGMT
-        fakeRankBase = '%s.rnk' % fakeBase 
+        fakeRankBase = '%s.rnk' % fakeBase
         if not fakeGMT.endswith('.gmt'):
             fakeGMT = '%s.gmt' % fakeGMT
         if not fakeBase.endswith('.gmt'):
@@ -184,7 +184,7 @@ done
         elif opts.history_gmt:
            #print >> sys.stderr , 'cp1 %s %s ' % (opts.history_gmt,fakeGMT)
            subprocess.call(['cp',opts.history_gmt,fakeGMT])
-        else:       
+        else:
            subprocess.call(['cp',opts.builtin_gmt,fakeGMT])
         # remove dupes from each gene set
         gmt = open(fakeGMT,'r').readlines()
@@ -207,7 +207,7 @@ done
             rdat = open(opts.input_ranks,'r').readlines() # suck in and remove blank ids that cause gsea to barf rml april 10 2012
             rdat = [x.rstrip().split('\t') for x in rdat[1:]] # ignore head
 	    try:
-	        dat = [[x[0],x[1],x[1]] for x in rdat] 
+	        dat = [[x[0],x[1],x[1]] for x in rdat]
             except:
                 print >> sys.stderr, '## error converting row', x
                 pass
@@ -228,14 +228,14 @@ done
             indat = open(opts.input_tab,'r').readlines()
             dat = [x.rstrip().split('\t') for x in indat[1:]]
             dat = [x for x in dat if len(x) > maxcol]
-            dat = [[x[self.idcol],x[self.adjpvalcol],x[self.signcol]] for x in dat] # reduce to rank form 
+            dat = [[x[self.idcol],x[self.adjpvalcol],x[self.signcol]] for x in dat] # reduce to rank form
             pvals = [float(x[1]) for x in dat]
             outofrange = [x for x in pvals if ((x < 0.0) or (x > 1.0))]
             assert len(outofrange) == 0, '## p values outside 0-1 encountered - was that the right column for adjusted p value?'
             signs = [float(x[2]) for x in dat]
             outofrange = [i for i,x in enumerate(signs) if (not x) and (dat[i][self.signcol] <> '0')]
-            bad = [dat[x][2] for x in outofrange] 
-            assert len(outofrange) == 0, '## null numeric values encountered for sign - was that the right column? %s' % bad 
+            bad = [dat[x][2] for x in outofrange]
+            assert len(outofrange) == 0, '## null numeric values encountered for sign - was that the right column? %s' % bad
         ids = [x[0] for x in dat]
         res = []
         self.comments = []
@@ -247,7 +247,7 @@ done
         if lost <> 0:
             newdat = [dat[x] for x in useme]
             del dat
-            dat = newdat  
+            dat = newdat
             print >> sys.stdout, '## %d lost - NA values or null id' % lost
         if remove_duplicates:
             uids = list(set(ids)) # complex procedure to get min pval for each unique id
@@ -274,7 +274,7 @@ done
                             ltp = len(tp)
                             ind = ltp/2 # yes, this is wrong for evens but what if sign wobbles?
                             if ltp % 2 == 1: # odd
-                                ind += 1 # take the median                            
+                                ind += 1 # take the median
                             p = tp[ind]
                             sign = ts[ind]
                         if KEEPSELECTION:
@@ -344,29 +344,29 @@ done
         #print >> sys.stderr, '### opening %s and writing %s' % (fakeRanks,str(ranks[:10]))
         rclean = open(fakeRanks,'w')
         rclean.write('contig\tscore\n')
-        rclean.write('\n'.join(ranks)) 
+        rclean.write('\n'.join(ranks))
         rclean.write('\n')
         rclean.close()
         cl = []
-        a = cl.append  
+        a = cl.append
         a('java -Xmx6G -cp')
         a(opts.gsea_jar)
         a('xtools.gsea.GseaPreranked')
         a('-gmx %s' % fakeGMTBase) # ensure .gmt extension as required by GSEA - gene sets to use
         a('-gui false')    # use preranked file mode and no gui
         a('-make_sets true -rnd_seed timestamp') # more things from the GUI command line display
-        a('-norm meandiv -zip_report false -scoring_scheme weighted')            # ? need to set these? 
+        a('-norm meandiv -zip_report true -scoring_scheme weighted')            # ? need to set these?
         a('-rnk %s' % fakeRankBase) # input ranks file symbol (the chip file is the crosswalk for ids in first column)
-        a('-out .' ) 
-        #a('-out' % opts.output_dir) 
+        a('-out .' )
+        #a('-out' % opts.output_dir)
         a('-set_max %s' % opts.setMax)
         a('-set_min %s' % opts.setMin)
         a('-mode %s' % opts.mode)
         if opts.chip > '':
-           #a('-chip %s -collapse true -include_only_symbols true' % opts.chip)   
-           a('-chip %s -collapse true' % opts.chip)   
+           #a('-chip %s -collapse true -include_only_symbols true' % opts.chip)
+           a('-chip %s -collapse true' % opts.chip)
         else:
-           a("-collapse false") # needed if no chip 
+           a("-collapse false") # needed if no chip
         a('-nperm %s' % opts.nPerm)
         a('-rpt_label %s' % opts.title)
         a('-plot_top_x %s' % opts.plotTop)
@@ -376,7 +376,7 @@ done
         print >> sys.stderr,  'CMD: ',' '.join(self.cl)
         self.fakeRanks = fakeRanks
         self.fakeGMT = fakeGMT
-     
+
     def grepIds(self):
         """
         """
@@ -388,7 +388,7 @@ done
 
     def run(self):
         """
-        
+
         """
         tlog = os.path.join(self.opts.output_dir,"gsea_runner.log")
         sto = open(tlog,'w')
@@ -403,8 +403,8 @@ done
             print >> sys.stdout, 'file : '+f
         gsea_dir = "./"
         if len(d) > 0:
-            fix_subdir(d[0],self.opts.output_dir)       
-        htmlfname = os.path.join(self.opts.output_dir,'index.html')     
+            fix_subdir(d[0],self.opts.output_dir)
+        htmlfname = os.path.join(self.opts.output_dir,'index.html')
 
 #        try:
 #            html = open(htmlfname,'r').readlines()
@@ -459,13 +459,13 @@ done
             else:
                 print >> sys.stdout, 'Odd, maketab = %s but no matches - tabs = %s' % (opts.outtab_neg,tabs)
         return retval
-        
+
 
 if __name__ == "__main__":
-    """ 
+    """
     called as:
    <command interpreter="python">rgGSEA.py --input_ranks "$input1"  --outhtml "$html_file"
-       --setMax "$setMax" --setMin "$setMin" --nPerm "$nPerm" --plotTop "$plotTop" --gsea_jar "$GALAXY_DATA_INDEX_DIR/shared/jars/gsea2-2.07.jar" 
+       --setMax "$setMax" --setMin "$setMin" --nPerm "$nPerm" --plotTop "$plotTop" --gsea_jar "$GALAXY_DATA_INDEX_DIR/shared/jars/gsea2-2.07.jar"
        --output_dir "$html_file.files_path" --use_gmt ""${use_gmt.fields.path}"" --chip "${use_chip.fields.path}"
   </command>
     """
@@ -480,8 +480,8 @@ if __name__ == "__main__":
     a('--history_gmt_name',default=None)
     a('--setMax',default="500")
     a('--setMin',default="15")
-    a('--nPerm',default="1000") 
-    a('--title',default="GSEA report") 
+    a('--nPerm',default="1000")
+    a('--title',default="GSEA report")
     a('--chip',default='')
     a('--plotTop',default='20')
     a('--outhtml',default=None)
@@ -494,7 +494,7 @@ if __name__ == "__main__":
     a('--idcol',default=None)
     a('--mode',default='Max_probe')
     a('-j','--gsea_jar',default='gsea2-2.0.12.jar')
-    opts, args = op.parse_args() 
+    opts, args = op.parse_args()
     #assert os.path.isfile(opts.gsea_jar),'## GSEA runner unable to find supplied gsea java desktop executable file %s' % opts.gsea_jar
     if opts.input_ranks:
         inpf = opts.input_ranks
@@ -520,5 +520,3 @@ if __name__ == "__main__":
     retcode = gse.run()
     if retcode <> 0:
         sys.exit(retcode) # indicate failure to job runner
-    
-    
