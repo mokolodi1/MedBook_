@@ -9,8 +9,6 @@ Dependancies:
 pymongo
 """
 
-#./expression3_export.py --sample_label [sample label] --study_label [study label] [output]"""
-
 import sys
 import getopt
 import pymongo
