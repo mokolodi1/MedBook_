@@ -33,6 +33,8 @@ GeneSetCollection.prototype.parseLine =
         description: this.wranglerFile.options.description,
         collaborations: [ user.collaborations.personal ],
       });
+
+      this.geneSetsBulk = GeneSets.rawCollection().initializeUnorderedBulkOp();
     }
   }
 
@@ -40,7 +42,7 @@ GeneSetCollection.prototype.parseLine =
   if (this.wranglerPeek) {
     this.gene_set_count++;
   } else {
-    GeneSets.insert({
+    this.geneSetsBulk.insert({
       name: brokenTabs[0],
       description: brokenTabs[1],
       gene_labels: brokenTabs.slice(2),
@@ -59,7 +61,11 @@ GeneSetCollection.prototype.endOfFile = function () {
         gene_set_count: this.gene_set_count,
       }
     });
-    console.log("inserted");
+  } else {
+    // execute the bulk insert we've been building up
+    var deferred = Q.defer();
+    this.geneSetsBulk.execute(errorResultResolver(deferred));
+    return deferred.promise;
   }
 };
 

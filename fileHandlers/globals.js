@@ -20,7 +20,7 @@ errorResultResolver = function (deferred) {
     if (error) {
       deferred.reject(error);
     } else {
-      deferred.resolve(result);
+      deferred.resolve({});
     }
   };
 };
