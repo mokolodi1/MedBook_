@@ -47,11 +47,18 @@ Accounts.onCreateUser(function (options, user) {
 });
 
 // make absolutely sure user.collaborations is set
+// NOTE: some users will have a collaborations list under
+// user.profile.collaborations or user.collaborations (directly), but there
+// is no migration code because this list is dependant on the Collaborations
+// collection, not the other way around.
 Accounts.onLogin(function (loginObj) {
   var user = loginObj.user;
   var collabs = user.collaborations;
   // also check "email_address" and "personal" just in case
-  if (!collabs || !collabs.email_address || !collabs.personal) {
+  // (memberOf is set during `getCollaborations`, so we don't technically
+  // need that one)
+  if (!collabs || Array.isArray(collabs)
+      || !collabs.email_address || !collabs.personal) {
     Meteor.users.update(user._id, {
       $set: {
         collaborations: getDefaultCollabs(user),
