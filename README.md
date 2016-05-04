@@ -14,7 +14,9 @@
 
 ## The User object
 
-To fetch a MedBook user object, use `MedBook.findUser()`. To throw an error if the user is not logged in, use `MedBook.ensureUser()`. You should use `ensureUser` unless you need to do something if no user is logged in.
+The MedBook user object is just Meteor.user() with a `collaborations` field and a couple helper methods attached.
+
+To fetch a MedBook user object, use `MedBook.findUser()`. `findUser` takes one parameter: the _id of the currently logged in user. To throw an error if the user is not logged in, use `MedBook.ensureUser()`. Use `ensureUser` unless you need to do something if no user is logged in.
 
 On the client, `MedBook.findUser()` only returns the contents of `Meteor.user()` once the subscription loading the `user.collaborations` attribute is ready.
 
@@ -37,7 +39,7 @@ if (user) {
 }
 ```
 
-To get the personal collaboration associated with a user, use `user.personalCollaboration`.
+To get the personal collaboration associated with a user, use `user.personalCollaboration()`. Currently, a user's personal collaboration is simply their email, but that may change in the future.
 
 ```js
 let user = MedBook.ensureUser(Meteor.userId());
