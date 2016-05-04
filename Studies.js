@@ -31,16 +31,25 @@ Studies.attachSchema(new SimpleSchema({
   Sample_IDs: { type: [String], defaultValue: [], optional: true },
   // TODO: remove (?)
   Patient_IDs: { type: [String], defaultValue: [], optional: true },
+  patients: {
+    type: [new SimpleSchema({
+      patient_label: { type: String },
+      sample_labels: { type: [String], optional: true, defaultValue: [] },
+    })],
+    optional: true,
+  },
 
   gene_expression: { type: [String], optional: true },
   gene_expression_index: { type: Object, blackbox: true, optional: true },
   gene_expression_genes: { type: [String], optional: true },
+
   // whether someone is currently inserting data (soft lock)
   gene_expression_wrangling: {
     type: Boolean,
     defaultValue: false,
     optional: true
   },
+
   // TODO:
   // gene_expression: {
   //   type: new SimpleSchema({
@@ -66,12 +75,4 @@ Studies.attachSchema(new SimpleSchema({
   //   }),
   //   optional: true,
   // },
-
-  patients: {
-    type: [new SimpleSchema({
-      patient_label: { type: String },
-      sample_labels: { type: [String], optional: true, defaultValue: [] },
-    })],
-    optional: true,
-  },
 }));

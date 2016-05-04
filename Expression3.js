@@ -23,9 +23,9 @@ Expression3.attachSchema(new SimpleSchema({
   // NOTE: collaborations not stored at this level
 
   // different normalizations
-  quantile_counts: _.extend({
-    label: "Quantile normalized counts",
-  }, normalValue),
+  // quantile_counts: _.extend({
+  //   label: "Quantile normalized counts",
+  // }, normalValue),
   rsem_quan_log2: _.extend({
     label: "Quantile normalized counts log2(x+1)",
     max: 100,
@@ -39,15 +39,15 @@ Expression3.attachSchema(new SimpleSchema({
     //   }
     // }
   }, normalValue),
-  raw_counts: _.extend({
-    label: "Raw counts",
-  }, normalValue),
-  tpm: _.extend({
-    label: "TPM (Transcripts Per Million)",
-  }, normalValue),
-  fpkm: _.extend({
-    label: "RPKM (Reads Per Kilobase of transcript per Million mapped reads)",
-  }, normalValue),
+  // raw_counts: _.extend({
+  //   label: "Raw counts",
+  // }, normalValue),
+  // tpm: _.extend({
+  //   label: "TPM (Transcripts Per Million)",
+  // }, normalValue),
+  // fpkm: _.extend({
+  //   label: "RPKM (Reads Per Kilobase of transcript per Million mapped reads)",
+  // }, normalValue),
 
   // stats: {
   //   type: new SimpleSchema({
