@@ -21,11 +21,10 @@ Package.onUse(function (api) {
     "aldeed:simple-schema@1.3.3", // attaching the schema to Collaborations
     "aldeed:collection2@2.3.3 || 2.7.0", // don't know if that's necessary
     "medbook:namespace@0.0.2",
-    "medbook:primary-collections@0.0.17",
+    // "medbook:primary-collections@0.0.17",
     "mokolodi1:helpers@0.0.10",
   ]);
   api.imply("medbook:namespace@0.0.2");
-
 
   api.addFiles([
     "client.js",
@@ -36,10 +35,11 @@ Package.onUse(function (api) {
     "server.js",
   ], "server");
 
+  api.export("Collaborations"); // defined seperately on client/server
+
   api.addFiles([
     "both.js",
   ], ["client", "server"]);
-  api.export("Collaborations"); // defined seperately on client/server
 });
 
 

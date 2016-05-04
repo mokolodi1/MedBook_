@@ -33,7 +33,11 @@ Collaborations.attachSchema(new SimpleSchema({
     label: "Admin approval required to join",
   },
 }));
-MedBook.collections.Collaborations = Collaborations;
+
+// don't want to force people to use primary-collections, but if they are...
+if (MedBook.collections) {
+  MedBook.collections.Collaborations = Collaborations;
+}
 
 // I don't necessarily like how this is loaded on both the client and server
 // but putting this code in a Meteor.isClient is the cleanest way I can think
