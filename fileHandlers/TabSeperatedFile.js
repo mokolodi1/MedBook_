@@ -24,6 +24,13 @@ TabSeperatedFile.prototype.parse = function () {
     var allLinePromises = [];
     var lineNumber = 0; // starts at one (no really, I promise!)
 
+    function rejectThenCleanup(reason) {
+      reject(reason);
+
+      // NOTE: not in Meteor environment
+      self.cleanupAfterError.call(self);
+    }
+
     // store stream in a variable so it can be paused
     var bylineStream = byLine(self.blob.createReadStream("blobs"));
     bylineStream.on('data', Meteor.bindEnvironment(function (lineObject) {
@@ -48,14 +55,14 @@ TabSeperatedFile.prototype.parse = function () {
           .then(Meteor.bindEnvironment(function (values) {
             lineBufferPromises = [];
             bylineStream.resume();
-          }, reject));
+          }, rejectThenCleanup));
       }
 
       // I guess we should parse the line eventually...
       Q.resolve(self.parseLine.call(self, brokenTabs, thisLineNumber, line))
         .then(deferred.resolve)
-        .catch(deferred.reject);
-    }, reject));
+        .catch(deferred.rejectThenCleanup);
+    }, rejectThenCleanup));
 
     bylineStream.on('end', Meteor.bindEnvironment(function () {
       // console.log("allLinePromises.slice(0, 5:)", allLinePromises.slice(0, 5));
@@ -63,9 +70,9 @@ TabSeperatedFile.prototype.parse = function () {
         .then(Meteor.bindEnvironment(function () {
           Q.resolve(self.endOfFile.call(self))
             .then(resolve);
-        }, reject))
-        .catch(reject);
-    }, reject));
+        }, rejectThenCleanup))
+        .catch(rejectThenCleanup);
+    }, rejectThenCleanup));
   });
 };
 
@@ -92,3 +99,5 @@ TabSeperatedFile.prototype.ensureRectangular = function (brokenTabs, lineNumber)
     }
   }
 };
+
+TabSeperatedFile.prototype.cleanupAfterError = function () {}

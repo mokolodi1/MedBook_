@@ -27,23 +27,22 @@ RectangularGeneExpression.prototype.beforeParsing = function () {
       id: study_label
     });
 
-    // TODO: put back in
-    // // lock the study for wrangling, tell them to try again if it's already locked
-    //
-    // var securedLock = Studies.update({
-    //   id: study_label,
-    //   gene_expression_wrangling: { $ne: true },
-    // }, {
-    //   $set: {
-    //     gene_expression_wrangling: true,
-    //   }
-    // });
-    // if (securedLock !== 1) {
-    //   throw "Someone is already wrangling data for this study. " +
-    //       "Please try again in a few minutes. " +
-    //       "If you continue to see this message, " +
-    //       "contact Teo at mokolodi1@gmail.com";
-    // }
+    // lock the study for wrangling, tell them to try again if it's already locked
+
+    var securedLock = Studies.update({
+      id: study_label,
+      gene_expression_wrangling: { $ne: true },
+    }, {
+      $set: {
+        gene_expression_wrangling: true,
+      }
+    });
+    if (securedLock !== 1) {
+      throw "Someone is already wrangling data for this study. " +
+          "Please try again in a few minutes. " +
+          "If you continue to see this message, " +
+          "contact Teo at mokolodi1@gmail.com";
+    }
   }
 };
 
@@ -231,5 +230,24 @@ RectangularGeneExpression.prototype.endOfFile = function () {
 Moko.ensureIndex(Expression3, {
   study_label: 1,
 });
+
+RectangularGeneExpression.prototype.cleanupAfterError = function () {
+  Studies.rawCollection().update({
+    id: this.submission.options.study_label
+  }, {
+    $set: {
+      gene_expression_wrangling: false
+    }
+  }, function (error, result) {
+    if (error) {
+      console.log("error cleaning up studies collection after error " +
+          "during wrangling");
+      console.log("error:", error);
+    } else {
+      console.log("cleaned up studies collection after error during wrangler");
+      console.log("result:", result);
+    }
+  });
+}
 
 WranglerFileTypes.RectangularGeneExpression = RectangularGeneExpression;
