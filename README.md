@@ -67,7 +67,7 @@ Expression3 is the collection where MedBook stores gene expression data for each
 | `gene_label`                | Gene identifier | `"MYC"` |
 | `rsem_quan_log2`            | Quantile normalized counts data that underwent a log2(x+1) transform. For sample mapping see the Studies collection. | `[0, 4.283, 392.482, ...]` |
 
-In MedBook history, there have been four different schemas for storing gene expression data. None of them matter except for Expression3 because they are not used anymore. (Along the way one of them was called GeneExpression which is why it is Expression3 instead of `expression4`.)
+In MedBook history, there have been four different schemas for storing gene expression data. None of them matter except for Expression3 because they are not used anymore. (Along the way one of them was called GeneExpression which is why it is Expression3 instead of Expression4.)
 
 <!-- ## Signature score workflow
 

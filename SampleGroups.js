@@ -13,7 +13,14 @@ var filterOptionsSchemas = {
   sample_label_list: new SimpleSchema({
     sample_labels: { type: [String] },
   }),
+  exclude_sample_label_list: new SimpleSchema({
+    sample_labels: { type: [String] },
+  }),
+  data_loaded: new SimpleSchema({
+    gene_expression: { type: Boolean },
+  }),
 };
+
 SimpleSchema.messages({
   filterOptionsInvalid: "Options provided in a filter are invalid",
 });
