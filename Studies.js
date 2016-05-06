@@ -22,7 +22,7 @@ Studies.attachSchema(new SimpleSchema({
     label: "Study ID",
   },
   name: { type: String },
-  // short_name: { type: String, max: 16 },
+  short_name: { type: String },
   description: { type: String, optional: true },
 
   tables: { type: [String] },
