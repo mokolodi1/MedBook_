@@ -29,11 +29,9 @@ RectangularGeneAssay.prototype.parseLine =
     console.log("this.sampleLabels:", this.sampleLabels);
 
     // TODO: run all the time when we get the study_label before the peek
-    if (!this.wranglerPeek) {
-      for (var sampleIndex in this.sampleLabels) {
-        var sampleLabel = this.sampleLabels[sampleIndex];
-        ensureSampleExists.call(this, this.submission.options.study_label, sampleLabel);
-      }
+    for (var sampleIndex in this.sampleLabels) {
+      var sampleLabel = this.sampleLabels[sampleIndex];
+      ensureSampleExists.call(this, this.wranglerFile.options.study_label, sampleLabel);
     }
 
     if (this.wranglerPeek) {

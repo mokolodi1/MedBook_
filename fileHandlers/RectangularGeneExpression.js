@@ -20,7 +20,7 @@ RectangularGeneExpression.prototype.beforeParsing = function () {
   }
 
   if (!this.wranglerPeek) {
-    var study_label = this.submission.options.study_label;
+    var study_label = this.wranglerFile.options.study_label;
 
     // maintain referential integrity between "studies" and "expression3"
     MedBook.referentialIntegrity.studies_expression3({
@@ -85,7 +85,7 @@ function Expression2Insert (gene, sampleLabels, expressionStrings) {
   }
   Expression2.upsert({
     gene: gene,
-    Study_ID: this.submission.options.study_label,
+    Study_ID: this.wranglerFile.options.study_label,
     Collaborations: [this.submission.options.collaboration_label],
   }, {
     $set: setObject
@@ -125,7 +125,7 @@ RectangularGeneExpression.prototype.insertToCollection =
   // Otherwise, just do a regular insert
 
   var expressionQuery = {
-    study_label: this.submission.options.study_label,
+    study_label: this.wranglerFile.options.study_label,
     gene_label: gene_label,
   };
 
@@ -163,7 +163,7 @@ RectangularGeneExpression.prototype.endOfFile = function () {
   // check to make sure the genes match up with existing data
 
   if (!this.wranglerPeek) {
-    var study_label = this.submission.options.study_label;
+    var study_label = this.wranglerFile.options.study_label;
     var study = Studies.findOne({id: study_label});
     var studyGenes = study.gene_expression_genes;
 
@@ -232,22 +232,24 @@ Moko.ensureIndex(Expression3, {
 });
 
 RectangularGeneExpression.prototype.cleanupAfterError = function () {
-  Studies.rawCollection().update({
-    id: this.submission.options.study_label
-  }, {
-    $set: {
-      gene_expression_wrangling: false
-    }
-  }, function (error, result) {
-    if (error) {
-      console.log("error cleaning up studies collection after error " +
-          "during wrangling");
-      console.log("error:", error);
-    } else {
-      console.log("cleaned up studies collection after error during wrangler");
-      console.log("result:", result);
-    }
-  });
+  if (!this.wranglerPeek) {
+    Studies.rawCollection().update({
+      id: this.wranglerFile.options.study_label
+    }, {
+      $set: {
+        gene_expression_wrangling: false
+      }
+    }, function (error, result) {
+      if (error) {
+        console.log("error cleaning up studies collection after error " +
+            "during wrangling");
+        console.log("error:", error);
+      } else {
+        console.log("cleaned up studies collection after error during wrangler");
+        console.log("result:", result);
+      }
+    });
+  }
 }
 
 WranglerFileTypes.RectangularGeneExpression = RectangularGeneExpression;

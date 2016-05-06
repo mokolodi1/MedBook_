@@ -44,8 +44,7 @@ SampleLabelDefinition.prototype.parseLine = function (brokenTabs, lineNumber, li
       // insert into CRFs... yuck yuck
       var crfDoc = {
         CRF: "Clinical_Info",
-        Study_ID: study.id,
-        Patient_ID: patient_label,
+        Study_ID: this.study.id,
         Sample_ID: sample_label,
       };
       CRFs.upsert(crfDoc, { $set: crfDoc });
