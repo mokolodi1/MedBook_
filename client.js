@@ -1,5 +1,5 @@
 // no transform on the client
-Collaborations = new Meteor.Collection("collaboration");
+Collaborations = new Meteor.Collection("collaborations");
 
 // This is the client-side version of this function. The full definition and
 // documentation are with the server-side version.
