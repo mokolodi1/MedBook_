@@ -77,7 +77,7 @@ def export_from_object(db, sampleGroup):
         currentStudy = studies[studyIndex]
         dataStrings = []
         for sampleLabel in sampleGroupStudies[studyIndex]["sample_labels"]:
-            index = currentStudy["gene_expression_index"][sampleLabel]
+            index = int(currentStudy["gene_expression_index"][sampleLabel])
             dataStrings.append(str(doc["rsem_quan_log2"][index]))
 
         sys.stdout.write("\t".join(dataStrings))
