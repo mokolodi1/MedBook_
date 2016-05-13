@@ -91,7 +91,7 @@ def main():
     argv = sys.argv
 
     # set up the database client
-    db = pymongo.MongoClient()["MedBook"]
+    db = pymongo.MongoClient("mongodb://mongo:27017/MedBook")["MedBook"]
 
     # process options if --sample_group_id
     if "--sample_group_id" in argv:
