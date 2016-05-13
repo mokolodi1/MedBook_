@@ -32,15 +32,6 @@
    containerName = "telescope"
    port = 3000
 
-   [apps.galaxy]
-   auth = false
-   route = "/galaxy"
-   cwd = "../galaxy-dist"
-   run = "/bin/sh -c ./run"
-   port = 10010
-   menuPosition = 4
-   menuItem = "Galaxy"
-
    [apps.fusion]
    auth = false
    route = "/fusion"
@@ -52,12 +43,6 @@
    menuItem = "Data Fusion"
    containerName="fusion"
 
-
-   [apps.cbioportal]
-   auth = true
-   route = "/cbioportal"
-   port = 8585
-   menuItem = "Cbioportal"
 
    [apps.wrangler]
    auth = false
@@ -74,14 +59,6 @@
    menuPosition = 7
    menuItem = "Job Runner"
    containerName = "job-runner"
-
-   [apps.workbench]
-   auth = false
-   route = "/workbench"
-   port = 3000
-   menuPosition = 8
-   menuItem = "Workbench"
-   containerName = "workbench"
 
 [final]
    redirect = "/"
