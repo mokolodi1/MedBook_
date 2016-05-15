@@ -53,7 +53,7 @@ let collaborations = user.getCollaborations();
 // ex. ["test@test.com", "Testing lab UCSC", "Cool RNA-Seq project"]
 ```
 
-To check if a user has access to an object, use `hasAccess` (returns boolean). To throw an error if the user doesn't have access, use `ensureAccess`. These functions take one parameter: either a collaboration object or a collaboration name (string). Use `ensureAccess` unless you need to do something if the user doesn't have access.
+To check if a user has access to an object, use `hasAccess` (returns boolean). To throw an error if the user doesn't have access, use `ensureAccess`. These functions take one parameter: either a collaboration object, collaboration name (string), or an array of collaboration names. Use `ensureAccess` unless you need to do something if the user doesn't have access.
 
 In determining if a user has access to an object, two fields are checked. A user is considered to have access if the `user_id` field matches the `_id` of the currently logged in user. A user is also considered to have access if they have access to one or more of the collaborations in the `collaborations` field.
 
@@ -63,7 +63,7 @@ Meteor.methods({
   CKCCDoSomething: function () {
     let user = MedBook.ensureUser(Meteor.userId()); // can throw "user-not-found"
 
-    if (user.hasAccess("CKCC")) {
+    if (user.hasAccess("CKCC")) { // or user.hasAccess(["CKCC"])
       console.log("We are doing something with the CKCC collaboration!");
     } else {
       console.log("Someone tried to do something but didn't have access.");

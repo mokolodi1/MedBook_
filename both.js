@@ -179,16 +179,16 @@ function ensureAdmin(collaborationOrName) {
  * // security-protected code
  * ```
  */
-function hasAccess (objOrName) {
-  // If objOrName is a name, create a "fake" object with only the
-  // collaborations field. Otherwise just continue on as usual...
+function hasAccess (objNameOrArray) {
+  // If objNameOrArray is a name or an array, create a "fake" object with
+  // only the collaborations field. Otherwise just continue on as usual...
   var obj;
-  if (typeof objOrName === "string") {
-    obj = {
-      collaborations: [objOrName]
-    };
+  if (typeof objNameOrArray === "string") {
+    obj = { collaborations: [objNameOrArray] };
+  } else if (Array.isArray(objNameOrArray)) {
+    obj = { collaborations: objNameOrArray };
   } else {
-    obj = objOrName;
+    obj = objNameOrArray;
   }
 
   // if the object is falsey or doesn't have one of the things we can check
