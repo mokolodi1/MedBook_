@@ -1,0 +1,16 @@
+{
+    "_id" : "227LsJuK3cqmgNnA7",
+    "collaborations" : [
+        "mokolodi1@gmail.com"
+    ],
+    "name" : "Sample enrollment",
+    "specificity": "patient",
+    "fields" : [
+        {
+            "label" : "Color",
+            "type" : "String",
+            "allowedValues": [ "brown", "red", "striped" ],
+            "optional" : false
+        },
+    ]
+}

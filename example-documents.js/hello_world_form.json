@@ -1,0 +1,11 @@
+{
+  "collaborations": ["mokolodi1@gmail.com"],
+  "name": "Hello world!",
+  "fields": [
+    {
+      "label": "Response",
+      "type": "String",
+      "optional": false
+    }
+  ]
+}
