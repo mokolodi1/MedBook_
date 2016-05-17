@@ -1,5 +1,10 @@
 // studies migration script:
-// db.getCollection('data_sets').update({}, {$unset: {short_name: 1, tables: 1, Patient_IDs: 1, id: 1}, $rename: {Sample_IDs: "sample_labels"}}, {multi: true})
+/*
+db.getCollection('data_sets').update({}, {
+  $unset: {short_name: 1, tables: 1, Patient_IDs: 1, id: 1},
+  $rename: {Sample_IDs: "sample_labels"}
+}, {multi: true})
+*/
 
 DataSets = new Meteor.Collection("data_sets");
 DataSets.attachSchema(new SimpleSchema({
@@ -46,34 +51,52 @@ Forms = new Meteor.Collection("forms");
 Forms.attachSchema(new SimpleSchema({
   collaborations: { type: [String] },
 
-  name: { type: String },
+  name: { type: String, label: "Name of form" },
   specificity: { type: String, allowedValues: [ "patient", "sample" ] },
 
   fields: {
     type: [ new SimpleSchema({
-      label: { type: String },
-
-      // type is the only special field that is changed before we apply
-      // all the attributes to the field
+      label: {
+        type: String,
+        label: "Field name",
+      },
       type: {
         type: String,
         allowedValues: [
           "String",
+          "Select",
+          "Integer",
+          "Decimal",
           "Boolean",
-          "Number",
           "Date",
         ],
       },
-      optional: { type: Boolean },
+      allowedValues: {
+        type: [String],
+        optional: true,
+        custom: function () {
+          if (this.value && this.siblingField("type").value !== "Select") {
+            return "allowedValuesOnlyForString";
+          }
+        },
+        minCount: 1,
+      },
+      min: { type: Number, decimal: true, optional: true },
+      max: { type: Number, decimal: true, optional: true },
+
+      optional: { type: Boolean, optional: true },
     }) ],
+    minCount: 1,
   },
 }));
 
 SimpleSchema.messages({
-  recordValuesDontMatchFormSchema: "Record values do not match the " +
-      "form schema.",
-  cantSpecifySample: "You cannot specify a sample label for a " +
-      "patient-specific form",
+  recordValuesDontMatchFormSchema:
+      "Record values do not match the form schema.",
+  cantSpecifySample:
+      "You cannot specify a sample label for a patient-specific form",
+  allowedValuesOnlyForString:
+      "You can only specify allowed values for string type fields",
 });
 
 Records = new Meteor.Collection("records");
@@ -146,19 +169,21 @@ MedBook.schemaObjectFromForm = function (form) {
   _.each(form.fields, function (field) {
     var fieldDefinition;
 
-    if (field.type === "String") {
+    if (field.type === "String" || field.type === "Select") {
       fieldDefinition = { type: String };
     } else if (field.type === "Boolean") {
       fieldDefinition = { type: Boolean };
-    } else if (field.type === "Number") {
+    } else if (field.type === "Integer") {
       fieldDefinition = { type: Number };
+    } else if (field.type === "Decimal") {
+      fieldDefinition = { type: Number, decimal: true };
     } else if (field.type === "Date") {
       fieldDefinition = { type: Date };
     } else {
       throw new Meteor.Error("Invalid field type");
     }
 
-    // remove `type` and then attach all the other attributes
+    // attach all other attributes (except field.type)
     delete field.type;
     _.extend(fieldDefinition, field);
 
