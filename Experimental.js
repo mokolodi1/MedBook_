@@ -59,6 +59,12 @@ Forms.attachSchema(new SimpleSchema({
       label: {
         type: String,
         label: "Field name",
+        custom: function () {
+          // make sure it's a valid mongo attribute name
+          if (this.value.indexOf(".") !== -1 || this.value[0] === "$") {
+            return "noDotsOrDollarSignsAtStart";
+          }
+        },
       },
       type: {
         type: String,
@@ -97,6 +103,8 @@ SimpleSchema.messages({
       "You cannot specify a sample label for a patient-specific form",
   allowedValuesOnlyForString:
       "You can only specify allowed values for string type fields",
+  noDotsOrDollarSignsAtStart:
+      "Field names cannot contain periods or begin with a dollar sign.",
 });
 
 Records = new Meteor.Collection("records");
