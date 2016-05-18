@@ -34,7 +34,8 @@ Collaborations.attachSchema(new SimpleSchema({
   // invitations: { type: [String], optional: true },
   requestsToJoin: {
     type: [new SimpleSchema({
-      name: { type: String },
+      firstName: { type: String },
+      lastName: { type: String },
       email: { type: String },
       personalCollaboration: { type: String },
     })],
