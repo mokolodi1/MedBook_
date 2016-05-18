@@ -22,7 +22,7 @@ Package.onUse(function(api) {
 
   api.addFiles([
     "introduction.js",
-    "studies_expression3.js",
+    "dataSets_expression3.js",
   ], "server");
 });
 

@@ -1,35 +1,35 @@
 /*
 * Maintains relationship between studies and expression3
 * 1. Make sure there's no elements in expression3Doc.rsem_quan_log2 not
-*    associated with any sample in the study
-* 2. Make sure study.gene_expression_index is looking good
-* 3. If study.gene_expression_genes isn't defined, calculate it from
+*    associated with any sample in the dataSet
+* 2. Make sure dataSet.gene_expression_index is looking good
+* 3. If dataSet.gene_expression_genes isn't defined, calculate it from
 *    documents in expression3
 */
-MedBook.referentialIntegrity.studies_expression3 = function (studiesQuery) {
+MedBook.referentialIntegrity.dataSets_expression3 = function (dataSetQuery) {
   console.log("starting referential integrity maintenance" +
-      " (studies ==> expression3)");
+      " (data sets ==> expression3)");
 
-  if (!studiesQuery) { // default to all studies
-    studiesQuery = {};
+  if (!dataSetQuery) { // default to all studies
+    dataSetQuery = {};
   }
 
-  Studies.find(studiesQuery).forEach(function (study) {
-    var study_label = study.id;
-    console.log("study_label:", study_label);
+  DataSets.find(dataSetQuery).forEach(function (dataSet) {
+    var data_set_id = dataSet._id;
+    console.log("data set _id / name:", dataSet._id, dataSet.name);
 
     // remove expression3 documents that don't have any data
     Expression3.remove({
-      study_label: study_label,
+      data_set_id: data_set_id,
       rsem_quan_log2: { $size:  0 }
     });
 
     // remove expression3Doc.rsem_quan_log2 array values not associated with
-    // a sample in study.gene_expression
+    // a sample in dataSet.gene_expression
 
     var sampleArray = []; // default if gene_expression undefined
-    if (study.gene_expression) {
-      sampleArray = study.gene_expression;
+    if (dataSet.gene_expression) {
+      sampleArray = dataSet.gene_expression;
     }
     sampleLength = sampleArray.length;
 
@@ -38,7 +38,7 @@ MedBook.referentialIntegrity.studies_expression3 = function (studiesQuery) {
     // the $slice modifier has an effect."
     // - https://docs.mongodb.org/manual/reference/operator/update/slice/
     Expression3.update({
-      study_label: study_label,
+      data_set_id: data_set_id,
       $where: function () { return this.rsem_quan_log2.length !== sampleLength; },
     }, {
       $push: {
@@ -51,10 +51,10 @@ MedBook.referentialIntegrity.studies_expression3 = function (studiesQuery) {
 
 
 
-    // regenerate study.gene_expression_index from study.gene_expression,
+    // regenerate dataSet.gene_expression_index from dataSet.gene_expression,
     // compare to current index
 
-    var currentIndex = study.gene_expression_index;
+    var currentIndex = dataSet.gene_expression_index;
     if (!currentIndex) {
       currentIndex = {};
     }
@@ -65,14 +65,14 @@ MedBook.referentialIntegrity.studies_expression3 = function (studiesQuery) {
     }
     if (!_.isEqual(correctIndex, currentIndex)) {
       console.log("There was a discrepancy between the gene_expression_index " +
-          "in " + study_label + " and the 'correct' index.");
+          "in " + data_set_id + " and the 'correct' index.");
       console.log("currentIndex !== correctIndex (bad!!!)");
-      console.log("study.gene_expression:", sampleArray);
+      console.log("dataSet.gene_expression:", sampleArray);
       console.log("currentIndex:", currentIndex);
       console.log("correctIndex:", correctIndex);
 
       console.log("setting to correctIndex...");
-      Studies.update({id: study_label}, {
+      DataSets.update(data_set_id, {
         $set: {
           gene_expression_index: correctIndex
         }
@@ -83,32 +83,32 @@ MedBook.referentialIntegrity.studies_expression3 = function (studiesQuery) {
 
     // make sure gene_expression_genes is set
 
-    if (!study.gene_expression_genes) {
+    if (!dataSet.gene_expression_genes) {
       // gene_expression_genes has never been set, so we will calculate it from
       // expression3 data if that is present
 
-      if (Expression3.findOne({ study_label: study_label })) {
+      if (Expression3.findOne({ data_set_id: data_set_id })) {
         // there's existing data, so let's make sure we match that
 
         // get a sorted list of all of the distinct `gene_label`s in Expression3
-        // for this study
+        // for this dataSet
         var existingDistinctGenes = Expression3.aggregate([
-          {$match: {study_label: study_label}},
+          {$match: {data_set_id: data_set_id}},
           {$group: {_id: ":)", "genes": {$addToSet: "$gene_label"}}}
         ])[0].genes.sort();
 
         // NOTE: node hangs if we try to do this update through the non-raw
         // collection because the array is so large (20,000+ elements)
-        Studies.rawCollection().update({id: study_label}, {
+        DataSets.rawCollection().update({_id: data_set_id}, {
           $set: { gene_expression_genes: existingDistinctGenes }
         }, function (error, result) {
           if (error) {
-            console.log(study_label,
+            console.log(data_set_id,
                 "gene_expression_genes update error:", error);
           }
         });
 
-        console.log(study_label,
+        console.log(data_set_id,
             "gene_expression_genes calculated from existing Expression3 data");
       }
     }
