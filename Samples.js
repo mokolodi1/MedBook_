@@ -1,7 +1,7 @@
 Samples = new Meteor.Collection("samples");
 
 Samples.attachSchema(new SimpleSchema({
-  study_label: { type: String },
+  data_set_id: { type: String },
   sample_label: { type: String },
   patient_label: { type: String },
 

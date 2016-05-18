@@ -16,9 +16,13 @@ var statsSchema = {
   optional: true,
 };
 
+// db.getCollection('expression3').update({}, {$rename: {study_label: "data_set_id"}}, {multi: true})
+// db.getCollection('expression3').update({data_set_id: "tcga"}, {$set: {data_set_id: "56d616988ed455bbd849feb3"}}, {multi: true})
+// db.getCollection('expression3').update({data_set_id: "prad_wcdt"}, {$set: {data_set_id: "54795e11b089fea9740779e4"}}, {multi: true})
+
 Expression3 = new Meteor.Collection("expression3");
 Expression3.attachSchema(new SimpleSchema({
-  study_label: { type: String, optional: true },
+  data_set_id: { type: String, optional: true },
   gene_label: { type: String },
   // NOTE: collaborations not stored at this level
 

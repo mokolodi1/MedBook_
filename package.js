@@ -38,6 +38,8 @@ Package.onUse(function(api) {
   api.export("Records");
   addAndExport(api, "Expression3");
 
+  addAndExport(api, "Samples");
+
   addAndExport(api, "SampleGroups");
   addAndExport(api, "GeneSets");
   addAndExport(api, "GeneSetCollections");
@@ -45,10 +47,6 @@ Package.onUse(function(api) {
   // utility collections
   addAndExport(api, "Genes");
   addAndExport(api, "Jobs");
-
-  // base collections
-  // addAndExport(api, "Samples");
-
 
   // addAndExport(api, "Contrasts");
 
