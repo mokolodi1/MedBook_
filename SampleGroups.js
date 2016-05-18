@@ -51,10 +51,11 @@ SampleGroups.attachSchema(new SimpleSchema({
   //   },
   // },
 
-  studies: {
+  data_sets: {
     type: [
       new SimpleSchema({
-        study_label: { type: String },
+        data_set_id: { type: String },
+
         sample_labels: { type: [String] },
         sample_labels_count: {
           type: Number,
@@ -95,7 +96,7 @@ SampleGroups.attachSchema(new SimpleSchema({
             })
           ],
           defaultValue: [],
-          optional: true, // not present ==> include all samples in a study
+          optional: true, // not present ==> include all samples in data set
         },
       })
     ],
