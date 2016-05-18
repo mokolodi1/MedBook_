@@ -25,12 +25,26 @@ Collaborations.attachSchema(new SimpleSchema({
   // in case there are reminant links to it that haven't been deleted.
   administrators: { type: [String] },
 
-  isUnlisted: { type: Boolean, label: "Unlisted" },
-  invitations: { type: [String], optional: true },
-  requests: { type: [String], optional: true },
+  publiclyListed: {
+    type: Boolean,
+    label: "Publicly listed",
+    defaultValue: false,
+    optional: true,
+  },
+  // invitations: { type: [String], optional: true },
+  requestsToJoin: {
+    type: [new SimpleSchema({
+      name: { type: String },
+      email: { type: String },
+      personalCollaboration: { type: String },
+    })],
+    defaultValue: [],
+    optional: true
+  },
   adminApprovalRequired: {
     type: Boolean,
     label: "Admin approval required to join",
+    defaultValue: true,
   },
 }));
 
