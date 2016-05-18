@@ -32,17 +32,17 @@ def exportLimmaPhenotype(db, sampleGroupAId, sampleGroupBId):
     sampleGroupA = db["sample_groups"].find_one({ "_id": sampleGroupAId })
     sampleGroupB = db["sample_groups"].find_one({ "_id": sampleGroupBId })
 
-    for study in sampleGroupA["studies"]:
-        writeGroupSamples(study["sample_labels"], "Group A")
+    for dataSet in sampleGroupA["data_sets"]:
+        writeGroupSamples(dataSet["sample_labels"], "Group A")
 
-    for study in sampleGroupB["studies"]:
-        writeGroupSamples(study["sample_labels"], "Group B")
+    for dataSet in sampleGroupB["data_sets"]:
+        writeGroupSamples(dataSet["sample_labels"], "Group B")
 
 def main():
     argv = sys.argv
 
     # set up the database client
-    db = pymongo.MongoClient("mongodb://mongo:27017/MedBook")["MedBook"]
+    db = pymongo.MongoClient()["MedBook"]
 
     if len(argv) == 3:
         exportLimmaPhenotype(db, argv[1], argv[2])

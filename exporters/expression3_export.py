@@ -4,7 +4,7 @@
 
 Usage:
 ./expression3_export.py --sample_group_id [sample group _id]
-./expression3_export.py --study_label [study label] --sample_label [sample label]
+./expression3_export.py --data_set_id [data set _id] --sample_label [sample label]
 
 Dependancies:
 pymongo
@@ -15,29 +15,29 @@ import getopt
 import pymongo
 
 def export_from_object(db, sampleGroup):
-    # NOTE: from this point on, don't reference sampleGroup["studies"]
+    # NOTE: from this point on, don't reference sampleGroup["data_sets"]
     #       because we mutate it (only sort, for now)
-    sampleGroupStudies = sampleGroup["studies"]
+    sampleGroupDataSets = sampleGroup["data_sets"]
 
-    # make sure sampleGroupStudies is sorted by study_label
-    sampleGroupStudies = sorted(sampleGroupStudies,
-            key=lambda study: study["study_label"])
+    # make sure sampleGroupDataSets is sorted by data_set_id
+    sampleGroupDataSets = sorted(sampleGroupDataSets,
+            key=lambda dataSet: dataSet["data_set_id"])
 
     # TODO: ??
     # # make sure the sample labels are sorted within each study
-    # for index, value in enumerate(sampleGroupStudies):
-    #     sampleGroupStudies[index]
-    studyLabels = [study["study_label"] for study in sampleGroupStudies]
-    studies = list(db["studies"].find({"id": { "$in": studyLabels }}).sort([
-        ("id", pymongo.ASCENDING)
+    # for index, value in enumerate(sampleGroupDataSets):
+    #     sampleGroupDataSets[index]
+    dataSetIds = [study["data_set_id"] for study in sampleGroupDataSets]
+    data_sets = list(db["data_sets"].find({"_id": { "$in": dataSetIds }}).sort([
+        ("_id", pymongo.ASCENDING)
     ]))
 
     # make sure we're dealing with the same gene set for each study
     # TODO
-    if len(sampleGroupStudies) > 1:
+    if len(sampleGroupDataSets) > 1:
         print "Need to make sure we're dealing with the same gene set for each study"
         sys.exit(1)
-    # geneSet = studies[0]["gene_expression_genes"]
+    # geneSet = data_sets[0]["gene_expression_genes"]
 
     # TODO: make sure there are no sample label collisions
 
@@ -45,44 +45,44 @@ def export_from_object(db, sampleGroup):
 
     sys.stdout.write("Gene")
 
-    for study in sampleGroupStudies:
+    for study in sampleGroupDataSets:
         for sampleLabel in study["sample_labels"]:
             sys.stdout.write("\t" + sampleLabel)
 
     # print out the data (non-header line)
 
-    # sort by gene_label and then study_label
-    cursor = db["expression3"].find({ "study_label": { "$in": studyLabels } }).sort([
+    # sort by gene_label and then data_set_id
+    cursor = db["expression3"].find({ "data_set_id": { "$in": dataSetIds } }).sort([
         ("gene_label", pymongo.ASCENDING),
-        ("study_label", pymongo.ASCENDING)
+        ("data_set_id", pymongo.ASCENDING)
     ])
 
-    # make absolutely sure the order of the studies matches the order of the
-    # studies in the sample group
-    for i in range(len(studies)):
-        if studies[i]["id"] != sampleGroupStudies[i]["study_label"]:
-            print "Order of studies not equal to order of sample group studies"
+    # make absolutely sure the order of the data_sets matches the order of the
+    # data_sets in the sample group
+    for i in range(len(data_sets)):
+        if data_sets[i]["_id"] != sampleGroupDataSets[i]["data_set_id"]:
+            print "Order of data sets not equal to order of sample group data sets"
             sys.exit(1)
 
     # actually write the stuff
-    studyIndex = 0 # keep track of which study we're looking at
-    firstStudyLabel = studies[0]["id"]
+    dataSetIndex = 0 # keep track of which study we're looking at
+    firstStudyLabel = data_sets[0]["_id"]
     for doc in cursor:
         # check to see if we're on a new gene
-        if doc["study_label"] == firstStudyLabel:
-            studyIndex = 0
+        if doc["data_set_id"] == firstStudyLabel:
+            dataSetIndex = 0
             sys.stdout.write("\n" + doc["gene_label"] + "\t")
 
         # write data for this doc
-        currentStudy = studies[studyIndex]
+        currentDataSet = data_sets[dataSetIndex]
         dataStrings = []
-        for sampleLabel in sampleGroupStudies[studyIndex]["sample_labels"]:
-            index = int(currentStudy["gene_expression_index"][sampleLabel])
+        for sampleLabel in sampleGroupDataSets[dataSetIndex]["sample_labels"]:
+            index = int(currentDataSet["gene_expression_index"][sampleLabel])
             dataStrings.append(str(doc["rsem_quan_log2"][index]))
 
         sys.stdout.write("\t".join(dataStrings))
 
-        studyIndex += 1
+        dataSetIndex += 1
 
     # add a line return at the end
     sys.stdout.write("\n")
@@ -91,7 +91,7 @@ def main():
     argv = sys.argv
 
     # set up the database client
-    db = pymongo.MongoClient("mongodb://mongo:27017/MedBook")["MedBook"]
+    db = pymongo.MongoClient()["MedBook"]
 
     # process options if --sample_group_id
     if "--sample_group_id" in argv:
@@ -104,15 +104,15 @@ def main():
         sampleGroup = db["sample_groups"].find_one({ "_id": sampleGroupId })
         export_from_object(db, sampleGroup)
         sys.exit(0)
-    elif "--study_label" in argv and "--sample_label" in argv:
-        studyIndex = argv.index("--study_label") + 1
+    elif "--data_set_id" in argv and "--sample_label" in argv:
+        dataSetIndex = argv.index("--data_set_id") + 1
         sampleIndex = argv.index("--sample_label") + 1
 
         # pretend we have a sample group
         export_from_object(db, {
-            "studies": [
+            "data_sets": [
                 {
-                    "study_label": argv[studyIndex],
+                    "data_set_id": argv[dataSetIndex],
                     "sample_labels": [ argv[sampleIndex] ]
                 }
             ]
