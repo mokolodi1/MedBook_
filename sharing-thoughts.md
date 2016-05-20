@@ -2,7 +2,7 @@
 
 ### Example documents
 
-#### `db.data_sets.findOne({ name: "West Coast Dream Team" })`
+##### `db.data_sets.findOne({ name: "West Coast Dream Team" })`
 ```json
 {
   "_id": "ABC123_wcdt_mongo_id",
@@ -18,7 +18,7 @@
 }
 ```
 
-#### `db.expression3.find({ data_set_id: "ABC123_wcdt_mongo_id" })`
+##### `db.expression3.find({ data_set_id: "ABC123_wcdt_mongo_id" })`
 ```json
 {
   "data_set_id": "ABC123_wcdt_mongo_id",
@@ -27,8 +27,7 @@
 }
 ```
 
-Here is an example patient document:
-#### `db.patients.find({ "patient_label": "DTB-001" })`
+##### `db.patients.find({ "patient_label": "DTB-001" })`
 ```json
 {
   "collaborations": [ "WCDT" ],
