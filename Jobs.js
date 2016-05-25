@@ -44,7 +44,8 @@ Jobs.attachSchema(new SimpleSchema({
     // TODO: depend on Jobs package
     allowedValues: Object.keys(jobSchemas),
   },
-  user_id: { type: Meteor.ObjectID },
+  user_id: { type: Meteor.ObjectID }, // TODO: remove?
+  // collaborations: 
   args: { // input
     type: Object,
     blackbox: true,

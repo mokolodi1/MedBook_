@@ -32,13 +32,12 @@ Package.onUse(function(api) {
 
   api.addFiles("globals.js");
 
-  api.addFiles("Experimental.js");
-  api.export("DataSets");
-  api.export("Forms");
-  api.export("Records");
+  addAndExport(api, "DataSets");
+  addAndExport(api, "Forms");
+  addAndExport(api, "Records");
   addAndExport(api, "Expression3");
 
-  addAndExport(api, "Samples");
+  addAndExport(api, "Patients");
 
   addAndExport(api, "SampleGroups");
   addAndExport(api, "GeneSets");

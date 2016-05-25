@@ -47,7 +47,7 @@ A study refers to a specific study or clinical trial. Examples of such studies i
 | `id`                        | The study label (or ID) of a study uniquely identifies a study and is the attribute which MedBook uses for joins accross collections. In most other collections this attribute is called `study_label`.  | `"tcga"` |
 | `name`                      | Name of the study | `"TCGA"` |
 | `description`               | Description of the study | `"The Cancer Genome Atlas is a comprehensive and coordinated effort ..."` |
-| `Sample_IDs`                | List of valid sample labels in the study | `["TCGA-OR-A5JX-01", "TCGA-HV-A5A5-01", "TCGA-MQ-A4LP-01", ...]` |
+| `sample_labels`                | List of valid sample labels in the study | `["TCGA-OR-A5JX-01", "TCGA-HV-A5A5-01", "TCGA-MQ-A4LP-01", ...]` |
 | `Patient_IDs`               | List of valid patient labels in the study | `["TCGA-OR-A5JX-01", "TCGA-HV-A5A5-01", "TCGA-MQ-A4LP-01", ...]` |
 | `patients`                  | List of valid patients in the study with each patients' list of valid samples. Note that not all samples are not associated with a patient. | `[ { patient_label: "TCGA-06-0190", sample_labels: ["TCGA-06-0190-01", "TCGA-06-0190-02"] }, ... ]` |
 | `gene_expression`           | Sample labels array matching values array in `expression3` | `["TCGA-OR-A5JX-01", "TCGA-HV-A5A5-01", "TCGA-MQ-A4LP-01", ...]` |
@@ -55,7 +55,7 @@ A study refers to a specific study or clinical trial. Examples of such studies i
 | `gene_expression_genes`     | The gene set for the study gene expression data | `[ "A1BG", "A1CF", "A2BP1", "A2LD1", ... ]` |
 | `gene_expression_wrangling` | Soft lock for wrangling gene expression data for a given study. | `false` |
 
-Use `MedBook.referentialIntegrity.studies_expression3` in `medbook:referential-integrity` to maintain relationships between Studies and Expression3.
+Use `MedBook.referentialIntegrity.dataSets_expression3` in `medbook:referential-integrity` to maintain relationships between Studies and Expression3.
 
 ### Expression3
 
