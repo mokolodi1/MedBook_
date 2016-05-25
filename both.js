@@ -17,12 +17,14 @@ Collaborations.attachSchema(new SimpleSchema({
   },
   description: { type: String },
 
-  collaborators: { type: [String], defaultValue: [] },
+  collaborators: { type: [String], defaultValue: [], minCount: 0 },
 
   // If there are no administrators, the collaboration is considered deleted
   // and cannot be managed or recreated. This is important because we don't
   // want someone to be able to recreate a collaboration that has been deleted
   // in case there are reminant links to it that haven't been deleted.
+  // If a collaboration has no administrators, it cannot have any
+  // collaborators
   administrators: { type: [String] },
 
   publiclyListed: {
@@ -195,13 +197,18 @@ function ensureAdmin(collaborationOrName) {
  * ```
  */
 function hasAccess (objNameOrArray) {
+  if (!objNameOrArray) return false;
+
   // If objNameOrArray is a name or an array, create a "fake" object with
   // only the collaborations field. Otherwise just continue on as usual...
   var obj;
+
   if (typeof objNameOrArray === "string") {
     obj = { collaborations: [objNameOrArray] };
   } else if (Array.isArray(objNameOrArray)) {
     obj = { collaborations: objNameOrArray };
+  } else if (objNameOrArray.collaborators) {
+    obj = { collaborations: objNameOrArray.collaborators };
   } else {
     obj = objNameOrArray;
   }
