@@ -2,6 +2,7 @@
   host = "localhost"
   bind_ip = "0.0.0.0"
   nonssl = 10000
+  ssl = 8001
   cookie_secret = "medbookCookie change for production"
   pingIntervalMS = 2000
   uid = "galaxy"

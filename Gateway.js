@@ -11,7 +11,6 @@ var path = require('path');
 var http = require('http');
 var crypto = require('crypto');
 var randomstring = require("randomstring");
-var forever = require('forever-monitor');
 var MongoClient = require('mongodb').MongoClient;
 
 
@@ -95,7 +94,7 @@ readPostScript();
 
 redirectServer = null;
 readSSLcredentials = function() {
-    if (config.server.ssl && config.server.nonssl)  {
+    if (!process.env.NO_SSL)  {
       if (redirectServer)
           server.close();
 
@@ -116,12 +115,12 @@ readSSLcredentials = function() {
 
       });
       redirectServer.listen(config.server.nonssl);
-    }
 
-    var options = {
-         key: fs.readFileSync(config.server.key),
-         cert: fs.readFileSync(config.server.cert),
-    };
+      var options = {
+        key: fs.readFileSync("/certificates/medbook_io.key"),
+        cert: fs.readFileSync("/certificates/STAR_medbook_io.crt")
+      };
+    }
 
     if (config.server.chain) {
         var ca = []
@@ -280,7 +279,7 @@ run = function() {
         forward(req, res);
   } // main
 
-  if (config.server.ssl)
+  if (!process.env.NO_SSL)
       server = require('https').createServer(readSSLcredentials(), main);
   else
       server = require('http').createServer(main);
@@ -306,7 +305,7 @@ run = function() {
     });
   })
    
-  if (config.server.ssl) {
+  if (!process.env.NO_SSL) {
       console.log("ssl listening on", config.server.ssl);
       server.listen(config.server.ssl)
   } else {
