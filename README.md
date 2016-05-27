@@ -16,7 +16,7 @@
 
 The MedBook user object is just Meteor.user() with a `collaborations` field and a couple helper methods attached.
 
-To fetch a MedBook user object, use `MedBook.findUser()`. `findUser` takes one parameter: the _id of the currently logged in user. To throw an error if the user is not logged in, use `MedBook.ensureUser()`. Use `ensureUser` unless you need to do something if no user is logged in.
+To fetch a MedBook user object, use `MedBook.findUser()`. `findUser` takes one parameter: a query to find a single user. (Normally this is the _id of the currently logged in user.) To throw an error if the user is not logged in, use `MedBook.ensureUser()`. Use `ensureUser` unless you need to do something if no user is logged in.
 
 On the client, `MedBook.findUser()` only returns the contents of `Meteor.user()` once the subscription loading the `user.collaborations` attribute is ready.
 
@@ -39,12 +39,16 @@ if (user) {
 }
 ```
 
-To get the personal collaboration associated with a user, use `user.personalCollaboration()`. Currently, a user's personal collaboration is simply their email, but that may change in the future.
+To get the personal collaboration associated with a user, use `user.personalCollaboration()`. Currently, a user's personal collaboration is simply their email, but that may change in the future. To get the email associated with a user, use `user.email()`.
 
 ```js
 let user = MedBook.ensureUser(Meteor.userId());
+
 let userCollab = user.personalCollaboration(); // "username@domain.suffix"
+let userEmail = user.email();
 ```
+
+
 
 To get a list of the collaborations a user is a part of, use `getCollaborations`. On both client and server, this returns `user.collaborations.memberOf`, however on the server this list is updated before it is returned. (Internally, `collaboration.getAssociatedCollaborators()` is used.) Currently, the `memberOf` list is updated every time this function is called. In the future, we may add throttling to this update function (ex. updating only a minute after the last update).
 ```js

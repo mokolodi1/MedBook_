@@ -74,8 +74,8 @@ if (Meteor.isClient) {
 }
 
 // does a findOne on Meteor.users and adds some useful functions to that
-MedBook.findUser = function (userId) {
-  var user = Meteor.users.findOne(userId);
+MedBook.findUser = function (query) {
+  var user = Meteor.users.findOne(query);
 
   // if we're on the client return null until we have all the data loaded
   if (Meteor.isClient && !userSub.get().ready()) {
@@ -87,6 +87,7 @@ MedBook.findUser = function (userId) {
       // getCollaborations is global in the package
       // and is defined seperately on the client and server
       personalCollaboration: personalCollaboration,
+      email: email,
       getCollaborations: getCollaborations, // different on client/server
       hasAccess: hasAccess,
       ensureAccess: ensureAccess,
@@ -102,8 +103,12 @@ function personalCollaboration () {
   return this.collaborations.personal;
 }
 
-MedBook.ensureUser = function (userId) {
-  var user = MedBook.findUser(userId);
+function email () {
+  return this.collaborations.email_address;
+}
+
+MedBook.ensureUser = function (query) {
+  var user = MedBook.findUser(query);
 
   if (!user) {
     throw new Meteor.Error("not-logged-in", "Please log in.");
