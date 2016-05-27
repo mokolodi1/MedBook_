@@ -27,15 +27,33 @@ var jobSchemas = {
     args: new SimpleSchema({
       sample_group_a_id: { type: String },
       sample_group_b_id: { type: String },
-      limma_top_genes_count: { type: Number, min: 1 },
-      gene_set_collection_id: { type: String },
       sample_group_a_name: { type: String },
       sample_group_b_name: { type: String },
+      limma_top_genes_count: { type: Number, min: 1 },
+      gene_set_collection_id: { type: String },
       gene_set_collection_name: { type: String },
     }),
     output: null,
   },
-}
+  TumorMapOverlay: {
+    args: new SimpleSchema({
+      map: { type: String, allowedValues: [ "CKCC/v1" ] },
+      layout: { type: String, allowedValues: [ "mRNA" ] },
+      samples: {
+        type: [new SimpleSchema({
+          data_set_id: { type: String, label: "Data set" },
+          data_set_name: { type: String },
+          sample_label: { type: String, label: "Sample" },
+        })],
+        minCount: 1,
+      },
+    }),
+    output: new SimpleSchema({
+      bookmark_url: { type: String },
+    }),
+  },
+};
+MedBook.jobSchemas = jobSchemas;
 
 Jobs.attachSchema(new SimpleSchema({
   // fields needed to insert a Job
