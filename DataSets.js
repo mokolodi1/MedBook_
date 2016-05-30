@@ -14,6 +14,7 @@ DataSets.attachSchema(new SimpleSchema({
   description: { type: String, optional: true },
 
   // all valid sample labels
+  // NOTE: each sample_label can only be linked with one patient.
   sample_labels: { type: [String] },
 
   // TODO: switch out

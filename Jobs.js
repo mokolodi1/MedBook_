@@ -14,8 +14,9 @@ var jobSchemas = {
 
   UpDownGenes: {
     args: new SimpleSchema({
-      study_label: { type: String },
-      patient_label: { type: String },
+      // can be patient_label or data set name
+      data_set_name_or_patient_label: { type: String },
+      data_set_id: { type: String },
       sample_label: { type: String },
       sample_group_id: { type: String },
       sample_group_name: { type: String },
