@@ -11,6 +11,19 @@ Patients.attachSchema(new SimpleSchema({
 
       // link to the genomic data
       data_set_id: { type: String },
+
+      // quality_control: {
+      //   type: new SimpleSchema({
+      //     status: {
+      //       type: String,
+      //       allowedValues: [
+      //         "accepted",
+      //         "rejected",
+      //       ],
+      //
+      //     },
+      //   })
+      // },
     })],
     defaultValue: [],
   },

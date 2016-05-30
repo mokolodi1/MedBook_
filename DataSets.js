@@ -11,15 +11,20 @@ DataSets.attachSchema(new SimpleSchema({
   collaborations: { type: [String] },
 
   name: { type: String },
-  description: { type: String, optional: true },
+  description: { type: String },
 
   // all valid sample labels
   // NOTE: each sample_label can only be linked with one patient.
-  sample_labels: { type: [String] },
+  sample_labels: { type: [String], defaultValue: [] },
 
   // TODO: switch out
-  gene_expression: { type: [String], optional: true },
-  gene_expression_index: { type: Object, blackbox: true, optional: true },
+  gene_expression: { type: [String], defaultValue: [], optional: true },
+  gene_expression_index: {
+    type: Object,
+    defaultValue: {},
+    blackbox: true,
+    optional: true,
+  },
   gene_expression_genes: { type: [String], optional: true },
   gene_expression_wrangling: {
     type: Boolean,

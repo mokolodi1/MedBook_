@@ -1,17 +1,21 @@
 MedBook.collections = {
-  // Samples: Samples,
+  DataSets: DataSets,
+  Expression3: Expression3,
   SampleGroups: SampleGroups,
+  Genes: Genes,
+  Jobs: Jobs,
+  Blobs: Blobs,
+  // Samples: Samples,
+
   // Contrasts: Contrasts,
   // GeneExpression: GeneExpression,
   // Expression2: Expression2,
-  Expression3: Expression3,
+
   // IsoformExpression: IsoformExpression,
   // GeneAnnotation: GeneAnnotation,
   // Signatures: Signatures,
   // SignatureScores: SignatureScores,
-  Genes: Genes,
-  Jobs: Jobs,
-  Blobs: Blobs,
+
   // Networks: Networks,
   // NetworkElements: NetworkElements,
   // NetworkInteractions: NetworkInteractions,

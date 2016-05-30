@@ -1,55 +1,76 @@
 SimpleSchema.messages({
   recordValuesDontMatchFormSchema:
       "Record values do not match the form schema.",
-  cantSpecifySample:
-      "You cannot specify a sample label for a patient-specific form",
+  invalidSpecifier:
+      "Invalid specifier",
 });
+
+function requiredIfPatientSpecificity() {
+  var form = Forms.findOne(this.field("form_id").value, {
+    fields: { specificity: 1 }
+  });
+
+  return requiredIfTrue.call(this, form.specificity === "patient");
+}
+
+function requiredIfSampleSpecificity() {
+  var form = Forms.findOne(this.field("form_id").value, {
+    fields: { specificity: 1 }
+  });
+
+  if (form.specificity === "patient") {
+    if (this.isSet) {
+      return "cantSpecifySample";
+    }
+  } else {
+    // NOTE: only two possible values, so here specificity = "sample"
+    return requiredIfTrue.call(this, true);
+  }
+}
+
+var patientSpecificityContext = new SimpleSchema({
+  patient_id: { type: String },
+  patient_label: { type: String },
+}).newContext();
+
+var sampleSpecificityContext = new SimpleSchema({
+  patient_id: { type: String, optional: true },
+  patient_label: { type: String, optional: true },
+  data_set_id: { type: String },
+  sample_label: { type: String },
+}).newContext();
 
 Records = new Meteor.Collection("records");
 Records.attachSchema(new SimpleSchema({
-  collaborations: { type: [String] },
-
   // foreign key to forms collection
   form_id: {
     type: String,
     label: "Form",
   },
 
-  // foreign key to data_sets collection
-  data_set_id: {
-    type: String,
-    label: "Data set",
-  },
-
-  patient_label: {
-    type: String,
-    optional: true,
-    custom: function () {
+  specifier: {
+    type: new SimpleSchema({
+      patient_id: { type: String, optional: true },
+      patient_label: { type: String, label: "Patient", optional: true },
+      data_set_id: { type: String, label: "Data set", optional: true },
+      sample_label: { type: String, label: "Sample", optional: true },
+    }),
+    custom: function() {
       var form = Forms.findOne(this.field("form_id").value, {
         fields: { specificity: 1 }
       });
 
-      return requiredIfTrue.call(this, form.specificity === "patient");
-    },
-    label: "Patient",
-  },
-  sample_label: {
-    type: String,
-    optional: true,
-    custom: function () {
-      var form = Forms.findOne(this.field("form_id").value, {
-        fields: { specificity: 1 }
-      });
-
+      var isInvalid = true;
       if (form.specificity === "patient") {
-        if (this.isSet) {
-          return "cantSpecifySample";
-        }
-      } else { // NOTE: only two possible values, so specificity = "sample"
-        return requiredIfTrue.call(this, true);
+        isInvalid = patientSpecificityContext.validate(this.value);
+      } else {
+        isInvalid = sampleSpecificityContext.validate(this.value);
+      }
+
+      if (!isValid) {
+        return "invalidSpecifier";
       }
     },
-    label: "Sample",
   },
 
   values: {
