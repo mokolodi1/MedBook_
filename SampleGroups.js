@@ -28,7 +28,10 @@ SimpleSchema.messages({
 SampleGroups.attachSchema(new SimpleSchema({
   name: { type: String },
   version: { type: Number, min: 1 },
-  date_created: { type: Date, autoValue: dateCreatedAutoValue },
+
+  // only optinal because SimpleSchema causes problems when validating a
+  // single object using a context
+  date_created: { type: Date, autoValue: dateCreatedAutoValue, optional: true },
 
   collaborations: { type: [String] },
 
@@ -96,7 +99,7 @@ SampleGroups.attachSchema(new SimpleSchema({
             })
           ],
           defaultValue: [],
-          optional: true, // not present ==> include all samples in data set
+          optional: true, // TODO: remove
         },
       })
     ],
