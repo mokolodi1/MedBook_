@@ -67,9 +67,9 @@ MedBook.referentialIntegrity.dataSets_expression3 = function (dataSetQuery) {
       console.log("There was a discrepancy between the gene_expression_index " +
           "in " + data_set_id + " and the 'correct' index.");
       console.log("currentIndex !== correctIndex (bad!!!)");
-      console.log("dataSet.gene_expression:", sampleArray);
-      console.log("currentIndex:", currentIndex);
-      console.log("correctIndex:", correctIndex);
+      // console.log("dataSet.gene_expression:", sampleArray);
+      // console.log("currentIndex:", currentIndex);
+      // console.log("correctIndex:", correctIndex);
 
       console.log("setting to correctIndex...");
       DataSets.update(data_set_id, {
