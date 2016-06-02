@@ -28,21 +28,23 @@ def export_from_object(db, sampleGroup):
     # for index, value in enumerate(sampleGroupDataSets):
     #     sampleGroupDataSets[index]
     dataSetIds = [study["data_set_id"] for study in sampleGroupDataSets]
-    data_sets = list(db["data_sets"].find({"_id": { "$in": dataSetIds }}).sort([
+    dataSets = list(db["data_sets"].find({"_id": { "$in": dataSetIds }}).sort([
         ("_id", pymongo.ASCENDING)
     ]))
 
-    # make sure we're dealing with the same gene set for each study
-    # TODO
-    if len(sampleGroupDataSets) > 1:
-        print "Need to make sure we're dealing with the same gene set for each study"
-        sys.exit(1)
-    # geneSet = data_sets[0]["gene_expression_genes"]
+    # make sure we're dealing with the same gene set for each data set
+    geneSet = dataSets[0]["gene_expression_genes"]
+
+    # if there is more than one data set, take the intersection one by one
+    if len(dataSets) > 1:
+        for dataSet in dataSet[1:]:
+            geneSet = list(set(geneSet) & set(dataSet["gene_expression_genes"]))
+
+        sys.stderr.write(str(geneSet));
 
     # TODO: make sure there are no sample label collisions
 
     # print out the header line
-
     sys.stdout.write("Gene")
 
     for study in sampleGroupDataSets:
@@ -52,21 +54,24 @@ def export_from_object(db, sampleGroup):
     # print out the data (non-header line)
 
     # sort by gene_label and then data_set_id
-    cursor = db["expression3"].find({ "data_set_id": { "$in": dataSetIds } }).sort([
+    cursor = db["expression3"].find({
+        "data_set_id": { "$in": dataSetIds },
+        "gene_label": { "$in": geneSet }
+    }).sort([
         ("gene_label", pymongo.ASCENDING),
         ("data_set_id", pymongo.ASCENDING)
     ])
 
-    # make absolutely sure the order of the data_sets matches the order of the
-    # data_sets in the sample group
-    for i in range(len(data_sets)):
-        if data_sets[i]["_id"] != sampleGroupDataSets[i]["data_set_id"]:
+    # make absolutely sure the order of the dataSets matches the order of the
+    # dataSets in the sample group
+    for i in range(len(dataSets)):
+        if dataSets[i]["_id"] != sampleGroupDataSets[i]["data_set_id"]:
             print "Order of data sets not equal to order of sample group data sets"
             sys.exit(1)
 
     # actually write the stuff
     dataSetIndex = 0 # keep track of which study we're looking at
-    firstStudyLabel = data_sets[0]["_id"]
+    firstStudyLabel = dataSets[0]["_id"]
     for doc in cursor:
         # check to see if we're on a new gene
         if doc["data_set_id"] == firstStudyLabel:
@@ -74,7 +79,7 @@ def export_from_object(db, sampleGroup):
             sys.stdout.write("\n" + doc["gene_label"] + "\t")
 
         # write data for this doc
-        currentDataSet = data_sets[dataSetIndex]
+        currentDataSet = dataSets[dataSetIndex]
         dataStrings = []
         for sampleLabel in sampleGroupDataSets[dataSetIndex]["sample_labels"]:
             index = int(currentDataSet["gene_expression_index"][sampleLabel])
