@@ -28,12 +28,6 @@ RectangularGeneAssay.prototype.parseLine =
     setSampleLabels.call(this, brokenTabs); // wrangle sample labels
     console.log("this.sampleLabels:", this.sampleLabels);
 
-    // TODO: run all the time when we get the study_label before the peek
-    for (var sampleIndex in this.sampleLabels) {
-      var sampleLabel = this.sampleLabels[sampleIndex];
-      ensureSampleExists.call(this, this.wranglerFile.options.study_label, sampleLabel);
-    }
-
     if (this.wranglerPeek) {
       this.line_count = 0;
     }
@@ -47,8 +41,6 @@ RectangularGeneAssay.prototype.parseLine =
   } else { // rest of file
     var expressionStrings = brokenTabs.slice(1);
     validateNumberStrings(expressionStrings);
-
-    this.updateOldStuff.call(this, brokenTabs, expressionStrings);
 
     // map the gene based on synonymes and previouses
     var gene_label = brokenTabs[0];
@@ -75,4 +67,3 @@ RectangularGeneAssay.prototype.parseLine =
 // set up non-required functions to be _.noops
 RectangularGeneAssay.prototype.beforeParsing = function () {};
 RectangularGeneAssay.prototype.endOfFile = function () {};
-RectangularGeneAssay.prototype.updateOldStuff = function () {};

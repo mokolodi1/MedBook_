@@ -245,7 +245,7 @@ Wrangler.fileTypes = {
   RectangularGeneExpression: {
     description: "Gene expression rectangular matrix",
     schema: new SimpleSchema({
-      study_label: { type: String },
+      data_set_id: { type: String },
       normalization: {
         type: String,
         // TODO: autogenerate these

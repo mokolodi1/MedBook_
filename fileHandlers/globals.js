@@ -25,65 +25,6 @@ errorResultResolver = function (deferred) {
   };
 };
 
-// // Ensures all sample labels have a record in Clinical_Info and are also in
-// // the study. Also makes sure all Patient_IDs are in the study.
-// // TODO: add wrangler documents warning the user of inserting into
-// // both studies and Clinical_Info
-// ensureClinicalExists = function (Study_ID, Sample_ID) {
-//   var Patient_ID = Wrangler.wranglePatientLabel(Sample_ID);
-//
-//   var clinical = {
-//     CRF: "Clinical_Info",
-//     Study_ID: Study_ID,
-//     Patient_ID: Patient_ID,
-//     Sample_ID: Sample_ID,
-//   };
-//
-//   if (this.wranglerPeek) {
-//     var studiesQuery = {
-//       study_label: Study_ID,
-//       Sample_IDs: Sample_ID,
-//       Patient_IDs: Patient_ID,
-//     };
-//
-//     // NOTE: this may require indexes
-//     if (!CRFs.findOne(clinical) || !Studies.findOne(studiesQuery)) {
-//       this.insertWranglerDocument.call(this, {
-//         document_type: "new_clinical_data",
-//         contents: {
-//           study_label: Study_ID,
-//           patient_label: Patient_ID,
-//           sample_label: Sample_ID,
-//         },
-//       });
-//     }
-//   } else {
-//     CRFs.upsert(clinical, {
-//       $set: clinical
-//     });
-//
-//     Studies.update({
-//       study_label: Study_ID
-//     }, {
-//       $addToSet: {
-//         Sample_IDs: Sample_ID,
-//         Patient_IDs: Patient_ID,
-//       }
-//     });
-//   }
-// };
-
-ensureSampleExists = function (study_label, sample_label) {
-  var study = Studies.findOne({
-    id: study_label,
-    Sample_IDs: sample_label,
-  });
-
-  if (!study) {
-    throw "Sample not defined in study.";
-  }
-};
-
 // adds a assay_sample_summary document, at the end of an expression file
 addExpressionSummaryDoc = function (data_type) {
   for (var index in this.sampleLabels) {
@@ -127,14 +68,14 @@ alertIfSampleDataExists = function (data_type, checkDataExists) {
 
 // sets this.sampleLabels from a header line containing sample labels
 setSampleLabels = function (brokenTabs) {
-  var study = Studies.findOne({id: this.wranglerFile.options.study_label});
+  var dataSet = DataSets.findOne(this.wranglerFile.options.data_set_id);
 
   this.sampleLabels = [];
   for (var column = 1; column < brokenTabs.length; column++) {
     var sample_label = brokenTabs[column];
 
-    if (study.Sample_IDs.indexOf(sample_label) === -1) {
-      throw "Sample " + sample_label + " not defined in study.";
+    if (dataSet.sample_labels.indexOf(sample_label) === -1) {
+      throw "Sample " + sample_label + " not defined in data set.";
     }
 
     this.sampleLabels.push(sample_label);
