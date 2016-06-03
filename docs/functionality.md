@@ -20,7 +20,7 @@ MedBook.findUser()
 	adds a bunch of functions to the user object returned:
 * personalCollaboration < user's collaborations.personal
      
-* email < user's collaborations.email
+* email < user's collaborations.email_address
      
 * getCollaborations < (different client side vs server side)
      
@@ -34,3 +34,15 @@ MedBook.findUser()
 * ensureAdmin < isAdmin or throws an error
 
 MedBook.ensureUser : findUser but throws an error if not found
+
+## client.js functions
+getCollaborations (client-side)
+global template helper: currentMedBookUser -- returns the MedBook user (with all their useful functions)
+
+## collaborationFunctionality.js
+getAssociatedCollaborators(doc) - returns all collaborators having access to doc (directly or indirectly)
+
+getAssociatedCollaborations (doc) -- returns all collaborations that doc has access to (directly or indirectly); ie, all collaborations for which doc can access items included in that collaboration
+
+
+
