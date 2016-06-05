@@ -22,8 +22,8 @@ RectangularGeneExpression.prototype.beforeParsing = function () {
   if (!this.wranglerPeek) {
     var data_set_id = this.wranglerFile.options.data_set_id;
 
-    // maintain referential integrity between "data_sets" and "expression3"
-    MedBook.referentialIntegrity.dataSets_expression3(data_set_id);
+    // maintain referential integrity between "data_sets" and "gene_expression"
+    MedBook.referentialIntegrity.dataSets_gene_expression(data_set_id);
 
     // lock the data set for wrangling,
     // tell them to try again if it's already locked
@@ -86,7 +86,7 @@ RectangularGeneExpression.prototype.insertToCollection =
 
   var seenCount = this.geneLabelIndex[gene_label];
   if (seenCount) {
-    var allData = Expression3.findOne(expressionQuery).rsem_quan_log2;
+    var allData = GeneExpression.findOne(expressionQuery).rsem_quan_log2;
     var startIndex = allData.length - log2Values.length;
 
     for (var i = 0; i < log2Values.length; i++) {
@@ -98,16 +98,16 @@ RectangularGeneExpression.prototype.insertToCollection =
     }
 
     // put the data back into the existing data and update...
-    Expression3.update(expressionQuery, {
+    GeneExpression.update(expressionQuery, {
       $set: { rsem_quan_log2: allData }
     });
   } else {
-    Expression3.upsert(expressionQuery, {
+    GeneExpression.upsert(expressionQuery, {
       $push: { rsem_quan_log2: { $each: log2Values } }
     });
   }
 };
-Moko.ensureIndex(Expression3, {
+Moko.ensureIndex(GeneExpression, {
   data_set_id: 1,
   gene_label: 1,
 });
@@ -177,8 +177,6 @@ RectangularGeneExpression.prototype.endOfFile = function () {
       setObject.gene_expression_index[sample_label] = sampleCount + index;
     });
 
-    console.log("setObject:", setObject);
-
     // If this one atomic operation fails or we don't get to it while loading
     // data, the collection will be cleaned up during the referential integrity
     // check (see beforeParsing function)
@@ -188,7 +186,7 @@ RectangularGeneExpression.prototype.endOfFile = function () {
     });
   }
 };
-Moko.ensureIndex(Expression3, {
+Moko.ensureIndex(GeneExpression, {
   data_set_id: 1,
 });
 
