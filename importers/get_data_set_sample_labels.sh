@@ -15,4 +15,4 @@ head -1 $1 | tr "\t" "\n" | awk '{ print "\t\""$0"\","}' | sed "1s/.*/[/"
 });
 
 // in a `meteor shell`
-MedBook.referentialIntegrity.dataSets_expression3("CHANGEME")'
+MedBook.referentialIntegrity.dataSets_gene_expression("CHANGEME")'

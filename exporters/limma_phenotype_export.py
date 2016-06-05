@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-"""Export MedBook expression3 data into rectangular files.
+"""Export MedBook gene_expression data into rectangular files.
 
 Usage:
 ./limma_phenotype_export.py [group A sample group _id] [group B sample group _id]

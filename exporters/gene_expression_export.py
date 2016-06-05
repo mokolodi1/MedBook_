@@ -1,10 +1,10 @@
 #! /usr/bin/env python
 
-"""Export MedBook expression3 data into rectangular files.
+"""Export MedBook gene_expression data into rectangular files.
 
 Usage:
-./expression3_export.py --sample_group_id [sample group _id]
-./expression3_export.py --data_set_id [data set _id] --sample_label [sample label]
+./gene_expression_export.py --sample_group_id [sample group _id]
+./gene_expression_export.py --data_set_id [data set _id] --sample_label [sample label]
 
 Dependancies:
 pymongo
@@ -54,7 +54,7 @@ def export_from_object(db, sampleGroup):
     # print out the data (non-header line)
 
     # sort by gene_label and then data_set_id
-    cursor = db["expression3"].find({
+    cursor = db["gene_expression"].find({
         "data_set_id": { "$in": dataSetIds },
         "gene_label": { "$in": geneSet }
     }).sort([

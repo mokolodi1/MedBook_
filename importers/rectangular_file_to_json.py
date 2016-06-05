@@ -27,19 +27,19 @@ def main():
                     sampleLabels = cells[1:]
                     firstLine = False
                 else:
-                    expression3Doc = {}
+                    geneExpressionDoc = {}
 
-                    expression3Doc["_id"] = str(ObjectId())
-                    expression3Doc["data_set_id"] = dataSetId
-                    expression3Doc["gene_label"] = cells[0]
-                    expression3Doc["rsem_quan_log2"] = [float(num) for num in cells[1:]]
+                    geneExpressionDoc["_id"] = str(ObjectId())
+                    geneExpressionDoc["data_set_id"] = dataSetId
+                    geneExpressionDoc["gene_label"] = cells[0]
+                    geneExpressionDoc["rsem_quan_log2"] = [float(num) for num in cells[1:]]
 
-                    print(str(expression3Doc))
+                    print(str(geneExpressionDoc))
 
         # magical incantation to import into mongodb
         # batchSize makes sure each bulk operation is smaller than 16mb
         sys.stderr.write("Use this command to imoprt into mongo:\n")
-        sys.stderr.write("mongoimport --db MedBook --collection expression3 --file OUTPUTFILE.mongoexport --batchSize 50\n")
+        sys.stderr.write("mongoimport --db MedBook --collection gene_expression --file OUTPUTFILE.mongoexport --batchSize 50\n")
 
         sys.stderr.write("\nUse this command to get the sample labels:\n")
         sys.stderr.write("./get_data_set_sample_labels data.tab | pbcopy\n")
