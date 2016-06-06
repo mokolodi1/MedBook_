@@ -35,7 +35,7 @@ Package.onUse(function(api) {
   addAndExport(api, "DataSets");
   addAndExport(api, "Forms");
   addAndExport(api, "Records");
-  addAndExport(api, "Expression3");
+  addAndExport(api, "GeneExpression");
 
   addAndExport(api, "Patients");
 

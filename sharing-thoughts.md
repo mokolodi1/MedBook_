@@ -18,7 +18,7 @@
 }
 ```
 
-##### `db.expression3.find({ data_set_id: "ABC123_wcdt_mongo_id" })`
+##### `db.gene_expression.find({ data_set_id: "ABC123_wcdt_mongo_id" })`
 ```json
 {
   "data_set_id": "ABC123_wcdt_mongo_id",

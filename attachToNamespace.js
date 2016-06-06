@@ -1,6 +1,6 @@
 MedBook.collections = {
   DataSets: DataSets,
-  Expression3: Expression3,
+  GeneExpression: GeneExpression,
   SampleGroups: SampleGroups,
   Genes: Genes,
   Jobs: Jobs,

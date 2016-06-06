@@ -33,7 +33,7 @@ Sometimes figuring out whether a user has access to an object requires a join wi
 | Mongo collection name | Javascript name  | Description | Security |
 |-----------------------| -----------------|-------------|----------|
 | `studies`             | Studies          | A study or clinical trial | collaboration |
-| `expression3`         | Expression3      | Gene expression data | study (`study_label`) |
+| `gene_expression`         | GeneExpression      | Gene expression data | study (`study_label`) |
 | `sample_groups`       | SampleGroups     | A list of samples from one or more studies. | collaboration |
 | `collaboration`       | Collaborations   | A group of collaborators | See below |
 | `users`               | Meteor.users     | Meteor users collection | N/A |
@@ -50,16 +50,16 @@ A study refers to a specific study or clinical trial. Examples of such studies i
 | `sample_labels`                | List of valid sample labels in the study | `["TCGA-OR-A5JX-01", "TCGA-HV-A5A5-01", "TCGA-MQ-A4LP-01", ...]` |
 | `Patient_IDs`               | List of valid patient labels in the study | `["TCGA-OR-A5JX-01", "TCGA-HV-A5A5-01", "TCGA-MQ-A4LP-01", ...]` |
 | `patients`                  | List of valid patients in the study with each patients' list of valid samples. Note that not all samples are not associated with a patient. | `[ { patient_label: "TCGA-06-0190", sample_labels: ["TCGA-06-0190-01", "TCGA-06-0190-02"] }, ... ]` |
-| `gene_expression`           | Sample labels array matching values array in `expression3` | `["TCGA-OR-A5JX-01", "TCGA-HV-A5A5-01", "TCGA-MQ-A4LP-01", ...]` |
+| `gene_expression`           | Sample labels array matching values array in `gene_expression` | `["TCGA-OR-A5JX-01", "TCGA-HV-A5A5-01", "TCGA-MQ-A4LP-01", ...]` |
 | `gene_expression_index`     | Index for `gene_expression` (for fast lookup) | `{ "TCGA-OR-A5JX-01": 0, "TCGA-HV-A5A5-01": 1, "TCGA-MQ-A4LP-01": 2, ... }` |
 | `gene_expression_genes`     | The gene set for the study gene expression data | `[ "A1BG", "A1CF", "A2BP1", "A2LD1", ... ]` |
 | `gene_expression_wrangling` | Soft lock for wrangling gene expression data for a given study. | `false` |
 
-Use `MedBook.referentialIntegrity.dataSets_expression3` in `medbook:referential-integrity` to maintain relationships between Studies and Expression3.
+Use `MedBook.referentialIntegrity.dataSets_expression3` in `medbook:referential-integrity` to maintain relationships between Studies and GeneExpression.
 
-### Expression3
+### GeneExpression
 
-Expression3 is the collection where MedBook stores gene expression data for each sample. Each object holds the data for every sample in a study (`study_label`) for a single gene (`gene_label`).
+GeneExpression is the collection where MedBook stores gene expression data for each sample. Each object holds the data for every sample in a study (`study_label`) for a single gene (`gene_label`).
 
 | Attribute                   | Meaning | Example |
 | ----------------------------|---------|---------|
@@ -67,7 +67,7 @@ Expression3 is the collection where MedBook stores gene expression data for each
 | `gene_label`                | Gene identifier | `"MYC"` |
 | `rsem_quan_log2`            | Quantile normalized counts data that underwent a log2(x+1) transform. For sample mapping see the Studies collection. | `[0, 4.283, 392.482, ...]` |
 
-In MedBook history, there have been four different schemas for storing gene expression data. None of them matter except for Expression3 because they are not used anymore. (Along the way one of them was called GeneExpression which is why it is Expression3 instead of Expression4.)
+In MedBook history, there have been four different schemas for storing gene expression data. None of them matter except for GeneExpression because they are not used anymore. (Along the way one of them was called GeneExpression which is why it is GeneExpression instead of Expression4.)
 
 <!-- ## Signature score workflow
 
