@@ -55,7 +55,7 @@ A study refers to a specific study or clinical trial. Examples of such studies i
 | `gene_expression_genes`     | The gene set for the study gene expression data | `[ "A1BG", "A1CF", "A2BP1", "A2LD1", ... ]` |
 | `gene_expression_wrangling` | Soft lock for wrangling gene expression data for a given study. | `false` |
 
-Use `MedBook.referentialIntegrity.dataSets_expression3` in `medbook:referential-integrity` to maintain relationships between Studies and GeneExpression.
+Use `MedBook.referentialIntegrity.DataSets_GeneExpression` in `medbook:referential-integrity` to maintain relationships between Studies and GeneExpression.
 
 ### GeneExpression
 
