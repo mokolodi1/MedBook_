@@ -6,10 +6,10 @@
                     <img src="images/cbioportal_logo.png" height="50px" alt="cBioPortal Logo">
                 </td>
                 <td valign="middle" align="center" width="50%">
-                        <img src="images/cbiologo.png" alt="WCM-NYP IPM Logo" style="max-height: 50px;">
+                        <img src="images/MedBook_LogoFull-010.png" alt="MedBook Logo" style="max-height: 50px;">
                 </td>
                 <td valign="middle" align="right" width="25%">
-                        <a href="http://www.mskcc.org"><img src="images/mskcc_logo_3d_grey.jpg" height="50px" alt="MSKCC Logo"></a>
+                        <a href="http://cbse.soe.ucsc.edu"><img src="images/ucsc_logo.gif" height="50px" alt="UCSC Logo"></a>
                 </td>
         </tr>
     <%
