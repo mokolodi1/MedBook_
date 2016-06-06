@@ -1,14 +1,14 @@
 /*
-* Maintains relationship between studies and expression3
-* 1. Make sure there's no elements in expression3Doc.rsem_quan_log2 not
+* Maintains relationship between studies and gene_expression
+* 1. Make sure there's no elements in gene_expressionDoc.rsem_quan_log2 not
 *    associated with any sample in the dataSet
 * 2. Make sure dataSet.gene_expression_index is looking good
 * 3. If dataSet.gene_expression_genes isn't defined, calculate it from
-*    documents in expression3
+*    documents in gene_expression
 */
-MedBook.referentialIntegrity.dataSets_expression3 = function (dataSetQuery) {
+MedBook.referentialIntegrity.DataSets_GeneExpression = function (dataSetQuery) {
   console.log("starting referential integrity maintenance" +
-      " (data sets ==> expression3)");
+      " (data sets ==> gene_expression)");
 
   if (!dataSetQuery) { // default to all studies
     dataSetQuery = {};
@@ -18,13 +18,13 @@ MedBook.referentialIntegrity.dataSets_expression3 = function (dataSetQuery) {
     var data_set_id = dataSet._id;
     console.log("data set _id / name:", dataSet._id, dataSet.name);
 
-    // remove expression3 documents that don't have any data
-    Expression3.remove({
+    // remove gene_expression documents that don't have any data
+    GeneExpression.remove({
       data_set_id: data_set_id,
       rsem_quan_log2: { $size:  0 }
     });
 
-    // remove expression3Doc.rsem_quan_log2 array values not associated with
+    // remove gene_expressionDoc.rsem_quan_log2 array values not associated with
     // a sample in dataSet.gene_expression
 
     var sampleArray = []; // default if gene_expression undefined
@@ -37,7 +37,7 @@ MedBook.referentialIntegrity.dataSets_expression3 = function (dataSetQuery) {
     // You can pass an empty array [] to the $each modifier such that only
     // the $slice modifier has an effect."
     // - https://docs.mongodb.org/manual/reference/operator/update/slice/
-    Expression3.update({
+    GeneExpression.update({
       data_set_id: data_set_id,
       $where: function () { return this.rsem_quan_log2.length !== sampleLength; },
     }, {
@@ -85,14 +85,14 @@ MedBook.referentialIntegrity.dataSets_expression3 = function (dataSetQuery) {
 
     if (!dataSet.gene_expression_genes) {
       // gene_expression_genes has never been set, so we will calculate it from
-      // expression3 data if that is present
+      // gene_expression data if that is present
 
-      if (Expression3.findOne({ data_set_id: data_set_id })) {
+      if (GeneExpression.findOne({ data_set_id: data_set_id })) {
         // there's existing data, so let's make sure we match that
 
-        // get a sorted list of all of the distinct `gene_label`s in Expression3
+        // get a sorted list of all of the distinct `gene_label`s in GeneExpression
         // for this dataSet
-        var existingDistinctGenes = Expression3.aggregate([
+        var existingDistinctGenes = GeneExpression.aggregate([
           {$match: {data_set_id: data_set_id}},
           {$group: {_id: ":)", "genes": {$addToSet: "$gene_label"}}}
         ])[0].genes.sort();
@@ -109,7 +109,7 @@ MedBook.referentialIntegrity.dataSets_expression3 = function (dataSetQuery) {
         });
 
         console.log(data_set_id,
-            "gene_expression_genes calculated from existing Expression3 data");
+            "gene_expression_genes calculated from existing GeneExpression data");
       }
     }
   });
