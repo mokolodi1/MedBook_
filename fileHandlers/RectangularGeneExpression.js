@@ -23,7 +23,7 @@ RectangularGeneExpression.prototype.beforeParsing = function () {
     var data_set_id = this.wranglerFile.options.data_set_id;
 
     // maintain referential integrity between "data_sets" and "gene_expression"
-    MedBook.referentialIntegrity.dataSets_gene_expression(data_set_id);
+    MedBook.referentialIntegrity.DataSets_GeneExpression(data_set_id);
 
     // lock the data set for wrangling,
     // tell them to try again if it's already locked
