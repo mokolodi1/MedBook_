@@ -95,24 +95,14 @@ readPostScript();
 redirectServer = null;
 readSSLcredentials = function() {
     if (!process.env.NO_SSL)  {
-      if (redirectServer)
-          server.close();
+      if (redirectServer) server.close();
 
       redirectServer = require('http').createServer(function(req, res) {
-       var hostname = req.headers.host
+	  var hostname = req.headers.host
        
-
-       // redirect http://tumormap.ucsc.edu to https://medbook.ucsc.edu/hex  (change hex to tumormap later)
-        if (hostname && hostname.indexOf("tumormap") == 0 ) {
-            var red = "https://" + config.server.host + ":" + config.server.ssl + "/hex" + req.url;
-            res.writeHead(307, {'Location': red});
-            res.end();
-        } else {
-           var red = "https://" + config.server.host + ":" + config.server.ssl + req.url;
-           res.writeHead(307, {'Location': red});
-           res.end();
-        }
-
+	  var red = "https://medbook.io" + req.url;
+	  res.writeHead(307, {'Location': red});
+          res.end();
       });
       redirectServer.listen(config.server.nonssl);
 
