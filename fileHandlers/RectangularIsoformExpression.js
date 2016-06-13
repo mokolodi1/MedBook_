@@ -179,4 +179,4 @@ RectangularIsoformExpression.prototype.endOfFile = function () {
   addExpressionSummaryDoc.call(this, dataType);
 };
 
-WranglerFileTypes.RectangularIsoformExpression = RectangularIsoformExpression;
+WranglerFileHandlers.RectangularIsoformExpression = RectangularIsoformExpression;

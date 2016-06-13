@@ -1,4 +1,4 @@
-WranglerFileTypes = {};
+WranglerFileHandlers = {};
 
 FileHandler = function (options) {
   console.log("options:", options);

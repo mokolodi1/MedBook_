@@ -69,4 +69,4 @@ GeneSetCollection.prototype.endOfFile = function () {
   }
 };
 
-WranglerFileTypes.GeneSetCollection = GeneSetCollection;
+WranglerFileHandlers.GeneSetCollection = GeneSetCollection;

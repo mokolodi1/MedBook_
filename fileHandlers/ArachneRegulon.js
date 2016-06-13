@@ -113,4 +113,4 @@ ArachneRegulon.prototype.parseLine = function (brokenTabs, lineNumber, line) {
   }
 };
 
-WranglerFileTypes.ArachneRegulon = ArachneRegulon;
+WranglerFileHandlers.ArachneRegulon = ArachneRegulon;

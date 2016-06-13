@@ -105,7 +105,7 @@ LimmaSignature.prototype.endOfFile = function () {
   }
 };
 
-WranglerFileTypes.LimmaSignature = LimmaSignature;
+WranglerFileHandlers.LimmaSignature = LimmaSignature;
 
 // // Copied from Robert's original limma wrangler in RunLimma
 

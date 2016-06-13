@@ -207,4 +207,4 @@ MutationVCF.prototype.parse = function () {
   });
 };
 
-WranglerFileTypes.MutationVCF = MutationVCF;
+WranglerFileHandlers.MutationVCF = MutationVCF;

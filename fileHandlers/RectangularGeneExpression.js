@@ -210,4 +210,4 @@ RectangularGeneExpression.prototype.cleanupAfterError = function () {
   }
 }
 
-WranglerFileTypes.RectangularGeneExpression = RectangularGeneExpression;
+WranglerFileHandlers.RectangularGeneExpression = RectangularGeneExpression;

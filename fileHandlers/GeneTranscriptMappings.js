@@ -73,7 +73,7 @@ GeneTranscriptMappings.prototype.endOfFile = function () {
   };
 };
 
-WranglerFileTypes.GeneTranscriptMappings = GeneTranscriptMappings;
+WranglerFileHandlers.GeneTranscriptMappings = GeneTranscriptMappings;
 
 Moko.ensureIndex(Genes, {
   gene_label: 1

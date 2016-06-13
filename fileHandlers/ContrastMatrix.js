@@ -144,4 +144,4 @@ ContrastMatrix.prototype.endOfFile = function () {
   }
 };
 
-WranglerFileTypes.ContrastMatrix = ContrastMatrix;
+WranglerFileHandlers.ContrastMatrix = ContrastMatrix;

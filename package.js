@@ -52,7 +52,7 @@ Package.onUse(function(api) {
     "fileHandlers/HGNCGeneList.js",
     "fileHandlers/GeneTranscriptMappings.js",
   ], "server");
-  api.export("WranglerFileTypes", "server");
+  api.export("WranglerFileHandlers", "server");
 
   api.addFiles("Wrangler.js");
   api.addFiles("reviewPanels.js");
@@ -60,7 +60,7 @@ Package.onUse(function(api) {
 
   api.addFiles("wranglerCollectionsSchemas.js");
 
-  // api.addFiles("WranglerFileTypes.js");
+  // api.addFiles("WranglerFileHandlers.js");
 
   // TODO: remove this when we move the schemas to collections
   api.export("getCollectionByName");

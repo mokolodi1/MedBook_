@@ -52,4 +52,4 @@ SampleLabelDefinition.prototype.parseLine = function (brokenTabs, lineNumber, li
   }
 };
 
-WranglerFileTypes.SampleLabelDefinition = SampleLabelDefinition;
+WranglerFileHandlers.SampleLabelDefinition = SampleLabelDefinition;

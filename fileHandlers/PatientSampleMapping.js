@@ -134,4 +134,4 @@ PatientSampleMapping.prototype.parseLine = function (brokenTabs, lineNumber, lin
   }
 };
 
-WranglerFileTypes.PatientSampleMapping = PatientSampleMapping;
+WranglerFileHandlers.PatientSampleMapping = PatientSampleMapping;

@@ -66,4 +66,4 @@ RectangularGeneAnnotation.prototype.endOfFile = function () {
   addExpressionSummaryDoc.call(this, dataType);
 };
 
-WranglerFileTypes.RectangularGeneAnnotation = RectangularGeneAnnotation;
+WranglerFileHandlers.RectangularGeneAnnotation = RectangularGeneAnnotation;

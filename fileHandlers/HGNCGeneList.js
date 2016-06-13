@@ -99,4 +99,4 @@ HGNCGeneList.prototype.endOfFile = function () {
   };
 };
 
-WranglerFileTypes.HGNCGeneList = HGNCGeneList;
+WranglerFileHandlers.HGNCGeneList = HGNCGeneList;
