@@ -338,9 +338,9 @@ done
              ranks = [[x[0].upper(),x[1]] for x in ranks]
              print >> sys.stderr, '## Fixed any lower case - now have',','.join([x[0] for x in ranks[:5]])
         ranks = ['\t'.join(x) for x in ranks]
-        if len(ranks) < 2:
-             print >> sys.stderr,'Input %s has 1 or less rows with two tab delimited fields - please check the tool documentation' % infname
-             sys.exit(3)
+        # if len(ranks) < 2:
+        #      print >> sys.stderr,'Input %s has 1 or less rows with two tab delimited fields - please check the tool documentation' % infname
+        #      sys.exit(3)
         #print >> sys.stderr, '### opening %s and writing %s' % (fakeRanks,str(ranks[:10]))
         rclean = open(fakeRanks,'w')
         rclean.write('contig\tscore\n')
@@ -352,11 +352,14 @@ done
         a('java -Xmx6G -cp')
         a(opts.gsea_jar)
         a('xtools.gsea.GseaPreranked')
-        a('-gmx %s' % fakeGMTBase) # ensure .gmt extension as required by GSEA - gene sets to use
+        # NOTE: changed from `fakeGMTBase` to `opts.builtin_gmt` to fix bug
+        print fakeGMTBase
+        a('-gmx %s' % opts.builtin_gmt) # ensure .gmt extension as required by GSEA - gene sets to use
         a('-gui false')    # use preranked file mode and no gui
         a('-make_sets true -rnd_seed timestamp') # more things from the GUI command line display
         a('-norm meandiv -zip_report true -scoring_scheme weighted')            # ? need to set these?
-        a('-rnk %s' % fakeRankBase) # input ranks file symbol (the chip file is the crosswalk for ids in first column)
+        # NOTE: changed from `fakeRankBase` to `opts.input_tab` to fix bug
+        a('-rnk %s' % opts.input_tab) # input ranks file symbol (the chip file is the crosswalk for ids in first column)
         a('-out .' )
         #a('-out' % opts.output_dir)
         a('-set_max %s' % opts.setMax)
