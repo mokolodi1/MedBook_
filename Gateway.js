@@ -11,7 +11,6 @@ var path = require('path');
 var http = require('http');
 var crypto = require('crypto');
 var randomstring = require("randomstring");
-var forever = require('forever-monitor');
 var MongoClient = require('mongodb').MongoClient;
 
 
@@ -19,98 +18,30 @@ var configuration = null;
 var routes = null;
 var apps = null;
 var auth = null;
-var final = null;
 var config = null;
-
-
-
 var MongoDB = null;
 
-var MongoDBstates = ["unknown", "dead", "live", "connecting", "lost"]
-var MongoDBstate = "unknown";
-
+var mongoCheckInterval = null;
 
 function mongoCheck() {
-    if (MongoDB == null)
-	MongoClient.connect(config.daemons.mongodb.MONGO_URL, function(err, db) {
-	  if (db == null) {
-	      console.log("still dead after connect");
-	      MongoDBstate = "dead";
-	  } else {
-	      MongoDB = db;
-	      MongoDBstate = "connecting";
-	  }
-	}) 
-      else MongoDB.admin().ping(function(err, pingResult) {
-	  if (pingResult && pingResult.ok == 1)
-	      MongoDBstate = "live";
-	  else {
-	      MongoDBstate = "lost";
-	  }
-      });
-    if (MongoDBstate == "dead" || MongoDBstate == "connecting" || MongoDBstate == "lost")
-	launchMongoDB();
-    // console.log("mongoCheck", MongoDBstate);
-    return MongoDBstate;
+    if (MongoDB == null){
+	var mongoUrl = "mongodb://mongo:27017/MedBook";
+	// defaults to auto_reconnect
+	// http://mongodb.github.io/node-mongodb-native/driver-articles/mongoclient.html#mongoclient-connect
+	MongoClient.connect(mongoUrl, function(err, db) {
+	    if (db == null) {
+		console.log("Error connecting to mongo", err);
+	    } else {
+		console.log("successfully connected to Mongo");
+		MongoDB = db;
+		//interval is failing to clear, annoying but not a huge deal
+		//maybe related http://stackoverflow.com/questions/30465977/node-clearinterval-only-clearing-intervalobject-scoped-to-method-it-was-assigned
+		clearInterval(mongoCheckInterval);
+	    }
+	});
+    }
 }
-// setInterval(mongoCheck, 5000);
-
-
-/*
-[daemons]
-   [daemons.mongodb]
-   MONGO_URL= "mongodb://localhost:27017/MedBook"
-   cwd = "/"
-   run = "/Users/tedgoldstein/Downloads/mongodb-osx-x86_64-2.6.10/bin/mongod"
-   uid = "tedgoldstein"
-*/
-
-function launchMongoDB() {
- var cmd =  config.daemons.mongodb.run.split(" ");
- console.log("launch mongodb", cmd);
- var child = forever.start(cmd, {
-     silent : true,
-     fork: true,
-     killTree: false,
-     max: 1,
- });
-}
-
-
-
-function launch(app, res) {
- console.log("Gateway launching", app.route, app.cwd, app.run);
- var cmd =  app.run.split(" ");
- console.log("launch", cmd);
- var child = forever.start(cmd, {
-     silent : true,
-     fork: true,
-     killTree: false,
-     env: {
-	PORT : app.port,
-	ROUTE : app.route,
-        MONGO_URL : config.daemons.mongodb.MONGO_URL,
-     },
-     cwd : app.cwd,
-     max: 3,
- });
-
- child.on('forever watch:restart', function(info) {
-     if (res) res.write('Restaring script because ' + info.file + ' changed');
-     console.error('Restaring script because ' + info.file + ' changed');
- });
-
- child.on('forever restart', function() {
-     if (res) res.write('Forever restarting script for ' + child.times + ' time');
-     console.error('Forever restarting script for ' + child.times + ' time');
- });
-
- child.on('forever exit:code', function(code) {
-     if (res) res.write('Forever detected script exited with code ' + code);
-     console.error('Forever detected script exited with code ' + code);
- });
-}
-
+mongoCheckInterval = setInterval(mongoCheck, 1000);
 
 var SECRET;
 function changeSecret() {
@@ -132,40 +63,29 @@ reloadFile = null;
 postScript = null;
 
 
-getPort = function(req) {
+var getTarget = function(req) {
     var a = req.url.split("/");
     if (a.length > 1) {
-        var p = routes["/" + a[1]];
-        if (p) {
-            // console.log("getPort", req.url, p);
-            return p;
-        }
+        var service = routes["/" + a[1]];
+	if (service){
+	    var target = "http://" + service.containerName + ":" + service.port;
+	} else {
+	    //fall through to telescope
+	    var telescope = config.apps.Telescope;
+	    var target = "http://" + telescope.containerName + ":" + telescope.port;
+	}
+	return target;
     }
-    // console.log("getPort final", req.url, final);
-    return final;
 }
-
-getApp = function(req) {
-    var a = req.url.split("/");
-    if (a.length > 1) {
-        var p = apps["/" + a[1]];
-        if (p) {
-            return p;
-        }
-    }
-    return config.final;
-}
-
 
 readMenu = function() {
-  menuFile = fs.readFileSync("/data/MedBook/Gateway/menu.html");
-  reloadFile = fs.readFileSync("/data/MedBook/Gateway/reload.html");
+  menuFile = fs.readFileSync("menu.html");
 };
 
 readMenu();
 
 
-postScriptFilename = "/data/MedBook/Gateway/postScript.js";
+postScriptFilename = "postScript.js";
 readPostScript = function() {
   postScript = fs.readFileSync(postScriptFilename);
 };
@@ -174,33 +94,23 @@ readPostScript();
 
 redirectServer = null;
 readSSLcredentials = function() {
-    if (config.server.ssl && config.server.nonssl)  {
-      if (redirectServer)
-          server.close();
+    if (!process.env.NO_SSL)  {
+      if (redirectServer) server.close();
 
       redirectServer = require('http').createServer(function(req, res) {
-       var hostname = req.headers.host
+	  var hostname = req.headers.host
        
-
-       // redirect http://tumormap.ucsc.edu to https://medbook.ucsc.edu/hex  (change hex to tumormap later)
-        if (hostname && hostname.indexOf("tumormap") == 0 ) {
-            var red = "https://" + config.server.host + ":" + config.server.ssl + "/hex" + req.url;
-            res.writeHead(307, {'Location': red});
-            res.end();
-        } else {
-           var red = "https://" + config.server.host + ":" + config.server.ssl + req.url;
-           res.writeHead(307, {'Location': red});
-           res.end();
-        }
-
+	  var red = "https://medbook.io" + req.url;
+	  res.writeHead(307, {'Location': red});
+          res.end();
       });
       redirectServer.listen(config.server.nonssl);
-    }
 
-    var options = {
-         key: fs.readFileSync(config.server.key),
-         cert: fs.readFileSync(config.server.cert),
-    };
+      var options = {
+        key: fs.readFileSync("/certificates/medbook_io.key"),
+        cert: fs.readFileSync("/certificates/STAR_medbook_io.crt")
+      };
+    }
 
     if (config.server.chain) {
         var ca = []
@@ -230,23 +140,22 @@ run = function() {
 
   configApp(args[0]);
 
-  function forward(req, res) {
-        var port = getPort(req);
-        if (req.url.indexOf("/xena") == 0) {
+    function forward(req, res) {
+	var target = getTarget(req);
+	if (req.url.indexOf("/xena") == 0) {
             // console.log("xena directing to port", port, "mapping url", req.url, "to", req.url.replace("/xena","/"));
             req.url =  req.url.replace("/xena","");
         }
         proxy.web(req, res, {
-          target: "http://localhost:"+port,
+            target: target,
         },function(e){
-          log_error(e,req);
-	  console.log("web error", e);
-	  launch(getApp(req), res);
-	  res.writeHead(500, { 'Content-Type': 'text/html' });
-          res.write(reloadFile, "binary");
-	  res.end();
-      });
-  }
+            log_error(e,req);
+	    console.log("web error", e);
+	    res.writeHead(500, { 'Content-Type': 'text/html' });
+            res.write("Target " + target + " not available at the moment..");
+	    res.end();
+	});
+    }
 
   function signIn(req, res) {
       var host = null;
@@ -360,7 +269,7 @@ run = function() {
         forward(req, res);
   } // main
 
-  if (config.server.ssl)
+  if (!process.env.NO_SSL)
       server = require('https').createServer(readSSLcredentials(), main);
   else
       server = require('http').createServer(main);
@@ -371,13 +280,11 @@ run = function() {
 
 
   server.on('upgrade',function(req,res){
-    var port = getPort(req);
+    var target = getTarget(req);
     proxy.ws(req, res, {
-      target: "http://localhost:" + port,
+      target: target,
     },function(e){
       log_error(e, req);
-	launch(getApp(req));
-
 	console.log("WS ERROR", e);
 	/*
 	res.writeHead(500, {
@@ -388,7 +295,7 @@ run = function() {
     });
   })
    
-  if (config.server.ssl) {
+  if (!process.env.NO_SSL) {
       console.log("ssl listening on", config.server.ssl);
       server.listen(config.server.ssl)
   } else {
@@ -428,33 +335,12 @@ configApp = function(path) {
   apps = {};
   auth = {};
   final = config.final.port
-  pingable = [];
 
   for (appName in config.apps) {
     var ca = config.apps[appName];
-    routes[ca.route] = ca.port;
+    routes[ca.route] = ca;
     apps[ca.route] = ca;
-    if (ca.ping)
-	pingable.push(ca)
     auth[ca.route] = ca.auth;
-  }
-
-  function relaunch() {
-       if (mongoCheck() == "LIVE") // if mongo is not live, don't bother checking anything else.
-	   pingable.map(function(app) {
-	       if (app.ping)
-		   http.get("http://localhost:" + app.port + app.ping, function(res) {
-		       console.log("Alive", app.route || app.daemon, " ping " + res.statusCode);
-		   }).on('error', function(e) {
-		       console.log("DEAD", app.route || app.daemon, " ping " + e.message);
-		       launch(app, null);
-		   });
-	   });
-  }
-
-  if (parseInt(config.server.pingIntervalMS)) {
-      console.log( "pinging every", config.server.pingIntervalMS);
-      setInterval(relaunch, config.server.pingIntervalMS);
   }
 };
 
