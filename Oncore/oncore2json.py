@@ -3,7 +3,10 @@
 # This script is part of the xlrd package, which is released under a
 # BSD-style licence.
 
+
 from __future__ import print_function
+
+import pdb, re
 
 cmd_doc = """
 Commands:
@@ -55,6 +58,17 @@ if __name__ == "__main__":
     import subprocess
     from dateutil import rrule
     #import datetime
+
+
+    """
+    Ted's quick hack fo fix column names
+    """
+    def fixKey(key):
+        newKey  = re.sub("\.", "", key);
+        newKey = newKey.strip();
+        if newKey != key:
+            print("transforming ", key, "to", newKey);
+        return newKey;
     
 
     class LogHandler(object):
@@ -176,9 +190,9 @@ if __name__ == "__main__":
             val = 'protected'
         if printit:
             print("   row: %d col: %d key: %s value: %r" % (rowx, colx,key, val))
-        if key == 'Sequence No.' or key == 'Level' or key == 'Cycle' or key == 'Not Applicable or Missing': # skip unused attributes
+        if key == 'Sequence No' or key == 'Level' or key == 'Cycle' or key == 'Not Applicable or Missing': # skip unused attributes
             return
-        if key == 'Form' or key == 'Form Desc.' or key == 'Form Status' or key == 'Initials': # insert forms
+        if key == 'Form' or key == 'Form Desc' or key == 'Form Status' or key == 'Initials': # insert forms
             if not sample_list[sample_id]['forms'].has_key(sheet):
                 sample_list[sample_id]['forms'][sheet] = {}
             sample_list[sample_id]['forms'][sheet][key] = val
@@ -294,6 +308,7 @@ if __name__ == "__main__":
                         col_index[sheet].append(val)
                     else:
                         key = col_index[sheet][colx]
+                        key = fixKey(key);
                         d = convert_col(rowx, colx, key, ty, val, printit, convert, sheet, subdocument, sample_id)
                         if d:
                             if sheet_type == 'Domains':
@@ -1455,3 +1470,4 @@ if __name__ == "__main__":
         main(av[1:])
     else:
         main(av)
+
