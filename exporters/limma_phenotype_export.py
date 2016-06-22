@@ -42,7 +42,7 @@ def main():
     argv = sys.argv
 
     # set up the database client
-    db = pymongo.MongoClient()["MedBook"]
+    db = pymongo.MongoClient("mongodb://mongo:27017/MedBook")["MedBook"]
 
     if len(argv) == 3:
         exportLimmaPhenotype(db, argv[1], argv[2])
