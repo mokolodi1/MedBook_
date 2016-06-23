@@ -24,7 +24,7 @@
         logAbandoned="true" 
         username="cbio" password="P@ssword1" driverClassName="com.mysql.jdbc.Driver"
         connectionProperties="zeroDateTimeBehavior=convertToNull;"
-        url="jdbc:mysql://mysql:3306/cbioportal"
+        url="jdbc:mysql://mysql:3306/cbioportal?useSSL=false"
 	testOnBorrow="true"
 	validationQuery="SELECT 1"/>
 
