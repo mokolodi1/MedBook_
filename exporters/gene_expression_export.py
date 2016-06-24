@@ -13,6 +13,7 @@ pymongo
 import sys
 import getopt
 import pymongo
+import os
 
 def export_from_object(db, sampleGroup):
     # NOTE: from this point on, don't reference sampleGroup["data_sets"]
@@ -96,7 +97,7 @@ def main():
     argv = sys.argv
 
     # set up the database client
-    db = pymongo.MongoClient("mongodb://mongo:27017/MedBook")["MedBook"]
+    db = pymongo.MongoClient(os.getenv("MONGO_URL", "mongodb://mongo:27017/MedBook"))["MedBook"]
 
     # process options if --sample_group_id
     if "--sample_group_id" in argv:

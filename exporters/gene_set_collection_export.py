@@ -12,6 +12,7 @@ pymongo
 import sys
 import getopt
 import pymongo
+import os
 
 def exportGeneSetCollection(db, geneSetCollectionId):
     cursor = db["gene_sets"].find({ "gene_set_collection_id": geneSetCollectionId })
@@ -25,7 +26,7 @@ def main():
     argv = sys.argv
 
     # set up the database client
-    db = pymongo.MongoClient("mongodb://mongo:27017/MedBook")["MedBook"]
+    db = pymongo.MongoClient(os.getenv("MONGO_URL", "mongodb://mongo:27017/MedBook"))["MedBook"]
 
     if len(argv) == 2:
         exportGeneSetCollection(db, argv[1])

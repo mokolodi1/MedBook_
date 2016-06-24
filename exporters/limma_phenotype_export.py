@@ -21,6 +21,7 @@ pymongo
 import sys
 import getopt
 import pymongo
+import os
 
 def writeGroupSamples(samples, name):
     for sample in samples:
@@ -42,7 +43,7 @@ def main():
     argv = sys.argv
 
     # set up the database client
-    db = pymongo.MongoClient("mongodb://mongo:27017/MedBook")["MedBook"]
+    db = pymongo.MongoClient(os.getenv("MONGO_URL", "mongodb://mongo:27017/MedBook"))["MedBook"]
 
     if len(argv) == 3:
         exportLimmaPhenotype(db, argv[1], argv[2])
