@@ -25,7 +25,7 @@ var mongoCheckInterval = null;
 
 function mongoCheck() {
     if (MongoDB == null){
-	var mongoUrl = "mongodb://mongo:27017/MedBook";
+	var mongoUrl = process.env.MONGO_URL;
 	// defaults to auto_reconnect
 	// http://mongodb.github.io/node-mongodb-native/driver-articles/mongoclient.html#mongoclient-connect
 	MongoClient.connect(mongoUrl, function(err, db) {
@@ -99,8 +99,8 @@ readSSLcredentials = function() {
 
       redirectServer = require('http').createServer(function(req, res) {
 	  var hostname = req.headers.host
-       
-	  var red = "https://medbook.io" + req.url;
+
+	  var red = "https://" + process.env.WORLD_URL + req.url;
 	  res.writeHead(307, {'Location': red});
           res.end();
       });
