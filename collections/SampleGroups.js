@@ -16,9 +16,6 @@ var filterOptionsSchemas = {
   exclude_sample_label_list: new SimpleSchema({
     sample_labels: { type: [String] },
   }),
-  data_loaded: new SimpleSchema({
-    gene_expression: { type: Boolean },
-  }),
 };
 
 SimpleSchema.messages({
@@ -31,28 +28,15 @@ SampleGroups.attachSchema(new SimpleSchema({
 
   // only optinal because SimpleSchema causes problems when validating a
   // single object using a context
-  date_created: { type: Date, autoValue: dateCreatedAutoValue, optional: true },
+  date_created: {
+    type: Date,
+    autoValue: dateCreatedAutoValue,
+    optional: true
+  },
 
   collaborations: { type: [String] },
 
-  // samples: {
-  //   type: [
-  //     new SimpleSchema({
-  //       study_label: { type: String },
-  //       sample_labels: { type: [String] },
-  //     })
-  //   ]
-  // },
-  // samples_count: {
-  //   type: Number,
-  //   min: 1,
-  //   autoValue: function () {
-  //     var samples = this.field("samples").value;
-  //     if (samples) {
-  //       return samples.length;
-  //     }
-  //   },
-  // },
+  value_type: DataSets.simpleSchema().schema().value_type,
 
   data_sets: {
     type: [
@@ -76,28 +60,26 @@ SampleGroups.attachSchema(new SimpleSchema({
         },
 
         filters: {
-          type: [
-            new SimpleSchema({
-              type: {
-                type: String,
-                allowedValues: Object.keys(filterOptionsSchemas),
-              },
-              options: {
-                type: Object,
-                blackbox: true,
-                custom: function () {
-                  var type = this.siblingField("type").value;
-                  var isValid = filterOptionsSchemas[type]
-                      .newContext()
-                      .validate(this.value);
+          type: [ new SimpleSchema({
+            type: {
+              type: String,
+              allowedValues: Object.keys(filterOptionsSchemas),
+            },
+            options: {
+              type: Object,
+              blackbox: true,
+              custom: function () {
+                var type = this.siblingField("type").value;
+                var isValid = filterOptionsSchemas[type]
+                    .newContext()
+                    .validate(this.value);
 
-                  if (!isValid) {
-                    return "filterOptionsInvalid";
-                  }
-                },
+                if (!isValid) {
+                  return "filterOptionsInvalid";
+                }
               },
-            })
-          ],
+            },
+          }) ],
           defaultValue: [],
           optional: true, // TODO: remove
         },

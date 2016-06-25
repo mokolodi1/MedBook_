@@ -3,6 +3,7 @@ SimpleSchema.messages({
       "You can only specify allowed values for string type fields",
   noDotsOrDollarSignsAtStart:
       "Field names cannot contain periods or begin with a dollar sign.",
+  reservedFieldName: 'Field name is reserved by the system',
 });
 
 Forms = new Meteor.Collection("forms");
@@ -10,11 +11,14 @@ Forms.attachSchema(new SimpleSchema({
   collaborations: { type: [String] },
 
   name: { type: String, label: "Name of form" },
-  specificity: { type: String, allowedValues: [ "patient", "sample" ] },
+
+  // these fields specify which field refers to the study or sample label
+  study_label_field: { type: Number },
+  sample_label_field: { type: Number },
 
   fields: {
     type: [ new SimpleSchema({
-      label: {
+      name: {
         type: String,
         label: "Field name",
         custom: function () {
@@ -22,9 +26,13 @@ Forms.attachSchema(new SimpleSchema({
           if (this.value.indexOf(".") !== -1 || this.value[0] === "$") {
             return "noDotsOrDollarSignsAtStart";
           }
+
+          if (this.value === "form_id") {
+            return "reservedFieldName";
+          }
         },
       },
-      type: {
+      value_type: {
         type: String,
         allowedValues: [
           "String",

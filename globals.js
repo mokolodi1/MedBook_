@@ -32,3 +32,5 @@ requiredIfTrue = function (shouldBeRequired) {
     }
   }
 };
+
+labelRegex = /([A-Z]|[a-z]|-|_|[0-9])+/

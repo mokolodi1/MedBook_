@@ -5,11 +5,12 @@
 GeneSets = new Meteor.Collection("gene_sets");
 
 GeneSets.attachSchema(new SimpleSchema({
+  gene_set_collection_id: { type: String },
+
   name: { type: String },
   description: { type: String, optional: true },
 
   gene_labels: { type: [String], min: 1 },
-  gene_set_collection_id: { type: String },
 
   // TODO: maybe include if we want people to be able to share single gene sets
   // collaborations: { type: [String] },

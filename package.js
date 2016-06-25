@@ -15,7 +15,7 @@ Package.describe({
 // var mime = Meteor.npmRequire("mime");
 
 function addAndExport (api, name) {
-  api.addFiles(name + ".js");
+  api.addFiles("collections/" + name + ".js");
   api.export(name);
 }
 
@@ -28,64 +28,28 @@ Package.onUse(function(api) {
     "aldeed:autoform@4.2.2 || 5.0.0 || 5.1.2",
     "underscore",
     "medbook:namespace@0.0.2",
+    "matb33:collection-hooks@0.8.1",
   ]);
 
   api.addFiles("globals.js");
 
   addAndExport(api, "DataSets");
+  addAndExport(api, "GenomicExpression");
   addAndExport(api, "Forms");
   addAndExport(api, "Records");
-  addAndExport(api, "GeneExpression");
-
-  addAndExport(api, "Patients");
-
   addAndExport(api, "SampleGroups");
+
   addAndExport(api, "GeneSets");
   addAndExport(api, "GeneSetCollections");
 
   // utility collections
-  addAndExport(api, "Genes");
   addAndExport(api, "Jobs");
-
-  // addAndExport(api, "Contrasts");
-
-  // genomic base data
-
-  // api.export("Expression2"); // NOTE: deprecated
-
-  // addAndExport(api, "IsoformExpression");
-  // api.export("ExpressionIsoform"); // old version of IsoformExpression
-  // addAndExport(api, "GeneAnnotation");
-  // addAndExport(api, "Mutations");
-
-  // genomic-based collections
-  // addAndExport(api, "Signatures");
-  // addAndExport(api, "SignatureScores");
-
-  // networks
-  // api.addFiles("Networks.js");
-  // api.export("Networks");
-  // api.export("NetworkElements");
-  // api.export("NetworkInteractions");
-
-  // gene sets
-
-
-
 
   // blobs
   api.use("cfs:gridfs@0.0.33");
   api.use("cfs:standard-packages@0.5.9");
   addAndExport(api, "Blobs");
   api.export("BlobStore", "server");
-
-  // Older stuff below this line
-
-  // api.addFiles("primary_collections.js");
-  // api.export("Studies");
-  // api.export("Patients");
-  // api.export("CohortSignatures");
-  // api.export("Mutations");
 
   api.addFiles("attachToNamespace.js");
 });
