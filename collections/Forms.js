@@ -8,6 +8,7 @@ SimpleSchema.messages({
 
 Forms = new Meteor.Collection("forms");
 Forms.attachSchema(new SimpleSchema({
+  administrators: { type: [String] },
   collaborations: { type: [String] },
 
   name: { type: String, label: "Name of form" },

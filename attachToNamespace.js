@@ -1,4 +1,5 @@
 MedBook.collections = {
+  Studies: Studies,
   DataSets: DataSets,
   GenomicExpression: GenomicExpression,
   Forms: Forms,
