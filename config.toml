@@ -6,6 +6,7 @@
   cookie_secret = "medbookCookie change for production"
   pingIntervalMS = 2000
   uid = "galaxy"
+  chain = "/certificates/STAR_medbook_io.ca-bundle"
 
 [apps]
    [apps.CRFs]

@@ -112,7 +112,7 @@ readSSLcredentials = function() {
       };
     }
 
-    if (config.server.chain) {
+    if (config.server && config.server.chain) {
         var ca = []
         var chain = fs.readFileSync(config.server.chain, 'utf8');
         chain = chain.split("\n");
