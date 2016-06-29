@@ -1,15 +1,6 @@
 # MedBook data model
 
-### Nomenclature: labels
-
-Labels are human readable identifiers that are also machine readable. Some examples include `"WCDT"`, `"DTB-001"`, and `"TP53"`.
-
-A label is a uniquely identifiable string within it's namespace.
-- each study has a globally unique label
-- within a study, each sample has a unique label (unique only within that study)
-- within a data set, each feature (gene, isoform, etc) has a unique label
-
-Labels can contain upper and lowercase letters, numbers, dashes, and underscores.
+## Collections
 
 ### Studies
 
@@ -78,13 +69,38 @@ Possible use cases:
 - Alana wants run an analyses on the WCDT gene expression data set comparing old patients and young patients but she does not have access to the age at biopsy clinical information. Ted, who has access to the clinical information, creates two sample groups for Alana: one containing young patients and the other containing old patients. Here, Ted provides Alana the information she needs without providing her with the full clinical information.
 - The CKCC team wants to share the gene expression data for only three samples with a third party provider. They create a sample group with those three samples and share that sample group with the third party provider.
 
+All samples in a sample group must be unique. (A sample cannot be in multiple data sets.)
+
+## Comments / Other
+
+### Nomenclature: labels
+
+Labels are human readable identifiers that are also machine readable. Some examples include `"WCDT"`, `"DTB-001"`, and `"TP53"`.
+
+A label is a uniquely identifiable string within it's namespace.
+- each study has a globally unique label
+- within a study, each sample has a unique label (unique only within that study)
+- within a data set, each feature (gene, isoform, etc) has a unique label
+
+Labels can contain upper and lowercase letters, numbers, dashes, and underscores.
+
+### Use cases
+
+#### Sample selection
+
+When a user is selecting a single sample, there should be two dropdown menus. In the first dropdown, the user chooses the data set or sample group. In the second dropdown the user choses the specific sample in that data set or sample group.
+
+#### Background cohorts
+
+When a user is selecting samples for a background cohort, there should be a dropdown menu. 
+
 ### TODO
 - Blobs
 - Patients
 - GeneSetCollections
 - GeneSets
 
-### Questions / Comments
+
 
 Should we make `study_label` and `sample_label` reserved field names in forms, allowing us to easily search records without having to look up form object?
 
