@@ -45,6 +45,13 @@
    menuItem = "Data Fusion"
    containerName="fusion"
 
+   [apps.cbioportal]
+   auth = false
+   route = "/cbioportal"
+   port = 8080
+   menuPosition = 6
+   menuItem = "Cbioportal"
+   containerName="cbioportal"
 
    [apps.wrangler]
    auth = false
@@ -61,6 +68,13 @@
    menuPosition = 7
    menuItem = "Job Runner"
    containerName = "job-runner"
+
+   [apps.rpad]
+   auth = false
+   route = "/r-pad"
+   port = 3000
+   containerName = "rpad"
+
 
 [final]
    redirect = "/"
