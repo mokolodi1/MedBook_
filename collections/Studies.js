@@ -1,4 +1,5 @@
 Studies = new Meteor.Collection("studies");
+
 Studies.attachSchema(new SimpleSchema({
   administrators: { type: [String] },
   collaborations: { type: [String] },

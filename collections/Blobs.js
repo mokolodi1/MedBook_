@@ -2,20 +2,21 @@ Blobs = new Meteor.Collection("blobs")
 
 Blobs.attachSchema(new SimpleSchema({
   // security/associated + object
-  security_object: {
+  associated_object: {
     type: new SimpleSchema({
       collection_name: {
         type: String,
-        allowedValues: [
-          // "Patients",
-        ],
+        // allowedValues: [
+        //   // "Patients",
+        // ],
       },
       mongo_id: { type: String },
     }),
   },
 
-  storage_path: { type: String }, // doesn't include _id folder
+  // doesn't include file name, which is the `_id` of the document
+  storage_path: { type: String },
 
   // completed/finished/done + writing
-  finished_writing: { type: Boolean, defaultValue: true },
+  finished_writing: { type: Boolean, defaultValue: false },
 }));

@@ -2,17 +2,23 @@
 
 ## Collections
 
-### Studies
+### Studies and Samples
 
-A study is a namespace for samples. Having access to a study allows the user to view the sample labels in the study. Being an administrator to a study means the user can add sample labels and edit the study name and description. Having access to a study does not give a user access to any clinical records nor to any genomic information.
+A *study* is a namespace for samples. A sample is merely a string contained within a study document; there are no *sample* documents.
 
-A study is uniquely identified by it's label. This label, such as `"WCDT"` or `"CKCC"` allows users to specify the study in files, such as clinical `.tsv`s. The study label also allows for unique naming of samples in instances where sample labels collide (ex. combining two studies each with a sample called `"A01"`). In such instances, the sample's name is shown as  `"STUDY/SAMPLE"` (ex. `"WCDT/DTB-001"`).
+A study has collaboration security. Users with access to a study can view all fields in the study, including sample labels; this does not provide access to genomic information or clinical data. Administrators of a study can add sample labels and edit the study name and description.
 
-Other possible fields include PUBMED id and the type of cancer.
+A study is uniquely identified by its *label*. This label, such as `"WCDT"` or `"CKCC"`, allows users to specify the study in files, such as clinical `.tsv`s. The study label also allows for unique naming of samples in instances where sample labels collide (ex. combining two studies each with a sample called `"A01"`). In such instances, the sample's name is shown as  `"STUDY/SAMPLE"` (ex. `"WCDT/DTB-001"`).
+
+Other possible study fields include PUBMED id and the type of cancer.
+
+S in MedBook are defined in a study and there is no samples collection.
 
 ### Data sets
 
-A data set is MedBook’s representation of a rectangular tab-separated file where each column represents a sample and each row represents a gene, isoform, or other genomic feature.
+A *data set* is MedBook’s representation of a rectangular tab-separated file where each column represents a sample and each row represents a gene, isoform, or other genomic feature.
+
+Administrators of a data set may incrementally add new columns (samples) to a data set; the rows (genomic features) are immutable and defined by the feature set of the first added sample.
 
 Examples of possible data sets:
 - FPKM gene expression data for CKCC
@@ -20,7 +26,7 @@ Examples of possible data sets:
 - signature scores for the TP53 signature applied to the WCDT gene expression data set
 - WCDT + TCGA gene expression data after COMBAT batch correction
 
-A data set has a value type, which describes what kind of data it contains (gene expression, signature scores, etc.). Each data set also has a metadata field which contains different information depending on the value type. Under most circumstances, data sets with differing metadata fields are not comparable.
+A data set has a value type, which describes what kind of data it contains (gene expression, signature scores, etc). Each data set also has a metadata field which contains different information depending on the value type. Under most circumstances, data sets with differing metadata fields are not comparable.
 
 Here is a list of proposed value types and metadata fields associated with each:
 - gene expression
@@ -40,11 +46,13 @@ Here is a list of proposed value types and metadata fields associated with each:
 - viper scores
 - paradigm scores
 
-In addition to the value type and metadata, each data set has a provenance field which contains a list of steps that were taken to generate the data set. For example:
+In addition to the value type and metadata, each data set has a provenance field. The details of this field will be defined in a future version of this document. The intent is to store the steps that were taken to generate the data set.
+
+For example:
 1. uploaded by Robert Baertsch on June 15, 2016 (link to original data set)
 2. BRCA1 signature applied by Ted Goldstein on June 16, 2016 (link to signature)
 
-Data sets contain a list of samples in the form of study label and sample label tuples. (Sample labels alone are not globally unique.)
+Data sets contain a list of samples in the form of study label/sample label tuples. (Sample labels alone are not globally unique.)
 
 The actual data in a data set are stored in the GenomicExpression collection. GenomicExpression documents are simple data containers. They contain a reference to the data set they belong to as well as the feature label they contain data for. Finally, they contain a list of values such that each element contains the value for the correspondingly indexed sample in the samples list in the data set document.
 
@@ -52,9 +60,18 @@ The actual data in a data set are stored in the GenomicExpression collection. Ge
 
 A form is a set of one or more fields, each of which has a name and a type. A form can have records associated with it whose fields are described by the form. Drawing comparisons to a spreadsheet, a form is a description of the header row and each record is a single data row in the spreadsheet.
 
-A record is uniquely identified by it's form, it's study label, and it's sample label. (Duplicates are not allowed.)
+Each record in a form is uniquely identified by its study/sample label tuple.
 
-A user that has access to a form can view it's fields and records. They can also copy a form to create their own version, though this does not copy the form's records. An administrator of a form can add, modify, and delete records. A form's fields are immutable.
+Forms have collaboration security. A user with access to a form can view its fields and records.
+
+Users should be able to browse publically listed
+
+A form can be "publicly copyiable"; this indicates that anyone can view the fields of a form
+
+
+
+
+They can also copy a form to create their own version, though this does not copy the form's records. An administrator of a form can add, modify, and delete records. A form's fields are immutable.
 
 Reserved field names (for implementation purposes): `form_id`.
 
@@ -73,11 +90,17 @@ All samples in a sample group must be unique. (A sample cannot be in multiple da
 
 ### Blobs
 
-Blobs represent files. All blobs are stored in a central directory shared by all apps, much like how mongo is shared.
+Blob documents are metadata for files. All files are stored in a central directory shared by all apps, much like how mongo is shared.
 
-Each blob is associated with an object that has collaboration security. A user has access to a blob if they have access to blob's associated object. Every day a job runs and deletes all blobs that do not have an associated object or have had their associated objects deleted. This job also deletes blobs that have not finished writing.
+Each blob must be associated with an object in another collection that has collaboration security. A user has access to a blob if they have access to blob's associated object.
 
-Each blob has a path where it is stored. The file is stored within that folder and the file's name is the `_id` of the blob.
+Periodically a job runs and deletes all blobs that do not have an associated object or have had their associated objects deleted. This job also deletes blobs that have not finished writing. (This creates a soft cap on the size of the blob; it must be writable to the directory in less than a day.)
+
+Blobs themselves do not have expiration dates. Some associated objects may delete their blobs. 
+
+Each blob has a path where its file is stored. The file is stored within that folder and the file's name is the `_id` of the blob.
+
+The file associated with a blob is immutable.
 
 ### Patients
 
@@ -91,12 +114,14 @@ Each patient has a globally unique patient label. Each patient has one or more s
 
 Labels are human readable identifiers that are also machine readable. Some examples include `"WCDT"`, `"DTB-001"`, and `"TP53"`.
 
-A label is a uniquely identifiable string within it's namespace.
+A name is not a label: names can contain spaces and other special characters. Names can also be changed after creation while labels cannot.
+
+A label is a unique string within its namespace:
 - each study has a globally unique label
 - within a study, each sample has a unique label (unique only within that study)
 - within a data set, each feature (gene, isoform, etc) has a unique label
 
-Labels can contain upper and lowercase letters, numbers, dashes, and underscores.
+Labels can contain only upper and lowercase letters, numbers, dashes, and underscores.
 
 ### Use cases
 
@@ -126,3 +151,5 @@ I'm tying down what a record is. I don't want them to be a catch-all. Is this ok
 Should we just rename blobs' files to be the mongo `_id`s instead of nesting them in a folder with the _id?
 
 I don't know if it's a great idea to require patients to have globally unique names. Because patients can be in more than one study, I don't know what container they could go into.
+
+MongoDb keys names (that are in most documents in a collection) should be short to optimize space and performance. Should we use short key names?  See http://christophermaier.name/blog/2011/05/22/MongoDB-key-names

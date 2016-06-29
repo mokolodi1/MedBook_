@@ -84,6 +84,18 @@ DataSets.attachSchema(new SimpleSchema({
 
   feature_labels: { type: [String] },
 
+  // // TODO
+  // provenance: {
+  //   type: [new SimpleSchema({
+  //     user_id: { type: String },
+  //     first_name: { type: String },
+  //     last_name: { type: String },
+  //
+  //     description: { type: String },
+  //     date: { type: Date },
+  //   })],
+  // },
+
   // soft lock: true when someone is loading data into this data set
   currently_wrangling: { type: Boolean, defaultValue: false },
 }));
