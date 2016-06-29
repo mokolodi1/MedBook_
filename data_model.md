@@ -71,6 +71,20 @@ Possible use cases:
 
 All samples in a sample group must be unique. (A sample cannot be in multiple data sets.)
 
+### Blobs
+
+Blobs represent files. All blobs are stored in a central directory shared by all apps, much like how mongo is shared.
+
+Each blob is associated with an object that has collaboration security. A user has access to a blob if they have access to blob's associated object. Every day a job runs and deletes all blobs that do not have an associated object or have had their associated objects deleted. This job also deletes blobs that have not finished writing.
+
+Each blob has a path where it is stored. The file is stored within that folder and the file's name is the `_id` of the blob.
+
+### Patients
+
+Treating patients is one of the core goals of MedBook, and the patient object serves as a focal point, bringing together many disparate data.
+
+Each patient has a globally unique patient label. Each patient has one or more samples associated with it.
+
 ## Comments / Other
 
 ### Nomenclature: labels
@@ -92,16 +106,23 @@ When a user is selecting a single sample, there should be two dropdown menus. In
 
 #### Background cohorts
 
-When a user is selecting samples for a background cohort, there should be a dropdown menu. 
+When a user is selecting samples for a background cohort, there should be a dropdown menu. The last used sample groups should be listed first, along with an option to create a new sample group. When the user types, the options should be filtered by name and the names of contained data sets.
+
+#### Patients page
+
+On the patients page there should be a UI for associating a sample with a patient. There should be a place to create new dialogue chains related to the patient, each with comments.
 
 ### TODO
 - Blobs
-- Patients
 - GeneSetCollections
 - GeneSets
 
-
+### Thoughts
 
 Should we make `study_label` and `sample_label` reserved field names in forms, allowing us to easily search records without having to look up form object?
 
 I'm tying down what a record is. I don't want them to be a catch-all. Is this okay?
+
+Should we just rename blobs' files to be the mongo `_id`s instead of nesting them in a folder with the _id?
+
+I don't know if it's a great idea to require patients to have globally unique names. Because patients can be in more than one study, I don't know what container they could go into.
