@@ -7,7 +7,8 @@ Package.describe({
 });
 
 Npm.depends({
-  "mv": "2.1.1"
+  "mv": "2.1.1",
+  "mime-types": "2.1.11"
 });
 
 Package.onUse(function(api) {

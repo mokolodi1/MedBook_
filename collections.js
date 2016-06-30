@@ -1,6 +1,7 @@
 fs = Npm.require("fs");
 path = Npm.require("path");
 mv = Npm.require("mv");
+mime = Npm.require("mime-types");
 
 Blobs2 = new Meteor.Collection("blobs", {
   transform: function (doc) {
@@ -36,6 +37,8 @@ Blobs2.attachSchema(new SimpleSchema({
 
   // original file name
   file_name: { type: String },
+
+  mime_type: { type: String },
 }));
 
 BlobMetadata = new Meteor.Collection("blob_metadata");

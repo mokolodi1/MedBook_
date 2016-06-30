@@ -62,9 +62,12 @@ Blobs2.create = function (pathOnServer, associated_object, callback) {
   // NOTE: don't set associated_object until it's actually done so if there's
   // an error somewhere along the line it's cleaned up
   var storage_path = "" + folder_num;
+  var file_name = path.basename(pathOnServer);
+
   var blobId = Blobs2.insert({
     storage_path: storage_path,
-    file_name: path.basename(pathOnServer),
+    file_name: file_name,
+    mime_type: mime.lookup(file_name),
   });
 
   // move the file to its new home
@@ -73,13 +76,9 @@ Blobs2.create = function (pathOnServer, associated_object, callback) {
 
   // only throw an error if the problem is something other than the folder
   // already existing
-  console.log("pathOnServer:", pathOnServer);
-  console.log("newPath:", newPath);
   mv(pathOnServer, newPath, { mkdirp: true },
         Meteor.bindEnvironment(function (err, out) {
-    console.log("done with mv");
     if (err) {
-      console.log("error with mv");
       callback(err);
     } else {
       Blobs2.update(blobId, {
