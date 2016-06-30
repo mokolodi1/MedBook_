@@ -40,12 +40,14 @@ The maximum number of files stored in the system is `Math.pow(filesPerFolder, 2)
 
 Inserting a blob on the server will move the original file!
 
-`Blobs.create(pathToFileOnServer, associatedObject)`, where `pathToFileOnServer` is the path of the file on the server and `associatedObject` is the object the blob is associated with. `associatedObject` is an object with the fields `collection_name` and `mongo_id`.
+`Blobs.create(pathToFileOnServer, associatedObject, callback)`, where `pathToFileOnServer` is the path of the file on the server and `associatedObject` is the object the blob is associated with. `associatedObject` is an object with the fields `collection_name` and `mongo_id`.
 
 ```js
 let blobId = Blobs.create("/path/to/file/on/server", {
   collection_name: "Jobs",
   mongo_id: "YDcb7YWfXTdjXbSKX"
+}, function (err, result) {
+  // code
 });
 ```
 
