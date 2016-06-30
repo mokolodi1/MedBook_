@@ -5,7 +5,7 @@ MAINTAINER Alexandros Sigaras <als2076@med.cornell.edu>
 # Clone cBioPortal			#
 #===========================#
 RUN git clone https://github.com/cBioPortal/cbioportal.git; \
-	cd cbioportal ; git checkout v1.1.1; \
+	cd cbioportal ; git checkout v1.2.1; \
 	echo "export PORTAL_HOME=/cbioportal" >> /root/.bash_profile;
 #===========================#
 # ADD Default Config		#
