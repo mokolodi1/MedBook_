@@ -6,9 +6,9 @@ Package.describe({
   documentation: "README.md"
 });
 
-// Npm.depends({
-//   "fs": "1.2.0"
-// });
+Npm.depends({
+  "mv": "2.1.1"
+});
 
 Package.onUse(function(api) {
   api.versionsFrom("1.1.0.3");

@@ -27,9 +27,6 @@ Blobs2.create = function (pathOnServer, associated_object, callback) {
   var biggestFolder = BlobMetadata.findOne({}, { sort: { folder_num: -1 } });
   var folder_num;
 
-  // keep track of whether we need to create a folder
-  var tryToCreateFolder = false;
-
   // if we need to make a new folder entry do so
   if (!biggestFolder ||
       biggestFolder.file_count >= Blobs2._configOptions.filesPerFolder) {
@@ -57,8 +54,6 @@ Blobs2.create = function (pathOnServer, associated_object, callback) {
     }, {
       $set: { file_count: 0 }
     });
-
-    tryToCreateFolder = true;
   } else {
     folder_num = biggestFolder.folder_num;
   }
@@ -76,34 +71,26 @@ Blobs2.create = function (pathOnServer, associated_object, callback) {
   var rootPath = Blobs2._configOptions.storageRootPath;
   var newPath = path.join(rootPath, storage_path, blobId);
 
-  function moveIt(err, out) {
-    // only throw an error if the problem is something other than the folder
-    // already existing
-    if (err && err.code !== "EEXIST")  {
+  // only throw an error if the problem is something other than the folder
+  // already existing
+  console.log("pathOnServer:", pathOnServer);
+  console.log("newPath:", newPath);
+  mv(pathOnServer, newPath, { mkdirp: true },
+        Meteor.bindEnvironment(function (err, out) {
+    console.log("done with mv");
+    if (err) {
+      console.log("error with mv");
       callback(err);
     } else {
-      fs.rename(pathOnServer, newPath,
-            Meteor.bindEnvironment(function (err, out) {
-        if (err) {
-          callback(err);
-        } else {
-          Blobs2.update(blobId, {
-            $set: { associated_object: associated_object }
-          });
+      Blobs2.update(blobId, {
+        $set: { associated_object: associated_object }
+      });
 
-          BlobMetadata.update({ folder_num: folder_num }, {
-            $inc: { file_count: 1 }
-          });
+      BlobMetadata.update({ folder_num: folder_num }, {
+        $inc: { file_count: 1 }
+      });
 
-          callback(null, Blobs2.findOne(blobId));
-        }
-      }));
+      callback(null, Blobs2.findOne(blobId));
     }
-  }
-
-  if (tryToCreateFolder) {
-    fs.mkdir(path.join(rootPath, storage_path), Meteor.bindEnvironment(moveIt));
-  } else {
-    moveIt();
-  }
+  }));
 };

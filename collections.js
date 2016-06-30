@@ -1,5 +1,6 @@
 fs = Npm.require("fs");
 path = Npm.require("path");
+mv = Npm.require("mv");
 
 Blobs2 = new Meteor.Collection("blobs", {
   transform: function (doc) {
