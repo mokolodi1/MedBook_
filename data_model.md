@@ -12,8 +12,6 @@ A study is uniquely identified by its *label*. This label, such as `"WCDT"` or `
 
 Other possible study fields include PUBMED id and the type of cancer.
 
-S in MedBook are defined in a study and there is no samples collection.
-
 ### Data sets
 
 A *data set* is MedBook’s representation of a rectangular tab-separated file where each column represents a sample and each row represents a gene, isoform, or other genomic feature.
@@ -64,12 +62,7 @@ Each record in a form is uniquely identified by its study/sample label tuple.
 
 Forms have collaboration security. A user with access to a form can view its fields and records.
 
-Users should be able to browse publically listed
-
-A form can be "publicly copyiable"; this indicates that anyone can view the fields of a form
-
-
-
+A form can be "publicly copyable"; this indicates that anyone can view the fields of a form but not the records.
 
 They can also copy a form to create their own version, though this does not copy the form's records. An administrator of a form can add, modify, and delete records. A form's fields are immutable.
 
@@ -96,7 +89,7 @@ Each blob must be associated with an object in another collection that has colla
 
 Periodically a job runs and deletes all blobs that do not have an associated object or have had their associated objects deleted. This job also deletes blobs that have not finished writing. (This creates a soft cap on the size of the blob; it must be writable to the directory in less than a day.)
 
-Blobs themselves do not have expiration dates. Some associated objects may delete their blobs. 
+Blobs themselves do not have expiration dates. Some associated objects may delete their blobs periodically.
 
 Each blob has a path where its file is stored. The file is stored within that folder and the file's name is the `_id` of the blob.
 

@@ -5,5 +5,4 @@ MedBook.collections = {
   Forms: Forms,
   Records: Records,
   Jobs: Jobs,
-  Blobs: Blobs,
 };

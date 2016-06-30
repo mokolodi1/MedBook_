@@ -33,6 +33,7 @@ Package.onUse(function(api) {
 
   api.addFiles("globals.js");
 
+  addAndExport(api, "Studies");
   addAndExport(api, "DataSets");
   addAndExport(api, "GenomicExpression");
   addAndExport(api, "Forms");
@@ -44,12 +45,6 @@ Package.onUse(function(api) {
 
   // utility collections
   addAndExport(api, "Jobs");
-
-  // blobs
-  api.use("cfs:gridfs@0.0.33");
-  api.use("cfs:standard-packages@0.5.9");
-  addAndExport(api, "Blobs");
-  api.export("BlobStore", "server");
 
   api.addFiles("attachToNamespace.js");
 });
