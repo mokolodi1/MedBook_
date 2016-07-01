@@ -13,27 +13,6 @@ cd webapp/packages
 git submodule add https://github.com/UCSC-MedBook/blobs
 ```
 
-### Setup
-
-Before using blobs, you must first configure the package.
-
-##### Example setup code
-
-```js
-Blobs.configure({
-  storageRootPath: "/filestore",
-});
-```
-
-##### Configuration fields
-
-| Field name               | Description |
-|--------------------------|-------------|
-| `filesPerFolder`         | Maximum number of files per folder. Defaults to 10000 |
-| `storageRootPath`        | Path to root of where to store files. |
-
-The maximum number of files stored in the system is `Math.pow(filesPerFolder, 2)`.
-
 ### Usage
 
 #### Insert
@@ -53,7 +32,6 @@ let blobId = Blobs.create("/path/to/file/on/server", {
 
 ### Internal documentation
 
-One `BlobMetadata` object is created for every leaf folder that is created.
+Blobs are stored at `/filestore` (hardcoded for now).
 
-- Internal documentation
-  - BlobMetadata
+Within that folder, they are stored two folders down, according to the mongo `_id`. If the mongo `_id` is "abcdefg", the full storage path will be "/filestore/ab/cd/abcdefg".

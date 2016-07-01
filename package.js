@@ -21,10 +21,8 @@ Package.onUse(function(api) {
     "check",
   ]);
 
-  api.addFiles("collections.js", "server");
+  api.addFiles("blobs.js", "server");
   api.export("Blobs2");
-
-  api.addFiles("configuration.js", "server");
 });
 
 Package.onTest(function(api) {
