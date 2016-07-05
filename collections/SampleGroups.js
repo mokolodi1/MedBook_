@@ -34,6 +34,7 @@ SampleGroups.attachSchema(new SimpleSchema({
     optional: true
   },
 
+  administrators: { type: [String] },
   collaborations: { type: [String] },
 
   value_type: DataSets.simpleSchema().schema().value_type,

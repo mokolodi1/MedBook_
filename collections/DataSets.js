@@ -38,6 +38,7 @@ SimpleSchema.messages({
 
 DataSets = new Meteor.Collection("data_sets");
 DataSets.attachSchema(new SimpleSchema({
+  administrators: { type: [String] },
   collaborations: { type: [String] },
 
   name: { type: String },
@@ -71,6 +72,11 @@ DataSets.attachSchema(new SimpleSchema({
     }) ],
   },
 
+  // sample_index allows for quick referencing of the index of the sample in
+  // the GenomicExpression collection. It is organized by study_label and then
+  // sample_label.
+  // Example usage:
+  // `genomicExpressionIndex = dataSet[study_label][sampel_label];`
   // Example `sample_index`:
   // {
   //   WCDT: { "DTB-001": 0, "DTB-002": 1, "DTB-003": 2 },

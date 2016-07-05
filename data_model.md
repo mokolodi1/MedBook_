@@ -16,7 +16,7 @@ Other possible study fields include PUBMED id and the type of cancer.
 
 A *data set* is MedBook’s representation of a rectangular tab-separated file where each column represents a sample and each row represents a gene, isoform, or other genomic feature.
 
-Administrators of a data set may incrementally add new columns (samples) to a data set; the rows (genomic features) are immutable and defined by the feature set of the first added sample.
+Administrators of a data set may incrementally add new columns (samples) to a data set; the rows (genomic features) are immutable and defined by the feature set of the first added sample. Collaborators can view the data set but not make changes.
 
 Examples of possible data sets:
 - FPKM gene expression data for CKCC
@@ -44,7 +44,7 @@ Here is a list of proposed value types and metadata fields associated with each:
 - viper scores
 - paradigm scores
 
-In addition to the value type and metadata, each data set has a provenance field. The details of this field will be defined in a future version of this document. The intent is to store the steps that were taken to generate the data set.
+In addition to the value type and metadata, each data set will have a provenance field. The details of this field will be defined in a future version of this document. The intent is to store the steps that were taken to generate the data set.
 
 For example:
 1. uploaded by Robert Baertsch on June 15, 2016 (link to original data set)
@@ -53,6 +53,8 @@ For example:
 Data sets contain a list of samples in the form of study label/sample label tuples. (Sample labels alone are not globally unique.)
 
 The actual data in a data set are stored in the GenomicExpression collection. GenomicExpression documents are simple data containers. They contain a reference to the data set they belong to as well as the feature label they contain data for. Finally, they contain a list of values such that each element contains the value for the correspondingly indexed sample in the samples list in the data set document.
+
+Only one user can add data to a data set at once. This is enforced by the `currently_wrangling` soft lock.
 
 ### Forms and Records
 
@@ -81,6 +83,8 @@ Possible use cases:
 
 All samples in a sample group must be unique. (A sample cannot be in multiple data sets.)
 
+Sample groups have collaboration security, with the right to change collaborators reserved for administrators.
+
 ### Blobs
 
 Blob documents are metadata for files. All files are stored in a central directory shared by all apps, much like how mongo is shared.
@@ -95,11 +99,19 @@ Each blob has a path where its file is stored. The file is stored within that fo
 
 The file associated with a blob is immutable.
 
+### Jobs
+
+A job represents a single run of a specific MedBook job.
+
+Sample groups have collaboration security, with the right to change collaborators reserved for administrators.
+
 ### Patients
 
 Treating patients is one of the core goals of MedBook, and the patient object serves as a focal point, bringing together many disparate data.
 
 Each patient has a globally unique patient label. Each patient has one or more samples associated with it.
+
+
 
 ## Comments / Other
 
