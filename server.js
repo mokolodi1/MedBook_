@@ -66,3 +66,31 @@ Accounts.onLogin(function (loginObj) {
     });
   }
 });
+
+
+
+// set up some stuff so that the reset password emails don't look like
+// they're coming from ROOT_URL (0.0.0.0/app-name)
+
+Accounts.emailTemplates.resetPassword.from = function () {
+  return "MedBook Admin <ucscmedbook@gmail.com>";
+}
+Accounts.emailTemplates.resetPassword.subject = function (user) {
+  return "Reset your MedBook password";
+};
+Accounts.emailTemplates.resetPassword.text = function (user, token) {
+  var worldUrl = process.env.WORLD_URL;
+  if (!worldUrl) {
+    worldUrl = "WORLD_URL_ENV_NOT_SET";
+  }
+
+  var text = "Hello,"
+  text += "\n\nA request was made to reset your MedBook password.";
+  text += "\n\nClick here to reset your password using our secure server: ";
+  text += token.replace("http", "https").replace("0.0.0.0:8000", worldUrl);
+  text += "\n\nIf you did not request to reset your password you " +
+      "can safely ignore this email.";
+  text += "\n\nHave a great day,\n\nThe MedBook Team";
+
+  return text;
+};
