@@ -19,6 +19,10 @@ var filterOptionsSchemas = {
   data_loaded: new SimpleSchema({
     gene_expression: { type: Boolean },
   }),
+  form_values: new SimpleSchema({
+    form_id: { type: String },
+    mongo_query: { type: Object, blackbox: true },
+  }),
 };
 
 SimpleSchema.messages({
