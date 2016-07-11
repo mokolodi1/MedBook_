@@ -35,13 +35,9 @@ MedBook.schemaObjectFromForm = function (form) {
   _.each(form.fields, function (field) {
     var fieldDefinition;
 
-    if (field.value_type === "String" || field.value_type === "Select") {
+    if (field.value_type === "String") {
       fieldDefinition = { type: String };
-    } else if (field.value_type === "Boolean") {
-      fieldDefinition = { type: Boolean };
-    } else if (field.value_type === "Integer") {
-      fieldDefinition = { type: Number };
-    } else if (field.value_type === "Decimal") {
+    } else if (field.value_type === "Number") {
       fieldDefinition = { type: Number, decimal: true };
     } else if (field.value_type === "Date") {
       fieldDefinition = { type: Date };

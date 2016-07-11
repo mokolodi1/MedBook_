@@ -1,6 +1,6 @@
 Package.describe({
   name: "medbook:primary-collections",
-  version: "0.0.19",
+  version: "0.0.19", // lol
   // Brief, one-line summary of the package.
   summary: "Primary collections and schemas for MedBook",
   // URL to the Git repository containing the source code for this package.
@@ -46,7 +46,14 @@ Package.onUse(function(api) {
   // utility collections
   addAndExport(api, "Jobs");
 
+  // deprecated: Blobs
+  api.use("cfs:gridfs@0.0.33");
+  api.use("cfs:standard-packages@0.5.9");
+  addAndExport(api, "Blobs");
+  api.export("BlobStore", "server");
+
   api.addFiles("attachToNamespace.js");
+  api.addFiles("utility.js");
 });
 
 Package.onTest(function(api) {

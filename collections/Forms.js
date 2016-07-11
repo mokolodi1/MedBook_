@@ -8,14 +8,13 @@ SimpleSchema.messages({
 
 Forms = new Meteor.Collection("forms");
 Forms.attachSchema(new SimpleSchema({
-  administrators: { type: [String] },
+  // administrators: { type: [String] },
   collaborations: { type: [String] },
 
   name: { type: String, label: "Name of form" },
 
-  // these fields specify which field refers to the study or sample label
-  study_label_field: { type: Number },
-  sample_label_field: { type: Number },
+  // which field has the sample_label
+  sample_label_field: { type: String },
 
   fields: {
     type: [ new SimpleSchema({
@@ -37,27 +36,10 @@ Forms.attachSchema(new SimpleSchema({
         type: String,
         allowedValues: [
           "String",
-          "Select",
-          "Integer",
-          "Decimal",
-          "Boolean",
+          "Number",
           "Date",
         ],
       },
-      allowedValues: {
-        type: [String],
-        optional: true,
-        custom: function () {
-          if (this.value && this.siblingField("type").value !== "Select") {
-            return "allowedValuesOnlyForString";
-          }
-        },
-        minCount: 1,
-      },
-      min: { type: Number, decimal: true, optional: true },
-      max: { type: Number, decimal: true, optional: true },
-
-      optional: { type: Boolean, optional: true },
     }) ],
     minCount: 1,
   },

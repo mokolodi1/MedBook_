@@ -31,8 +31,8 @@ Here is a list of proposed value types and metadata fields associated with each:
   - normalization (quantile counts, RSEM, TPM, raw counts)
   - quantification method (RSEM, Cufflinks, kallisto, etc.)
   - genome assembly (hg19, hg38)
-  - scaling (none, log2(x+1))
-  - strandedness (stranded, unstranded, unknown)
+  - value_scaling (none, log2(x+1))
+  - read_strandedness (stranded, unstranded, unknown)
   - sequencing selection method (polyA)
   - aligner used (STAR, TopHat)
 - isoform expression
@@ -60,13 +60,15 @@ Only one user can add data to a data set at once. This is enforced by the `curre
 
 A form is a set of one or more fields, each of which has a name and a type. A form can have records associated with it whose fields are described by the form. Drawing comparisons to a spreadsheet, a form is a description of the header row and each record is a single data row in the spreadsheet.
 
-Each record in a form is uniquely identified by its study/sample label tuple.
+Each record in a form is uniquely identified by its form and its sample label.
 
 Forms have collaboration security. A user with access to a form can view its fields and records.
 
 A form can be "publicly copyable"; this indicates that anyone can view the fields of a form but not the records.
 
 They can also copy a form to create their own version, though this does not copy the form's records. An administrator of a form can add, modify, and delete records. A form's fields are immutable.
+
+Within a form, field names must be unique.
 
 Reserved field names (for implementation purposes): `form_id`.
 

@@ -22,8 +22,36 @@ MedBook.dataSetTypes = [
             { value: "tpm", label: "TPM" },
           ]
         }
-      }
-      // TODO: fill in the rest of the fields
+      },
+      quantification_method: {
+        type: String,
+        allowedValues: [ "rsem" ],
+      },
+      genome_assembly: {
+        type: String,
+        allowedValues: [
+          "hg19",
+          "hg38"
+        ]
+      },
+      value_scaling: {
+        type: String,
+        allowedValues: [
+          "none",
+          "log2(x+1)",
+        ],
+      },
+      read_strandedness: {
+        type: String,
+        allowedValues: [
+          "stranded",
+          "unstranded",
+          "unknown"
+        ],
+      },
+      // TODO
+      // - sequencing selection method (polyA)
+      // - aligner used (STAR, TopHat)
     },
   },
   // isoform expression
@@ -38,7 +66,7 @@ SimpleSchema.messages({
 
 DataSets = new Meteor.Collection("data_sets");
 DataSets.attachSchema(new SimpleSchema({
-  administrators: { type: [String] },
+  // administrators: { type: [String] },
   collaborations: { type: [String] },
 
   name: { type: String },
@@ -72,17 +100,17 @@ DataSets.attachSchema(new SimpleSchema({
     }) ],
   },
 
-  // sample_index allows for quick referencing of the index of the sample in
+  // samples_index allows for quick referencing of the index of the sample in
   // the GenomicExpression collection. It is organized by study_label and then
   // sample_label.
   // Example usage:
   // `genomicExpressionIndex = dataSet[study_label][sampel_label];`
-  // Example `sample_index`:
+  // Example `samples_index`:
   // {
   //   WCDT: { "DTB-001": 0, "DTB-002": 1, "DTB-003": 2 },
   //   CKCC: { "K1_S1": 3, "K2_S2": 4 }
   // }
-  sample_index: {
+  samples_index: {
     type: Object,
     defaultValue: {},
     blackbox: true,

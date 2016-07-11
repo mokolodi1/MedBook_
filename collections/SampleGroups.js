@@ -4,17 +4,24 @@ SampleGroups = new Meteor.Collection("sample_groups");
 // "CRF",
 // "sample_label_search",
 // "sample_label_list",
-// "has_gene_expression",
-// "has_isoform_expression",
 // // etc.
 
 // attribute = filter["type"]
+var studySampleTuple = {
+  study_label: { type: String },
+  sample_label: { type: String },
+};
+
 var filterOptionsSchemas = {
-  sample_label_list: new SimpleSchema({
-    sample_labels: { type: [String] },
+  include_sample_list: new SimpleSchema({
+    samples: {
+      type: [ new SimpleSchema(studySampleTuple) ]
+    },
   }),
-  exclude_sample_label_list: new SimpleSchema({
-    sample_labels: { type: [String] },
+  exclude_sample_list: new SimpleSchema({
+    samples: {
+      type: [ new SimpleSchema(studySampleTuple) ]
+    },
   }),
 };
 
@@ -34,7 +41,7 @@ SampleGroups.attachSchema(new SimpleSchema({
     optional: true
   },
 
-  administrators: { type: [String] },
+  // administrators: { type: [String] },
   collaborations: { type: [String] },
 
   value_type: DataSets.simpleSchema().schema().value_type,
@@ -44,16 +51,16 @@ SampleGroups.attachSchema(new SimpleSchema({
       new SimpleSchema({
         data_set_id: { type: String },
 
-        sample_labels: { type: [String] },
-        sample_labels_count: {
+        samples: { type: [String] },
+        samples_count: {
           type: Number,
           min: 0,
           custom: function () {
             return requiredIfTrue.call(this,
-                !!this.siblingField("sample_labels").value);
+                !!this.siblingField("samples").value);
           },
           autoValue: function () {
-            var filteredSamples = this.siblingField("sample_labels").value;
+            var filteredSamples = this.siblingField("samples").value;
             if (filteredSamples) {
               return filteredSamples.length;
             }
