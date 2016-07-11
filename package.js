@@ -47,6 +47,7 @@ Package.onUse(function(api) {
     // "fileHandlers/ArachneRegulon.js", // not ready yet
 
     "fileHandlers/GeneSetCollection.js",
+    "fileHandlers/ClinicalForm.js",
 
     // Admin stuff
     "fileHandlers/HGNCGeneList.js",

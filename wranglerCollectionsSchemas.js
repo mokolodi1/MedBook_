@@ -46,15 +46,8 @@ WranglerFiles.attachSchema(new SimpleSchema({
   submission_type: {
     type: String,
     allowedValues: [
-      "gene_expression",
-      "gene_annotation",
-      "isoform_expression",
-      "network",
-      "contrast",
-      "signature",
-      "mutation",
-      "metadata",
       "gene_set_collection",
+      "clinical",
     ],
     optional: true,
   },
@@ -97,12 +90,6 @@ WranglerFiles.attachSchema(new SimpleSchema({
 
   written_to_database: { type: Boolean, defaultValue: false },
   error_description: { type: String, optional: true },
-
-  // // idea:
-  // parsing_comments: { type: [String], defaultValue: [] },
-
-  // // refers to Blobs
-  // uncompressed_from_id: { type: Meteor.ObjectID, optional: true },
 }));
 
 WranglerDocuments.attachSchema(new SimpleSchema({
@@ -123,15 +110,41 @@ WranglerDocuments.attachSchema(new SimpleSchema({
   },
 }));
 
+// XXX: test this
+function verifyOptions (options) {
+  console.log("verifying access");
+
+  if (options.study_label) {
+    console.log("checking study label");
+    var study = Studies.findOne({ study_label: options.study_label });
+    user.ensureAccess(study);
+    console.log("study label okay");
+  }
+
+  if (options.data_set_id) {
+    var dataSets = DataSets.findOne({ data_set_id: options.data_set_id });
+    user.ensureAccess(dataSets);
+  }
+}
+
 WranglerSubmissions.allow({
   insert: function (userId, doc) {
-    return doc.user_id === userId;
+    var user = MedBook.ensureUser(userId);
+    user.ensureAccess(doc);
+
+    verifyOptions(user, doc.options);
+
+    return submission.status === "editing";
   },
   update: function (userId, doc, fields, modifier) {
-    var submission = WranglerSubmissions.findOne(doc._id);
+    // var submission = WranglerSubmissions.findOne(doc._id);
 
-    return submission.user_id === userId &&
-        submission.status === "editing";
+    var user = MedBook.ensureUser(userId);
+    user.ensureAccess(doc);
+
+    verifyOptions(user, doc.options);
+
+    return doc.status === "editing";
   },
 });
 

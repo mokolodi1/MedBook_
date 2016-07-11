@@ -30,10 +30,10 @@ RectangularGeneExpression.prototype.beforeParsing = function () {
 
     var securedLock = DataSets.update({
       _id: data_set_id,
-      gene_expression_wrangling: { $ne: true },
+      currently_wrangling: { $ne: true },
     }, {
       $set: {
-        gene_expression_wrangling: true,
+        currently_wrangling: true,
       }
     });
     if (securedLock !== 1) {
@@ -107,10 +107,11 @@ RectangularGeneExpression.prototype.insertToCollection =
     });
   }
 };
-Moko.ensureIndex(GeneExpression, {
-  data_set_id: 1,
-  gene_label: 1,
-});
+// XXX: taken out while changing to GenomicExpression: taken out while changing to GenomicExpression
+// Moko.ensureIndex(GeneExpression, {
+//   data_set_id: 1,
+//   gene_label: 1,
+// });
 
 RectangularGeneExpression.prototype.endOfFile = function () {
   var sortedGenes = Object.keys(this.geneLabelIndex).sort();
@@ -170,7 +171,7 @@ RectangularGeneExpression.prototype.endOfFile = function () {
 
 
     var setObject = {
-      gene_expression_wrangling: false, // unlock for others
+      currently_wrangling: false, // unlock for others
       gene_expression_index: dataSet.gene_expression_index
     };
     _.each(this.sampleLabels, function (sample_label, index) {
@@ -186,15 +187,16 @@ RectangularGeneExpression.prototype.endOfFile = function () {
     });
   }
 };
-Moko.ensureIndex(GeneExpression, {
-  data_set_id: 1,
-});
+// XXX: taken out while changing to GenomicExpression
+// Moko.ensureIndex(GeneExpression, {
+//   data_set_id: 1,
+// });
 
 RectangularGeneExpression.prototype.cleanupAfterError = function () {
   if (!this.wranglerPeek) {
     DataSets.rawCollection().update(this.wranglerFile.options.data_set_id, {
       $set: {
-        gene_expression_wrangling: false
+        currently_wrangling: false
       }
     }, function (error, result) {
       if (error) {
