@@ -75,6 +75,13 @@
    port = 3000
    containerName = "rpad"
 
+    [apps.casebook]
+    auth = false
+    route = /casebook
+    port = 3000
+    containerName = "case-book"
+    menuPosition = 8
+    menuItem = "Case Book"
 
 [final]
    redirect = "/"
