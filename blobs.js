@@ -40,8 +40,14 @@ Blobs2.attachSchema(new SimpleSchema({
   storage_path: { type: String, optional: true },
 }));
 
+var storageRootPath = "/filestore";
+if (process.env.MEDBOOK_FILESTORE) {
+  storageRootPath = process.env.MEDBOOK_FILESTORE;
+  console.log("storageRootPath:", storageRootPath);
+}
+
 Blobs2._configOptions = {
-  storageRootPath: "/filestore"
+  storageRootPath: storageRootPath
 };
 
 Blobs2.create = function (pathOnServer, associated_object, callback) {
