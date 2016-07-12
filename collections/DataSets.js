@@ -1,9 +1,10 @@
 // define options for value_type and schemas for the metadata field
 // associated with each value_type
-// NOTE: `value` and `label` chosen to be compatible with AutoForm
+// NOTE: within `metadata_schema`, `label` must be defined for use
+//       on the data set management page
 MedBook.dataSetTypes = [
   {
-    value: "gene_expression",
+    value_type: "gene_expression",
     label: "Gene expression",
     metadata_schema: {
       normalization: {
@@ -21,18 +22,21 @@ MedBook.dataSetTypes = [
             { value: "fpkm", label: "FPKM" },
             { value: "tpm", label: "TPM" },
           ]
-        }
+        },
+        label: "Normalization",
       },
       quantification_method: {
         type: String,
         allowedValues: [ "rsem" ],
+        label: "Quantification method",
       },
       genome_assembly: {
         type: String,
         allowedValues: [
           "hg19",
           "hg38"
-        ]
+        ],
+        label: "Genome assembly",
       },
       value_scaling: {
         type: String,
@@ -40,6 +44,7 @@ MedBook.dataSetTypes = [
           "none",
           "log2(x+1)",
         ],
+        label: "Value scaling",
       },
       read_strandedness: {
         type: String,
@@ -48,6 +53,7 @@ MedBook.dataSetTypes = [
           "unstranded",
           "unknown"
         ],
+        label: "Read strandedness",
       },
       // TODO
       // - sequencing selection method (polyA)
@@ -74,7 +80,7 @@ DataSets.attachSchema(new SimpleSchema({
 
   value_type: {
     type: String,
-    allowedValues: _.pluck(MedBook.dataSetTypes, "value"),
+    allowedValues: _.pluck(MedBook.dataSetTypes, "value_type"),
   },
 
   metadata: {
@@ -82,10 +88,12 @@ DataSets.attachSchema(new SimpleSchema({
     blackbox: true,
     custom: function () {
       var schemaObj = _.findWhere(MedBook.dataSetTypes, {
-        value: this.field("value_type")
+        value_type: this.field("value_type")
       });
 
-      var isValid = new SimpleSchema(schemaObj).newContext().validate(this.value);
+      var isValid = new SimpleSchema(schemaObj)
+          .newContext()
+          .validate(this.value);
 
       if (!isValid) {
         return "datasetMetadataInvalid";
@@ -93,30 +101,29 @@ DataSets.attachSchema(new SimpleSchema({
     },
   },
 
-  samples: {
-    type: [ new SimpleSchema({
-      study_label: { type: String, regEx: labelRegex },
-      sample_label: { type: String, regEx: labelRegex },
-    }) ],
-  },
+  sample_labels: { type: [String], optional: true },
 
   // samples_index allows for quick referencing of the index of the sample in
   // the GenomicExpression collection. It is organized by study_label and then
   // sample_label.
   // Example usage:
-  // `genomicExpressionIndex = dataSet[study_label][sampel_label];`
-  // Example `samples_index`:
+  // `genomicExpressionIndex = dataSet[sampel_label];`
+  // Example `sample_label_index`:
   // {
-  //   WCDT: { "DTB-001": 0, "DTB-002": 1, "DTB-003": 2 },
-  //   CKCC: { "K1_S1": 3, "K2_S2": 4 }
+  //   "prad_wcdt/DTB-001": 0,
+  //   "prad_wcdt/DTB-002": 1,
+  //   "prad_wcdt/DTB-003": 2,
+  //   "ckcc/K1_S1": 3,
+  //   "ckcc/K2_S2": 4
   // }
-  samples_index: {
+  sample_label_index: {
     type: Object,
     defaultValue: {},
     blackbox: true,
+    optional: true,
   },
 
-  feature_labels: { type: [String] },
+  feature_labels: { type: [String], optional: true },
 
   // // TODO
   // provenance: {

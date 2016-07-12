@@ -7,6 +7,6 @@ Studies.attachSchema(new SimpleSchema({
   name: { type: String },
   description: { type: String },
 
-  study_label: { type: String, regEx: labelRegex },
-  sample_labels: { type: [String] },
+  study_label: { type: String, regEx: MedBook.sampleLabelRegex },
+  sample_labels: { type: [String], regEx: MedBook.sampleLabelRegex },
 }));

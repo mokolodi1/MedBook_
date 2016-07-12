@@ -6,6 +6,8 @@ MedBook.collections = {
   Forms: Forms,
   Records: Records,
   Jobs: Jobs,
+  GeneSets: GeneSets,
+  GeneSetCollections: GeneSetCollections,
 
    // deprecated
   Blobs: Blobs,
