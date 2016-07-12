@@ -80,7 +80,7 @@
     route = "/case-book"
     port = 3000
     containerName = "case-book"
-    menuPosition = 8
+    menuPosition = 9
     menuItem = "Case Book"
 
 [final]
