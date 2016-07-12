@@ -77,7 +77,7 @@
 
     [apps.casebook]
     auth = false
-    route = "/casebook"
+    route = "/case-book"
     port = 3000
     containerName = "case-book"
     menuPosition = 8
