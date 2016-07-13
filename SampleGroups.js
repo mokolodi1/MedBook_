@@ -21,7 +21,7 @@ var filterOptionsSchemas = {
   }),
   form_values: new SimpleSchema({
     form_id: { type: String },
-    mongo_query: { type: Object, blackbox: true },
+    mongo_query: { type: String}, // Use JSON.parse & JSON.stringify to translate
   }),
 };
 
