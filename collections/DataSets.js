@@ -28,6 +28,11 @@ MedBook.dataSetTypes = [
       quantification_method: {
         type: String,
         allowedValues: [ "rsem" ],
+        autoform: {
+          options: [
+            { value: "rsem", label: "RSEM" },
+          ]
+        },
         label: "Quantification method",
       },
       genome_assembly: {
@@ -88,14 +93,12 @@ DataSets.attachSchema(new SimpleSchema({
     blackbox: true,
     custom: function () {
       var schemaObj = _.findWhere(MedBook.dataSetTypes, {
-        value_type: this.field("value_type")
+        value_type: this.field("value_type").value
       });
 
-      var isValid = new SimpleSchema(schemaObj)
-          .newContext()
-          .validate(this.value);
+      var context = new SimpleSchema(schemaObj.metadata_schema).newContext()
 
-      if (!isValid) {
+      if (!context.validate(this.value)) {
         return "datasetMetadataInvalid";
       }
     },

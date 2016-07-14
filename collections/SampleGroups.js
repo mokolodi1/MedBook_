@@ -1,27 +1,13 @@
 SampleGroups = new Meteor.Collection("sample_groups");
 
-// Filter types:
-// "CRF",
-// "sample_label_search",
-// "sample_label_list",
-// // etc.
-
-// attribute = filter["type"]
-var studySampleTuple = {
-  study_label: { type: String },
-  sample_label: { type: String },
-};
-
 var filterOptionsSchemas = {
   include_sample_list: new SimpleSchema({
-    samples: {
-      type: [ new SimpleSchema(studySampleTuple) ]
-    },
+    sample_labels: { type: [String] },
+    sample_count: { type: Number },
   }),
   exclude_sample_list: new SimpleSchema({
-    samples: {
-      type: [ new SimpleSchema(studySampleTuple) ]
-    },
+    sample_labels: { type: [String] },
+    sample_count: { type: Number },
   }),
 };
 
@@ -50,22 +36,24 @@ SampleGroups.attachSchema(new SimpleSchema({
     type: [
       new SimpleSchema({
         data_set_id: { type: String },
+        data_set_name: { type: String },
 
-        samples: { type: [String] },
-        samples_count: {
+        sample_labels: { type: [String] },
+        sample_count: {
           type: Number,
           min: 0,
           custom: function () {
             return requiredIfTrue.call(this,
-                !!this.siblingField("samples").value);
+                !!this.siblingField("sample_labels").value);
           },
           autoValue: function () {
-            var filteredSamples = this.siblingField("samples").value;
+            var filteredSamples = this.siblingField("sample_labels").value;
             if (filteredSamples) {
               return filteredSamples.length;
             }
           },
         },
+        unfiltered_sample_count: { type: Number },
 
         filters: {
           type: [ new SimpleSchema({
