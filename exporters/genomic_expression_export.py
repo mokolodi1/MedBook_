@@ -48,7 +48,7 @@ def export_from_object(db, sampleGroup, isPlc):
 
     # if it's a .plc, put the extra two rows
     if isPlc:
-        sys.stdout.write("NAME\tGWEIGHT\t");
+        sys.stdout.write("\tNAME\tGWEIGHT");
 
     for study in sampleGroupDataSets:
         for sampleLabel in study["sample_labels"]:
