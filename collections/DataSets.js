@@ -12,7 +12,7 @@ MedBook.dataSetTypes = [
         allowedValues: [
           "raw_counts",
           "quan_norm_counts",
-          "rsem",
+          "fpkm",
           "tpm",
         ],
         autoform: {
@@ -104,7 +104,7 @@ DataSets.attachSchema(new SimpleSchema({
     },
   },
 
-  sample_labels: { type: [String], optional: true },
+  sample_labels: { type: [String], defaultValue: [] },
 
   // samples_index allows for quick referencing of the index of the sample in
   // the GenomicExpression collection. It is organized by study_label and then
