@@ -42,7 +42,8 @@ RectangularGeneAssay.prototype.parseLine =
       }
 
       console.log("dataSet.sample_labels:", dataSet.sample_labels);
-      if (dataSet.sample_labels.indexOf(sample_label) !== -1) {
+      if (dataSet.sample_label &&
+          dataSet.sample_labels.indexOf(sample_label) !== -1) {
         throw "Sample " + sample_label + " already defined in data set.";
       }
 

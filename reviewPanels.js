@@ -44,7 +44,7 @@ Wrangler.reviewPanels = {
           attribute: "sample_label",
           header_of_row: true
         },
-        { heading: "Data type", attribute: "data_type" },
+        { heading: "Data set", attribute: "data_set_name" },
         { heading: "Gene count", attribute: "line_count" },
       ],
     }

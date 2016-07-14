@@ -47,9 +47,9 @@ RectGenomicExpression.prototype.insertToCollection =
     if (scaling_to_perform === "log2(x+1)") {
       return Math.log(numberVal + 1) / Math.LN2;
     } if (scaling_to_perform === "none") {
-      throw new Meteor.Error("scaling-behavior-undefined");
-    } else {
       return numberVal;
+    } else {
+      throw new Meteor.Error("scaling-behavior-undefined");
     }
   });
 
