@@ -22,7 +22,7 @@ Package.onUse(function(api) {
 
   api.addFiles([
     "introduction.js",
-    "DataSets_GeneExpression.js",
+    "DataSets_GenomicExpression.js",
   ], "server");
 });
 
