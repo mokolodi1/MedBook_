@@ -25,39 +25,31 @@ Wrangler = {};
 //   label: "Update or create",
 // };
 
+// NOTE: READ MEEEEEE
+// When new fields are added that link to secure data (data sets, studies, etc.)
+// you need to update the WranglerFiles.allow options to ensure access.
 Wrangler.fileTypes = {
-  // PatientSampleMapping: {
-  //   description: "Patient sample mapping",
-  //   schema: new SimpleSchema({
-  //     study_label: { type: String },
-  //   }),
-  // },
-  // SampleLabelDefinition: {
-  //   description: "Sample ID definition",
-  //   schema: new SimpleSchema({
-  //     study_label: { type: String },
-  //   }),
-  // },
-  RectangularGeneExpression: {
+  RectGenomicExpression: {
     description: "Gene expression rectangular matrix",
     schema: new SimpleSchema({
       data_set_id: { type: String },
-      normalization: {
+      study_id: { type: String },
+      scaling_to_perform: {
         type: String,
         // TODO: autogenerate these
         allowedValues: [
-          "rsem_quan_log2",
-          "quantile_counts",
+          "log2(x+1)",
+          "none",
         ],
         autoform: {
           options: [
             {
-              value: "rsem_quan_log2",
-              label: "Quantile normalized counts log2(x+1)",
+              value: "log2(x+1)",
+              label: "Perform log2(x+1) scaling",
             },
             {
-              value: "quantile_counts",
-              label: "Quantile normalized counts",
+              value: "none",
+              label: "No scaling",
             },
           ],
         },
@@ -74,7 +66,7 @@ Wrangler.fileTypes = {
   ClinicalForm: {
     description: "Clinical form",
     schema: new SimpleSchema({
-      study_label: { type: String, label: "Study" },
+      study_id: { type: String, label: "Study" },
       form_name: { type: String },
       sample_label_field: {
         type: String,
@@ -83,6 +75,18 @@ Wrangler.fileTypes = {
       },
     }),
   },
+  // PatientSampleMapping: {
+  //   description: "Patient sample mapping",
+  //   schema: new SimpleSchema({
+  //     study_id: { type: String },
+  //   }),
+  // },
+  // SampleLabelDefinition: {
+  //   description: "Sample ID definition",
+  //   schema: new SimpleSchema({
+  //     study_id: { type: String },
+  //   }),
+  // },
 
   // RectangularIsoformExpression: {
   //   description: "Isoform expression rectangular matrix",

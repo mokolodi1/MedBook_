@@ -8,20 +8,6 @@
 //   ],
 // };
 
-var sampleDataExists = {
-  name: "sample_data_exists",
-  title: "DO NOT LOAD THIS DATA!!!! D:",
-  description: "DO NOT LOAD THIS DATA. " +
-      "It will break things and I will have to fix them. " +
-      "Contact Teo at mokolodi1@gmail.com for more info.",
-  css_class: "panel-danger",
-  columns: [
-    { heading: "Sample", attribute: "sample_label", header_of_row: true },
-    { heading: "Data type", attribute: "data_type" },
-    { heading: "File name", attribute: "file_name" },
-  ],
-};
-
 // var mappedGenesNoDescription = {
 //   name: "mapped_genes",
 //   title: "Mapped genes",
@@ -31,23 +17,6 @@ var sampleDataExists = {
 //     { heading: "MedBook gene name", attribute: "mapped_gene" },
 //   ],
 // };
-
-function assaySampleSummary (lineCountHeading) {
-  return {
-    name: "assay_sample_summary",
-    title: "Sample summary",
-    css_class: "panel-default",
-    columns: [
-      {
-        heading: "Sample label",
-        attribute: "sample_label",
-        header_of_row: true
-      },
-      { heading: "Data type", attribute: "data_type" },
-      { heading: lineCountHeading, attribute: "line_count" },
-    ],
-  };
-}
 
 // var newClinicalData = {
 //   name: "new_clinical_data",
@@ -63,20 +32,23 @@ function assaySampleSummary (lineCountHeading) {
 //   ],
 // };
 
-var geneAssayPanels = [
-  assaySampleSummary("Gene count"),
-  // newClinicalData,
-  sampleDataExists,
-  // ignoredGenesPanel,
-  // _.extend(mappedGenesNoDescription, {
-  //   description: "These genes are valid but are going to be mapped " +
-  //       "into MedBook gene namespace."
-  // }),
-];
-
 Wrangler.reviewPanels = {
-  gene_expression: geneAssayPanels,
-  // gene_annotation: geneAssayPanels,
+  genomic_expression: [
+    {
+      name: "assay_sample_summary",
+      title: "Sample summary",
+      css_class: "panel-default",
+      columns: [
+        {
+          heading: "Sample label",
+          attribute: "sample_label",
+          header_of_row: true
+        },
+        { heading: "Data type", attribute: "data_type" },
+        { heading: "Gene count", attribute: "line_count" },
+      ],
+    }
+  ],
   // isoform_expression: [
   //   assaySampleSummary("Isoform count"),
   //   // newClinicalData,

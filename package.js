@@ -36,7 +36,7 @@ Package.onUse(function(api) {
     "fileHandlers/TabSeperatedFile.js",
     "fileHandlers/RectangularGeneAssay.js",
 
-    "fileHandlers/RectangularGeneExpression.js",
+    "fileHandlers/RectGenomicExpression.js",
     // "fileHandlers/RectangularGeneAnnotation.js",
     // "fileHandlers/RectangularIsoformExpression.js",
     "fileHandlers/PatientSampleMapping.js",

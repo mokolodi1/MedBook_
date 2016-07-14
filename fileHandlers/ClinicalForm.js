@@ -62,6 +62,9 @@ ClinicalForm.prototype.parseLine = function (brokenTabs, lineNumber, line) {
         sample_label_field: sample_label_field,
         fields: this.fields
       });
+
+      this.bulk = Records.rawCollection().initializeUnorderedBulkOp();
+      this.bulkCount = 0;
     }
   } else {
     // parse a data line
@@ -76,10 +79,28 @@ ClinicalForm.prototype.parseLine = function (brokenTabs, lineNumber, line) {
 
       // change sample_label_field to include study_label
       var slField = this.wranglerFile.options.sample_label_field;
-      var study_label = this.wranglerFile.options.study_label;
-      record[slField] = study_label + "/" + record[slField]
+      var study = Studies.findOne(this.wranglerFile.options.study_id);
+      record[slField] = study.study_label + "/" + record[slField];
 
-      Records.insert(record);
+      // add to the bulk to be inserted
+      this.bulk.insert(record);
+      this.bulkCount++;
+
+      // if the bulk is big enough, insert everything
+      if (this.bulkCount > 500) {
+        console.log("lineNumber:", lineNumber);
+
+        // switch out the bulk for a new one
+        // TODO: is there a concurrency issue here?
+        var lastBulk = this.bulk;
+        this.bulk = Records.rawCollection().initializeUnorderedBulkOp();
+        this.bulkCount = 0;
+
+        // insert the last bulk
+        var deferred = Q.defer();
+        lastBulk.execute(errorResultResolver(deferred));
+        return deferred.promise;
+      }
     }
   }
 };
@@ -105,12 +126,12 @@ ClinicalForm.prototype.endOfFile = function () {
       });
     }, this);
   } else {
-    // TODO
-
-    // // execute the bulk insert we've been building up
-    // var deferred = Q.defer();
-    // this.geneSetsBulk.execute(errorResultResolver(deferred));
-    // return deferred.promise;
+    // execute the last bit of the bulk we've been building up
+    if (this.bulkCount > 0) {
+      var deferred = Q.defer();
+      this.bulk.execute(errorResultResolver(deferred));
+      return deferred.promise;
+    }
   }
 };
 
