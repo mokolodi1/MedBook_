@@ -32,6 +32,6 @@ let blobId = Blobs.create("/path/to/file/on/server", {
 
 ### Internal documentation
 
-Blobs are stored at `/filestore` (hardcoded for now).
+Blobs are stored at `/filestore`, but this can be overridden by setting `MEDBOOK_FILESTORE` in environment.
 
 Within that folder, they are stored two folders down, according to the mongo `_id`. If the mongo `_id` is "abcdefg", the full storage path will be "/filestore/ab/cd/abcdefg".
