@@ -52,9 +52,14 @@ MedBook.referentialIntegrity.DataSets_GenomicExpression =
     }, { multi: true });
 
     // remove GenomicExpression docs not associated with a valid feature
+    var featuresToKeep = [];
+    if (dataSet.feature_labels) {
+      featuresToKeep = dataSet.feature_labels;
+    }
+
     GenomicExpression.remove({
       data_set_id: data_set_id,
-      feature_label: { $nin: dataSet.feature_labels },
+      feature_label: { $nin: featuresToKeep },
     });
 
 
