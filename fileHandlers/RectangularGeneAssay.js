@@ -35,13 +35,10 @@ RectangularGeneAssay.prototype.parseLine =
     for (var column = 1; column < brokenTabs.length; column++) {
       var sample_label = study.study_label + "/" + brokenTabs[column];
 
-      console.log("study.sample_labels:", study.sample_labels);
-      console.log("sample_label:", sample_label);
       if (study.sample_labels.indexOf(sample_label) === -1) {
         throw "Sample " + sample_label + " not defined in study.";
       }
 
-      console.log("dataSet.sample_labels:", dataSet.sample_labels);
       if (dataSet.sample_label &&
           dataSet.sample_labels.indexOf(sample_label) !== -1) {
         throw "Sample " + sample_label + " already defined in data set.";
@@ -49,7 +46,6 @@ RectangularGeneAssay.prototype.parseLine =
 
       this.sampleLabels.push(sample_label);
     }
-    console.log("this.sampleLabels:", this.sampleLabels);
 
     if (this.wranglerPeek) {
       this.line_count = 0;
