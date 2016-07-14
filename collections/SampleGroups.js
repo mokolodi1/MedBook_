@@ -9,6 +9,10 @@ var filterOptionsSchemas = {
     sample_labels: { type: [String] },
     sample_count: { type: Number },
   }),
+  form_values: new SimpleSchema({
+    form_id: { type: String },
+    mongo_query: { type: String}, // Use JSON.parse & JSON.stringify to translate
+  }),
 };
 
 SimpleSchema.messages({
