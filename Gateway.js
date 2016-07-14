@@ -70,8 +70,8 @@ var getTarget = function(req) {
     if (service){
       var target = "http://" + service.containerName + ":" + service.port;
     } else {
-      //fall through to telescope
-      var telescope = config.apps.Telescope;
+      //fall through to patient-care
+      var telescope = config.apps.PatientCare;
       var target = "http://" + telescope.containerName + ":" + telescope.port;
     }
     return target;
@@ -441,12 +441,10 @@ fs.watchFile(postScriptFilename, readPostScript);
 
 function log_error(e,req){
   if(e){
-    /*
-    console.log("log_error");
-    console.error(e.message);
-    console.log(req.headers.host,'-->');
-    console.log('-----');
-    */
+    // console.log("log_error");
+    // console.error(e.message);
+    // console.log(req.headers.host,'-->');
+    // console.log('-----');
   }
 }
 

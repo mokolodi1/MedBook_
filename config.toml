@@ -9,41 +9,41 @@
   chain = "/certificates/STAR_medbook_io.ca-bundle"
 
 [apps]
-   [apps.CRFs]
-   auth = false
-   route = "/CRF"
-   port = 3000
-   menuPosition = 1
-   menuItem = "Forms"
-   containerName = "crfs"
+   # [apps.CRFs]
+   # auth = false
+   # route = "/CRF"
+   # port = 3000
+   # menuPosition = 1
+   # menuItem = "Forms"
+   # containerName = "crfs"
 
    [apps.PatientCare]
    auth = false
-   route = "/patient-care"
+   route = "/"
    port = 3000
    menuPosition = 7
    menuItem = "Patient Care"
    containerName = "patient-care"
 
 
-   [apps.Telescope]
-   auth = false
-   route = "/"
-   menuPosition = 3
-   menuItem = "Telescope"
-   containerName = "telescope"
-   port = 3000
+   # [apps.Telescope]
+   # auth = false
+   # route = "/"
+   # menuPosition = 3
+   # menuItem = "Telescope"
+   # containerName = "telescope"
+   # port = 3000
 
-   [apps.fusion]
-   auth = false
-   route = "/fusion"
-   cwd = "../Medbook-Fusion5"
-   ping = "/fusion/packages/reload.js"
-   run = "/bin/sh -c ./run"
-   port = 3000
-   menuPosition = 5
-   menuItem = "Data Fusion"
-   containerName="fusion"
+   # [apps.fusion]
+   # auth = false
+   # route = "/fusion"
+   # cwd = "../Medbook-Fusion5"
+   # ping = "/fusion/packages/reload.js"
+   # run = "/bin/sh -c ./run"
+   # port = 3000
+   # menuPosition = 5
+   # menuItem = "Data Fusion"
+   # containerName="fusion"
 
    [apps.cbioportal]
    auth = false
@@ -61,13 +61,13 @@
    menuItem = "Wrangler"
    containerName="wrangler"
 
-   [apps.jobRunner]
-   auth = false
-   route = "/job-runner"
-   port = 3000
-   menuPosition = 7
-   menuItem = "Job Runner"
-   containerName = "job-runner"
+   # [apps.jobRunner]
+   # auth = false
+   # route = "/job-runner"
+   # port = 3000
+   # menuPosition = 7
+   # menuItem = "Job Runner"
+   # containerName = "job-runner"
 
    [apps.rpad]
    auth = false
