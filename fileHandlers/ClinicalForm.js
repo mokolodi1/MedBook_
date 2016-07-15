@@ -48,8 +48,6 @@ ClinicalForm.prototype.parseLine = function (brokenTabs, lineNumber, line) {
         };
       }, this);
 
-      var user = Meteor.users.findOne(this.wranglerFile.user_id);
-
       var name = this.wranglerFile.options.form_name;
       var sample_label_field = this.wranglerFile.options.sample_label_field;
       if (!sample_label_field) {
@@ -58,9 +56,11 @@ ClinicalForm.prototype.parseLine = function (brokenTabs, lineNumber, line) {
 
       this.form_id = Forms.insert({
         name: name,
-        collaborations: [ user.collaborations.personal ],
         sample_label_field: sample_label_field,
-        fields: this.fields
+        fields: this.fields,
+
+        // keep collaborations blank for now so they can't see it
+        collaborations: [],
       });
 
       this.bulk = Records.rawCollection().initializeUnorderedBulkOp();
@@ -126,11 +126,34 @@ ClinicalForm.prototype.endOfFile = function () {
       });
     }, this);
   } else {
+    // call this usually after having run this.bulk.execute()
+    var self = this;
+    function makeFormAvailable() {
+      var user = Meteor.users.findOne(self.wranglerFile.user_id);
+
+      Forms.update(self.form_id, {
+        $set: {
+          collaborations: [ user.collaborations.personal ]
+        }
+      });
+    }
+
     // execute the last bit of the bulk we've been building up
     if (this.bulkCount > 0) {
       var deferred = Q.defer();
-      this.bulk.execute(errorResultResolver(deferred));
+
+      this.bulk.execute(Meteor.bindEnvironment(function (err, res) {
+        if (err) {
+          deferred.reject(err);
+        } else {
+          makeFormAvailable();
+          deferred.resolve();
+        }
+      }, deferred.reject));
+
       return deferred.promise;
+    } else {
+      makeFormAvailable();
     }
   }
 };
