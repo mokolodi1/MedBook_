@@ -1,20 +1,16 @@
 #!/bin/bash
 #
-#
 # Precomputed median, highthreshold and lowthreshold 1.5 IQR values based on CKCC
 # reference file target_tcga_RSEM_Hugo_norm_count.tumor.sort
 #
-# Inputs:
-#   ./highthreshold.tsv
-#   ./lowthreshold.tsv
-#   ./median.tsv
-# Outputs:
+# Example:
+# ./outlier-analysis.sh SAMPLE_DATA.tsv median.tsv highthreshold.tsv lowthreshold.tsv
 #
 #######################################################################
 
-sed s/\"//g median.tsv | sort > median.sort
-sort highthreshold.tsv > highthreshold.sort
-sort lowthreshold.tsv > lowthreshold.sort
+sed s/\"//g $2 | sort > median.sort
+sort $3 > highthreshold.sort
+sort $4 > lowthreshold.sort
 
 mv $1 single_sample
 
@@ -28,7 +24,6 @@ gene_count=$(wc -l single_sample | awk '{print $1}')
 top_percent=$(printf "%.0f" $(echo "($gene_count - 1) * .05" | bc))
 (>&2 echo "gene count: $gene_count")
 (>&2 echo "top/bottom 5% number of genes: $top_percent")
-(>&2 echo "3.8")
 
 sort -r -n -k  2,2 single_sample | head -n $top_percent | sort > single_sample.head.sort
 #sort -r -n -k 2,2 single_sample | tail -n $top_percent | sort > single_sample.tail.sort
