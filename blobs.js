@@ -2,6 +2,7 @@ fs = Npm.require("fs");
 path = Npm.require("path");
 mv = Npm.require("mv");
 mime = Npm.require("mime-types");
+// remove = Npm.require("remove");
 
 var storageRootPath = "/filestore";
 if (process.env.MEDBOOK_FILESTORE) {
@@ -42,14 +43,19 @@ Blobs2.attachSchema(new SimpleSchema({
 
   // includes the file name, which is the `_id` of the document
   storage_path: { type: String, optional: true },
+
+  // clients can put anything here
+  metadata: { type: Object, blackbox: true, optional: true },
 }));
 
-Blobs2.create = function (pathOnServer, associated_object, callback) {
+Blobs2.create = function (pathOnServer, associated_object,
+    metadata, callback) {
   check(pathOnServer, String);
   check(associated_object, new SimpleSchema({
     collection_name: { type: String },
     mongo_id: { type: String },
   }));
+  check(metadata, Object);
   if (typeof callback !== "function") throw new Meteor.Error("no-callback");
 
   // create the blob
@@ -76,6 +82,7 @@ Blobs2.create = function (pathOnServer, associated_object, callback) {
         $set: {
           associated_object: associated_object,
           storage_path: storage_path,
+          metadata: metadata,
         }
       });
 
@@ -83,3 +90,15 @@ Blobs2.create = function (pathOnServer, associated_object, callback) {
     }
   }));
 };
+
+// Blobs2.delete = function (selector, callback) {
+//   check(selector, Object);
+//   if (typeof callback !== "function") throw new Meteor.Error("no-callback");
+//
+//   var removePaths = [];
+//   Blobs2.find(selector).forEach(function (blob) {
+//     removePaths.push(blob.getStoragePath());
+//   });
+//
+//
+// };
