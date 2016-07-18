@@ -75,14 +75,15 @@ GeneTranscriptMappings.prototype.endOfFile = function () {
 
 WranglerFileHandlers.GeneTranscriptMappings = GeneTranscriptMappings;
 
-Moko.ensureIndex(Genes, {
-  gene_label: 1
-});
-
-Moko.ensureIndex(Genes, {
-  previous_labels: 1
-});
-
-Moko.ensureIndex(Genes, {
-  synonym_labels: 1
-});
+// TODO: I don't think I need this anymore
+// Moko.ensureIndex(Genes, {
+//   gene_label: 1
+// });
+//
+// Moko.ensureIndex(Genes, {
+//   previous_labels: 1
+// });
+//
+// Moko.ensureIndex(Genes, {
+//   synonym_labels: 1
+// });

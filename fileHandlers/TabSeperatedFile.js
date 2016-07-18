@@ -69,7 +69,8 @@ TabSeperatedFile.prototype.parse = function () {
       Q.all(allLinePromises)
         .then(Meteor.bindEnvironment(function () {
           Q.resolve(self.endOfFile.call(self))
-            .then(resolve);
+            .then(resolve)
+            .catch(rejectThenCleanup);
         }, rejectThenCleanup))
         .catch(rejectThenCleanup);
     }, rejectThenCleanup));

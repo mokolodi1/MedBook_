@@ -25,14 +25,31 @@ RectangularGeneAssay.prototype.parseLine =
           " column tab file";
     }
 
-    setSampleLabels.call(this, brokenTabs); // wrangle sample labels
-    console.log("this.sampleLabels:", this.sampleLabels);
+    // Figure out the sample labels
+    // Throw an error if it already exists or is not defined in
+    // the selected study.
+    var study = Studies.findOne(this.wranglerFile.options.study_id);
+    var dataSet = DataSets.findOne(this.wranglerFile.options.data_set_id);
+
+    this.sampleLabels = [];
+    for (var column = 1; column < brokenTabs.length; column++) {
+      var sample_label = study.study_label + "/" + brokenTabs[column];
+
+      if (study.sample_labels.indexOf(sample_label) === -1) {
+        throw "Sample " + sample_label + " not defined in study.";
+      }
+
+      if (dataSet.sample_label &&
+          dataSet.sample_labels.indexOf(sample_label) !== -1) {
+        throw "Sample " + sample_label + " already defined in data set.";
+      }
+
+      this.sampleLabels.push(sample_label);
+    }
 
     if (this.wranglerPeek) {
       this.line_count = 0;
     }
-
-    this.alertIfSampleDataExists.call(this);
 
     // keep track of the genes we've seen
     this.geneLabelIndex = {};
@@ -42,13 +59,7 @@ RectangularGeneAssay.prototype.parseLine =
     var expressionStrings = brokenTabs.slice(1);
     validateNumberStrings(expressionStrings);
 
-    // map the gene based on synonymes and previouses
     var gene_label = brokenTabs[0];
-    // remove stuff after "|" ("MYC|ch3")  http://regexr.com/3chqf
-    var chromosomeSuffix = gene_label.match(/\w+?(?=\|chr[0-9]{1,2})/);
-    if (chromosomeSuffix) {
-      gene_label = chromosomeSuffix[0];
-    }
 
     if (this.wranglerPeek) {
       this.line_count++;

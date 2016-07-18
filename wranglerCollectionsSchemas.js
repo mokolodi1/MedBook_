@@ -46,15 +46,9 @@ WranglerFiles.attachSchema(new SimpleSchema({
   submission_type: {
     type: String,
     allowedValues: [
-      "gene_expression",
-      "gene_annotation",
-      "isoform_expression",
-      "network",
-      "contrast",
-      "signature",
-      "mutation",
-      "metadata",
+      "genomic_expression",
       "gene_set_collection",
+      "clinical",
     ],
     optional: true,
   },
@@ -97,12 +91,6 @@ WranglerFiles.attachSchema(new SimpleSchema({
 
   written_to_database: { type: Boolean, defaultValue: false },
   error_description: { type: String, optional: true },
-
-  // // idea:
-  // parsing_comments: { type: [String], defaultValue: [] },
-
-  // // refers to Blobs
-  // uncompressed_from_id: { type: Meteor.ObjectID, optional: true },
 }));
 
 WranglerDocuments.attachSchema(new SimpleSchema({
@@ -124,38 +112,62 @@ WranglerDocuments.attachSchema(new SimpleSchema({
 }));
 
 WranglerSubmissions.allow({
-  insert: function (userId, doc) {
-    return doc.user_id === userId;
-  },
-  update: function (userId, doc, fields, modifier) {
-    var submission = WranglerSubmissions.findOne(doc._id);
+  insert: function (userId, submission) {
+    var user = MedBook.ensureUser(userId);
+    user.ensureAccess(submission);
 
-    return submission.user_id === userId &&
-        submission.status === "editing";
+    return submission.status === "editing";
+  },
+  update: function (userId, submission, fields, modifier) {
+    var user = MedBook.ensureUser(userId);
+    user.ensureAccess(submission);
+
+    return submission.status === "editing";
   },
 });
 
-function makePermissions (collection) {
-  return {
-    insert: function (userId, doc) {
-      var submission = WranglerSubmissions.findOne(doc.submission_id);
+function verifyOptions (user, options) {
+  if (options.study_id) {
+    var study = Studies.findOne(options.study_id);
+    user.ensureAccess(study);
+  }
 
-      return doc.user_id === userId &&
-          submission.user_id === userId;
-    },
-    update: function (userId, doc, fields, modifier) {
-      var wholeDoc = collection.findOne(doc._id);
-      var submission = WranglerSubmissions.findOne(wholeDoc.submission_id);
-
-      return submission.user_id === userId &&
-          submission.status === "editing";
-    },
-  };
+  if (options.data_set_id) {
+    var dataSets = DataSets.findOne(options.data_set_id);
+    user.ensureAccess(dataSets);
+  }
 }
 
-// NOTE: don't want people to be able to add just any document
-// WranglerDocuments.allow(makePermissions(WranglerDocuments));
-WranglerFiles.allow(makePermissions(WranglerFiles));
+WranglerFiles.allow({
+  insert: function (userId, doc) {
+    // get the whole document
+    var wranglerFile = WranglerFiles.findOne(doc._id);
+
+    var user = MedBook.ensureUser(userId);
+    user.ensureAccess(wranglerFile);
+
+    var submission = WranglerSubmissions.findOne(wranglerFile.submission_id);
+    user.ensureAccess(submission);
+
+    verifyOptions(user, wranglerFile.options);
+
+    return submission.status === "editing";
+  },
+  update: function (userId, doc, fields, modifier) {
+    // get the whole document
+    var wranglerFile = WranglerFiles.findOne(doc._id);
+
+    var user = MedBook.ensureUser(userId);
+    user.ensureAccess(wranglerFile);
+
+    var submission = WranglerSubmissions.findOne(wranglerFile.submission_id);
+    user.ensureAccess(submission);
+
+    verifyOptions(user, wranglerFile.options);
+
+    return submission.status === "editing";
+  },
+});
 
 getCollectionByName = function(collectionName) {
   switch (collectionName) {
