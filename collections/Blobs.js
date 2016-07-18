@@ -9,19 +9,6 @@ if (Meteor.isServer) {
         fileObject.metadata = {};
       }
       fileObject.metadata.uploaded_date = new Date();
-
-      // if (fileObject.original.type == "") {
-      //   var name = fileObject.name();
-      //   var type;
-      //
-      //   if (name.match(/\.tab$/)) {
-      //     type = 'text/tab-separated-values';
-      //   } else {
-      //     type = mime.lookup(name);
-      //   }
-      //
-      //   fileObject.type(type);
-      // }
     }
   };
 }

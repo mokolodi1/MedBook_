@@ -1,0 +1,15 @@
+{
+    "_id" : "227LsJuK3bqmgNnA7",
+    "collaborations" : [
+        "mokolodi1@gmail.com"
+    ],
+    "name" : "Patient enrollment",
+    "specificity": "patient",
+    "fields" : [
+        {
+            "label" : "Name",
+            "type" : "String",
+            "optional" : false
+        },
+    ]
+}

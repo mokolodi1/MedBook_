@@ -32,3 +32,7 @@ requiredIfTrue = function (shouldBeRequired) {
     }
   }
 };
+
+MedBook.studyLabelRegex = /^([A-Z]|[a-z]|-|_|[0-9])+$/;
+MedBook.sampleLabelRegex =
+    /^([A-Z]|[a-z]|-|_|[0-9])+\/([A-Z]|[a-z]|-|_|[0-9])+$/;

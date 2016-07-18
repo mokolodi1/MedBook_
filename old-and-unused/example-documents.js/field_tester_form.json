@@ -1,0 +1,47 @@
+{
+    "_id" : "227LsJuK3bqmgNnA9",
+    "collaborations" : [
+        "mokolodi1@gmail.com"
+    ],
+    "name" : "Field type tester form",
+    "specificity": "patient",
+    "fields" : [
+        {
+            "label" : "What's up?",
+            "type" : "String",
+            "optional" : false
+        },
+        {
+            "label" : "What is your favorite color?",
+            "type" : "String",
+            "optional" : false,
+            "allowedValues" : [
+                "Red",
+                "Green",
+                "Blue"
+            ]
+        },
+        {
+            "label" : "What's the date",
+            "type" : "Date",
+            "optional" : false
+        },
+        {
+            "label" : "How old are you?",
+            "type" : "Number",
+            "min" : 0,
+            "optional" : false
+        },
+        {
+            "label" : "What's the temperature",
+            "type" : "Number",
+            "decimal" : true,
+            "optional" : false
+        },
+        {
+            "label" : "Do you like green eggs and ham?",
+            "type" : "Boolean",
+            "optional" : false
+        }
+    ]
+}
