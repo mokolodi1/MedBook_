@@ -19,18 +19,38 @@ git submodule add https://github.com/UCSC-MedBook/blobs
 
 Inserting a blob on the server will move the original file!
 
-`Blobs.create(pathToFileOnServer, associatedObject, metadata, callback)`
+`Blobs2.create(pathToFileOnServer, associatedObject, metadata, callback)`
 
 - `pathToFileOnServer`: the path of the file on the server
 - `associatedObject`: the object the blob is associated with. This is an object with the fields `collection_name` and `mongo_id`.
 - `metadata`: any needed uniquely identifying information (any Object)
 
 ```js
-let blobId = Blobs.create("/path/to/file/on/server", {
+let blobId = Blobs2.create("/path/to/file/on/server", {
   collection_name: "Jobs",
   mongo_id: "YDcb7YWfXTdjXbSKX"
 }, {}, function (err, result) {
   // code
+});
+```
+
+#### Delete
+
+Blobs can be deleted using `Blobs2.delete`, which takes a selector and a
+callback function.
+
+Calling `Blobs2.delete` will also delete the files on disk.
+
+```js
+let associated_object = {
+  collection_name: "Jobs",
+  mongo_id: "7bcYtNJx4G3NpEtCn",
+}
+
+Blobs2.delete({ associated_object }, (err, deletedCount) => {
+  if (err) {
+    console.log("Error deleting blobs!");
+  }
 });
 ```
 

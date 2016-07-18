@@ -2,13 +2,15 @@ fs = Npm.require("fs");
 path = Npm.require("path");
 mv = Npm.require("mv");
 mime = Npm.require("mime-types");
-// remove = Npm.require("remove");
+remove = Npm.require("remove");
+Q = Npm.require("Q");
 
 var storageRootPath = "/filestore";
 if (process.env.MEDBOOK_FILESTORE) {
   storageRootPath = process.env.MEDBOOK_FILESTORE;
-  console.log("blobs storage root path:", storageRootPath);
 }
+
+console.log("blobs storage root path:", storageRootPath);
 
 function getFilePath (doc) {
   return path.join(storageRootPath, doc.storage_path);
@@ -91,14 +93,25 @@ Blobs2.create = function (pathOnServer, associated_object,
   }));
 };
 
-// Blobs2.delete = function (selector, callback) {
-//   check(selector, Object);
-//   if (typeof callback !== "function") throw new Meteor.Error("no-callback");
-//
-//   var removePaths = [];
-//   Blobs2.find(selector).forEach(function (blob) {
-//     removePaths.push(blob.getStoragePath());
-//   });
-//
-//
-// };
+Blobs2.delete = function (selector, callback) {
+  if (typeof selector === "string") {
+    check(selector, String);
+  } else {
+    check(selector, Object);
+  }
+  if (typeof callback !== "function") throw new Meteor.Error("no-callback");
+
+  var rmPromises = [];
+  Blobs2.find(selector).forEach(function (blob) {
+    rmPromises.push(Q.nfcall(remove, blob.getFilePath()));
+  });
+
+  Q.all(rmPromises)
+    .then(Meteor.bindEnvironment(function (result) {
+      callback(null, rmPromises.length);
+    }))
+    .catch(function (yop) {
+      callback(new Meteor.Error("failed-to-remove-blobs",
+          "Failed to remove all blobs."));
+    });
+};

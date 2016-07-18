@@ -7,9 +7,10 @@ Package.describe({
 });
 
 Npm.depends({
-  "mv": "2.1.1",
+  mv: "2.1.1",
   "mime-types": "2.1.11",
-  // "remove": "0.1.5",
+  remove: "0.1.5",
+  q: "1.4.1",
 });
 
 Package.onUse(function(api) {
