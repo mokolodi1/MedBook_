@@ -127,9 +127,15 @@ Meteor.methods({
 
 ## The Collaboration object
 
-Two methods are available on the server for objects fetched from the Collaborations collection (ex. `Collaborations.findOne()`).  `getAssociatedCollaborators` does a downwards tree traversal, returning a list of collaborations (including personal collaborations) that have access to the source collaboration. `getAssociatedCollaborations` does an upwards tree traversal, returning a list of collaborations that the source collaboration has access to. Both of these functions take no parameters and return an array of collaboration name strings.
+The following functions are available on the collaboration object on the server.
 
-These two functions are provided for `medbook:collaboration`'s internal API and advanced users. Use them with care!
+| Function | Description |
+|----------|-------------|
+| `getUserEmails` | Not implemented yet. Returns a list of emails for all of the users that have access to the collaboration. |
+| `getAssociatedCollaborators` | Does a downwards tree traversal, returning a list of collaborations (including personal collaborations) that have access to the source collaboration. Takes no parameters and returns an array of collaboration names. |
+| `getAssociatedCollaborations` | Does an upwards tree traversal, returning a list of collaborations that the source collaboration has access to. Takes no parameters and returns an array of collaboration names. |
+
+`getAssociatedCollaborations` and `getAssociatedCollaborations` are provided for `medbook:collaboration`'s internal API and are for advanced users. Use them with care!
 
 ## Use case questions
 
