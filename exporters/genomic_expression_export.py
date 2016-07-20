@@ -1,10 +1,12 @@
 #! /usr/bin/env python
 
-"""Export MedBook gene_expression data into rectangular files.
+"""Export MedBook genomic_expression data into rectangular files.
 
 Usage:
-./gene_expression_export.py --sample_group_id [sample group _id]
-./gene_expression_export.py --data_set_id [data set _id] --sample_label [sample label]
+./genomic_expression_export.py --sample_group_id (sample group _id)
+./genomic_expression_export.py --data_set_id (data set _id) [--sample_label (sample label)]
+
+Use "--plc" to create a .plc file: http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#RES:_ExpRESsion_.28with_P_and_A_calls.29_file_format_.28.2A.res.29
 
 Dependancies:
 pymongo
@@ -15,7 +17,7 @@ import getopt
 import pymongo
 import os
 
-def export_from_object(db, sampleGroup):
+def export_from_object(db, sampleGroup, isPlc):
     # NOTE: from this point on, don't reference sampleGroup["data_sets"]
     #       because we mutate it (only sort, for now)
     sampleGroupDataSets = sampleGroup["data_sets"]
@@ -24,29 +26,29 @@ def export_from_object(db, sampleGroup):
     sampleGroupDataSets = sorted(sampleGroupDataSets,
             key=lambda dataSet: dataSet["data_set_id"])
 
-    # TODO: ??
-    # # make sure the sample labels are sorted within each study
-    # for index, value in enumerate(sampleGroupDataSets):
-    #     sampleGroupDataSets[index]
     dataSetIds = [study["data_set_id"] for study in sampleGroupDataSets]
     dataSets = list(db["data_sets"].find({"_id": { "$in": dataSetIds }}).sort([
         ("_id", pymongo.ASCENDING)
     ]))
 
+    # TODO: make sure the sample labels are unique across data sets
+
     # make sure we're dealing with the same gene set for each data set
-    geneSet = dataSets[0]["gene_expression_genes"]
+    geneSet = dataSets[0]["feature_labels"]
 
     # if there is more than one data set, take the intersection one by one
     if len(dataSets) > 1:
         for dataSet in dataSet[1:]:
-            geneSet = list(set(geneSet) & set(dataSet["gene_expression_genes"]))
-
-        sys.stderr.write(str(geneSet));
+            geneSet = list(set(geneSet) & set(dataSet["feature_labels"]))
 
     # TODO: make sure there are no sample label collisions
 
     # print out the header line
     sys.stdout.write("Gene")
+
+    # if it's a .plc, put the extra two rows
+    if isPlc:
+        sys.stdout.write("\tNAME\tGWEIGHT");
 
     for study in sampleGroupDataSets:
         for sampleLabel in study["sample_labels"]:
@@ -54,14 +56,19 @@ def export_from_object(db, sampleGroup):
 
     # print out the data (non-header line)
 
-    # sort by gene_label and then data_set_id
-    cursor = db["gene_expression"].find({
-        "data_set_id": { "$in": dataSetIds },
-        "gene_label": { "$in": geneSet }
-    }).sort([
-        ("gene_label", pymongo.ASCENDING),
+    # create an index so the sort doesn't fail
+    sortBy = [
+        ("feature_label", pymongo.ASCENDING),
         ("data_set_id", pymongo.ASCENDING)
-    ])
+    ]
+
+    db["genomic_expression"].create_index(sortBy);
+
+    # sort by feature_label and then data_set_id
+    cursor = db["genomic_expression"].find({
+        "data_set_id": { "$in": dataSetIds },
+        "feature_label": { "$in": geneSet }
+    }).sort(sortBy)
 
     # make absolutely sure the order of the dataSets matches the order of the
     # dataSets in the sample group
@@ -77,14 +84,18 @@ def export_from_object(db, sampleGroup):
         # check to see if we're on a new gene
         if doc["data_set_id"] == firstStudyLabel:
             dataSetIndex = 0
-            sys.stdout.write("\n" + doc["gene_label"] + "\t")
+            sys.stdout.write("\n" + doc["feature_label"] + "\t")
+
+        # if it's a .plc, put the extra two rows
+        if isPlc:
+            sys.stdout.write("\t1\t");
 
         # write data for this doc
         currentDataSet = dataSets[dataSetIndex]
         dataStrings = []
         for sampleLabel in sampleGroupDataSets[dataSetIndex]["sample_labels"]:
-            index = int(currentDataSet["gene_expression_index"][sampleLabel])
-            dataStrings.append(str(doc["rsem_quan_log2"][index]))
+            index = int(currentDataSet["sample_label_index"][sampleLabel])
+            dataStrings.append(str(doc["values"][index]))
 
         sys.stdout.write("\t".join(dataStrings))
 
@@ -97,9 +108,10 @@ def main():
     argv = sys.argv
 
     # set up the database client
-    db = pymongo.MongoClient(os.getenv("MONGO_URL", "mongodb://mongo:27017/MedBook"))["MedBook"]
+    db = pymongo.MongoClient(os.getenv("MONGO_URL"))["MedBook"]
 
-    # process options if --sample_group_id
+    sampleGroup = {}
+
     if "--sample_group_id" in argv:
         index = argv.index("--sample_group_id") + 1
         if index >= len(argv):
@@ -108,25 +120,31 @@ def main():
 
         sampleGroupId = argv[index]
         sampleGroup = db["sample_groups"].find_one({ "_id": sampleGroupId })
-        export_from_object(db, sampleGroup)
-        sys.exit(0)
-    elif "--data_set_id" in argv and "--sample_label" in argv:
+    elif "--data_set_id" in argv:
         dataSetIndex = argv.index("--data_set_id") + 1
-        sampleIndex = argv.index("--sample_label") + 1
 
         # pretend we have a sample group
-        export_from_object(db, {
+        sampleGroup = {
             "data_sets": [
                 {
                     "data_set_id": argv[dataSetIndex],
-                    "sample_labels": [ argv[sampleIndex] ]
                 }
             ]
-        })
+        };
 
-        sys.exit(0)
+        if "--sample_label" in argv:
+            sampleIndex = argv.index("--sample_label") + 1
+            sampleGroup["data_sets"][0]["sample_labels"] = [ argv[sampleIndex] ]
+        else:
+            dataSet = db["data_sets"].find_one({ "_id": argv[dataSetIndex] })
+            sampleGroup["data_sets"][0]["sample_labels"] = dataSet["sample_labels"]
+    else:
+        print("invalid arguments given to exporter");
+        sys.exit(1);
 
-    print __doc__
+    export_from_object(db, sampleGroup, "--plc" in argv)
+
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()
