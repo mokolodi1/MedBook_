@@ -6,6 +6,25 @@
 # Example:
 # ./outlier-analysis.sh SAMPLE_DATA.tsv median.tsv highthreshold.tsv lowthreshold.tsv
 #
+# output :
+# top_5_percent_most_highly_expressed_genes.tsv
+#   tab-separated
+#   Fields: Gene name, sample expression value
+#   Gene names and expression values for the 5% of genes in
+#   SAMPLE_DATA with the highest absolute expression values
+#
+# down_outlier_genes
+#   space-separated
+#   Fields: gene name, median background value, sample expression value
+#   Gene names & values for all genes where SAMPLE_DATA's expression value
+#   is lower than the background cohort's "low" threshold.
+#
+# up_outlier_genes
+#   space-separated
+#   Fields: gene_name, median background value, sample expression value, sample expression value (again)
+#   Gene names & values for genes where SAMPLE_DATA's expression value
+#   is higher than the background cohort's "high" threshold. Only includes
+#   genes that are ALSO in the top 5% most highly expressed
 #######################################################################
 
 sed s/\"//g $2 | sort > median.sort
@@ -30,6 +49,9 @@ sort -r -n -k  2,2 single_sample | head -n $top_percent | sort > single_sample.h
 
 cat down.outlier-single_sample.temp.sort > down_outlier_genes
 join up.outlier-single_sample.temp.sort single_sample.head.sort > up_outlier_genes
+
+# rename for clarity
+mv single_sample.head.sort top_5_percent_most_highly_expressed_genes.tsv
 #rm temp
 #rm *.temp*
 #rm *.sort
