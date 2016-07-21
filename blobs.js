@@ -3,7 +3,7 @@ path = Npm.require("path");
 mv = Npm.require("mv");
 mime = Npm.require("mime-types");
 remove = Npm.require("remove");
-Q = Npm.require("Q");
+Q = Npm.require("q");
 
 var storageRootPath = "/filestore";
 if (process.env.MEDBOOK_FILESTORE) {
