@@ -69,19 +69,19 @@
    # menuItem = "Job Runner"
    # containerName = "job-runner"
 
-   [apps.rpad]
-   auth = false
-   route = "/r-pad"
-   port = 3000
-   containerName = "rpad"
+   # [apps.rpad]
+   # auth = false
+   # route = "/r-pad"
+   # port = 3000
+   # containerName = "rpad"
 
-    [apps.casebook]
-    auth = false
-    route = "/case-book"
-    port = 3000
-    containerName = "case-book"
-    menuPosition = 9
-    menuItem = "Case Book"
+   #  [apps.casebook]
+   #  auth = false
+   #  route = "/case-book"
+   #  port = 3000
+   #  containerName = "case-book"
+   #  menuPosition = 9
+   #  menuItem = "Case Book"
 
 [final]
    redirect = "/"
