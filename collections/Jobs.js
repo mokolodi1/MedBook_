@@ -53,6 +53,16 @@ var jobSchemas = {
       bookmark_url: { type: String },
     }),
   },
+  // TODO : just guessing at args and output for now
+  // may need to modify
+  ApplyExprAndVarianceFilters: {
+    args: new SimpleSchema({
+      sample_group_id: { type: String},
+    })
+    output: new SimpleSchema({
+      filtered_samples_blob_id: { type: String},
+    }),
+  },
 };
 MedBook.jobSchemas = jobSchemas;
 
