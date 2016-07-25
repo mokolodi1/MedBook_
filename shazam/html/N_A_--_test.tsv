@@ -1,0 +1,46 @@
+Gene	Avg num Alterations	Total alterations	num genes	min mean truth	max mean truth	min mean any	max mean any	normalized activity
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=ASK1/TAK1/MAP3K11 target="_blank">ASK1/TAK1/MAP3K11</a>	0.0	0.0	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MEF2 target="_blank">MEF2</a>	0.02	0.136	0.254	1.0	-0.164	1.0	2.0	0.026	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=HRAS target="_blank">HRAS</a>	-0.1	0.293	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=ERK Target Kinases target="_blank">ERK Target Kinases</a>	-0.068	0.104	-9999.0	0.0	-9999.0	0.0	0.0	0.016	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAPK14 target="_blank">MAPK14</a>	0.016	0.141	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP2K2 target="_blank">MAP2K2</a>	-0.084	0.267	-9999.0	0.0	-9999.0	0.0	0.0	0.014	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP2K1 target="_blank">MAP2K1</a>	-0.112	0.29	0.364	1.0	-9999.0	0.0	1.0	0.1	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=ELK1 target="_blank">ELK1</a>	-0.048	0.209	-9999.0	0.0	-0.311	3.0	3.0	0.072	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP2K7 target="_blank">MAP2K7</a>	0.038	0.224	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP2K6 target="_blank">MAP2K6</a>	-0.1	0.293	-9999.0	0.0	-9999.0	0.0	0.0	0.056	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP2K5 target="_blank">MAP2K5</a>	-0.007	0.077	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP2K4 target="_blank">MAP2K4</a>	-0.132	0.204	-9999.0	0.0	-0.426	2.0	2.0	0.086	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=GCK/MAP4K3/MAP4K4 target="_blank">GCK/MAP4K3/MAP4K4</a>	-0.0	0.0	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MEK3/MEK6 target="_blank">MEK3/MEK6</a>	0.0	0.0	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAPK11/ERK6/MAPK13/p38 target="_blank">MAPK11/ERK6/MAPK13/p38</a>	0.022	0.055	-9999.0	0.0	-9999.0	0.0	0.0	0.011	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=CEBPA target="_blank">CEBPA</a>	-0.032	0.115	-9999.0	0.0	-0.191	1.0	1.0	0.001	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=p38 Target Kinases target="_blank">p38 Target Kinases</a>	0.021	0.051	-9999.0	0.0	-9999.0	0.0	0.0	0.011	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=STAT1 target="_blank">STAT1</a>	-0.005	0.129	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP3K1 target="_blank">MAP3K1</a>	-0.106	0.235	-9999.0	0.0	-9999.0	0.0	0.0	0.031	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=JUN target="_blank">JUN</a>	-0.034	0.236	-9999.0	0.0	-9999.0	0.0	0.0	0.038	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP3K7 target="_blank">MAP3K7</a>	0.097	0.286	0.386	4.0	-9999.0	0.0	4.0	0.11	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=ERK1/ERK2 target="_blank">ERK1/ERK2</a>	-0.072	0.114	-9999.0	0.0	-9999.0	0.0	0.0	0.015	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=RAF1/A-RAF/B-RAF target="_blank">RAF1/A-RAF/B-RAF</a>	-0.083	0.178	-9999.0	0.0	-9999.0	0.0	0.0	0.002	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAPK7 target="_blank">MAPK7</a>	0.009	0.218	0.404	1.0	-9999.0	0.0	1.0	0.054	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MYC target="_blank">MYC</a>	0.019	0.094	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP4K5/MAP4K1 target="_blank">MAP4K5/MAP4K1</a>	0.0	0.0	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=FOS target="_blank">FOS</a>	-0.131	0.149	-9999.0	0.0	-0.311	3.0	3.0	0.031	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=SP1 target="_blank">SP1</a>	-0.029	0.051	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=CHUK target="_blank">CHUK</a>	-0.022	0.376	-9999.0	0.0	-9999.0	0.0	0.0	0.108	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=CREB1 target="_blank">CREB1</a>	0.066	0.101	-9999.0	0.0	-9999.0	0.0	0.0	0.004	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MKK7/MEK4 target="_blank">MKK7/MEK4</a>	0.046	0.122	0.302	1.0	-9999.0	0.0	1.0	0.024	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP2K3 target="_blank">MAP2K3</a>	-0.102	0.2	-9999.0	0.0	-0.426	1.0	1.0	0.035	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=JNK1/MAPK9/MAPK10 target="_blank">JNK1/MAPK9/MAPK10</a>	0.042	0.114	0.279	1.0	-9999.0	0.0	1.0	0.022	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP3K4/MAP3K12 target="_blank">MAP3K4/MAP3K12</a>	0.076	0.353	0.719	1.0	-9999.0	0.0	1.0	0.058	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=IKBKB target="_blank">IKBKB</a>	-0.065	0.444	-9999.0	0.0	-9999.0	0.0	0.0	0.127	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP3K2/MEKK1/MAP3K3/MAP3K8 target="_blank">MAP3K2/MEKK1/MAP3K3/MAP3K8</a>	-0.0	0.0	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAX target="_blank">MAX</a>	0.045	0.123	-9999.0	0.0	-9999.0	0.0	0.0	0.008	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=RPS6KA1 target="_blank">RPS6KA1</a>	-0.008	0.226	-9999.0	0.0	-0.39	1.0	1.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP3K13 target="_blank">MAP3K13</a>	-0.026	0.265	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MAP3K14 target="_blank">MAP3K14</a>	0.023	0.34	0.386	4.0	-9999.0	0.0	4.0	0.148	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=RAC1 target="_blank">RAC1</a>	-0.032	0.201	-9999.0	0.0	-9999.0	0.0	0.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=ATF2 target="_blank">ATF2</a>	0.03	0.125	0.305	1.0	-9999.0	0.0	1.0	0.0	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=PAK1 target="_blank">PAK1</a>	0.072	0.352	0.711	1.0	-9999.0	0.0	1.0	0.061	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=PAK2 target="_blank">PAK2</a>	0.064	0.358	0.71	1.0	-9999.0	0.0	1.0	0.056	
+<a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene=MEK1/MEK2 target="_blank">MEK1/MEK2</a>	-0.076	0.134	-9999.0	0.0	-9999.0	0.0	0.0	0.012	

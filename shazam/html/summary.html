@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<html lang="en">
+<head>
+<link media="print, projection, screen" href="style.css" type="text/css" rel="stylesheet" />
+<title>Per-pathway summary of activity</title>
+<script src="js/jquery-latest.js" type="text/javascript"></script>
+<script src="js/jquery.tablesorter.min.js" type="text/javascript"></script>
+<script src="js/jquery.metadata.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function()
+  {
+      $("table").tablesorter({
+      // sort on the tenth column , order desc 
+          sortList: [[9,1]] 
+              }); 
+  }
+);
+</script>
+</head>
+<body>
+
+<p>Per-pathway summary of activity</p>
+<p><a href="index.html">Click here for all pathways</a></p>
+<table class="tablesorter" border="1" id="results">
+<thead>
+<tr>
+<th>Image</th>
+<th>Name</th>
+<th class="{sorter:&quot;digit&quot;}">Avg Num Alterations</th>
+<th class="{sorter:&quot;digit&quot;}">Total Alterations</th>
+<th class="{sorter:&quot;digit&quot;}">Num Genes</th>
+<th class="{sorter:&quot;digit&quot;}">Min Mean Truth</th>
+<th class="{sorter:&quot;digit&quot;}">Max Mean Truth</th>
+<th class="{sorter:&quot;digit&quot;}">Min Mean Any</th>
+<th class="{sorter:&quot;digit&quot;}">Max Mean Any</th>
+<th class="{sorter:&quot;digit&quot;}">Normalized Activity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="test_pid_test_p_summary.html"><img width="100" src="png/test_pid_test_p_summary.png" /></a></td>
+<td><a href="test_pid_test_p_summary.html">N/A</a></td>
+<td>1.318</td>
+<td>29.0</td>
+<td>22.0</td>
+<td>-0.094</td>
+<td>0.048</td>
+<td>-0.335</td>
+<td>0.386</td>
+<td>6.07</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td></td>
+<td>Total</td>
+<td>1.31818181818</td>
+<td>29</td>
+<td>22</td>
+<td>-0.093654075</td>
+<td>0.04756527</td>
+<td>-0.335394</td>
+<td>0.386371</td>
+<td>6.07016141212</td>
+</tr>
+</tbody>
+</table>
+<p><a href="index.html">Click here for all pathways</a></p>
+Last modified on 6/25/2014 12:24:43
+</body>
+</html>
