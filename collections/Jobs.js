@@ -58,7 +58,7 @@ var jobSchemas = {
   ApplyExprAndVarianceFilters: {
     args: new SimpleSchema({
       sample_group_id: { type: String},
-    })
+    }),
     output: new SimpleSchema({
       filtered_samples_blob_id: { type: String},
     }),
