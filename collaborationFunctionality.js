@@ -40,9 +40,18 @@ Collaborations = new Meteor.Collection("collaborations", {
     // I'm too lazy to change it. Feel free to!
     doc.getAssociatedCollaborators = _.partial(getAssociatedCollaborators, doc);
     doc.getAssociatedCollaborations = _.partial(getAssociatedCollaborations, doc);
+    doc.getUserEmails = _.partial(getUserEmails, doc);
     return doc;
   }
 });
+
+function getUserEmails (doc) {
+  var associatedCollabs = getAssociatedCollaborators(doc);
+
+  return _.filter(associatedCollabs, function (collabName) {
+    return collabName.indexOf("@") !== -1;
+  });
+}
 
 /**
  * @summary Traverse the collaboration graph downwards.
@@ -64,7 +73,7 @@ function getAssociatedCollaborators (doc) {
 
   // add the current collaboration
   // TODO: is this the behaviour we want?
-  associatedCollaborations[doc.name] = 1;
+  associatedCollaborators[doc.name] = 1;
 
   // the dynamic queue of tree nodes that we're going to parse through
   // NOTE: list of collaboration names
