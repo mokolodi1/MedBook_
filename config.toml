@@ -26,13 +26,13 @@
    containerName = "patient-care"
 
 
-   [apps.Telescope]
-   auth = false
-   route = "/telescope"
-   menuPosition = 3
-   menuItem = "Telescope"
-   containerName = "telescope"
-   port = 3000
+   # [apps.Telescope]
+   # auth = false
+   # route = "/telescope"
+   # menuPosition = 3
+   # menuItem = "Telescope"
+   # containerName = "telescope"
+   # port = 3000
 
    # [apps.fusion]
    # auth = false
