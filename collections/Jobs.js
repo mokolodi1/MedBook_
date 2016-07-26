@@ -1,7 +1,6 @@
 Jobs = new Meteor.Collection("jobs");
 
 // TODO: implement job schemas
-
 // NOTE: attributes = name of jobs
 var jobSchemas = {
   "ParseWranglerFile": null,
@@ -53,6 +52,11 @@ var jobSchemas = {
       bookmark_url: { type: String },
     }),
   },
+  UpdateCbioSecurity: {
+    args: new SimpleSchema({
+      collab_names: { type: [String] },
+    }),
+  }
 };
 MedBook.jobSchemas = jobSchemas;
 
@@ -109,20 +113,3 @@ Jobs.attachSchema(new SimpleSchema({
   error_description: { type: String, optional: true },
   stack_trace: { type: String, optional: true },
 }));
-
-function onlyAdminCollaboration (user_id, doc) {
-  var user = Meteor.users.findOne(user_id);
-
-  return user.profile &&
-      user.profile.collaborations instanceof Array &&
-      user.profile.collaborations.indexOf("Admin") >= 0 &&
-      doc.status === "creating" || doc.status === "waiting";
-}
-
-// we don't want a user to be able to create a "ReloadGenesCollection" job
-Jobs.allow({
-  insert: onlyAdminCollaboration,
-  update: onlyAdminCollaboration,
-  remove: onlyAdminCollaboration,
-  fetch: ["status"],
-});
