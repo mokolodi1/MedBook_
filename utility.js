@@ -29,6 +29,7 @@ var slugStringMap = {
   tpm: "TPM",
   raw_counts: "raw counts",
   rsem: "RSEM",
+  cufflinks: "Cufflinks",
 };
 MedBook.utility.slugToString = function (slug) {
   var mapped = slugStringMap[slug];

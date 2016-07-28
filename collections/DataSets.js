@@ -27,10 +27,11 @@ MedBook.dataSetTypes = [
       },
       quantification_method: {
         type: String,
-        allowedValues: [ "rsem" ],
+        allowedValues: [ "rsem", "cufflinks" ],
         autoform: {
           options: [
             { value: "rsem", label: "RSEM" },
+            { value: "cufflinks", label: "Cufflinks" },
           ]
         },
         label: "Quantification method",
