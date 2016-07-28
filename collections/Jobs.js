@@ -21,6 +21,7 @@ var jobSchemas = {
       sample_group_id: { type: String },
       sample_group_name: { type: String },
       iqr_multiplier: { type: Number, decimal: true },
+      use_filtered_sample_group: { type: Boolean, optional: true},
     }),
     output: null,
   },
