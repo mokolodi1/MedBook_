@@ -6,7 +6,10 @@ Usage:
 ./genomic_expression_export.py --sample_group_id (sample group _id)
 ./genomic_expression_export.py --data_set_id (data set _id) [--sample_label (sample label)]
 
-Use "--plc" to create a .plc file: http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#RES:_ExpRESsion_.28with_P_and_A_calls.29_file_format_.28.2A.res.29
+Use the "--plc" option to create a .plc file: http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#RES:_ExpRESsion_.28with_P_and_A_calls.29_file_format_.28.2A.res.29
+
+TODO:
+Use the "--uq-sample-labels" option to exclude the study_label prefix from the sample names. Ex: a sample will be called "DTB-001" instead of "prad_wcdt/DTB-001" if there are no sample name collisions. If there are sample name collisions this option is ignored.
 
 Dependancies:
 pymongo
@@ -38,7 +41,7 @@ def export_from_object(db, sampleGroup, isPlc):
 
     # if there is more than one data set, take the intersection one by one
     if len(dataSets) > 1:
-        for dataSet in dataSet[1:]:
+        for dataSet in dataSets[1:]:
             geneSet = list(set(geneSet) & set(dataSet["feature_labels"]))
 
     # TODO: make sure there are no sample label collisions
