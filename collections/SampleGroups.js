@@ -11,7 +11,12 @@ var filterOptionsSchemas = {
   }),
   form_values: new SimpleSchema({
     form_id: { type: String },
-    mongo_query: { type: String}, // Use JSON.parse & JSON.stringify to translate
+
+    // Use JSON.parse & JSON.stringify to translate
+    mongo_query: { type: String},
+
+    // TODO: perhaps?
+    // matching_sample_count: { type: Number },
   }),
 };
 
@@ -79,9 +84,16 @@ SampleGroups.attachSchema(new SimpleSchema({
                 }
               },
             },
+
+            // TODO: should we do something like this?
+            // // the number of samples after this filter was applied
+            // // (so that users can see that a certain filter filtered from
+            // // 143 samples to 59 samples)
+            // sample_count_after_filter: { type: Number },
           }) ],
+
           defaultValue: [],
-          optional: true, // TODO: remove
+          optional: true, // TODO: remove (?)
         },
       })
     ],
