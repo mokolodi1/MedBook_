@@ -21,6 +21,12 @@ MedBook.utility.sampleArrStrToObj = function (array) {
   return _.map(array, MedBook.utility.sampleStrToObj);
 };
 
+MedBook.utility.unqualifySampleLabels = function (sampleLabels) {
+  var sampleObjects = MedBook.utility.sampleArrStrToObj(sampleLabels);
+
+  return _.pluck(sampleObjects, "uq_sample_label");
+};
+
 var slugStringMap = {
   gene_expression: "gene expression",
   rsem: "RSEM",
