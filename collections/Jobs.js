@@ -20,6 +20,7 @@ var jobSchemas = {
       sample_group_id: { type: String },
       sample_group_name: { type: String },
       iqr_multiplier: { type: Number, decimal: true },
+      use_filtered_sample_group: { type: Boolean, optional: true},
     }),
     output: null,
   },
@@ -56,7 +57,15 @@ var jobSchemas = {
     args: new SimpleSchema({
       collab_names: { type: [String] },
     }),
-  }
+  },
+  ApplyExprAndVarianceFilters: {
+    args: new SimpleSchema({
+      sample_group_id: { type: String},
+    }),
+    output: new SimpleSchema({
+      filtered_samples_blob_id: { type: String},
+    }),
+  },
 };
 MedBook.jobSchemas = jobSchemas;
 
