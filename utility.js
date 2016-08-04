@@ -36,6 +36,9 @@ var slugStringMap = {
   raw_counts: "raw counts",
   rsem: "RSEM",
   cufflinks: "Cufflinks",
+  // gistic: "GISTIC",
+  // adtex: "Adtex",
+  // varscan: "Varscan",
 };
 MedBook.utility.slugToString = function (slug) {
   var mapped = slugStringMap[slug];
