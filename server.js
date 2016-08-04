@@ -68,7 +68,9 @@ Accounts.onLogin(function (loginObj) {
 
   // update in case we needed to migrate (above)
   user = MedBook.findUser(user._id);
-  console.log("User logged in:", user._id, user.personalCollaboration());
+
+  var dateString = (new Date()).toString().slice(4, 21);
+  console.log("Login:", user._id, user.personalCollaboration(), dateString);
 });
 
 
