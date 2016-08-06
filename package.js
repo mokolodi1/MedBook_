@@ -41,7 +41,7 @@ Package.onUse(function(api) {
   addAndExport(api, "SampleGroups");
 
   addAndExport(api, "GeneSets");
-  addAndExport(api, "GeneSetCollections");
+  addAndExport(api, "GeneSetGroups");
 
   // utility collections
   addAndExport(api, "Jobs");
