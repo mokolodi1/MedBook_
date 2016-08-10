@@ -6,33 +6,45 @@
 
 Records = new Meteor.Collection("records");
 
-// NOTE: form argument is optional
-MedBook.validateRecord = function(record, form) {
+// NOTE: fetchedObject argument is optional
+MedBook.validateRecord = function(record, fetchedObject) {
   check(record, Object);
-  check(form, Match.Optional(Forms.simpleSchema()));
 
-  // make sure form_id is defined
-  var form_id = record.form_id;
-  if (!form_id) throw new Meteor.Error("form_id-required");
-
-  // grab the form if not passed
-  if (!form) {
-    form = Forms.findOne(record.form_id);
-
-    if (!form) throw new Meteor.Error("invalid-form");
+  // make sure associated_object is defined
+  var associated_object = record.associated_object;
+  if (!associated_object) {
+    throw new Meteor.Error("associated_object-required");
   }
 
-  // delete the form_id field and check if the record matches the schema
-  var recordCopy = JSON.parse(JSON.stringify(record));
-  delete recordCopy.form_id;
+  // make sure associated_object is valid
+  var validCollectionNames = ["Forms", "GeneSets"];
+  if (Object.keys(associated_object).length !== 2 ||
+      validCollectionNames.indexOf(associated_object.collection_name) === -1 ||
+      typeof associated_object.mongo_id !== "string") {
+    throw new Meteor.Error("associated_object-invalid");
+  }
 
-  check(recordCopy, schemaObjectFromForm(form));
+  // grab the associated object if not provided
+  if (!fetchedObject) {
+    var collection = MedBook.collections[associated_object.collection_name];
+    fetchedObject = collection.findOne(associated_object.mongo_id);
+
+    if (!fetchedObject) throw new Meteor.Error("invalid-form");
+  }
+
+  // delete the associated_object field and check if the
+  // record matches the schema
+  delete record.associated_object;
+  delete record._id;
+
+  var schemaObj = MedBook.schemaFromFields(fetchedObject.fields);
+  check(record, new SimpleSchema(schemaObj));
 };
 
-MedBook.schemaObjectFromForm = function (form) {
+MedBook.schemaFromFields = function (fields) {
   var schema = {};
 
-  _.each(form.fields, function (field) {
+  _.each(fields, function (field) {
     var fieldDefinition;
 
     if (field.value_type === "String") {
@@ -45,9 +57,9 @@ MedBook.schemaObjectFromForm = function (form) {
       throw new Meteor.Error("Invalid field type");
     }
 
-    // attach all other attributes (except field.value_type)
-    delete field.value_type;
-    _.extend(fieldDefinition, field);
+    // attach all other attributes (except field.value_type and .name)
+    // This is so that it can handle things like minCount, etc.
+    _.extend(fieldDefinition, _.omit(field, "name", "value_type"));
 
     schema[field.name] = fieldDefinition;
   });

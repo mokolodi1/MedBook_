@@ -64,9 +64,9 @@ Only one user can add data to a data set at once. This is enforced by the `curre
 
 Data sets have collaboration security. Administrators of a data set may incrementally add new columns (samples) to a data set; the rows (genomic features) are immutable and defined by the feature set of the first added sample. Collaborators can view the data set but cannot make changes.
 
-#### Forms and Records
+#### Forms
 
-A form is a set of one or more fields, each of which has a name and a type. A form can have records associated with it whose fields are described by the form. Drawing comparisons to a spreadsheet, a form is a description of the header row and each record is a single data row in the spreadsheet.
+A form is a set of one or more fields, each of which has a name and a type. A form has records associated with it whose fields are described by the form. Drawing comparisons to a spreadsheet, a form is a description of the header row and each record is a single data row in the spreadsheet.
 
 Each record in a form is uniquely identified by its form and its sample label.
 
@@ -78,7 +78,7 @@ They can also copy a form to create their own version, though this does not copy
 
 Within a form, field names must be unique.
 
-Reserved field names (for implementation purposes): `form_id`.
+Reserved field names (for implementation purposes): `_id`, `associated_object`.
 
 #### Sample groups
 
@@ -99,13 +99,28 @@ Sample groups have collaboration security, with the right to change collaborator
 
 Gene sets are a set of genes that have some relevance to each other. They have a list of genes as well as a set of columns associated with each gene.
 
+The data for gene sets (the list of genes and associated values) are stored as records, much like with forms.
+
 Gene sets can have collaboration security or gene set group security depending on if `collaborations` or `gene_set_group_id` is set.
 
 #### Gene set groups
 
-Gene set groups are a collection of feature sets. They are created by importing a `.gmt` file.
+Gene set groups are a collection of gene sets. They are created by importing a `.gmt` file.
+
+The gene sets in a gene set group are stored as gene sets and are linked by mongo _id.
 
 Gene set groups have collaboration security and are immutable.
+
+#### Records
+
+Records are objects in MedBook that users will never directly interact with.
+
+Records are "dumb" data stores for other MedBook data types. (Currently that list includes gene sets, forms, and might soon include mutations.) Records inherit security from their associated objects: a collection name, mongo _id tuple.
+
+To use records and their associated widgets, a schema must define the following attributes:
+- the name of the field that will serve as the primary key
+- an array containing all primary keys for which there are records (for easy lookup)
+- an array of field definitions for each record
 
 #### Blobs
 
