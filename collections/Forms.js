@@ -11,6 +11,9 @@ Forms.attachSchema(new SimpleSchema({
   fields: recordFields([ "String", "Number", "Date" ]),
 
   // for quick look-up
+  sample_count: {
+    type: Number
+  },
   sample_labels: {
     type: [String],
   },

@@ -13,32 +13,54 @@ SimpleSchema.messages({
 
 // - require if the field isn't set
 // - error if the field is set and this field is set as well
-function requireIfUnset (fieldName, isReallyOptional) {
+function requireIfUnset (fieldName) {
   if (this.field(fieldName).isSet) {
     if (this.isSet) { return "metadataAndGeneSetGroupIncompatible"; }
   } else {
-    if (!isReallyOptional && !this.isSet) { return "required"; }
+    if (!this.isSet) { return "required"; }
   }
 }
+
+var fields = recordFields([ "String", "Number" ]);
+// we have to save this up here so that the custom function doesn't reference
+// itself
+var fieldsCustom = fields.custom;
+
+var requireIfNotInGroup = _.partial(requireIfUnset, "gene_set_group_id")
 
 GeneSets.attachSchema(new SimpleSchema({
   name: { type: String },
   description: {
     type: String,
     optional: true,
-
-    // NOTE: this field really is optional, unlike most of them
-    custom: _.partial(requireIfUnset, "gene_set_group_id", true),
   },
 
   collaborations: {
     type: [String],
     optional: true,
-    custom: _.partial(requireIfUnset, "gene_set_group_id"),
+    custom: requireIfNotInGroup,
   },
 
-  gene_label_field: { type: String, label: "Genes" },
-  fields: recordFields([ "String", "Number" ]),
+  gene_label_field: {
+    type: String,
+    label: "Genes",
+    optional: true,
+    custom: requireIfNotInGroup
+  },
+  fields: _.extend(fields, {
+    optional: true,
+
+    // call both custom functions, one after the other
+    custom: function () {
+      if (this.value) {
+        var fieldsError = fieldsCustom.call(this);
+
+        if (fieldsError) { return fieldsError; }
+      }
+
+      return requireIfNotInGroup.call(this);
+    },
+  }),
 
   gene_labels: { type: [String], min: 1 },
 

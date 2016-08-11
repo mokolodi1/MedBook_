@@ -7,7 +7,7 @@
 Records = new Meteor.Collection("records");
 
 // NOTE: fetchedObject argument is optional
-MedBook.validateRecord = function(record, fetchedObject) {
+MedBook.validateRecord = function(record, fields) {
   check(record, Object);
 
   // make sure associated_object is defined
@@ -25,20 +25,23 @@ MedBook.validateRecord = function(record, fetchedObject) {
   }
 
   // grab the associated object if not provided
-  if (!fetchedObject) {
+  if (!fields) {
     var collection = MedBook.collections[associated_object.collection_name];
-    fetchedObject = collection.findOne(associated_object.mongo_id);
+    var fetchedObject = collection.findOne(associated_object.mongo_id);
 
-    if (!fetchedObject) throw new Meteor.Error("invalid-form");
+    if (!fetchedObject || !fetchedObject.fields) {
+      throw new Meteor.Error("invalid-fields-object");
+    }
+
+    fields = fetchedObject.fields;
   }
 
   // delete the associated_object field and check if the
   // record matches the schema
-  delete record.associated_object;
-  delete record._id;
+  var onlyDefinedFields = _.omit(record, "associated_object", "_id");
 
-  var schemaObj = MedBook.schemaFromFields(fetchedObject.fields);
-  check(record, new SimpleSchema(schemaObj));
+  var schemaObj = MedBook.schemaFromFields(fields);
+  check(onlyDefinedFields, new SimpleSchema(schemaObj));
 };
 
 MedBook.schemaFromFields = function (fields) {
