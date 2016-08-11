@@ -31,7 +31,7 @@ var jobSchemas = {
       sample_group_a_name: { type: String },
       sample_group_b_name: { type: String },
       limma_top_genes_count: { type: Number, min: 1 },
-      gene_set_collection_id: { type: String },
+      gene_set_group_id: { type: String },
       gene_set_collection_name: { type: String },
     }),
     output: null,

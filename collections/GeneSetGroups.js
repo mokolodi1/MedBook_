@@ -1,7 +1,7 @@
 // http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/
 // Data_formats#GMT:_Gene_Matrix_Transposed_file_format_.28.2A.gmt.29
 
-GeneSetGroups = new Meteor.Collection("gene_set_collections");
+GeneSetGroups = new Meteor.Collection("gene_set_groups");
 
 GeneSetGroups.attachSchema(new SimpleSchema({
   name: { type: String },
@@ -9,4 +9,5 @@ GeneSetGroups.attachSchema(new SimpleSchema({
   collaborations: { type: [String] },
 
   gene_set_count: { type: Number },
+  gene_set_names: { type: [String] },
 }));

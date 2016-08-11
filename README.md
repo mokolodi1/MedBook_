@@ -109,6 +109,8 @@ Gene set groups are a collection of gene sets. They are created by importing a `
 
 The gene sets in a gene set group are stored as gene sets and are linked by mongo _id.
 
+Gene sets that are part of gene set groups do not have records associated with them, as they do not have columns other than the gene label. The gene list is already stored on every gene set object, which is where gene set groups should look for the gene data.
+
 Gene set groups have collaboration security and are immutable.
 
 #### Records
