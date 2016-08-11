@@ -3,7 +3,7 @@
 """Export MedBook gene_expression data into rectangular files.
 
 Usage:
-./gene_set_collection_export.py [gene set collection id]
+./gene_set_group_export.py [gene set collection id]
 
 Dependancies:
 pymongo
@@ -14,8 +14,8 @@ import getopt
 import pymongo
 import os
 
-def exportGeneSetCollection(db, geneSetCollectionId):
-    cursor = db["gene_sets"].find({ "gene_set_collection_id": geneSetCollectionId })
+def exportGeneSetGroup(db, geneSetGroupId):
+    cursor = db["gene_sets"].find({ "gene_set_group_id": geneSetGroupId })
 
     for doc in cursor:
         sys.stdout.write(doc["name"] + "\t")
@@ -29,7 +29,7 @@ def main():
     db = pymongo.MongoClient(os.getenv("MONGO_URL", "mongodb://mongo:27017/MedBook"))["MedBook"]
 
     if len(argv) == 2:
-        exportGeneSetCollection(db, argv[1])
+        exportGeneSetGroup(db, argv[1])
 
         sys.exit(0)
 
