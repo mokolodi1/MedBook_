@@ -56,7 +56,7 @@ Wrangler.fileTypes = {
       }
     }),
   },
-  GeneSetCollection: {
+  GeneSetGroup: {
     description: "Gene sets file (.gmt)",
     schema: new SimpleSchema({
       name: { type: String },
@@ -73,6 +73,12 @@ Wrangler.fileTypes = {
         label: "Sample ID field",
         optional: true
       },
+    }),
+  },
+  SampleLabelDefinition: {
+    description: "Sample label definition",
+    schema: new SimpleSchema({
+      study_id: { type: String, label: "Study" },
     }),
   },
   // PatientSampleMapping: {

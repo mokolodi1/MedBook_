@@ -14,10 +14,16 @@ ClinicalForm.prototype.constructor = ClinicalForm;
 ClinicalForm.prototype.parseLine = function (brokenTabs, lineNumber, line) {
   // initialize stuff at the beginning
   if (lineNumber === 1) {
+    // keep track of this to be put into the Forms object
+    this.sample_labels = [];
+
     if (this.wranglerPeek) {
+      // keep track of this seperately because we don't keep
+      // a list of sample_labels if they haven't set sample_label_field
+      // yet
       this.recordCount = 0;
 
-      // NOTE: also defined when `wranglerPeek = false`
+      // NOTE: defined differently when `wranglerPeek = false`
       this.fields = _.map(brokenTabs, function (name) {
         return {
           name: name,
@@ -35,11 +41,12 @@ ClinicalForm.prototype.parseLine = function (brokenTabs, lineNumber, line) {
       // ==> This allows us to have the user select a different type
       //     and also means we can do everything at once instead of setting
       //     the `value_type`s at the end, which is annoying.
-      // NOTE: also defined when `wranglerPeek = true`
+      // NOTE: defined differently when `wranglerPeek = true`
       this.fields = _.map(brokenTabs, function (name) {
         var wranglerDoc = WranglerDocuments.findOne({
           submission_id: this.submission._id,
-          document_type: "field_definition"
+          document_type: "field_definition",
+          "contents.field_name": name,
         });
 
         return {
@@ -50,7 +57,11 @@ ClinicalForm.prototype.parseLine = function (brokenTabs, lineNumber, line) {
 
       var name = this.wranglerFile.options.form_name;
       var sample_label_field = this.wranglerFile.options.sample_label_field;
-      if (!sample_label_field) {
+      var possibleHeaderNames = this.wranglerFile.info.header_names;
+
+      // make sure the sample label field is set and is valid
+      if (!sample_label_field ||
+          possibleHeaderNames.indexOf(sample_label_field) === -1) {
         throw "Sample field not selected for " + name;
       }
 
@@ -61,27 +72,68 @@ ClinicalForm.prototype.parseLine = function (brokenTabs, lineNumber, line) {
 
         // keep collaborations blank for now so they can't see it
         collaborations: [],
+
+        // update these at the end when once we've collected the info
+        sample_labels: [],
+        sample_count: 0,
       });
 
       this.bulk = Records.rawCollection().initializeUnorderedBulkOp();
       this.bulkCount = 0;
     }
+
+    // grab the study to be used every line
+    this.study = Studies.findOne(this.wranglerFile.options.study_id);
+
+    // add the header names to the wrangler file if they don't exist already
+    if ((!this.wranglerFile.info || _.isEqual(this.wranglerFile.info, {}))
+        || !this.wranglerFile.info.header_names) {
+      WranglerFiles.update(this.wranglerFile._id, {
+        $set: {
+          info: {
+            header_names: _.pluck(this.fields, "name")
+          }
+        }
+      });
+    }
   } else {
     // parse a data line
+
+    var record = _.reduce(this.fields, function (memo, field, index) {
+      memo[field.name] = brokenTabs[index];
+      return memo;
+    }, {
+      associated_object: {
+        collection_name: "Forms",
+        mongo_id: this.form_id
+      }
+    });
+
+    // change sample_label_field to include study_label
+    var slField = this.wranglerFile.options.sample_label_field;
+
+    // We can only check if the samples are valid once the user has selected
+    // the sample_label_column. Once they do that, we run ParseWranglerFile
+    // again before SubmitWranglerFile, which will run this code.
+    if (slField) {
+      var sample_label = this.study.study_label + "/" + record[slField];
+
+      // make sure the sample label is in the study
+      if (this.study.sample_labels.indexOf(sample_label) === -1) {
+        throw "Sample " + sample_label + " not defined in study.";
+      }
+
+      // change the record's sample label and add to the list of sample labels
+      record[slField] = sample_label;
+      this.sample_labels.push(sample_label);
+    }
+
+    // validate the record
+    MedBook.validateRecord(record, this.fields);
 
     if (this.wranglerPeek) {
       this.recordCount++;
     } else {
-      var record = _.reduce(this.fields, function (memo, field, index) {
-        memo[field.name] = brokenTabs[index];
-        return memo;
-      }, { form_id: this.form_id });
-
-      // change sample_label_field to include study_label
-      var slField = this.wranglerFile.options.sample_label_field;
-      var study = Studies.findOne(this.wranglerFile.options.study_id);
-      record[slField] = study.study_label + "/" + record[slField];
-
       // add to the bulk to be inserted
       this.bulk.insert(record);
       this.bulkCount++;
@@ -131,11 +183,22 @@ ClinicalForm.prototype.endOfFile = function () {
     function makeFormAvailable() {
       var user = Meteor.users.findOne(self.wranglerFile.user_id);
 
-      Forms.update(self.form_id, {
+      var deferred = Q.defer();
+
+      // use Forms.rawCollection because SimpleSchema hands when
+      // arrays are very large (10,000+ elements)
+      Forms.rawCollection().update({_id: self.form_id }, {
         $set: {
-          collaborations: [ user.collaborations.personal ]
+          collaborations: [ user.collaborations.personal ],
+          sample_labels: self.sample_labels,
+          sample_count: self.sample_labels.length,
         }
+      }, function (error, result) {
+        if (error) { deferred.reject(error); }
+        else { deferred.resolve(); }
       });
+
+      return deferred.promise;
     }
 
     // execute the last bit of the bulk we've been building up
@@ -146,14 +209,15 @@ ClinicalForm.prototype.endOfFile = function () {
         if (err) {
           deferred.reject(err);
         } else {
-          makeFormAvailable();
-          deferred.resolve();
+          makeFormAvailable()
+            .then(deferred.resolve)
+            .catch(deferred.reject);
         }
       }, deferred.reject));
 
       return deferred.promise;
     } else {
-      makeFormAvailable();
+      return makeFormAvailable();
     }
   }
 };

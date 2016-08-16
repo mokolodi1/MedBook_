@@ -223,4 +223,20 @@ Wrangler.reviewPanels = {
       ],
     },
   ],
+  metadata: [
+    {
+      name: "sample_label_definition",
+      title: "Sample label definitions",
+      description: "The following sample label definitions will be loaded.",
+      css_class: "panel-default",
+      columns: [
+        { heading: "Study", attribute: "study_name" },
+        { heading: "New sample labels", attribute: "new_sample_label_count" },
+        {
+          heading: "Existing sample labels",
+          attribute: "existing_sample_label_count"
+        },
+      ],
+    }
+  ]
 };

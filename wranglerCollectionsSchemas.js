@@ -33,6 +33,18 @@ _.each(Wrangler.reviewPanels, function (fileTypes, key) {
   });
 });
 
+var infoSchemas = {
+  ClinicalForm: new SimpleSchema({
+    header_names: {
+      type: [String],
+    },
+  }),
+};
+
+SimpleSchema.messages({
+  invalidInfoObject: "Invalid info given file type.",
+});
+
 var fileTypeNames = _.map(Wrangler.fileTypes, function (value, file_type) {
   return {
     file_type: file_type,
@@ -49,6 +61,7 @@ WranglerFiles.attachSchema(new SimpleSchema({
       "genomic_expression",
       "gene_set_collection",
       "clinical",
+      "metadata",
     ],
     optional: true,
   },
@@ -88,6 +101,28 @@ WranglerFiles.attachSchema(new SimpleSchema({
   },
   // has it gone through the options parsing part of ParseWranglerFile
   parsed_options_once_already: { type: Boolean, defaultValue: false },
+
+  // The info field holds information about a file that doesn't change
+  // even when the options change. For example, it can hold a list of
+  // headers to choose from in the options.
+  info: {
+    type: Object,
+    optional: true,
+    blackbox: true,
+    custom: function () {
+      var file_type = this.field("options").file_type;
+
+      if (this.isSet && file_type) {
+        var validationContext = infoSchemas[file_type].newContext();
+        var isValid = validationContext.validate(clonedSampleGroup);
+
+        if (!isValid) {
+          return "invalidInfoObject";
+        }
+        console.log("valid info object");
+      }
+    },
+  },
 
   written_to_database: { type: Boolean, defaultValue: false },
   error_description: { type: String, optional: true },
@@ -168,21 +203,3 @@ WranglerFiles.allow({
     return submission.status === "editing";
   },
 });
-
-getCollectionByName = function(collectionName) {
-  switch (collectionName) {
-    case "superpathway_elements":
-      return SuperpathwayElements;
-    case "superpathway_interactions":
-      return SuperpathwayInteractions;
-    case "mutations":
-      return Mutations;
-    case "gene_expression":
-      return GeneExpression;
-    case "superpathways":
-      return Superpathways;
-    default:
-      throw new Error("couldn't find appropriate schema");
-      return null;
-  }
-};

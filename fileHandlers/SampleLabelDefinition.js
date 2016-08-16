@@ -14,41 +14,40 @@ SampleLabelDefinition.prototype.constructor = SampleLabelDefinition;
 SampleLabelDefinition.prototype.parseLine = function (brokenTabs, lineNumber, line) {
   this.ensureRectangular.call(this, brokenTabs, lineNumber);
 
-  var sample_label = brokenTabs[0];
-
   if (lineNumber === 1) {
-    if (!sample_label.match(/sample/i)) {
-      throw 'First column header must contain "sample" (not case sensitive)';
-    }
+    this.study = Studies.findOne(this.wranglerFile.options.study_id);
 
-    this.study = Studies.findOne({id: this.wranglerFile.options.study_label});
-
-    return;
+    this.newSampleLabels = [];
+    this.existingSampleLabels = [];
   }
 
-  if (!this.study.SampleIDs ||
-      this.study.Sample_IDs.indexOf(sample_label) === -1) {
-    if (this.wranglerPeek) {
-      this.insertWranglerDocument.call(this, {
-        document_type: "new_sample_label",
-        contents: {
-          study_label: this.study.id,
-          sample_label: sample_label,
-        },
-      });
-    } else {
-      Studies.update(this.study._id, {
-        $addToSet: { Sample_IDs: sample_label },
-      });
+  var sample_label = this.study.study_label + "/" + brokenTabs[0];
 
-      // insert into CRFs... yuck yuck
-      var crfDoc = {
-        CRF: "Clinical_Info",
-        Study_ID: this.study.id,
-        Sample_ID: sample_label,
-      };
-      CRFs.upsert(crfDoc, { $set: crfDoc });
-    }
+  if (this.study.sample_labels.indexOf(sample_label) === -1) {
+    this.newSampleLabels.push(sample_label);
+  } else {
+    this.existingSampleLabels.push(sample_label);
+  }
+};
+
+SampleLabelDefinition.prototype.endOfFile = function () {
+  if (this.wranglerPeek) {
+    this.insertWranglerDocument.call(this, {
+      document_type: "sample_label_definition",
+      contents: {
+        study_name: this.study.name,
+        new_sample_label_count: this.newSampleLabels.length,
+        existing_sample_label_count: this.existingSampleLabels.length,
+      }
+    });
+  } else {
+    Studies.update(this.wranglerFile.options.study_id, {
+      $addToSet: {
+        sample_labels: {
+          $each: this.newSampleLabels
+        }
+      }
+    });
   }
 };
 

@@ -2,7 +2,7 @@
 // http://www.broadinstitute.org/cancer/software/genepattern/file-formats-guide#GMT
 
 // TODO: change this to accept options instead of wrangler_file_id
-function GeneSetCollection (wrangler_file_id) {
+function GeneSetGroup (wrangler_file_id) {
   TabSeperatedFile.call(this, {
     wrangler_file_id: wrangler_file_id
   });
@@ -11,28 +11,30 @@ function GeneSetCollection (wrangler_file_id) {
   this.setSubmissionType.call(this, "gene_set_collection");
 }
 
-GeneSetCollection.prototype = Object.create(TabSeperatedFile.prototype);
-GeneSetCollection.prototype.constructor = GeneSetCollection;
+GeneSetGroup.prototype = Object.create(TabSeperatedFile.prototype);
+GeneSetGroup.prototype.constructor = GeneSetGroup;
 
-GeneSetCollection.prototype.parseLine =
+GeneSetGroup.prototype.parseLine =
     function (brokenTabs, lineNumber, line) {
   // make sure it's at least three wide
   if (brokenTabs.length < 3) {
     throw "Line " + lineNumber + " less than three columns";
   }
 
-  // initialize stuff, insert to GeneSetCollections if not wranglerPeek
+  // initialize stuff, insert to GeneSetGroups if not wranglerPeek
   if (lineNumber === 1) {
     if (this.wranglerPeek) {
       this.gene_set_count = 0;
     } else {
-      var user = Meteor.users.findOne(this.wranglerFile.user_id);
-
-      this.gene_set_collection_id = GeneSetCollections.insert({
+      this.gene_set_group_id = GeneSetGroups.insert({
         name: this.wranglerFile.options.name,
         description: this.wranglerFile.options.description,
-        collaborations: [ user.collaborations.personal ],
+        collaborations: [],
+        gene_set_names: [],
+        gene_set_count: 0,
       });
+
+      this.gene_set_names = [];
 
       this.geneSetsBulk = GeneSets.rawCollection().initializeUnorderedBulkOp();
     }
@@ -42,16 +44,20 @@ GeneSetCollection.prototype.parseLine =
   if (this.wranglerPeek) {
     this.gene_set_count++;
   } else {
+    var name = brokenTabs[0];
+
     this.geneSetsBulk.insert({
-      name: brokenTabs[0],
+      name: name,
       description: brokenTabs[1],
       gene_labels: brokenTabs.slice(2),
-      gene_set_collection_id: this.gene_set_collection_id,
+      gene_set_group_id: this.gene_set_group_id,
     });
+
+    this.gene_set_names.push(name);
   }
 };
 
-GeneSetCollection.prototype.endOfFile = function () {
+GeneSetGroup.prototype.endOfFile = function () {
   if (this.wranglerPeek) {
     this.insertWranglerDocument.call(this, {
       document_type: "new_gene_set_collection",
@@ -62,6 +68,17 @@ GeneSetCollection.prototype.endOfFile = function () {
       }
     });
   } else {
+    // make the gene set visible, put in the names
+    var user = Meteor.users.findOne(this.wranglerFile.user_id);
+
+    GeneSetGroups.update(this.gene_set_group_id, {
+      $set: {
+        collaborations: [ user.collaborations.personal ],
+        gene_set_names: this.gene_set_names,
+        gene_set_count: this.gene_set_names.length,
+      }
+    });
+
     // execute the bulk insert we've been building up
     var deferred = Q.defer();
     this.geneSetsBulk.execute(errorResultResolver(deferred));
@@ -69,4 +86,4 @@ GeneSetCollection.prototype.endOfFile = function () {
   }
 };
 
-WranglerFileHandlers.GeneSetCollection = GeneSetCollection;
+WranglerFileHandlers.GeneSetGroup = GeneSetGroup;

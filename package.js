@@ -46,7 +46,7 @@ Package.onUse(function(api) {
     // "fileHandlers/MutationVCF.js",
     // "fileHandlers/ArachneRegulon.js", // not ready yet
 
-    "fileHandlers/GeneSetCollection.js",
+    "fileHandlers/GeneSetGroup.js",
     "fileHandlers/ClinicalForm.js",
 
     // Admin stuff
