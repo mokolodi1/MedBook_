@@ -6,35 +6,40 @@
 
 Records = new Meteor.Collection("records");
 
-// NOTE: fetchedObject argument is optional
-MedBook.validateRecord = function(record, fields) {
+// options:
+// - { bare: true } will validate the record without checking (or removing)
+//   associated_object or _id
+MedBook.validateRecord = function(record, fields, options) {
   check(record, Object);
 
-  // make sure associated_object is defined
-  var associated_object = record.associated_object;
-  if (!associated_object) {
-    throw new Meteor.Error("associated_object-required");
-  }
-
-  // make sure associated_object is valid
-  var validCollectionNames = ["Forms", "GeneSets"];
-  if (Object.keys(associated_object).length !== 2 ||
-      validCollectionNames.indexOf(associated_object.collection_name) === -1 ||
-      typeof associated_object.mongo_id !== "string") {
-    throw new Meteor.Error("associated_object-invalid");
-  }
-
-  // grab the associated object if not provided
-  if (!fields) {
-    var collection = MedBook.collections[associated_object.collection_name];
-    var fetchedObject = collection.findOne(associated_object.mongo_id);
-
-    if (!fetchedObject || !fetchedObject.fields) {
-      throw new Meteor.Error("invalid-fields-object");
+  if (options && options.bare) {
+    // make sure associated_object is defined
+    var associated_object = record.associated_object;
+    if (!associated_object) {
+      throw new Meteor.Error("associated_object-required");
     }
 
-    fields = fetchedObject.fields;
+    // make sure associated_object is valid
+    var validCollectionNames = ["Forms", "GeneSets"];
+    if (Object.keys(associated_object).length !== 2 ||
+        validCollectionNames.indexOf(associated_object.collection_name) === -1 ||
+        typeof associated_object.mongo_id !== "string") {
+      throw new Meteor.Error("associated_object-invalid");
+    }
+
+    // grab the associated object if not provided
+    if (!fields) {
+      var collection = MedBook.collections[associated_object.collection_name];
+      var fetchedObject = collection.findOne(associated_object.mongo_id);
+
+      if (!fetchedObject || !fetchedObject.fields) {
+        throw new Meteor.Error("invalid-fields-object");
+      }
+
+      fields = fetchedObject.fields;
+    }
   }
+
 
   // delete the associated_object field and check if the
   // record matches the schema
