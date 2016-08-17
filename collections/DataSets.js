@@ -2,6 +2,18 @@
 // associated with each value_type
 // NOTE: within `metadata_schema`, `label` must be defined for use
 //       on the data set management page
+var genome_assembly = {
+  type: String,
+  allowedValues: [
+    "hg19",
+    "hg38"
+  ],
+  label: "Genome assembly",
+};
+
+// Things to consider
+// - pacbio vs. Illumina for RNA-Seq
+
 MedBook.dataSetTypes = [
   {
     value_type: "gene_expression",
@@ -36,14 +48,7 @@ MedBook.dataSetTypes = [
         },
         label: "Quantification method",
       },
-      genome_assembly: {
-        type: String,
-        allowedValues: [
-          "hg19",
-          "hg38"
-        ],
-        label: "Genome assembly",
-      },
+      genome_assembly: genome_assembly,
       value_scaling: {
         type: String,
         allowedValues: [
@@ -66,6 +71,50 @@ MedBook.dataSetTypes = [
       // - aligner used (STAR, TopHat)
     },
   },
+  // {
+  //   value_type: "copy_number",
+  //   label: "Copy number",
+  //   metadata_schema: {
+  //     calling_method: {
+  //       type: String,
+  //       allowedValues: [
+  //         "varscan",
+  //         "adtex",
+  //       ],
+  //     },
+  //     genome_assembly: genome_assembly,
+  //     normalization: {
+  //       type: String,
+  //       allowedValues: [
+  //         "gistic",
+  //         // "raw",
+  //         // "cbs",
+  //       ],
+  //       autoform: {
+  //         options: [
+  //           { value: "gistic", label: "GISTIC" },
+  //         ]
+  //       },
+  //     },
+  //   },
+  // },
+  // {
+  //   value_type: "paradigm_scores", // IPL?
+  //   label: "Paradigm scores",
+  //   metadata_schema: {
+  //     // which superpathway/pathways you ran it on
+  //     // number of permutations
+  //     // number of nulls
+  //     // post processing?
+  //     // you can give it scaled RNA data or
+  //     // dogma file, pathway, parameter file, imap file
+  //     // - dogma: how the DNA/RNA are linked
+  //     // - pathway: the superpathwy or something
+  //     // - imap file (Robert never uses this), describes the superpathway
+  //     // - parameter file:
+  //     // what kinds of inputs you've given paradigm
+  //   },
+  // },
   // isoform expression
   // exon counts
   // copy number (GISTIC)

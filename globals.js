@@ -36,3 +36,47 @@ requiredIfTrue = function (shouldBeRequired) {
 MedBook.studyLabelRegex = /^([A-Z]|[a-z]|-|_|[0-9])+$/;
 MedBook.sampleLabelRegex =
     /^([A-Z]|[a-z]|-|_|[0-9])+\/([A-Z]|[a-z]|-|_|[0-9])+$/;
+
+SimpleSchema.messages({
+  noDotsOrDollarSignsAtStart:
+      "Field names cannot contain periods or begin with a dollar sign.",
+  reservedFieldName: '"_id" and "associated_object" are reserved names ' +
+      'by the system',
+  fieldNamesMustBeUnique:
+      "Field names must be unique",
+});
+
+recordFields = function (allowedValues) {
+  return {
+    type: [ new SimpleSchema({
+      name: {
+        type: String,
+        label: "Field name",
+        custom: function () {
+          // make sure it's a valid mongo attribute name
+          if (this.value.indexOf(".") !== -1 || this.value[0] === "$") {
+            return "noDotsOrDollarSignsAtStart";
+          }
+
+          if (this.value === "associated_object" || this.value === "_id") {
+            return "reservedFieldName";
+          }
+        },
+      },
+      value_type: {
+        type: String,
+        allowedValues: allowedValues,
+      },
+
+      optional: { type: Boolean, optional: true },
+    }) ],
+    minCount: 1,
+    custom: function () {
+      var uniqueNames = _.uniq(_.pluck(this.value, "name"));
+
+      if (this.value.length !== uniqueNames.length) {
+        return "fieldNamesMustBeUnique";
+      }
+    },
+  };
+}
