@@ -12,7 +12,7 @@ Records = new Meteor.Collection("records");
 MedBook.validateRecord = function(record, fields, options) {
   check(record, Object);
 
-  if (options && options.bare) {
+  if (!options || !options.bare) {
     // make sure associated_object is defined
     var associated_object = record.associated_object;
     if (!associated_object) {
@@ -38,15 +38,14 @@ MedBook.validateRecord = function(record, fields, options) {
 
       fields = fetchedObject.fields;
     }
+
+    // delete the associated_object and _id before validating
+    var record = _.omit(record, "associated_object", "_id");
   }
 
-
-  // delete the associated_object field and check if the
-  // record matches the schema
-  var onlyDefinedFields = _.omit(record, "associated_object", "_id");
-
+  // check if record matches the schema
   var schemaObj = MedBook.schemaFromFields(fields);
-  check(onlyDefinedFields, new SimpleSchema(schemaObj));
+  check(record, new SimpleSchema(schemaObj));
 };
 
 MedBook.schemaFromFields = function (fields) {
