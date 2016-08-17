@@ -71,18 +71,24 @@ GeneSetGroup.prototype.endOfFile = function () {
     // make the gene set visible, put in the names
     var user = Meteor.users.findOne(this.wranglerFile.user_id);
 
-    GeneSetGroups.update(this.gene_set_group_id, {
-      $set: {
-        collaborations: [ user.collaborations.personal ],
-        gene_set_names: this.gene_set_names,
-        gene_set_count: this.gene_set_names.length,
+    var deferred = Q.defer();
+    var self = this;
+
+    // first, insert the bulk we've built up
+    this.geneSetsBulk.execute(function (error, result) {
+      if (error) { deferred.reject(error); }
+      else {
+        // use GeneSetGroups.rawCollection because SimpleSchema hands when
+        // arrays are very large (10,000+ elements)
+        GeneSetGroups.rawCollection().update({_id: self.gene_set_group_id }, {
+          $set: {
+            collaborations: [ user.collaborations.personal ],
+            gene_set_names: self.gene_set_names,
+            gene_set_count: self.gene_set_names.length,
+          }
+        }, errorResultResolver(deferred));
       }
     });
-
-    // execute the bulk insert we've been building up
-    var deferred = Q.defer();
-    this.geneSetsBulk.execute(errorResultResolver(deferred));
-    return deferred.promise;
   }
 };
 
