@@ -60,11 +60,6 @@ Package.onUse(function(api) {
   api.export("Wrangler");
 
   api.addFiles("wranglerCollectionsSchemas.js");
-
-  // api.addFiles("WranglerFileHandlers.js");
-
-  // TODO: remove this when we move the schemas to collections
-  api.export("getCollectionByName");
 });
 
 Package.onTest(function(api) {
