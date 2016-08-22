@@ -1,0 +1,272 @@
+{
+  "dependencies": {
+    "binary-search": {
+      "version": "1.2.0"
+    },
+    "byline": {
+      "version": "4.2.1"
+    },
+    "docker-run": {
+      "version": "2.4.0",
+      "dependencies": {
+        "debug": {
+          "version": "1.0.4",
+          "dependencies": {
+            "ms": {
+              "version": "0.6.2"
+            }
+          }
+        },
+        "docker-raw-stream": {
+          "version": "1.3.1",
+          "dependencies": {
+            "through2": {
+              "version": "0.5.1",
+              "dependencies": {
+                "readable-stream": {
+                  "version": "1.0.34",
+                  "dependencies": {
+                    "core-util-is": {
+                      "version": "1.0.2"
+                    },
+                    "isarray": {
+                      "version": "0.0.1"
+                    },
+                    "string_decoder": {
+                      "version": "0.10.31"
+                    },
+                    "inherits": {
+                      "version": "2.0.1"
+                    }
+                  }
+                },
+                "xtend": {
+                  "version": "3.0.0"
+                }
+              }
+            }
+          }
+        },
+        "docker-remote-api": {
+          "version": "4.4.1",
+          "dependencies": {
+            "concat-stream": {
+              "version": "1.5.1",
+              "dependencies": {
+                "inherits": {
+                  "version": "2.0.1"
+                },
+                "typedarray": {
+                  "version": "0.0.6"
+                },
+                "readable-stream": {
+                  "version": "2.0.6",
+                  "dependencies": {
+                    "core-util-is": {
+                      "version": "1.0.2"
+                    },
+                    "isarray": {
+                      "version": "1.0.0"
+                    },
+                    "process-nextick-args": {
+                      "version": "1.0.6"
+                    },
+                    "string_decoder": {
+                      "version": "0.10.31"
+                    },
+                    "util-deprecate": {
+                      "version": "1.0.2"
+                    }
+                  }
+                }
+              }
+            },
+            "docker-host": {
+              "version": "3.1.0"
+            },
+            "once": {
+              "version": "1.3.3",
+              "dependencies": {
+                "wrappy": {
+                  "version": "1.0.1"
+                }
+              }
+            },
+            "xtend": {
+              "version": "3.0.0"
+            }
+          }
+        },
+        "pump": {
+          "version": "1.0.1",
+          "dependencies": {
+            "end-of-stream": {
+              "version": "1.1.0"
+            },
+            "once": {
+              "version": "1.3.3",
+              "dependencies": {
+                "wrappy": {
+                  "version": "1.0.1"
+                }
+              }
+            }
+          }
+        },
+        "through2": {
+          "version": "0.6.5",
+          "dependencies": {
+            "readable-stream": {
+              "version": "1.0.34",
+              "dependencies": {
+                "core-util-is": {
+                  "version": "1.0.2"
+                },
+                "isarray": {
+                  "version": "0.0.1"
+                },
+                "string_decoder": {
+                  "version": "0.10.31"
+                },
+                "inherits": {
+                  "version": "2.0.1"
+                }
+              }
+            },
+            "xtend": {
+              "version": "4.0.1"
+            }
+          }
+        },
+        "minimist": {
+          "version": "1.2.0"
+        }
+      }
+    },
+    "mime": {
+      "version": "1.2.11"
+    },
+    "mysql": {
+      "version": "2.11.1",
+      "dependencies": {
+        "bignumber.js": {
+          "version": "2.3.0"
+        },
+        "readable-stream": {
+          "version": "1.1.14",
+          "dependencies": {
+            "core-util-is": {
+              "version": "1.0.2"
+            },
+            "isarray": {
+              "version": "0.0.1"
+            },
+            "string_decoder": {
+              "version": "0.10.31"
+            },
+            "inherits": {
+              "version": "2.0.1"
+            }
+          }
+        },
+        "sqlstring": {
+          "version": "2.0.1"
+        }
+      }
+    },
+    "q": {
+      "version": "1.4.1"
+    },
+    "temp": {
+      "version": "0.8.1",
+      "dependencies": {
+        "rimraf": {
+          "version": "2.2.8"
+        }
+      }
+    },
+    "xlsx": {
+      "version": "0.8.0",
+      "dependencies": {
+        "ssf": {
+          "version": "0.8.2",
+          "dependencies": {
+            "voc": {
+              "version": "0.5.0"
+            },
+            "colors": {
+              "version": "0.6.2"
+            },
+            "frac": {
+              "version": "0.3.1"
+            }
+          }
+        },
+        "codepage": {
+          "version": "1.3.8",
+          "dependencies": {
+            "voc": {
+              "version": "0.5.0"
+            },
+            "concat-stream": {
+              "version": "1.5.1",
+              "dependencies": {
+                "inherits": {
+                  "version": "2.0.1"
+                },
+                "typedarray": {
+                  "version": "0.0.6"
+                },
+                "readable-stream": {
+                  "version": "2.0.2",
+                  "dependencies": {
+                    "core-util-is": {
+                      "version": "1.0.1"
+                    },
+                    "isarray": {
+                      "version": "0.0.1"
+                    },
+                    "process-nextick-args": {
+                      "version": "1.0.3"
+                    },
+                    "string_decoder": {
+                      "version": "0.10.31"
+                    },
+                    "util-deprecate": {
+                      "version": "1.0.2"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "cfb": {
+          "version": "0.10.3"
+        },
+        "jszip": {
+          "version": "2.4.0",
+          "dependencies": {
+            "pako": {
+              "version": "0.2.8"
+            }
+          }
+        },
+        "crc-32": {
+          "version": "0.3.0"
+        },
+        "adler-32": {
+          "version": "0.2.1"
+        },
+        "commander": {
+          "version": "2.9.0",
+          "dependencies": {
+            "graceful-readlink": {
+              "version": "1.0.1"
+            }
+          }
+        }
+      }
+    }
+  }
+}
