@@ -11,7 +11,7 @@
 	path = webapp/packages/adapters
 	url = https://github.com/UCSC-MedBook/adapters
 [submodule "external-tools"]
-	path = external-tools
+	path = jobrunner/external-tools
 	url = https://github.com/UCSC-MedBook/external-tools
 [submodule "webapp/packages/blobs"]
 	path = webapp/packages/blobs
