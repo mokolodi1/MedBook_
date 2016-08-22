@@ -1,0 +1,15 @@
+USERNAME="XXXXXX"  # The Oncore user name
+PASSWORD="XXXXX" # The Oncore user password
+OUTPUT="data.zip" # The results
+
+# The following are options from the BIOSTAT html form
+FORMOPTIONS='hdn_function=EXPORT&hdn_function_type=EXPORT_DATA&protocol_id=11195&active_tab=EXPORT&console=BIOSTAT&protocol_subject_id=&sd_cdi_id=&is_selected=&accrual_page_number=0&primary_sort_order=&primary_sort_column=&secondary_sort_order=&secondary_sort_column=&sort_preferences_id=&pr_no=125519&protocol_no=&protocol_no_selected=&hdn_action_type=&exportId=1523&hdn_count=12&formStatus=&formStatus_settings=%7B%22tokenName%22%3A%22DESCRIPTION%22%2C%22tokenValue%22%3A%22DESCRIPTION%22%2C%22additionalTokenData%22%3Anull%7D&export_sd_cdi_id=-1&export_sd_cdi_id=-2&export_sd_cdi_id=1827&export_sd_cdi_id=1828&export_sd_cdi_id=1923&export_sd_cdi_id=1924&export_sd_cdi_id=1925&export_sd_cdi_id=1928&export_sd_cdi_id=2447&export_sd_cdi_id=2448&export_sd_cdi_id=2449&export_sd_cdi_id=2452&export_sd_cdi_id=2508&export_sd_cdi_id=2517&export_sd_cdi_id=2644&transpose_labs=Y&use_descriptions=Y&include_form_row=Y&export_format=excel'
+
+
+curl -k -c c https://oncore.ucsf.edu/login/login > /dev/null
+curl -k -b c -c c -d "username=$USERNAME" -d "password=$PASSWORD" https://oncore.ucsf.edu/login/login > /dev/null
+curl -k -b c -c c https://oncore.ucsf.edu/login/redirecthome > /dev/null
+curl -k -b c -c c https://oncore.ucsf.edu/smrs/SMRSLogonServlet?hdn_function=WELCOME > /dev/null
+curl -k -b c -c c -d $FORMOPTIONS https://oncore.ucsf.edu/smrs/BioStatConsoleControlServlet > $OUTPUT
+curl -k -b c -c c https://oncore.ucsf.edu/login/logout   > /dev/null
+rm c
