@@ -1,0 +1,13 @@
+version: '3'
+services:
+  job-runner:
+    command: /app-dev/dockerDev.sh
+    volumes:
+    - ./jobrunner/webapp:/app-dev
+  mongo:
+    container_name: "mongo"
+    restart: always
+    image: mongo:2.6.12
+    # allows contact with mongo from localhost outside a container
+    ports:
+      - "127.0.0.1:27017:27017"
