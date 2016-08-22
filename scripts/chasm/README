@@ -1,0 +1,9 @@
+steps to decorate raw vcfs from a mutations caller to something useful in medbook.
+
+Overview
+1. convert VCF file to cravat format
+2. upload cravat file to http://www.cravat.us/ and submit request for vest, cravat and text results.
+3. download results based on file included in email.
+4. unzip results
+5. convert tsv file to format that is compatible with medbook
+6. mongoimport mutations
