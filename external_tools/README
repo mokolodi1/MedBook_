@@ -1,0 +1,5 @@
+This external_tools folder contains legacy external tools.
+
+Apps should not link to tools in this folder; instead, apps should contain
+ their own external_tools subfolder with the tools in use, thus allowing
+different apps to use their own versions of each tool.
