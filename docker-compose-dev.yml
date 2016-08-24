@@ -7,6 +7,13 @@ services:
     - ./packages:/packages
     environment:
       PACKAGE_DIRS: "/packages"
+  wrangler:
+    command: /app-dev/dockerDev.sh
+    volumes:
+    - ./wrangler/webapp:/app-dev
+    - ./packages:/packages
+    environment:
+      PACKAGE_DIRS: "/packages"
   mongo:
     container_name: "mongo"
     restart: always
