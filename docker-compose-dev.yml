@@ -4,6 +4,9 @@ services:
     command: /app-dev/dockerDev.sh
     volumes:
     - ./jobrunner/webapp:/app-dev
+    - ./packages:/packages
+    environment:
+      PACKAGE_DIRS: "/packages"
   mongo:
     container_name: "mongo"
     restart: always
