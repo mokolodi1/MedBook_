@@ -1,0 +1,96 @@
+<template name="reviewWranglerDocuments">
+  <h2>Review</h2>
+
+  {{#if getSubmissionType}}
+    {{! NOTE: I decided to call showReviewPanels with an argument back when
+              I switched out that argument with #ifs. I'm too lazy to change
+              it without needing to.}}
+    {{> showReviewPanels getPanels}}
+  {{else}}
+    <div class="well">
+      Upload files to continue
+    </div>
+  {{/if}}
+</template>
+
+<template name="showReviewPanels">
+  {{#each this}}
+    <div class="panel-group">
+      {{> reviewPanel this}}
+    </div>
+  {{/each}}
+
+  {{#if noPanelsShown}}
+    <div class="well">
+      Please wait while the review data from your file(s) load.
+    </div>
+  {{/if}}
+</template>
+
+<template name="reviewPanel">
+  {{#if shouldShowPanel}}
+    <div class="panel {{css_class}}" id="review-{{name}}">
+      <div class="panel-heading clearfix">
+        <span class="h4">{{title}}</span>
+
+        <a href="#" class="download-as-file pull-right btn btn-xs btn-primary">
+          <span class="glyphicon glyphicon-download-alt"></span>
+          <span>
+            Download
+            {{#if existsAndBig}}
+              all {{getPublishedCount name}}
+            {{/if}}
+          </span>
+        </a>
+      </div>
+
+      {{#if description}}
+        <div class="panel-body">
+          <p>{{description}}</p>
+        </div>
+      {{/if}}
+
+      <table class="table">
+        <thead>
+          <tr>
+            {{#each columns}}
+              <th>{{heading}}</th>
+            {{/each}}
+          </tr>
+        </thead>
+        <tbody>
+          {{#each getWranglerDocuments}}
+            {{#with contents}}
+              {{> panelRow}}
+            {{/with}}
+          {{/each}}
+        </tbody>
+      </table>
+
+      {{#if Template.subscriptionsReady}}
+        {{#if hasMoreRows}}
+          <a href="#">
+            <div class="panel-footer loadMore text-center">
+              <span>Load more</span>
+            </div>
+          </a>
+        {{/if}}
+      {{else}}
+        {{! TODO: make sure this looks good}}
+        <div class="relative-spinner">{{>spinner}}</div>
+      {{/if}}
+    </div>
+  {{/if}}
+</template>
+
+<template name="panelRow">
+  <tr>
+    {{#each panelColumns}}
+      {{#if header_of_row}}
+        <th scope="row">{{cellData}}</th>
+      {{else}}
+        <td>{{cellData}}</td>
+      {{/if}}
+    {{/each}}
+  </tr>
+</template>
