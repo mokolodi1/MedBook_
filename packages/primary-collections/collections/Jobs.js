@@ -10,6 +10,7 @@ var jobSchemas = {
   "ExportFile": null,
   "ReloadGenesCollection": null,
   "GeneTranscriptMappings": null,
+  "TestJob":null,
 
   UpDownGenes: {
     args: new SimpleSchema({
