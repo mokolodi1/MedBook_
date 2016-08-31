@@ -1,0 +1,22 @@
+
+Add new Reference Cohort and update sample groups
+Data migration performed Friday August 19th, 2016
+
+ORR: "DONE ORR: Add unfiltered CKCC Reference Cohort to mongo. August 19 2016"
+See this ORR in Google Docs for detailed steps and usage of scripts.
+
+Pre-generated files not included in this archive (see ORR for re-generation):
+ - features
+ - samples
+ - update_ckcc_study.json
+
+
+Task:
+When the existing CKCC Reference Cohort was imported into MedBook, two filters
+were applied to it before import which dropped some genes from the cohort.
+Medbook now has the capability to apply those filters on the fly, so a new
+copy of the reference cohort was imported, which did not have those filters
+applied.
+
+Then, for each sample group which referred to the original copy of the cohort,
+a new version of that sample group was created referring to the new cohort.
