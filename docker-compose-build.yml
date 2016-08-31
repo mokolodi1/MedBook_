@@ -1,0 +1,21 @@
+version: '2'
+services:
+  job-runner:
+    build: jobrunner
+    volumes:
+    - ./packages:/packages
+    environment:
+      PACKAGE_DIRS: "/packages"
+  wrangler:
+    build: wrangler
+    volumes:
+    - ./packages:/packages
+    environment:
+      PACKAGE_DIRS: "/packages"
+  mongo:
+    container_name: "mongo"
+    restart: always
+    image: mongo:2.6.12
+    # allows contact with mongo from localhost outside a container
+    ports:
+      - "127.0.0.1:27017:27017"
