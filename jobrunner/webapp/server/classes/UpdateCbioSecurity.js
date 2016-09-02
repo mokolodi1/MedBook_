@@ -4,7 +4,7 @@ function UpdateCbioSecurity (job_id) {
 UpdateCbioSecurity.prototype = Object.create(Job.prototype);
 UpdateCbioSecurity.prototype.constructor = UpdateCbioSecurity;
 
-var mysql = Meteor.npmRequire('mysql');
+var mysql = require('mysql');
 
 UpdateCbioSecurity.prototype.run = function () {
   var connection = mysql.createConnection({

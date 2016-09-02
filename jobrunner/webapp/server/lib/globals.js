@@ -1,7 +1,7 @@
 // actual globals
-Q = Meteor.npmRequire('q');
-byLine = Meteor.npmRequire('byline');
-ntemp = Meteor.npmRequire('temp');
+const Q = require('q');
+const byLine = require('byline');
+const ntemp = require('temp');
 ntemp.track(); // clean up folders after process exits
 
 path = Npm.require('path');
