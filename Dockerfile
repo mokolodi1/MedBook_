@@ -1,4 +1,4 @@
-FROM node:0.10.44
+FROM node:0.10.46
 MAINTAINER Mike Risse
 
 RUN apt-get update
@@ -18,13 +18,14 @@ WORKDIR /app
 EXPOSE 3000
 ENV PORT 3000
 
+# temp - add to jobrunner instead
 
-ONBUILD ADD ./webapp /app
-ONBUILD RUN mkdir /bundle
-ONBUILD RUN meteor build --directory /build
-ONBUILD WORKDIR /build/bundle/programs/server
+#ONBUILD ADD ./webapp /app
+#ONBUILD RUN mkdir /bundle
+#ONBUILD RUN meteor build --directory /build
+#ONBUILD WORKDIR /build/bundle/programs/server
 
-ONBUILD RUN npm install
-ONBUILD WORKDIR /build/bundle
+#ONBUILD RUN npm install
+#ONBUILD WORKDIR /build/bundle
 
 CMD node main.js
