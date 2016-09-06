@@ -1,4 +1,4 @@
-805,822c805,806
+811,830c811,812
 <   var garbageDir = toDir + '-garbage-' + utils.randomToken();
 < 
 <   // Get old dir out of the way, if it exists.
@@ -6,8 +6,9 @@
 <   try {
 <     files.rename(toDir, garbageDir);
 <   } catch (e) {
-<     if (e.code !== 'ENOENT')
+<     if (e.code !== 'ENOENT') {
 <       throw e;
+<     }
 <     movedOldDir = false;
 <   }
 < 
@@ -15,8 +16,9 @@
 <   files.rename(fromDir, toDir);
 < 
 <   // ... and delete the old one.
-<   if (movedOldDir)
+<   if (movedOldDir) {
 <     files.rm_recursive(garbageDir);
+<   }
 ---
 >     files.rm_recursive(toDir);
 >     files.rename(fromDir, toDir);
