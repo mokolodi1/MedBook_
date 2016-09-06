@@ -31,6 +31,10 @@ ONBUILD ARG appdir=.
 ONBUILD ADD $appdir/webapp /app
 ONBUILD ADD packages/ /app/packages/
 ONBUILD RUN mkdir /bundle
+
+# Add necessary npm packages BEFORE building
+ONBUILD RUN meteor npm install
+
 ONBUILD RUN meteor build --directory /build
 ONBUILD WORKDIR /build/bundle/programs/server
 
