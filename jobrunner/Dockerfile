@@ -1,23 +1,8 @@
-FROM medbook/meteor-base:latest
+FROM medbook/meteor-base:meteor1.3_v1.0.0
 MAINTAINER Mike Risse
 
-# temp - these were the onbuild things
-# add relative to parent, not jobrunner
-#ADD jobrunner/webapp /app
-#ADD packages/ /app/packages/
-# then the rest of these things
-#RUN mkdir /bundle
-#RUN meteor build --directory /build
-#WORKDIR /build/bundle/programs/server
-
-# FOR ORIG VERSIONRUN `find ~/.meteor -path "*dev_bundle/bin/npm" | grep "1.1.3"` install
-#RUN npm install
-#WORKDIR /build/bundle
-
-### END TEMP ONBUILD
-
-# needed to get the node_modules folder around
-RUN meteor npm install
+# Builds jobrunner on meteor 1.3.
+# See medbook/meteor-base for a number of ONBUILD instructions which happen here
 
 # Start Rscript install (pulled from https://github.com/rocker-org/rocker/blob/master/r-base/Dockerfile)
 
