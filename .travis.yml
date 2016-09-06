@@ -9,7 +9,7 @@ install:
   # Build all containers
   - docker-compose -f docker-compose-build.yml build
   # Just run mongo & jobrunner for now
-  - docker-compose -f docker-compose-dev.yml run mongo
+  - docker-compose -f docker-compose-mongo.yml up
   - docker-compose run job-runner
 script:
   # is it running?
