@@ -1,0 +1,12 @@
+language: node_js
+services:
+  - docker
+install:
+  - docker-compose -f docker-compose.yml -f docker-compose-build.yml up
+script:
+  - docker version
+  - docker-compose version
+  - docker ps
+
+
+
