@@ -16,6 +16,9 @@ MAINTAINER Mike Risse
 
 ### END TEMP ONBUILD
 
+# needed to get the node_modules folder around
+RUN meteor npm install
+
 # Start Rscript install (pulled from https://github.com/rocker-org/rocker/blob/master/r-base/Dockerfile)
 
 RUN apt-get update \

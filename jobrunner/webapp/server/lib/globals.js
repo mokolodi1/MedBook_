@@ -1,7 +1,12 @@
 // actual globals
-const Q = require('q');
-const byLine = require('byline');
-const ntemp = require('temp');
+import * as Q_module from 'q';
+import * as byLine_module from 'byline';
+import * as ntemp_module from 'temp';
+// and make globals available outside of this file by assigning new vars
+Q = Q_module;
+byLine = byLine_module;
+ntemp = ntemp_module;
+
 ntemp.track(); // clean up folders after process exits
 
 path = Npm.require('path');
