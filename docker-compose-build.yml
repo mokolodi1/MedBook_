@@ -8,16 +8,9 @@ services:
         appdir: jobrunner
     image: medbook/job-runner:v1.0.9
   #wrangler:
-  #  command: /app-dev/dockerDev.sh
-  #  volumes:
-  #  - ./wrangler/webapp:/app-dev
-  #  - ./packages:/packages
-  #  environment:
-  #    PACKAGE_DIRS: "/packages"
-  #mongo:
-  #  container_name: "mongo"
-  #  restart: always
-  #  image: mongo:2.6.12
-  #  # allows contact with mongo from localhost outside a container
-  #  ports:
-  #    - "127.0.0.1:27017:27017"
+  #  build:
+  #    context: .
+  #    dockerfile: wrangler/Dockerfile
+  #    args:
+  #      appdir: wrangler
+  #  image: medbook/wrangler:v1.0.4
