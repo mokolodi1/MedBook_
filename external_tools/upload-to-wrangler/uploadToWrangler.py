@@ -16,7 +16,10 @@ def findSample(options, sample):
   innerpath = options["sample_contents_path"]
   suffix = options["sample_suffix"]
   sample_name = "".join([sample, suffix])
-  sample_full_path = os.path.join(basepath, sample, innerpath, sample_name)
+  # NEW - Filename format was changed so the sample name is no longer present
+  # TODO allow a flag to use sample name in the filename or not; for now, just
+  # use the suffix as the entire filename
+  sample_full_path = os.path.join(basepath, sample, innerpath, suffix)
   if(not os.path.isfile(sample_full_path)):
     raise Exception("Couldn't find sample at path:\n%s" % sample_full_path)
   return sample_full_path
