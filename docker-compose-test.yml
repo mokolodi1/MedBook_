@@ -1,0 +1,8 @@
+version: '2'
+services:
+  job-runner:
+    command: /test-cmd/runTests.sh
+    volumes:
+    - ./jobrunner/test-cmd:/test-cmd
+    environment:
+      PACKAGE_DIRS: "/packages"
