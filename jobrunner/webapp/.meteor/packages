@@ -41,3 +41,4 @@ standard-minifier-css
 standard-minifier-js
 ecmascript
 modules
+dispatch:mocha-phantomjs
