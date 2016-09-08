@@ -1,0 +1,32 @@
+September 8 2016
+Code that was used to create 27 sample groups.
+We started with a cohort of 27 samples; for each sample group,
+one of those samples was omitted from the cohort & the group was
+labeled with the excluded sample.
+
+Genericized for future use.
+
+1. make oneline.txt containing:
+
+{"collaborations": ["(email omitted)", "(email omitted)"], "data_sets": [{"data_set_id": "(id omitted)", "filters": [{"type": "exclude_sample_list", "options": {"sample_labels": ["(namespace)/SAMPLENAME"], "sample_count": 1}}]}], "version": 1, "name": "- SAMPLENAME excluded from (original sample group)"},
+
+2. make samples.txt with one samplename per line.
+
+3. run the following script to make a list of the sample group objects to add in sampleLines.txt
+
+while read line; do sed -e "s/SAMPLENAME/$line/g" < oneline.txt >> sampleLines.txt ; done < samples.txt
+
+4. Insert into final code framework below and run as a snippet in chrome.
+
+var sgroups = [
+
+ // list goes here
+
+]
+
+  for( item of sgroups){
+    Meteor.call("createSampleGroup", item, (e,r) => {
+      if(e){console.log("ERROR ",e);}
+      else{console.log("RAN ",r);} 
+    });
+  }
