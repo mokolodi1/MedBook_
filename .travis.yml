@@ -1,0 +1,16 @@
+language: node_js
+services:
+  - docker
+env:
+  # Necessary if we're running a service manually instead of
+  # using prodStart.sh or devStart.sh
+  - MONGO_URL="mongodb://mongo:27017/MedBook"
+install:
+  # Build all containers
+  - docker-compose -f docker-compose-build.yml build
+  # Just run mongo & jobrunner for now
+  - docker-compose -f docker-compose-mongo.yml up -d
+  - docker-compose run -d job-runner
+script:
+  # is it running?
+  - docker ps

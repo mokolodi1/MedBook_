@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "binary-search": {
-      "version": "1.2.0"
+      "version": "1.2.0",
+      "resolved": "https://registry.npmjs.org/binary-search/-/binary-search-1.2.0.tgz",
+      "from": "binary-search@1.2.0"
     }
   }
 }
