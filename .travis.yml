@@ -10,6 +10,8 @@ install:
   - docker-compose -f docker-compose-build.yml build
   # Start up mongo
   - docker-compose -f docker-compose-mongo.yml up -d
+  # for now, just start up wrangler normally
+  - docker-compose -f docker-compose.yml -f docker-compose-test.yml run -d wrangler
 script:
   # Run some jobrunner tests 
   - docker-compose -f docker-compose.yml -f docker-compose-test.yml run job-runner
