@@ -36,6 +36,9 @@ var jobSchemas = {
     }),
     output: null,
   },
+  RunGSEA: null,
+  RunPairedAnalysis: null,
+  RunLimma: null,
   TumorMapOverlay: {
     args: new SimpleSchema({
       map: { type: String, allowedValues: [ "CKCC/v1" ] },
