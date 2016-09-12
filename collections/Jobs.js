@@ -39,6 +39,7 @@ var jobSchemas = {
   RunGSEA: null,
   RunPairedAnalysis: null,
   RunLimma: null,
+  RunSingleSampleTopGenes: null,
   TumorMapOverlay: {
     args: new SimpleSchema({
       map: { type: String, allowedValues: [ "CKCC/v1" ] },
