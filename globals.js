@@ -46,6 +46,7 @@ SimpleSchema.messages({
       "Field names must be unique",
 });
 
+// returns the schema object for fields that have associated records
 recordFields = function (allowedValues) {
   return {
     type: [ new SimpleSchema({
