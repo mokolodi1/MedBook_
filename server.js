@@ -46,7 +46,7 @@ Blobs2.attachSchema(new SimpleSchema({
   // includes the file name, which is the `_id` of the document
   storage_path: { type: String, optional: true },
 
-  // clients can put anything here
+  // can put anything here
   metadata: { type: Object, blackbox: true, optional: true },
 }));
 
