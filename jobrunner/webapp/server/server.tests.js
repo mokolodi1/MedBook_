@@ -15,11 +15,11 @@ describe('running a job', function(){
 describe('no running jobs or wrangling datasets on startup',function(){
   it('has no running jobs', function(){
     let runjob = Jobs.findOne({status:"running"});
-    assert.isUndefined(runjob);
+    assert.strictEqual(runjob, undefined);
   });
   it('has no wrangling datasets',function(){
     let ds = DataSets.findOne({currently_wrangling:true});
-    assert.isUndefined(ds);
+    assert.strictEqual(ds, undefined);
   });
 });
 
@@ -27,14 +27,6 @@ describe('synched cron', function(){
   it('is scheduled to start another job', function(){
     let foo = SyncedCron.nextScheduledAtDate("start-next-job");
     console.log(foo);
-    assert.typeOf(foo, 'Date', "start next job at some date.");
+    assert.strictEqual(typeof(foo), 'Date', "start next job at some date.");
   });
 });
-
-describe('my first test', function(){
-  it('doesnt do much', function(){
-    console.log("hello world");
-    assert.equal(2,2);
-  });
-});
-
