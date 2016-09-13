@@ -1,8 +1,10 @@
 version: '2'
 services:
   job-runner:
-    command: /test-cmd/runTests.sh
-    volumes:
-    - ./jobrunner/test-cmd:/test-cmd
-    environment:
-      PACKAGE_DIRS: "/packages"
+    extends:
+      file: docker-compose-base-test.yml
+      service: medbook-app
+  wrangler:
+    extends:
+      file: docker-compose-base-test.yml
+      service: medbook-app
