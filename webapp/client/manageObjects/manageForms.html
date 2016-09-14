@@ -1,0 +1,70 @@
+<template name="introForms">
+  <p>
+    Clinical forms store clinical information that can be used to create
+    sample groups.
+  </p>
+</template>
+
+<template name="createForm">
+  <h2>Create a new form</h2>
+
+  <div class="ui message">
+    <p>
+      Use Wrangler to create a new clinical form
+    </p>
+    <p>
+      <a href="https://medbook.io/wrangler" target="_self">
+        Click here to use Wrangler
+      </a>
+    </p>
+  </div>
+</template>
+
+<template name="showForm">
+  <a href={{pathFor "viewFormRecords" form_id=_id}}
+      class="ui primary button">
+    View data
+  </a>
+
+  <h3>Fields</h3>
+  <table class="ui celled striped table">
+    <thead>
+      <tr>
+        <th>Field name</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each fields}}
+        <tr>
+          <td>
+            {{#if compare name ../sample_label_field}}
+              <div class="ui ribbon label">Sample name</div>
+            {{/if}}
+            {{name}}
+          </td>
+          <td>{{value_type}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <h3 style="display: inline-block; margin-bottom: 0px;">
+    Samples
+  </h3>
+  {{> listSamplesButton sample_labels}}
+</template>
+
+<template name="viewFormRecords">
+  <h1>
+    View records for
+    {{#if Template.subscriptionsReady}}
+      {{getForm.name}}
+    {{else}}
+      loading...
+    {{/if}}
+  </h1>
+
+  {{> showRecords fields=getForm.fields mongoId=(param "form_id")
+      collectionName="Forms" primaryFieldName=getForm.sample_label_field}}
+</template>

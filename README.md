@@ -14,4 +14,3 @@ To build in docker and run (Currently: wrangler + jobrunner):
 
   ./prodStart.sh
 ~~~~
-

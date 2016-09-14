@@ -1,0 +1,163 @@
+<template name="upDownGenesJob">
+  <h1>Outlier Analysis Result</h1>
+
+  {{#jobStatusWrapper (param "job_id")}}
+    {{> outlierAnalysis}}
+  {{/jobStatusWrapper}}
+</template>
+
+<template name="geneWithInfo">
+  {{! data context requires: gene (String) - name of gene }}
+  {{! and foundGeneInfos - [objects] with description:, color:, icon fields that apply to this gene. }}
+  {{! any time we display a gene name, use this template to see if }}
+  {{! it is in a highlighted gene set. Right now, the only option is}}
+  {{! a hardcoded list of stanford pathology stains for either a gene }}
+  {{! or for a gene family. }}
+  {{gene}}
+  {{#each foundGeneInfos}}
+    <i class="geneInfoIcon icon {{this.icon}}" style="color:{{this.color}}"></i>
+    <div class="ui popup">
+      {{this.description}}
+    </div>
+  {{/each}}
+</template>
+
+<template name="outlierAnalysis">
+  <h2>Options</h2>
+  <p>
+    Data set/patient: {{args.data_set_name_or_patient_label}}<br>
+    Sample: {{args.sample_label}}<br>
+    Comparison group:
+      {{args.sample_group_name}}
+      {{#if getSampleGroupVersion args.sample_group_id}}
+        (v{{getSampleGroupVersion args.sample_group_id}})
+      {{/if}}<br>
+    IQR multiplier: {{args.iqr_multiplier}}<br>
+    Gene filters used:
+      {{#if args.use_filtered_sample_group}}
+        Genes unexpressed in 80% of background samples removed;
+        20% of lowest-variance genes removed.
+      {{else}}
+        None
+      {{/if}}
+  </p>
+
+  {{#if Template.subscriptionsReady}}
+    {{> outlierGenesTable title="Upregulated genes" data=output.up_genes
+        url=(getBlobUrl output.up_blob_id "up_outlier_genes")}}
+
+    {{> outlierGenesTable title="Downregulated genes" data=output.down_genes
+        url=(getBlobUrl output.down_blob_id "down_outlier_genes")}}
+    <!-- confirm top5% is available; older analyses may not have this field-->
+    {{#if output.top5percent_genes}}
+      {{> outlierGenesTable title="Top 5% expressed genes" data=output.top5percent_genes
+          url=(getBlobUrl output.top5percent_blob_id "top_5_percent_most_highly_expressed_genes.tsv") isTop5percent=true }}
+    {{else}}
+      <div>
+        <h2 style="display: inline;">
+          Top 5% expressed genes not available; delete and rerun this analysis to calculate them.
+        </h2>
+      </div>
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="outlierGenesTable">
+  <div>
+    <h2 style="display: inline;">
+      {{title}}
+      <a href={{url}} class="ui labeled icon button" target="_blank" download>
+        <i class="download icon"></i>
+        Download
+      </a>
+      <button class="ui labeled icon button copy-genes-to-clipboard"
+          data-content="Add users to your feed">
+        <i class="copy icon"></i>
+        Copy genes to clipboard
+      </button>
+    </h2>
+
+    <div class="ui search filter-text"
+        style="display: inline-block; float: right;">
+      <div class="ui icon input">
+        <input class="prompt" type="text" placeholder="Filter by gene...">
+        <i class="search icon"></i>
+      </div>
+    </div>
+  </div>
+  {{! wait until the gene tooltips load to display table }}
+  {{# if gotGeneInfos }}
+    <table class="ui celled table">
+      <thead>
+        <tr>
+          <th>Gene</th>
+        <!--  top5% overexpressed doesn't have background median -->
+        {{#unless isTop5percent}}
+          <th>Background median</th>
+        {{/unless}}
+          <th>Sample value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!--  top5% overexpressed doesn't have background median -->
+        <!-- #if must be outside #each or `this` changes and it doesn't work-->
+
+        {{#if isTop5percent}}
+          {{#each currentPageData}}
+            <tr>
+              <td>{{>geneWithInfo gene=gene_label foundGeneInfos=(getInfoForGene gene_label)}}</td>
+              <td>{{fewDecimals sample_value}}</td>
+            </tr>
+          {{/each}}
+        {{else}}
+          {{#each currentPageData}}
+            <tr>
+              <td>{{>geneWithInfo gene=gene_label foundGeneInfos=(getInfoForGene gene_label)}}</td>
+              <td>{{fewDecimals background_median}}</td>
+              <td>{{fewDecimals sample_value}}</td>
+            </tr>
+          {{/each}}
+        {{/if}}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan={{#if isTop5percent}}2{{else}}3{{/if}}>
+            <span>
+              Showing
+              <div class="ui input" style="width: 80px;">
+                <input placeholder="# results" class="results-per-page"
+                    value={{getInstanceReactive "rowsPerPage"}} type="text">
+              </div>
+              of {{totalRows}} results</span>
+
+            <div class="ui right floated pagination menu">
+              {{#unless compare pageNumber 1}}
+                <a class="icon item previous-page">
+                  <i class="left chevron icon"></i>
+                </a>
+              {{/unless}}
+
+              {{#each pagesToShow}}
+                <a class="item go-to-page
+                    {{#if compare this "..."}}disabled{{/if}}
+                    {{#if compare this pageNumber}}active{{/if}}">
+                  {{this}}
+                </a>
+              {{/each}}
+
+              {{#unless compare pageNumber maxPageNumber}}
+                <a class="icon item next-page">
+                  <i class="right chevron icon"></i>
+                </a>
+              {{/unless}}
+            </div>
+          </th>
+        </tr>
+      </tfoot>
+    </table>
+  {{else}}
+    {{>dataLoading}}
+  {{/if}}
+</template>
