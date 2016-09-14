@@ -27,10 +27,11 @@ medbook:referential-integrity@0.0.2
 erasaur:meteor-lodash
 reactive-var
 
-npm-container
 aldeed:autoform
 aldeed:template-extension
 audit-argument-checks
 tmeasday:publish-counts
 mokolodi1:helpers
 medbook:collaborations@2.4.12
+dispatch:mocha
+ecmascript

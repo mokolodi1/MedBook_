@@ -1,0 +1,14 @@
+{
+  "name": "jobrunner",
+  "version": "1.0.7",
+  "dependencies": {
+    "binary-search": "1.2.0",
+    "byline": "^4.2.1",
+    "docker-run": "2.4.0",
+    "mime": "1.2.11",
+    "mysql": "^2.11.1",
+    "q": "^1.4.1",
+    "temp": "^0.8.1",
+    "xlsx": "0.8.0"
+  }
+}

@@ -2,4 +2,8 @@ export MONGO_URL="mongodb://localhost:27017/MedBook"
 export MEDBOOK_FILESTORE=/tmp/filestore
 export PACKAGE_DIRS=../../packages
 
-meteor --port 3003 --settings ../config/etk/settings.json
+if [ -z "$1" ]; then
+    meteor --port 3002
+else
+    meteor $1 --port 3002
+fi

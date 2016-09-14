@@ -4,9 +4,11 @@ function UpdateCbioSecurity (job_id) {
 UpdateCbioSecurity.prototype = Object.create(Job.prototype);
 UpdateCbioSecurity.prototype.constructor = UpdateCbioSecurity;
 
-var mysql = Meteor.npmRequire('mysql');
+import 'mysql';
+var mysql = Npm.require('mysql');
 
 UpdateCbioSecurity.prototype.run = function () {
+
   var connection = mysql.createConnection({
     host     : "mysql",
     user     : "cbio",
@@ -14,6 +16,16 @@ UpdateCbioSecurity.prototype.run = function () {
     database : "cbioportal"
   });
 
+  // 'error' events are special in node. If they occur without an attached 
+  // listener, a stack trace is printed and your process is killed.
+  // suppress it instead. TODO : Fail the job when this error appears.
+  connection.on('error', function(e) {
+    console.log("UpdateCbioSecurity: Mysql connection failed:", e);
+    console.log("Error suppressed to avoid crashing jobrunner.");
+    // Throwing an error here appears to crash jobrunner entirely
+    //throw new Error("Error establishing Mysql connection.");
+  });
+  
   connection.connect();
 
   // Collect this information out here so that it runs in the Meteor

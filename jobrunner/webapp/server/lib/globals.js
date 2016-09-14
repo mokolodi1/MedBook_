@@ -1,7 +1,11 @@
 // actual globals
-Q = Meteor.npmRequire('q');
-byLine = Meteor.npmRequire('byline');
-ntemp = Meteor.npmRequire('temp');
+import * as Q_module from 'q';
+import * as ntemp_module from 'temp';
+var byLine = require('byline');
+// and make globals available outside of this file by assigning new vars
+Q = Q_module;
+ntemp = ntemp_module;
+
 ntemp.track(); // clean up folders after process exits
 
 path = Npm.require('path');
