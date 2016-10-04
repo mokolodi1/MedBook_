@@ -8,3 +8,7 @@ services:
     extends:
       file: docker-compose-base-test.yml
       service: medbook-app
+  patient-care:
+    extends:
+      file: docker-compose-base-test.yml
+      service: medbook-app

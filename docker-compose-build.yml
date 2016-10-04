@@ -1,5 +1,12 @@
 version: '2'
 services:
+  patient-care:
+    build:
+      context: .
+      dockerfile: patientcare/Dockerfile
+      args:
+        appdir: patientcare
+    image: medbook/patient-care:v1.0.5
   job-runner:
     build:
       context: .
