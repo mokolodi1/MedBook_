@@ -81,13 +81,22 @@ def export_from_object(db, sampleGroup, isPlc):
             sys.exit(1)
 
     # actually write the stuff
-    dataSetIndex = 0 # keep track of which study we're looking at
+
+    # keep track of which data set we're looking at
+    dataSetIndex = 0
+
     firstStudyLabel = dataSets[0]["_id"]
+
     for doc in cursor:
         # check to see if we're on a new gene
         if doc["data_set_id"] == firstStudyLabel:
             dataSetIndex = 0
-            sys.stdout.write("\n" + doc["feature_label"] + "\t")
+            sys.stdout.write("\n" + doc["feature_label"])
+
+        # put in the tab separator regardless of whether the last
+        # string written was a gene name or the last data value of
+        # the last data set
+        sys.stdout.write("\t");
 
         # if it's a .plc, put the extra two rows
         if isPlc:
