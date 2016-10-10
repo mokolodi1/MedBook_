@@ -7,19 +7,26 @@ ADD installMeteor.sh /tmp/installMeteor.sh
 RUN sh /tmp/installMeteor.sh
 
 ADD packages /app/.meteor/packages
-ADD release /app/.meteor/release 
+ADD release /app/.meteor/release
 WORKDIR /app
 RUN meteor build .
 # Patch to help avoid EXDEV errors when updating npm packages
 ADD patch /tmp/patch
 RUN patch /root/.meteor/packages/meteor-tool/1.3.5_1/mt-os.linux.x86_64/tools/fs/files.js  /tmp/patch
 
+# do something with locales so that mongo to connect correctly
+# https://github.com/yogiben/meteor-starter/issues/117
+RUN apt-get update && apt-get install -y \
+    locales && \
+    locale-gen en_US.UTF-8 && \
+    localedef -i en_US -f UTF-8 en_US.UTF-8
+
 WORKDIR /app
 
 EXPOSE 3000
 ENV PORT 3000
 
-# Apps should be given a build context of the base directory so that the 
+# Apps should be given a build context of the base directory so that the
 # packages/ dir is included; this allows it to be added to the same volume as
 # the rest of the app and helps avoid EXDEV errors when meteor tries to update
 # packages.
