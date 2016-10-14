@@ -2,9 +2,9 @@
 
 ## Creating a new Azure box
 
-1. Create box on Azure portal
-- Point DNS record to box's IP [here](https://domains.google.com/registrar#d=3530982,medbook.io&z=a&chp=d,z)
+1. Create a 16.04 Ubuntu VM on Azure portal
 - Add drives to box (see: [this section](#connected-drives))
+- Point DNS record to box's IP [here](https://domains.google.com/registrar#d=3530982,medbook.io&z=a&chp=d,z)
 - Set up box with ansible: `ansible-playbook playbook.yml -i hosts -u ubuntu`
 - Add necessary ssh keys to box
 
