@@ -7,6 +7,7 @@ services:
     - ./packages:/packages
     environment:
       PACKAGE_DIRS: "/packages"
+
   wrangler:
     command: /app-dev/dockerDev.sh
     volumes:
@@ -14,3 +15,52 @@ services:
     - ./packages:/packages
     environment:
       PACKAGE_DIRS: "/packages"
+
+  # gateway:
+  #   ports:
+  #    - "8000:10000"
+  #   # build: MedBook-Gateway
+  #   # volumes:
+  #   #  - ./MedBook-Gateway:/app-dev
+  #   # command: /app-dev/runDev.sh
+  #   environment:
+  #     NO_SSL: "TRUE"
+
+  # patient-care:
+  #   build: patient-care
+  #   volumes:
+  #   - ./patient-care/webapp:/app-dev
+  #   command: /app-dev/dockerDev.sh
+
+  # cbioportal:
+  #   build: cbioportal-docker
+  #   volumes:
+  #   - ./cbioportal-docker/config:/custom_config
+  #   - /tmp/logs:/cbio-logs
+
+  # rpad:
+  #   container_name: "rpad"
+  #   build: RPad
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./RPad:/app-dev
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   command: /app-dev/runDev.sh
+  #   privileged: true #allows docker in docker
+
+  # mysql:
+  #   image: mysql:5.7
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: 'asdfasdf'
+  #     MYSQL_DATABASE: 'cbioportal'
+  #     MYSQL_USER: 'cbio'
+  #     MYSQL_PASSWORD: 'P@ssword1'
+
+  # mongo:
+  #   container_name: "mongo"
+  #   restart: always
+  #   image: mongo:2.6.12
+  #   # allows contact with mongo from localhost outside a container
+  #   ports:
+  #     - "127.0.0.1:27017:27017"
