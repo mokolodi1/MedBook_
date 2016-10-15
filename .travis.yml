@@ -6,6 +6,8 @@ env:
   # using prodStart.sh or devStart.sh
   - MONGO_URL="mongodb://mongo:27017/MedBook"
 install:
+  # Go to the start folder
+  - cd start
   # Build all containers
   - docker-compose -f docker-compose-build.yml build
   # Start up mongo
