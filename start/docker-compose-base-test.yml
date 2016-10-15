@@ -3,6 +3,6 @@ services:
   medbook-app:
     command: /run_tests/runTests.sh
     volumes:
-    - ./run_tests:/run_tests
+    - ../run_tests:/run_tests
     environment:
       PACKAGE_DIRS: "/packages"
