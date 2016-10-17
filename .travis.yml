@@ -6,18 +6,14 @@ env:
   # using prodStart.sh or devStart.sh
   - MONGO_URL="mongodb://mongo:27017/MedBook"
 install:
-  # Go to the start folder
-  - cd start
   # Build all containers
-  - docker-compose -f docker-compose-build.yml build
+  - docker-compose -f docker/docker-compose-build.yml build
   # Start up mongo
-  - docker-compose -f docker-compose-mongo.yml up -d
+  - docker-compose -f docker/docker-compose-mongo.yml up -d
 script:
-  # Go to the start folder
-  - cd start
   # Run wrangler and jobrunner tests
-  - docker-compose -f docker-compose.yml -f docker-compose-test.yml run wrangler
-  - docker-compose -f docker-compose.yml -f docker-compose-test.yml run job-runner
+  - docker-compose -f docker/docker-compose.yml -f docker/docker-compose-test.yml run wrangler
+  - docker-compose -f docker/docker-compose.yml -f docker/docker-compose-test.yml run job-runner
   # Then, spin them up normally in daemon mode and confirm they run
-  - docker-compose -f docker-compose.yml up -d
+  - docker-compose -f docker/docker-compose.yml up -d
   - docker ps
