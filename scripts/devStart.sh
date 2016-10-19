@@ -7,4 +7,4 @@ else
     export MONGO_URL="mongodb://127.0.0.1:27017/MedBook"
 fi
 
-docker-compose -f ./docker/docker-compose.yml -f ./docker/docker-compose-dev.yml -f ./docker/docker-compose-mongo.yml up
+docker-compose -f docker-compose.yml -f docker-compose-dev.yml -f docker-compose-mongo.yml up
