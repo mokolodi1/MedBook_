@@ -3,9 +3,9 @@ services:
   job-runner:
     build:
       context: .
-      dockerfile: ./jobrunner/Dockerfile
+      dockerfile: ./job-runner/Dockerfile
       args:
-        appdir: jobrunner
+        appdir: job-runner
   wrangler:
     build:
       context: .

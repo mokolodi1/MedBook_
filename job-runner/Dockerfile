@@ -1,7 +1,7 @@
 FROM medbook/meteor-base:meteor1.3_v1.0.0
 MAINTAINER Mike Risse
 
-# Builds jobrunner on meteor 1.3.
+# Builds job-runner on meteor 1.3.
 # See medbook/meteor-base for a number of ONBUILD instructions which happen here
 
 # Start Rscript install (pulled from https://github.com/rocker-org/rocker/blob/master/r-base/Dockerfile)

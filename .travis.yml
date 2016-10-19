@@ -11,7 +11,7 @@ install:
   # Start up mongo
   - docker-compose -f docker-compose-mongo.yml up -d
 script:
-  # Run wrangler and jobrunner tests
+  # Run Meteor app tests
   - docker-compose -f docker-compose.yml -f docker-compose-test.yml run wrangler
   - docker-compose -f docker-compose.yml -f docker-compose-test.yml run job-runner
   # Then, spin them up normally in daemon mode and confirm they run

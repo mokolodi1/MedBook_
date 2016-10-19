@@ -6,7 +6,7 @@
 
 [![Stories in Ready](https://badge.waffle.io/UCSC-MedBook/MedBook.png?label=ready&title=Ready)](https://waffle.io/UCSC-MedBook/MedBook)
 
-To build in docker and run (Currently: wrangler + jobrunner):
+To build in docker and run (Currently: wrangler + job-runner):
 ~~~~
   git clone https://github.com/UCSC-MedBook/medbook_.git
   git checkout jobrunner-add-tests
