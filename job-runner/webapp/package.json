@@ -1,5 +1,5 @@
 {
-  "name": "jobrunner",
+  "name": "job-runner",
   "version": "1.0.7",
   "dependencies": {
     "binary-search": "1.2.0",

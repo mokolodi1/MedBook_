@@ -1,8 +1,8 @@
 version: '2'
 services:
   medbook-app:
-    command: /run_tests/runTests.sh
+    command: /scripts/runTests.sh
     volumes:
-    - ./run_tests:/run_tests
-    environment:
-      PACKAGE_DIRS: "/packages"
+    - ./scripts:/scripts
+    # environment:
+    #   PACKAGE_DIRS: "/packages"

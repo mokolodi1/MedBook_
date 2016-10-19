@@ -10,14 +10,12 @@ services:
   job-runner:
     build:
       context: .
-      dockerfile: jobrunner/Dockerfile
+      dockerfile: ./job-runner/Dockerfile
       args:
-        appdir: jobrunner
-    image: medbook/job-runner:v1.0.9
+        appdir: job-runner
   wrangler:
     build:
       context: .
-      dockerfile: wrangler/Dockerfile
+      dockerfile: ./wrangler/Dockerfile
       args:
         appdir: wrangler
-    image: medbook/wrangler:v1.0.4
