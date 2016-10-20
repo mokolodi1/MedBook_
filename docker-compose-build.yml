@@ -3,10 +3,9 @@ services:
   patient-care:
     build:
       context: .
-      dockerfile: patientcare/Dockerfile
+      dockerfile: ./patient-care/Dockerfile
       args:
-        appdir: patientcare
-    image: medbook/patient-care:v1.0.5
+        appdir: patient-care
   job-runner:
     build:
       context: .
