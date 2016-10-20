@@ -1,0 +1,28 @@
+{
+  "name": "Gateway",
+  "version": "0.0.5",
+  "description": "GatewayProxy",
+  "main": "GatewaySSL",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UCSC-MedBook/MedBook-Gateway"
+  },
+  "bin": {
+    "Gateway": "./Gateway.js"
+  },
+  "keywords": [
+    "proxy",
+    "websockets"
+  ],
+  "author": "Ted Goldstein",
+  "bugs": {},
+  "dependencies": {
+    "cookies": "^0.5.1",
+    "forever-monitor":"^1.7.0",
+    "http-proxy": "*",
+    "https": "*",
+    "mongodb": "^2.0.46",
+    "randomstring": "*",
+    "toml": "^2.3.0"
+  }
+}
