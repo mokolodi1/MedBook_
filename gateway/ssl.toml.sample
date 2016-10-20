@@ -1,0 +1,55 @@
+[server]
+host = "localhost"
+bind_ip = "0.0.0.0"
+nonssl = 10000
+ssl = 10001
+cookie_secret = "medbookCookie change for production"
+key   = "/etc/httpd/conf/ssl.key/server.key"
+cert  = "/etc/httpd/conf/ssl.crt/server.crt"
+chain = "/etc/httpd/conf/ssl.crt/chain.crt"
+
+
+[apps]
+   [apps.WB]
+   auth = false
+   route = "/wb"
+   run = "./MedBook-Workbench/run 10003"
+   port = 10003
+   menuPosition = 0
+   menuItem = "Workbench"
+
+   [apps.CRFs]
+   auth = false
+   route = "/CRF"
+   run = "./Telescope/run 10002"
+   port = 10002
+   menuPosition = 1
+   menuItem = "Forms"
+
+   [apps.Telescope]
+   auth = false
+   route = "/"
+   run = "./Telescope/run 10001"
+   port = 10001
+   menuPosition = 3
+   menuItem = "Telescope"
+
+   [apps.galaxy]
+   auth = true
+   route = "/galaxy"
+   run = "./galaxy-dist/run"
+   port = 10010
+   menuPosition = 4
+   menuItem = "Galaxy"
+
+   [apps.cbioportal]
+   auth = true
+   route = "/cbioportal"
+   port = 8585
+   menuItem = "Cbioportal"
+
+[final]
+   redirect = "/"
+   run = "./Telescope/run 10001"
+   port = 10001
+
