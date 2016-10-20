@@ -1,0 +1,14 @@
+meteor-platform
+mrt:jquery-ui
+jquery
+iron:router
+accounts-password
+accounts-ui
+accounts-google
+ajduke:bootstrap-tagsinput
+cfs:http-methods
+d3js:d3
+mizzao:bootstrap-3
+aslagle:reactive-table
+matb33:collection-hooks
+mizzao:jquery-ui
