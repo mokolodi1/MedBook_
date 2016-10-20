@@ -2,9 +2,13 @@ version: '2'
 services:
   job-runner:
     extends:
-      file: docker-compose-base-test.yml
-      service: medbook-app
+      file: docker-compose-base.yml
+      service: test-medbook-app
   wrangler:
     extends:
-      file: docker-compose-base-test.yml
-      service: medbook-app
+      file: docker-compose-base.yml
+      service: test-medbook-app
+  patient-care:
+    extends:
+      file: docker-compose-base.yml
+      service: test-medbook-app

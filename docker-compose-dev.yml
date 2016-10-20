@@ -1,24 +1,35 @@
 version: '2'
 services:
+  # NOTE: regarding combining the volumes list with the medbook-app list:
+  #       "For the multi-value options ... Compose concatenates both
+  #       sets of values" - https://docs.docker.com/compose/extends/
+
   job-runner:
-    command: /app-dev/dockerDev.sh
+    extends:
+      file: docker-compose-base.yml
+      service: dev-medbook-app
+    depends_on:
+      - "mongo"
     volumes:
     - ./job-runner/webapp:/app-dev
-    - ./packages:/packages
-    environment:
-      PACKAGE_DIRS: "/packages"
-    depends_on:
-      - "mongo"
 
   wrangler:
-    command: /app-dev/dockerDev.sh
-    volumes:
-    - ./wrangler/webapp:/app-dev
-    - ./packages:/packages
-    environment:
-      PACKAGE_DIRS: "/packages"
+    extends:
+      file: docker-compose-base.yml
+      service: dev-medbook-app
     depends_on:
       - "mongo"
+    volumes:
+    - ./wrangler/webapp:/app-dev
+
+  patient-care:
+    extends:
+      file: docker-compose-base.yml
+      service: dev-medbook-app
+    depends_on:
+      - "mongo"
+    volumes:
+    - ./patient-care/webapp:/app-dev
 
   # gateway:
   #   ports:
@@ -29,12 +40,6 @@ services:
   #   # command: /app-dev/runDev.sh
   #   environment:
   #     NO_SSL: "TRUE"
-
-  # patient-care:
-  #   build: patient-care
-  #   volumes:
-  #   - ./patient-care/webapp:/app-dev
-  #   command: /app-dev/dockerDev.sh
 
   # cbioportal:
   #   build: cbioportal-docker
@@ -52,19 +57,3 @@ services:
   #     - /var/run/docker.sock:/var/run/docker.sock
   #   command: /app-dev/runDev.sh
   #   privileged: true #allows docker in docker
-
-  # mysql:
-  #   image: mysql:5.7
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: 'asdfasdf'
-  #     MYSQL_DATABASE: 'cbioportal'
-  #     MYSQL_USER: 'cbio'
-  #     MYSQL_PASSWORD: 'P@ssword1'
-
-  # mongo:
-  #   container_name: "mongo"
-  #   restart: always
-  #   image: mongo:2.6.12
-  #   # allows contact with mongo from localhost outside a container
-  #   ports:
-  #     - "127.0.0.1:27017:27017"

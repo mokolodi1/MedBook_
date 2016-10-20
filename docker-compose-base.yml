@@ -1,0 +1,15 @@
+version: '2'
+services:
+  dev-medbook-app:
+    command: /app-dev/dockerDev.sh
+    volumes:
+    - ./packages:/packages
+    environment:
+      PACKAGE_DIRS: "/packages"
+
+  test-medbook-app:
+    command: /scripts/runTests.sh
+    volumes:
+    - ./scripts:/scripts
+    # environment:
+    #   PACKAGE_DIRS: "/packages"

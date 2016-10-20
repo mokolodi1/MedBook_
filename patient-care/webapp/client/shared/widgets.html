@@ -1,0 +1,306 @@
+<template name="widgetsDemo">
+  <h1>Widgets demo page</h1>
+
+  <h2><code>{{|> dataLoading}}</code></h2>
+  {{> dataLoading}}
+
+  <h2><code>{{|> shareAndDeleteButtons}}</code></h2>
+  {{> shareAndDeleteButtons
+      collectionName="DataSets" object=fakeObject}}
+  <br />
+  <br />
+  {{> shareAndDeleteButtons extraButtonsClass="large"
+      collectionName="DataSets" object=fakeObject}}
+
+  <h2><code>{{|> showErrorMessage}}</code></h2>
+  {{> showErrorMessage reactiveError}}
+
+  <h2><code>{{|> contactUsButton}}</code></h2>
+  <p>
+    The URL within patient-care is include in the subject of the email :)
+  </p>
+  {{> contactUsButton}}
+
+  <h2><code>{{|> listSamplesButton}}</code></h2>
+  {{> listSamplesButton fakeSamples}}
+
+  <h2><code>{{|> viewJobButton}}</code></h2>
+  {{> viewJobButton job=(fakeJob "waiting") href="https://google.com"}}
+  {{> viewJobButton job=(fakeJob "running") href="https://google.com"}}
+  {{> viewJobButton job=(fakeJob "error") href="https://google.com"}}
+  {{> viewJobButton job=(fakeJob "done") href="https://google.com"}}
+
+  <h2><code>{{|#semanticUIDropdown}}code{{|/semanticUIDropdown}}</code></h2>
+  <p>
+    This simply calls <code>instance.$(".ui.dropdown").dropdown(options)</code>
+  </p>
+  {{#semanticUIDropdown options=noAction}}
+    <div class="ui dropdown">
+      <div class="text">Hello my name is Ui Dropdown</div>
+      <i class="dropdown icon"></i>
+      <div class="menu">
+        <div class="item">I am an option</div>
+        <div class="item">Another option</div>
+        <div class="item">A THIRD OPTION PICK ME PICK ME</div>
+      </div>
+    </div>
+  {{/semanticUIDropdown}}
+
+  <h2>
+    <code>
+      {{|#jobStatusWrapper "jobId"}} if done {{|/jobStatusWrapper}}
+    </code>
+  </h2>
+  <p>
+    This one is really hard to demonstrate because the job subscription is
+    handled from within the template, but that's how you use it!
+  </p>
+
+  <h2><code>{{|> showRecords}}</code></h2>
+  <p>
+    This will show records in a Handsontable.
+
+    See manageForms or manageGeneSets for a code example.
+  </p>
+</template>
+
+<template name="shareAndDeleteButtons">
+  <div class="ui labeled icon tiny buttons {{extraButtonsClass}}">
+    <button class="ui secondary share button">
+      <i class="share icon"></i>
+      Share
+    </button>
+    <button class="ui negative delete button">
+      <i class="trash icon"></i>
+      {{#if deleteClicked}}
+        Really?
+      {{else}}
+        Delete
+      {{/if}}
+    </button>
+  </div>
+</template>
+
+<template name="editCollaborationsModal">
+  <div class="ui edit-collaborations modal">
+    <i class="close modal icon"></i>
+    <div class="header">
+      Edit collaborations
+    </div>
+    <div class="content">
+      <div class="description">
+        {{#unless sessionPopulated}}
+          <h1>You forgot to set the session variables!</h1>
+          <p>
+            <code>editCollaborationsCollection</code>
+          </p>
+          <p>
+            <code>editCollaborationsMongoId</code>
+          </p>
+        {{/unless}}
+
+        <div class="ui header">
+          These collaborations can see and edit this object.
+        </div>
+        {{#if collaborationOptions}}
+          {{#autoForm id="editCollaborations" schema=onlyCollaborations}}
+            {{> afQuickField name="collaborations" options=collaborationOptions
+                type="select" multiple=true search=true
+                value=getObject.collaborations}}
+          {{/autoForm}}
+        {{else}}
+          {{> dataLoading}}
+        {{/if}}
+      </div>
+    </div>
+    <div class="actions">
+      <div class="ui negative right labeled icon button">
+        Cancel
+        <i class="cancel icon"></i>
+      </div>
+      <div class="ui positive right labeled icon button
+          {{#if waitingForServer}}loading{{/if}}">
+        Set collaborations
+        <i class="checkmark icon"></i>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="showErrorMessage">
+  {{#with getError}}
+    <div class="ui negative message">
+      <i class="close icon close-error-message"></i>
+      <div class="header">{{header}}</div>
+      {{{message}}}
+    </div>
+  {{/with}}
+</template>
+
+<template name="contactUsButton">
+  <a href="mailto:ucscmedbook@gmail.com?subject={{emailSubject}}"
+      class="ui button teal {{cssClass}}">
+    <i class="bug icon"></i>
+    Contact the MedBook Team
+  </a>
+</template>
+
+<template name="dataLoading">
+  <div class="ui icon message">
+    <i class="notched circle loading icon"></i>
+    <div class="content">
+      <div class="header">
+        One moment please...
+      </div>
+      <p>We're fetching that data for you.</p>
+    </div>
+  </div>
+</template>
+
+<template name="listSamplesButton">
+  {{#if firstGreater (length this) 5}}
+    <div class="ui mini buttons">
+      <div class="ui button show-list" style="display: inline;">
+        Show {{#if showAllSamples}}fewer{{else}}all{{/if}} samples
+      </div>
+      {{#semanticUIDropdown options=dropdownOptions}}
+        <div class="ui floating dropdown icon button">
+          <i class="dropdown icon"></i>
+          <div class="menu">
+            <div class="item toggle-study-labels">
+              <i class="{{#if hideStudyLabels}}un{{/if}}hide icon"></i>
+              {{#if hideStudyLabels}}Show{{else}}Hide{{/if}} study labels
+            </div>
+          </div>
+        </div>
+      {{/semanticUIDropdown}}
+    </div>
+  {{/if}}
+
+  <ul>
+    {{#each sampleToShow}}
+      <li>{{this}}</li>
+    {{/each}}
+  </ul>
+</template>
+
+
+<template name="semanticUIDropdown">
+  {{! Calls $(".ui.dropdown").dropdown() when rendered}}
+  {{> UI.contentBlock}}
+</template>
+
+<template name="semanticUICheckbox">
+  {{! Calls $(".ui.checkbox").checkbox() when rendered}}
+  {{> UI.contentBlock}}
+</template>
+
+<!-- <template name="semanticUIPopup">
+  {{! Calls $(selector).popup() when rendered}}
+  {{> UI.contentBlock}}
+</template> -->
+
+<template name="viewJobButton">
+  <a href={{href}}
+      class="ui right labeled icon {{buttonClass}} button">
+    <i class="right arrow icon"></i>
+    {{#if compare job.status "done"}}
+      View
+    {{else}}
+      {{capitalize job.status}}
+    {{/if}}
+  </a>
+</template>
+
+<template name="jobStatusWrapper">
+  {{#if Template.subscriptionsReady}}
+    {{#with getJob}}
+      {{#if compare status "done"}}
+        {{> Template.contentBlock this}}
+      {{/if}}
+
+      {{#if compare status "waiting"}}
+        <div class="ui huge info message">
+          <div class="header">
+            Waiting...
+          </div>
+          Your job will be run soon.
+        </div>
+      {{/if}}
+
+      {{#if compare status "running"}}
+        <div class="ui huge info message">
+          <div class="header">
+            Running!
+          </div>
+          Your job is running.
+        </div>
+      {{/if}}
+
+      {{#if compare status "error"}}
+        <div class="ui huge error message">
+          <div class="header">
+            Error running job.
+          </div>
+          <p>
+            We have encountered an error running your job.
+            If you believe this is an internal error, please
+            {{> contactUsButton}}
+          </p>
+          <p>
+            Description: <code>{{error_description}}</code>
+          </p>
+          {{#if stack_trace}}
+            <p>
+              <pre><code>{{stack_trace}}</code></pre>
+            </p>
+          {{/if}}
+          <p>
+            {{{contactTeoText}}}
+          </p>
+        </div>
+      {{/if}}
+    {{/with}}
+
+    {{#unless getJob}}
+      <div class="ui icon message massive">
+        <i class="warning sign icon"></i>
+        <div class="content">
+          <div class="header">
+            Uh oh...
+          </div>
+          <p>We couldn't find that job.</p>
+          <p>
+            If you believe you are seeing this message in error, please
+            {{> contactUsButton}}
+          </p>
+        </div>
+      </div>
+    {{/unless}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="showRecords">
+  {{#if gettingRecordsData}}
+    {{> dataLoading}}
+  {{else}}
+    {{! wait until the data loads in the template above: this is to
+        allow us to make the call for the records immediately before all
+        the information about the form has loaded}}
+    {{#if and fields primaryFieldName}}
+      {{> recordsHandsOnTable recordsData=recordsData fields=fields
+          primaryFieldName=primaryFieldName}}
+    {{else}}
+      {{> dataLoading}}
+    {{/if}}
+  {{/if}}
+</template>
+
+<template name="recordsHandsOnTable">
+  {{! height, width, overflow: makes the table scroll when it gets too big}}
+  <div id="recordsHOT"
+      style="height: {{height}}; width: 100%; overflow: hidden;">
+  </div>
+</template>
