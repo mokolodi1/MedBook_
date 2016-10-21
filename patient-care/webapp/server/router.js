@@ -1,7 +1,7 @@
-fs = Npm.require("fs");
-path = Npm.require('path');
-spawn = Npm.require('child_process').spawn;
-ntemp = Meteor.npmRequire('temp').track();
+import "fs";
+import "path";
+import "child_process";
+import "temp";
 
 // Route for downloading blobs2 by job filename & blob filename
 // Used in Limma/GSEA results which output several HTML files
@@ -80,7 +80,7 @@ Picker.route("/download/:userId/:loginToken/" +
 
   let blob = Blobs2.findOne(blobId);
   if(!blob){ return notFound(res);}
- 
+
   let assocObjName = blob.associated_object.collection_name;
   let assocObjId = blob.associated_object.mongo_id;
   let assocObj = MedBook.collections[assocObjName].findOne(
@@ -88,7 +88,7 @@ Picker.route("/download/:userId/:loginToken/" +
 
   // confirm user's access to blob via associated object
   if( !user.hasAccess(assocObj)){ return permissionDenied(res);}
-  
+
   // Provide the blob for download
   res.setHeader("Content-Type", blob.mime_type);
   res.setHeader("Content-Disposition",
@@ -136,7 +136,7 @@ Picker.route("/download/:userId/:loginToken/" +
       `attachment; filename="${object.name}.tsv"`);
   res.writeHead(200);
 
-  let cwd = ntemp.mkdirSync("DownloadData");
+  let cwd = temp.track().mkdirSync("DownloadData");
   let logfilePath = path.join(cwd, "stderr.txt");
   let stderrStream = fs.createWriteStream(logfilePath, {flags: "a"});
 

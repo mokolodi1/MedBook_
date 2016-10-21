@@ -10,8 +10,10 @@ services:
       service: dev-medbook-app
     depends_on:
       - "mongo"
+      - "mysql"
     volumes:
     - ./job-runner/webapp:/app-dev
+    - ./tools:/tools
 
   wrangler:
     extends:
@@ -30,21 +32,20 @@ services:
       - "mongo"
     volumes:
     - ./patient-care/webapp:/app-dev
+    - ./tools/exporters:/tools/exporters
 
-  # gateway:
-  #   ports:
-  #    - "8000:10000"
-  #   # build: MedBook-Gateway
-  #   # volumes:
-  #   #  - ./MedBook-Gateway:/app-dev
-  #   # command: /app-dev/runDev.sh
-  #   environment:
-  #     NO_SSL: "TRUE"
+  gateway:
+    ports:
+     - "8000:10000"
+    environment:
+      NO_SSL: "TRUE"
+    depends_on:
+      - "mongo"
 
   # cbioportal:
-  #   build: cbioportal-docker
+  #   build: cbioportal
   #   volumes:
-  #   - ./cbioportal-docker/config:/custom_config
+  #   - ./cbioportal/config:/custom_config
   #   - /tmp/logs:/cbio-logs
 
   # rpad:

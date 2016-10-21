@@ -1,5 +1,8 @@
 version: '2'
 services:
+  # NOTE: appdir is consumed in the ONBUILD commands in the meteor base image
+  # Dockerfile
+
   patient-care:
     build:
       context: .
@@ -18,3 +21,13 @@ services:
       dockerfile: ./wrangler/Dockerfile
       args:
         appdir: wrangler
+
+  gateway:
+    build:
+      context: .
+      dockerfile: ./gateway/Dockerfile
+
+  cbioportal:
+    build:
+      context: .
+      dockerfile: ./cbioportal/Dockerfile

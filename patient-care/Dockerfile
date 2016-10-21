@@ -11,3 +11,7 @@ RUN apt-get update && apt-get install -y --force-yes --no-install-recommends \
 RUN easy_install pip
 RUN pip install --upgrade virtualenv
 RUN pip install pymongo
+
+# copy in export scripts
+# NOTE: relative to path when docker-compose is called
+COPY tools/exporters /tools/exporters

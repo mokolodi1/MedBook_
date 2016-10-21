@@ -1,2 +1,4 @@
 external-tools
 */*/.meteor/local
+
+tools/old-external-tools
