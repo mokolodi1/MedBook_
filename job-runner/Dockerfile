@@ -35,3 +35,7 @@ RUN apt-get install -y bc
 
 # Install Java
 RUN apt-get install -y --no-install-recommends openjdk-7-jdk
+
+# copy in necessary tools
+# NOTE: relative to path when docker-compose is called
+COPY tools /tools

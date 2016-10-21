@@ -1,0 +1,325 @@
+<head>
+  <!-- <script src="https://docs.handsontable.com/pro/1.3.4/bower_components/handsontable-pro/dist/handsontable.full.min.js"></script> -->
+  <!-- <link rel="stylesheet" href="https://docs.handsontable.com/pro/1.3.4/bower_components/handsontable-pro/dist/handsontable.full.min.css"> -->
+</head>
+
+<template name="appBody">
+  {{! shared modals that are used on multiple pages}}
+  {{> editCollaborationsModal}}
+
+  <div class="ui container">
+    <div class="ui menu">
+      <a href={{pathFor "home"}} class="header item">
+        MedBook Patient Care
+      </a>
+
+      <a href={{pathFor "home"}} class="ui simple dropdown item">
+        Tools
+        <div class="menu">
+          <a href={{pathFor "listLimmaGSEA"}} class="item">
+            Limma <i class="right arrow icon"></i> GSEA
+          </a>
+          <!-- <a href={{pathFor "listTumorMap"}} class="item">
+            Tumor Map
+          </a> -->
+          <a href={{pathFor "listUpDownGenes"}} class="item">
+            Outlier Analysis
+          </a>
+        </div>
+      </a>
+
+      <a href={{pathFor "manageObjects"}} class="ui simple dropdown item">
+        Data
+        <div class="menu">
+          <a href={{pathFor "manageObjects" collectionSlug="data-sets"}}
+              class="item">
+            Data Sets
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="sample-groups"}}
+              class="item">
+            Sample Groups
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="gene-sets"}}
+              class="item">
+            Gene Sets
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="gene-set-groups"}}
+              class="item">
+            Gene Set Groups
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="studies"}}
+              class="item">
+            Studies
+          </a>
+          <a href={{pathFor "manageObjects" collectionSlug="clinical-forms"}}
+              class="item">
+            Clinical Forms
+          </a>
+        </div>
+      </a>
+
+      <a href={{pathFor "manageCollaborations"}}
+          class="item">
+        Collaborations
+      </a>
+
+      <div class="right menu">
+        <div class="ui simple dropdown icon item">
+          <i class="alarm icon"></i>
+          <!-- <div class="floating ui red label">3</div> -->
+          <div class="menu">
+            <div class="item">
+              No notifications
+            </div>
+          </div>
+        </div>
+        <div class="ui simple dropdown icon item">
+          <i class="info circle icon"></i>
+          <div class="menu">
+            {{> chatWithUsOnSlack}}
+            <a href="mailto:ucscmedbook@gmail.com" class="item">
+              Send us an email
+            </a>
+          </div>
+        </div>
+        <div class="ui simple dropdown icon item">
+          <i class="grid layout icon"></i>
+          <div class="menu">
+            <a href={{pathFor "home"}} class="item">
+              Patient Care
+            </a>
+            <a href="https://medbook.io/wrangler" target="_self" class="item">
+              Wrangler
+            </a>
+            <a href="https://medbook.io/cbioportal/index.do#"
+                target="_self" class="item">
+              cBioPortal
+            </a>
+          </div>
+        </div>
+        <div class="item">
+          {{> loginButtons}}
+        </div>
+      </div>
+    </div>
+
+    {{! don't show the breadcrumbs on the not signed in page or
+        on the home page}}
+    {{#if currentMedBookUser}}
+      {{#unless isActiveRoute "home"}}
+        {{> siteBreadcrumbs}}
+      {{/unless}}
+    {{/if}}
+
+    {{#if loggingIn}}
+      {{> loggingInMessage}}
+    {{else}}
+      {{#if currentUser}}
+        {{#if currentMedBookUser}}
+          {{>Template.dynamic template=content data=params}}
+        {{else}}
+          {{> loggingInMessage}}
+        {{/if}}
+      {{else}}
+        {{> notLoggedIn}}
+      {{/if}}
+    {{/if}}
+  </div>
+</template>
+
+<template name="siteBreadcrumbs">
+  <div class="ui big breadcrumb">
+    {{#breadcrumbItem isActive=(isActiveRoute "home")
+        href=(pathFor "home")}}
+      Home
+    {{/breadcrumbItem}}
+
+    <!-- {{#if or (isActiveRoute "listPatients") (isActiveRoute "patient")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listPatients")
+          href=(pathFor "listPatients")}}
+        Patients
+      {{/breadcrumbItem}}
+
+      {{#if isActiveRoute "patient"}}
+        {{#breadcrumbItem isActive=true
+            href=(pathFor "patient" patient_id=params.patient_id)}}
+          {{getPatientLabel}}
+        {{/breadcrumbItem}}
+      {{/if}}
+    {{/if}} -->
+
+    {{#if or (isActiveRoute "listLimmaGSEA")
+        (isActiveRoute "limmaGseaJob")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listLimmaGSEA")
+          href=(pathFor "listLimmaGSEA")}}
+        Limma <i class="right arrow icon"></i> GSEA
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    <!-- {{#if isActiveRoute "listTumorMap"}}
+      {{#breadcrumbItem isActive=true}}
+        Tumor Map
+      {{/breadcrumbItem}}
+    {{/if}} -->
+
+    {{#if or (isActiveRoute "listUpDownGenes")
+        (isActiveRoute "upDownGenesJob")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listUpDownGenes")
+          href=(pathFor "listUpDownGenes")}}
+        Outlier Analysis
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if or (isActiveRoute "upDownGenesJob") (isActiveRoute "limmaGseaJob")}}
+      {{#breadcrumbItem isActive=true}}
+        Result
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if threeOr (isActiveRoute "manageCollaborations")
+        (isActiveRoute "createCollaboration")
+        (isActiveRoute "browseCollaborations")}}
+      {{#breadcrumbItem isActive=true}}
+        Collaborations
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if or (isActiveRoute "manageObjects")
+        (isActiveRoute "viewFormRecords")}}
+      {{! TODO: don't hardcode collectionSlug}}
+      {{#breadcrumbItem isActive=(isActiveRoute "manageObjects")
+          href=(pathFor "manageObjects" collectionSlug="clinical-forms")}}
+        Manage data
+      {{/breadcrumbItem}}
+
+      {{#if isActiveRoute "viewFormRecords"}}
+        {{#breadcrumbItem isActive=true}}
+          View records
+        {{/breadcrumbItem}}
+      {{/if}}
+    {{/if}}
+
+    {{! Utility}}
+
+    {{#if invalidUrl}}
+      {{#breadcrumbItem isActive=true}}Invalid URL{{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if isActiveRoute "widgetsDemo"}}
+      {{#breadcrumbItem isActive=true}}
+        Widgets
+      {{/breadcrumbItem}}
+    {{/if}}
+  </div>
+</template>
+
+<template name="notLoggedIn">
+  <div class="ui massive message">
+    <!-- <i class="warning sign icon"></i> -->
+    <div class="content">
+      <div class="header">
+        Welcome to MedBook!
+      </div>
+      <p>
+        MedBook allows you to run your favorite <b>bioinformatic tools</b>
+        with the touch of a button.
+      </p>
+      <p>
+        MedBook enables you to quickly compare private patient information with
+        <b>publically available data sets</b> and then securely
+        <b>share findings with collaborators</b>.
+      </p>
+      <p>
+        MedBook is currently in public beta and is free to use.
+      </p>
+    </div>
+  </div>
+</template>
+
+<template name="chatWithUsOnSlack">
+  <a href={{directSlackLink}}
+      class="item {{#unless directSlackLink}}explain-slack-button{{/unless}}">
+    Chat with us on Slack
+  </a>
+  <div class="ui modal explain-slack">
+    <i class="close icon"></i>
+    <div class="header">
+      Chatting with us with Slack
+    </div>
+    <div class="content">
+      <div class="description">
+        <div class="ui header">What is Slack?</div>
+        <p>
+          Slack is an instant messaging app that we here in the
+          MedBook team use to communicate.
+        </p>
+        <p>
+          You can reach us quickly and easily to request a
+          feature or to get help with a problem you're having.
+        </p>
+        <p>
+          <div class="ui checkbox dismiss-slack-explanation">
+            <input type="checkbox" name="example">
+            <label>Don't show me this again.</label>
+          </div>
+        </p>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="ui secondary cancel button">
+        Close
+      </div>
+      <a href="https://medbook.slack.com"
+          class="ui primary right labeled icon ok button">
+        Take me there
+        <i class="right arrow icon"></i>
+      </a>
+    </div>
+  </div>
+</template>
+
+<template name="breadcrumbItem">
+  {{#if isActive}}
+    <div class="section active">
+      {{> UI.contentBlock}}
+    </div>
+  {{else}}
+    <a href={{href}}>
+      {{> UI.contentBlock}}
+    </a>
+    <span class="divider">/</span>
+  {{/if}}
+</template>
+
+<template name="loggingInMessage">
+  <div class="ui massive icon message">
+    <i class="notched circle loading icon"></i>
+    <div class="content">
+      <div class="header">
+        Logging in...
+      </div>
+      <p>
+        You'll be on your way in just a moment!
+      </p>
+    </div>
+  </div>
+</template>
+
+<template name="routeNotFound">
+  <div class="ui message massive">
+    <div class="header">Invalid URL</div>
+    <p>
+      To be completely honest, we don't quite know how you found your way here...
+    </p>
+    <p>
+      Click here to return to the home page:
+      <a href={{pathFor "home"}} class="ui primary button">
+        <i class="home icon"></i>
+        Go home!
+      </a>
+    </p>
+    <p>
+      If you think you are seeing this message in error, please {{> contactUsButton}}
+    </p>
+  </div>
+</template>

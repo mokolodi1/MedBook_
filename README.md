@@ -1,21 +1,17 @@
 # MedBook_
 
-[![Build Status](https://travis-ci.org/UCSC-MedBook/MedBook_.svg?branch=master)](https://travis-ci.org/UCSC-MedBook/MedBook_) Master
-
-[![Build Status](https://travis-ci.org/UCSC-MedBook/MedBook_.svg?branch=patientcare-add-tests)](https://travis-ci.org/UCSC-MedBook/MedBook_) Patient-Care
-
+[![Build Status](https://travis-ci.org/UCSC-MedBook/MedBook_.svg?branch=master)](https://travis-ci.org/UCSC-MedBook/MedBook_)
 [![Stories in Ready](https://badge.waffle.io/UCSC-MedBook/MedBook.png?label=ready&title=Ready)](https://waffle.io/UCSC-MedBook/MedBook)
 
-To build in docker and run (Currently: wrangler + job-runner):
-~~~~
-  git clone https://github.com/UCSC-MedBook/medbook_.git
-  git checkout jobrunner-add-tests
+To build in docker and run:
+```sh
+git clone https://github.com/UCSC-MedBook/MedBook
 
-  docker-compose -f docker-compose-build.yml build
-  docker-compose -f docker-compose-mongo.yml up -d
+docker-compose -f docker-compose-build.yml build
+docker-compose -f docker-compose-mongo.yml up -d
 
-  ./prodStart.sh
-~~~~
+./scripts/prodStart.sh
+```
 
 ### Setting up cBioPortal
 ```sh

@@ -1,0 +1,62 @@
+[server]
+host = "localhost"
+bind_ip = "0.0.0.0"
+nonssl = 10000
+
+[apps]
+   [apps.WB]
+   auth = false
+   route = "/wb"
+   run = "./MedBook-Workbench/run 10003"
+   port = 10003
+   menuPosition = 0
+   menuItem = "Workbench"
+
+   [apps.CRFs]
+   auth = true
+   route = "/CRF"
+   run = "./Telescope/run 10002"
+   port = 10002
+   menuPosition = 1
+   menuItem = "Forms"
+
+   [apps.Streams]
+   auth = false
+   route = "/"
+   port = 10001
+   menuPosition = 3
+   menuItem = "Streams"
+
+   [apps.galaxy]
+   auth = true
+   route = "/galaxy"
+   run = "./galaxy-dist/run"
+   port = 10010
+   menuPosition = 4
+   menuItem = "Galaxy"
+
+   [apps.fusion]
+   auth = false
+   route = "/fusion"
+   port = 10011
+   menuPosition = 5
+   menuItem = "Data Fusion"
+
+   [apps.wrangle]
+   auth = false
+   route = "/wrangle"
+   port = 10011
+   menuPosition = 5
+   menuItem = "Data Wrangler"
+
+   [apps.cbioportal]
+   auth = true
+   route = "/cbioportal"
+   port = 8585
+   menuItem = "Cbioportal"
+
+[final]
+   redirect = "/"
+   run = "./Telescope/run 10001"
+   port = 10001
+

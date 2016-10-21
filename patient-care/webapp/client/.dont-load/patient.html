@@ -1,0 +1,261 @@
+<template name="patient">
+  {{#if Template.subscriptionsReady}}
+    {{#with getPatient}}
+      <h1 class="title ui">
+        <i class="fa fa-user"></i>
+        {{patient_label}}
+      </h1>
+
+      {{> questions}}
+    {{/with}}
+
+    {{#unless getPatient}}
+      <div class="ui icon message massive">
+        <i class="warning sign icon"></i>
+        <div class="content">
+          <div class="header">
+            No patient found
+          </div>
+          <p>
+            We couldn't find a patient with that id. It's possible that
+            a patient exists with that id but you do not have access.
+          </p>
+        </div>
+      </div>
+    {{/unless}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+
+
+<template name="questions">
+    {{#if length samples}}
+      <h2 class="title ui">
+        Which data have been loaded?
+      </h2>
+      <div class="content">
+        {{> patientLoadedData}}
+      </div>
+
+
+      <h2 class="title ui">
+        Which cancers is this cancer most like?
+      </h2>
+      <div class="content">
+        {{> patientTumorMap}}
+      </div>
+
+
+      <h2 class="title ui">
+        Which genes are gene-expression outliers?
+      </h2>
+      <div class="content">
+        {{> patientUpDownGenes}}
+      </div>
+    {{else}}
+      {{! error message if there are no samples}}
+      <div class="ui warning message">
+        This patient has no samples associated with it.
+        Questions that provide sample-level information have been hidden.
+      </div>
+    {{/if}}
+</template>
+
+
+
+<template name="patientLoadedData">
+  <p>
+    This panel is an overview of which data are loaded into MedBook.
+  </p>
+
+  <h3>Gene expression</h3>
+  <table class="ui celled structured table">
+    <thead>
+      <tr>
+        <th>Sample</th>
+        <th>Quantile counts log2(x+1)</th>
+        <!-- <th>FPKM</th>
+        <th>TPM</th> -->
+      </tr>
+    </thead>
+    <tbody>
+      {{#let patient=this}}
+        {{#each samples}}
+          {{> sampleLoadedData patient=patient sample=this}}
+        {{/each}}
+      {{/let}}
+    </tbody>
+  </table>
+</template>
+
+<template name="sampleLoadedData">
+  <tr>
+    <td><i class="fa fa-flask"></i>{{sample.sample_label}}</td>
+    <td class="center aligned">
+      <i class="large icon {{dataExistsClasses "gene_expression_index"}}"></i>
+    </td>
+    <!-- <td class="center aligned">
+      <i class="large icon {{dataExistsClasses "tpm"}}"></i>
+    </td>
+    <td class="center aligned">
+      <i class="large icon {{dataExistsClasses "fpkm"}}"></i>
+    </td> -->
+  </tr>
+</template>
+
+<template name="patientTumorMap">
+  <p>
+    <a href="https://tumormap.ucsc.edu/">TumorMap</a>
+    clusters samples based on expression values or other genomic
+    data such as mutations.
+  </p>
+
+  <table class="ui structured celled table">
+    <thead>
+      <tr>
+        <th rowspan="2">Sample</th>
+        <th colspan="3">Cluster by...</th>
+      </tr>
+      <tr>
+        <th>Gene Expression</th>
+        <th>Copy Number</th>
+        <th>Mutations</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each samples}}
+        <tr>
+          <td><i class="fa fa-flask"></i>{{sample_label}}</td>
+          <td>
+            {{> tumorMapButton}}
+          </td>
+          <td>No data</td>
+          <td>No data</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</template>
+
+<template name="tumorMapButton">
+  TODO
+  <!-- {{#if bookmarkExists}}
+    <a href={{getBookmark}} target="_blank" class="ui primary button tiny">
+      View
+    </a>
+  {{else}}
+    <div class="ui secondary button tiny bookmark-popup
+        {{#if creatingBookmark}}loading{{else}}generate-bookmark{{/if}}"
+        data-content="This usually takes around 10 seconds">
+      Generate
+    </div>
+  {{/if}} -->
+</template>
+
+<template name="patientUpDownGenes">
+  <p>
+    Outlier genes are defined as being more than N IQRs (InterQuartile Range)
+    away from the median.
+    The maximum number of genes returned is 5% of the total number of genes.
+    If there are more than 5% of the total number of genes that are outliers,
+    only the top 5% of the outliers will be returned.
+  </p>
+
+  <h3>Create a new analysis</h3>
+  <form id="create-up-down-genes" class="ui form">
+    Calculate outlier genes in
+
+    <select class="ui tiny search dropdown sample-label">
+      <option value="">Choose sample...</option>
+      {{#each sample_labels}}
+        <option value={{this}}>{{this}}</option>
+      {{/each}}
+    </select>
+
+    compared to
+
+    <select class="ui tiny search dropdown sample-group">
+      <option value="">Choose background...</option>
+      <option value="create-new-sample-group">
+        Create new
+      </option>
+      {{#each getSampleGroups}}
+        <option value={{_id}}>{{name}}</option>
+      {{/each}}
+    </select>
+
+    with an IQR multiplier of
+    <div class="ui tiny input" style="width: 60px;">
+      <input type="text" placeholder="IQR" value="1.5" class="set-iqr">
+    </div>.
+
+    <button class="ui tiny primary labeled icon button
+          {{#if getInstanceReactive "waitingForResponse"}}loading{{/if}}"
+        id="create-up-down-genes" type="submit">
+      <i class="arrow right icon"></i> Go!
+    </button>
+  </form>
+
+  {{#if getInstanceReactive "createCustomSampleGroup"}}
+    {{> editSampleGroup sampleGroup=getCustomSampleGroup}}
+  {{/if}}
+
+  {{> showErrorMessage error}}
+
+  <h3>Previously run analyses</h3>
+  {{> patientUpDownGenesTable}}
+</template>
+
+<template name="patientUpDownGenesTable">
+  {{#if Template.subscriptionsReady}}
+    {{#if length getJobs}}
+      <table class="ui single line table">
+        <thead>
+          <tr>
+            <th>Sample</th>
+            <th>Comparison sample group</th>
+            <th>IQR multiplier</th>
+            <th>Upregulated genes</th>
+            <th>Downregulated genes</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each getJobs}}
+            <tr>
+              <td><i class="fa fa-flask"></i>{{this.args.sample_label}}</td>
+              <td>{{this.args.sample_group_name}}</td>
+              <td>{{this.args.iqr_multiplier}}</td>
+              <td>{{this.output.up_genes.length}}</td>
+              <td>{{this.output.down_genes.length}}</td>
+              <td>
+                <a href={{pathFor "upDownGenes" data_set_id=(param "data_set_id")
+                        patient_label=(param "patient_label") job_id=this._id}}
+                    class="ui right labeled icon button">
+                  <i class="right arrow icon"></i>
+                  View
+                </a>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="ui message">
+        <div class="content">
+          <div class="header">
+            No analyses... yet!
+          </div>
+          <p>
+            No analyses have been run for this patient.
+            Use the form above to run a new analysis.
+          </p>
+        </div>
+      </div>
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>

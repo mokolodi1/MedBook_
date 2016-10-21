@@ -7,13 +7,28 @@ env:
   - MONGO_URL="mongodb://mongo:27017/MedBook"
 install:
   # Build all containers
-  - docker-compose -f docker-compose.yml -f docker-compose-build.yml build
+  - ./scripts/buildAll.sh
   # Start up mongo
   - docker-compose -f docker-compose-mongo.yml up -d
 script:
   # Run Meteor app tests
   - docker-compose -f docker-compose.yml -f docker-compose-test.yml run wrangler
   - docker-compose -f docker-compose.yml -f docker-compose-test.yml run job-runner
+  - docker-compose -f docker-compose.yml -f docker-compose-test.yml run patient-care
   # Then, spin them up normally in daemon mode and confirm they run
   - docker-compose -f docker-compose.yml up -d
   - docker ps
+
+# If all tests pass, push the images to docker hub
+# https://docs.travis-ci.com/user/docker/
+after_success:
+  - echo $TRAVIS_BRANCH && echo $TRAVIS_TAG && if [ "$TRAVIS_BRANCH" == "master" && -z "$TRAVIS_TAG" ]; then
+    echo $DOCKER_EMAIL
+    echo $DOCKER_USERNAME
+    echo $DOCKER_PASSWORD
+    docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push $(grep medbook/patient-care docker-compose.yml | cut -d " " -f 6);
+    docker push $(grep medbook/wrangler docker-compose.yml | cut -d " " -f 6);
+    docker push $(grep medbook/job-runner docker-compose.yml | cut -d " " -f 6);
+    docker push $(grep medbook/gateway docker-compose.yml | cut -d " " -f 6);
+    fi
