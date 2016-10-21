@@ -7,7 +7,7 @@ env:
   - MONGO_URL="mongodb://mongo:27017/MedBook"
 install:
   # Build all containers
-  - docker-compose -f docker-compose.yml -f docker-compose-build.yml build
+  - ./scripts/buildAll.sh
   # Start up mongo
   - docker-compose -f docker-compose-mongo.yml up -d
 script:
@@ -30,4 +30,5 @@ after_success:
     docker push $(grep medbook/patient-care docker-compose.yml | cut -d " " -f 6);
     docker push $(grep medbook/wrangler docker-compose.yml | cut -d " " -f 6);
     docker push $(grep medbook/job-runner docker-compose.yml | cut -d " " -f 6);
+    docker push $(grep medbook/gateway docker-compose.yml | cut -d " " -f 6);
     fi

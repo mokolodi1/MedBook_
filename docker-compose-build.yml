@@ -27,7 +27,7 @@ services:
       context: .
       dockerfile: ./gateway/Dockerfile
 
-  cbioportal:
-    build:
-      context: .
-      dockerfile: ./cbioportal/Dockerfile
+  # cbioportal:
+  #   build:
+  #     context: .
+  #     dockerfile: ./cbioportal/Dockerfile
