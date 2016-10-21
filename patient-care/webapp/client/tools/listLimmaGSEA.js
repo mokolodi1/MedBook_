@@ -18,8 +18,8 @@ Template.listLimmaGSEA.onCreated(function () {
       }),
     }
   }
-  instance.groupA = makeDefaultGroup("Experimental group", "sampleGroupA");
-  instance.groupB = makeDefaultGroup("Reference group", "sampleGroupB");
+  instance.groupA = makeDefaultGroup("Reference group", "sampleGroupA");
+  instance.groupB = makeDefaultGroup("Experimental group", "sampleGroupB");
 
   instance.error = new ReactiveVar(null); // null = don't show
   instance.creatingJob = new ReactiveVar(false); // spinner on submit button

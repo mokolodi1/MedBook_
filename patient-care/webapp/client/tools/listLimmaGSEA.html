@@ -5,7 +5,8 @@
 
   <p>
     This tool runs Limma on a contrast and then feeds the output from Limma
-    into GSEA.
+    into GSEA. <code>na_pos</code> gene sets in the GSEA output are
+    upregulated in the experimental group compared to the reference group.
   </p>
 
   <h2>Run a new analysis</h2>
@@ -20,12 +21,9 @@
    -->
 
   <div style="position: relative; margin-bottom: 14px">
-    <div class="ui two column very relaxed stackable grid">
+    <div class="ui two column stackable grid">
       <div class="column">
         {{> limmaGSEAGroupSelector group=groupA}}
-      </div>
-      <div class="ui vertical divider">
-        vs.
       </div>
       <div class="column">
         {{> limmaGSEAGroupSelector group=groupB}}
