@@ -22,7 +22,7 @@ script:
 # If all tests pass, push the images to docker hub
 # https://docs.travis-ci.com/user/docker/
 after_success:
-  - echo $TRAVIS_BRANCH && echo $TRAVIS_TAG && if [ "$TRAVIS_BRANCH" == "master"  ] && [ ! -z "$TRAVIS_TAG" ]; then
+  - if [ "$TRAVIS_BRANCH" == "master"  ]; then
     echo $DOCKER_EMAIL
     echo $DOCKER_USERNAME
     echo $DOCKER_PASSWORD
