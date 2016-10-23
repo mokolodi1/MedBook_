@@ -23,9 +23,6 @@ script:
 # https://docs.travis-ci.com/user/docker/
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master"  ]; then
-    echo $DOCKER_EMAIL
-    echo $DOCKER_USERNAME
-    echo $DOCKER_PASSWORD
     docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
     docker push $(grep medbook/patient-care docker-compose.yml | cut -d " " -f 6);
     docker push $(grep medbook/wrangler docker-compose.yml | cut -d " " -f 6);
