@@ -9,6 +9,7 @@ ellen.medbook.io
 teo.medbook.io
 robert.medbook.io
 staging.medbook.io
+staging-3.medbook.io
 medbook.io
 new.medbook.io
 rob.medbook.io
@@ -21,6 +22,7 @@ ellen.medbook.io
 teo.medbook.io
 robert.medbook.io
 staging.medbook.io
+staging-3.medbook.io
 rob.medbook.io
 
 medbook.io
@@ -32,6 +34,7 @@ mongo-staging.medbook.io
 medbook.io
 new.medbook.io
 staging.medbook.io
+staging-3.medbook.io
 
 [actualProd]
 medbook.io
