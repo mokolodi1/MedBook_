@@ -7,4 +7,6 @@ else
     export MONGO_URL="mongodb://mongo:27017/MedBook"
 fi
 
+export PATIENT_CARE_SETTINGS=$(cat ./patient-care/webapp/settings.json)
+
 docker-compose -f docker-compose.yml up

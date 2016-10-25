@@ -1,7 +1,7 @@
-import "fs";
-import "path";
-import "child_process";
-import "temp";
+import fs from "fs";
+import path from "path";
+import { spawn } from "child_process";
+import temp from "temp";
 
 // Route for downloading blobs2 by job filename & blob filename
 // Used in Limma/GSEA results which output several HTML files
@@ -40,8 +40,8 @@ Picker.route("/download/:userId/:loginToken/" +
   // don't seem to need Content-Disposition header here
   res.writeHead(200);
 
-  var path = blob.getFilePath();
-  fs.createReadStream(path).pipe(res);
+  var blobPath = blob.getFilePath();
+  fs.createReadStream(blobPath).pipe(res);
 
   return;
 });
@@ -94,9 +94,9 @@ Picker.route("/download/:userId/:loginToken/" +
   res.setHeader("Content-Disposition",
       `attachment; filename="${file_name}"`);
   res.writeHead(200);
-  var path = blob.getFilePath();
+  var blobPath = blob.getFilePath();
 
-  fs.createReadStream(path).pipe(res);
+  fs.createReadStream(blobPath).pipe(res);
 });
 
 // this will send down a .tsv containing genomic information in
@@ -141,9 +141,8 @@ Picker.route("/download/:userId/:loginToken/" +
   let stderrStream = fs.createWriteStream(logfilePath, {flags: "a"});
 
   // spawn the python exporter and pipe the output to the user
-  let child = spawn(Meteor.settings.genomic_expression_export, [
-    exportFirstArg, mongoId
-  ], { cwd: cwd });
+  let child = spawn(Meteor.settings.genomic_expression_export,
+    [ exportFirstArg, mongoId ], { cwd });
 
   child.stderr.pipe(stderrStream);
   child.stdout.pipe(res);

@@ -39,7 +39,7 @@ services:
 
   patient-care:
     container_name: "patient-care"
-    image: medbook/patient-care:v1.1
+    image: medbook/patient-care:v1.1.1
     restart: always
     volumes:
       - /filestore:/filestore
@@ -50,7 +50,7 @@ services:
       MAIL_URL:
       KADIRA_APP_ID: ${PATIENT_CARE_KADIRA_APP_ID}
       KADIRA_APP_SECRET: ${PATIENT_CARE_KADIRA_APP_SECRET}
-      METEOR_SETTINGS: '{"genomic_expression_export":"/tools/exporters/genomic_expression_export.py","public":{"WORLD_URL": "${WORLD_URL}", "analyticsSettings":{"GoogleAnalytics":{"trackingId":"UA-77676037-2"}}}}'
+      METEOR_SETTINGS: ${PATIENT_CARE_SETTINGS}
 
   cbioportal:
     image: medbook/cbioportal:v1.2.2
