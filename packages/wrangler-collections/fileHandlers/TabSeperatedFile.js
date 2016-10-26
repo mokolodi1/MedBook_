@@ -1,3 +1,5 @@
+import byline from "byline";
+
 TabSeperatedFile = function (options) {
   FileHandler.call(this, options);
 };
@@ -32,7 +34,7 @@ TabSeperatedFile.prototype.parse = function () {
     }
 
     // store stream in a variable so it can be paused
-    var bylineStream = byLine(self.blob.createReadStream("blobs"));
+    var bylineStream = byline(self.blob.createReadStream("blobs"));
     bylineStream.on('data', Meteor.bindEnvironment(function (lineObject) {
       var deferred = Q.defer();
       lineBufferPromises.push(deferred.promise);

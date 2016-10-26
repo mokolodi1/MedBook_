@@ -10,13 +10,17 @@ Package.describe({
   documentation: null
 });
 
-Npm.depends({"binary-search": "1.2.0"});
+Npm.depends({
+  "binary-search": "1.2.0",
+  "byline": "4.2.2",
+});
 
 Package.onUse(function(api) {
   api.versionsFrom("1.1.0.3");
 
   api.use("accounts-base@1.2.0");
   api.use("underscore");
+  api.use("ecmascript");
   api.use("aldeed:simple-schema@1.3.3");
   api.use("aldeed:autoform@5.5.1");
   api.use("mokolodi1:helpers@0.0.3");
