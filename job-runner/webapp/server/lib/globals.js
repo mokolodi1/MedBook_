@@ -1,7 +1,7 @@
 // actual globals
 import * as Q_module from 'q';
 import * as ntemp_module from 'temp';
-var byLine = require('byline');
+import byline from "byline";
 // and make globals available outside of this file by assigning new vars
 Q = Q_module;
 ntemp = ntemp_module;
@@ -107,7 +107,7 @@ getBlobTextSample = function (blob) {
   var characters = 250;
   var maxLines = 5;
 
-  var bylineStream = byLine(blob.createReadStream("blobs"));
+  var bylineStream = byline(blob.createReadStream("blobs"));
   bylineStream.on('data', function (lineObject) {
     blob_line_count++;
     if (blob_line_count <= maxLines) {
