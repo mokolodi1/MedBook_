@@ -3,7 +3,7 @@ services:
   mongo:
     container_name: "mongo"
     restart: always
-    image: mongo:3.2.9
+    image: mongo:3.2.10
     # allows contact with mongo from localhost outside a container
     ports:
       - "127.0.0.1:27017:27017"
