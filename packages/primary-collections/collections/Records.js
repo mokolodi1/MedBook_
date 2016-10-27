@@ -38,10 +38,10 @@ MedBook.validateRecord = function(record, fields, options) {
 
       fields = fetchedObject.fields;
     }
-
-    // delete the associated_object and _id before validating
-    var record = _.omit(record, "associated_object", "_id");
   }
+
+  // omit the associated_object and _id before validating
+  var record = _.omit(record, "associated_object", "_id");
 
   // check if record matches the schema
   var schemaObj = MedBook.schemaFromFields(fields);

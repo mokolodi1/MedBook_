@@ -129,7 +129,9 @@ ClinicalForm.prototype.parseLine = function (brokenTabs, lineNumber, line) {
     }
 
     // validate the record
-    MedBook.validateRecord(record, this.fields);
+    MedBook.validateRecord(record, this.fields, {
+      bare: this.wranglerPeek
+    });
 
     if (this.wranglerPeek) {
       this.recordCount++;

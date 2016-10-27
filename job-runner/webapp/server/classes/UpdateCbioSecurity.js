@@ -16,7 +16,7 @@ UpdateCbioSecurity.prototype.run = function () {
     database : "cbioportal"
   });
 
-  // 'error' events are special in node. If they occur without an attached 
+  // 'error' events are special in node. If they occur without an attached
   // listener, a stack trace is printed and your process is killed.
   // suppress it instead. TODO : Fail the job when this error appears.
   connection.on('error', function(e) {
@@ -25,7 +25,7 @@ UpdateCbioSecurity.prototype.run = function () {
     // Throwing an error here appears to crash jobrunner entirely
     //throw new Error("Error establishing Mysql connection.");
   });
-  
+
   connection.connect();
 
   // Collect this information out here so that it runs in the Meteor
@@ -128,31 +128,35 @@ UpdateCbioSecurity.prototype.run = function () {
   return jobDeferred.promise;
 }
 
-Meteor.startup(function () {
-  // NOTE: the job can also be called by any user via Meteor method
-  // in patient-care (refreshCBioPortalAccess)
-  var newJobBlueprint = {
-    name: "UpdateCbioSecurity",
-    user_id: "admin",
-    args: {
-      collab_names: [ "WCDT" ]
-    }
-  };
+// run the job every 24 hours if running in production (WORLD_URL is set)
+if (process.env.WORLD_URL) {
+  Meteor.startup(function () {
+    // NOTE: the job can also be called by any user via Meteor method
+    // in patient-care (refreshCBioPortalAccess)
+    var newJobBlueprint = {
+      name: "UpdateCbioSecurity",
+      user_id: "admin",
+      args: {
+        collab_names: [ "WCDT" ]
+      }
+    };
 
-  // set up a cron job to execute every so often
-  SyncedCron.add({
-    name: "update-cbio-security",
-    schedule: function(parser) {
-      // parser is a later.parse object
-      return parser.text('every 6 hours');
-    },
-    job: function () {
-      Jobs.insert(newJobBlueprint);
-    },
+    // set up a cron job to execute every so often
+    SyncedCron.add({
+      name: "update-cbio-security",
+      schedule: function(parser) {
+        // parser is a later.parse object
+        return parser.text('every 24 hours');
+      },
+      job: function () {
+        Jobs.insert(newJobBlueprint);
+      },
+    });
+
+    // also execute immediately
+    Jobs.insert(newJobBlueprint);
   });
+}
 
-  // also execute immediately
-  Jobs.insert(newJobBlueprint);
-});
 
 JobClasses.UpdateCbioSecurity = UpdateCbioSecurity;
