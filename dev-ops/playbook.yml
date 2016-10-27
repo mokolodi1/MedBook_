@@ -97,8 +97,30 @@
       become: yes
       become_method: sudo
 
-    - name: Install mongo client
-      apt: pkg=mongodb-clients
+    # uninstall old mongo client and install the 3.2 mongo client
+    # https://docs.mongodb.com/v3.2/tutorial/install-mongodb-on-ubuntu/
+    - name: Uninstall old mongo client
+      apt:
+        name: mongodb-clients
+        state: absent
+      become: yes
+      become_method: sudo
+
+    - name: Add mongo org repository key
+      apt_key: keyserver=hkp://keyserver.ubuntu.com:80 id=EA312927
+      become: yes
+      become_method: sudo
+
+    - name: "Add mongo repo to mongodb list thing"
+      shell: echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+
+    - name: Update packages (again)
+      apt: update_cache=yes
+      become: yes
+      become_method: sudo
+
+    - name: Finally install 3.2 mongo client
+      apt: pkg=mongodb-org
       become: yes
       become_method: sudo
 
