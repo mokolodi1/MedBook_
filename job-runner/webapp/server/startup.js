@@ -126,7 +126,7 @@ function runNextJob () {
 
   // define helper in case things get bad
   var nope = function (reason) {
-    //var errorWarningUser;
+    var errorWarningUser;
     try {
       job.onError(reason);
     } catch (e) {

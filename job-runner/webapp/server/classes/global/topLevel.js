@@ -1,9 +1,7 @@
 // TODO: remove these from global namespace
 
 Job = function (job_id) {
-  console.log('find job', job_id, 'this', this)
   this.job = Jobs.findOne(job_id);
-  console.log('this.job', this.job)
   if (!this.job) {
     throw "Invalid job_id";
   }
