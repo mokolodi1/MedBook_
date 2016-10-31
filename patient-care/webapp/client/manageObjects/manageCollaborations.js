@@ -33,6 +33,7 @@ SimpleSchema.messages({
 // NOTE: result of the function, not a function itself!
 var collaborationSchema = function() {
   let collabSchemaObject = Collaborations.simpleSchema().schema();
+  console.log('collab schema', collabSchemaObject)
 
   let name = collabSchemaObject.name;
   let oldCustom = name.custom;

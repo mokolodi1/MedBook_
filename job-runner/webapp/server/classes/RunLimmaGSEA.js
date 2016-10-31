@@ -1,4 +1,5 @@
 function RunLimmaGSEA (job_id) {
+  console.log('runLimma this', this, 'job', job_id)
   Job.call(this, job_id);
 }
 RunLimmaGSEA.prototype = Object.create(Job.prototype);
@@ -15,6 +16,7 @@ RunLimmaGSEA.prototype.run = function () {
   // eesh.
   // """
 
+  console.log("workDir: ", workDir);
   var workDir = "/tmp/" + "RunLimmaGSEA_" + this.job._id;
 
   try {
@@ -25,7 +27,6 @@ RunLimmaGSEA.prototype.run = function () {
     throw e;
   }
 
-  console.log("workDir: ", workDir);
 
   // create a sample group which is the combination of the two sample groups
   // so that we can easily write out a file
