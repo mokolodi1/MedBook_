@@ -26,7 +26,6 @@ def export_from_object(db, sampleGroup, isPlc):
     sampleGroupDataSets = sampleGroup["data_sets"]
 
     # make sure sampleGroupDataSets is sorted by data_set_id
-    print "starting expression export sampleGroups ds", sampleGroupDataSets
     sampleGroupDataSets = sorted(sampleGroupDataSets,
             key=lambda dataSet: dataSet["data_set_id"])
 

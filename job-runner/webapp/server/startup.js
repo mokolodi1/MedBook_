@@ -67,15 +67,13 @@ function runNextJob () {
   // the same user and we want to make sure we quit out before printing if
   // that comes to pass
   console.log("");
-  console.log("job is running - ", mongoJob.name,
+  console.log("job: running - ", mongoJob.name,
       "{ _id: \"" + mongoJob._id + "\" }");
 
-  console.log('prereq ids',mongoJob,mongoJob.prerequisite_job_ids)
   // check to see if something else has to be done first
   var mustHaveFinished = Jobs.find({
     _id: {$in: mongoJob.prerequisite_job_ids}
   }).fetch();
-  console.log('prereq', mustHaveFinished)
   for (var index = 0; index<mustHaveFinished.length; index++) {
     // if there was an error with that one, there's an error with this one
     if (mustHaveFinished[index].status === "error") {
@@ -93,11 +91,9 @@ function runNextJob () {
     }
   }
   // All prerequisites are "done"; carry on.
-  console.log('about to get class', mongoJob)
 
   // get the job's class
   var jobClass = JobClasses[mongoJob.name];
-  console.log('jobClass', jobClass)
   if (!jobClass) {
     Jobs.update(mongoJob._id, {
       $set: {
@@ -130,7 +126,7 @@ function runNextJob () {
 
   // define helper in case things get bad
   var nope = function (reason) {
-    var errorWarningUser;
+    //var errorWarningUser;
     try {
       job.onError(reason);
     } catch (e) {
@@ -157,7 +153,6 @@ function runNextJob () {
   };
 
   // run the job
-  console('about to run the job',job)
   try { // wrap so we can catch errors in job.run()
     var boundNope = Meteor.bindEnvironment(nope);
     Q.when(job.run()).timeout(mongoJob.timeout_length)
