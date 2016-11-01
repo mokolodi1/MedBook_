@@ -23,7 +23,8 @@ Package.onUse(function(api) {
     "check",
   ]);
 
-  api.addFiles("blobs.js", "server");
+  api.addFiles("client.js", "client");
+  api.addFiles("server.js", "server");
   api.export("Blobs2");
 });
 
