@@ -214,6 +214,18 @@ function hasAccess (objNameOrArray) {
     obj = { collaborations: objNameOrArray };
   } else if (objNameOrArray.collaborators) {
     obj = { collaborations: objNameOrArray.collaborators };
+  } else if (objNameOrArray.associated_object) {
+    // If we're on the client the associated object isn't necessarily loaded,
+    // so assume they have access. (Otherwise the object wouldn't have loaded.)
+    if (Meteor.isClient) { return true; }
+
+    // recursively call hasAccess
+    var collection_name = objNameOrArray.associated_object.collection_name;
+    var mongo_id = objNameOrArray.associated_object.mongo_id;
+
+    var collection = MedBook.collections[collection_name];
+
+    return hasAccess.call(this, collection.findOne(mongo_id));
   } else {
     obj = objNameOrArray;
   }
