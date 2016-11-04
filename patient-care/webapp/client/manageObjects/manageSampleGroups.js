@@ -65,9 +65,6 @@ Template.showSampleGroup.helpers({
 
 // Sample Group Expression Level & Variance Filters
 
-// Setup the client-side Blobs2 collection
-Blobs2 = new Mongo.Collection('blobs');
-
 // Subscribe to associated jobs & blobs
 Template.sampleGroupExprVarFilters.onCreated(function(){
   let instance = this;
