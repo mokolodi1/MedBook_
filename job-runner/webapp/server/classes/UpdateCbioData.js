@@ -88,14 +88,19 @@ UpdateCbioData.prototype.run = function () {
       ], workDir),
       // phenotype file for Limma
       spawnCommand(getSetting("clinical_export"), [
+        "--sample_group_id",
         this.job.args.sample_group_id,
+        "--form_id",
+        this.job.args.form_id,
+        "--work-dir",
+        workDir,
       ], workDir),
       // gene sets file for GSEA
       //spawnCommand(getSetting("gene_set_group_export"), [
       //  self.job.args.gene_set_group_id,
       //], workDir, { stdoutPath: geneSetGroupPath }),
     ])
-    .then(function (spawnResults) {
+    .then(function (spawnResults)           {
       console.log("done writing files");
 
       _.each(spawnResults, function (result) {
