@@ -135,6 +135,7 @@ getSetting = function (attribute) {
 
   var value = settings[attribute];
   if (!value) {
+    console.log("Meteor.settings ", Meteor.settings);
     throw new Error(attribute + " not defined in settings file");
   }
 
