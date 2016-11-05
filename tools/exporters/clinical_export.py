@@ -28,33 +28,40 @@ def export_from_object(db, sampleGroup, form_id, work_dir, isPlc):
     sample_label_field = form[u'sample_label_field']
 
     #line 1 - field names
-    out_clin.write("#%s\t" % "Patient ID" ),
-    out_clin.write("%s\t" % "Sample ID" ),
+    out_clin.write("#%s" % "Patient_ID" ),
+    out_clin.write("\t%s" % "Sample_ID" ),
     for field in field_list:
 	if field[u'name'] != sample_label_field:
-		out_clin.write("%s\t" % field[u'name'] ),
+		out_clin.write("\t%s" % field[u'name'] ),
     out_clin.write("\n")
     #line 2 - field descriptions
-    out_clin.write("#%s\t" % "Patient ID" ),
-    out_clin.write("%s\t" % "Sample ID" ),
+    out_clin.write("#%s" % "Patient_ID" ),
+    out_clin.write("\t%s" % "Sample_ID" ),
     for field in field_list:
 	if field[u'name'] != sample_label_field:
-		out_clin.write("%s\t" % field[u'name'] ),
+		out_clin.write("\t%s" % field[u'name'] ),
     out_clin.write("\n")
 
     #line 3 - field types
-    out_clin.write("#%s\t" % "String" ),
-    out_clin.write("%s\t" % "String" ),
+    out_clin.write("#%s" % "STRING" ),
+    out_clin.write("\t%s" % "STRING" ),
     for field in field_list:
 	if field[u'name'] != sample_label_field:
-		out_clin.write("%s\t" % field[u'value_type'] ),
+		out_clin.write("\t%s" % field[u'value_type'].toUpperCase() ),
     out_clin.write("\n")
-    #line 4 - mysql field names
-    out_clin.write("#%s\t" % "PATIENT_ID" ),
-    out_clin.write("%s\t" % "SAMPLE_ID" ),
+    #line 4 - priority
+    out_clin.write("#%s" % "1" ),
+    out_clin.write("\t%s" % "1" ),
     for field in field_list:
 	if field[u'name'] != sample_label_field:
-		out_clin.write("%s\t" % field[u'name'].upper().replace(" ","_").replace("-","_").replace("?","_").replace(",","_")),
+		out_clin.write("\t%s" % "1" ),
+    out_clin.write("\n")
+    #line 5 - mysql field names
+    out_clin.write("%s" % "PATIENT_ID" ),
+    out_clin.write("\t%s" % "SAMPLE_ID" ),
+    for field in field_list:
+	if field[u'name'] != sample_label_field:
+		out_clin.write("\t%s" % field[u'name'].upper().replace(" ","_").replace("-","_").replace("?","_").replace(",","_")),
     out_clin.write("\n")
     # db.records.find({"associated_object.mongo_id":"6QpxSMZymmL28Ge8k"},{Age:1,Race:1,_id:0,"Patient ID":1})
     record_list = db["records"].find({ "associated_object.mongo_id": form_id })
@@ -67,14 +74,14 @@ def export_from_object(db, sampleGroup, form_id, work_dir, isPlc):
 		name_arr = pid.split('/')
 		pid = name_arr[1]
 
-        out_clin.write("%s\t%s\t" % (pid, pid))
+        out_clin.write("%s\t%s" % (pid, pid))
         for field in field_list:
 		name = field[u'name']
 		if name != sample_label_field:
 			try:
-				out_clin.write("%s\t" % record[name]),
+				out_clin.write("\t%s" % record[name]),
 			except:
-				out_clin.write("%s\t" % "N/A"),
+				out_clin.write("\t%s" % "NA"),
 
         out_clin.write("\n")
     out_clin.close()
