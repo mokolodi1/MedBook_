@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
 
 cd /app-dev
-meteor
+meteor --settings settings.json
 
