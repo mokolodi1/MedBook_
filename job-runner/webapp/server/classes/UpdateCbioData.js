@@ -115,15 +115,12 @@ UpdateCbioData.prototype.run = function () {
       var clinicalPath = spawnResults[1].stdoutPath;
 
       // run CbioImporter
-      return spawnCommand("java", [
-        getSetting("cbio_importer_path"),
+      return spawnCommand(getSetting("cbio_importer_path"), [
         "-c import-study",
         "-jar",
         getSetting("cbio_core_jar_path"),
         "-s",
         workDir,
-        expressionDataPath,
-        clinicalPath,
       ], workDir);
     })
     .then(function (cbioImportResult) {
