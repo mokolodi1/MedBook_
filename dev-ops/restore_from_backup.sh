@@ -45,7 +45,7 @@ elif [ $HOSTNAME = "medbook-staging-2" ] ; then
   mongo_host="mongo-staging"
 fi
 mongo MedBook --host $mongo_host --eval "db.dropDatabase()"
-mongorestore --host $mongo_host
+mongorestore --drop --host $mongo_host
 
 # restore the filestore
 sudo rsync -r filestore/ /filestore
