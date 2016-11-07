@@ -38,3 +38,6 @@ And exit tmux:
 *Ctrl-b , then press d*
 
 [For setting up a new production machine, see here.](dev-ops/README.md)
+
+#### Documentation changes
+For documention or devops-only changes that do NOT affect the docker images, add `[skip ci]` to the commit messages. This will prevent Travis from rebuilding (and if on master, pushing to dockerhub) the images.
