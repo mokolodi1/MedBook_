@@ -1,7 +1,6 @@
 # run from a machine that has ansible installed
 # and has ssh access (via public key) to all hosts involved.
-# to run:
-# ansible-playbook playbook.yml -i hosts -u ubuntu
+# to run: ./runAnsible.sh
 ---
 
 - hosts: all
@@ -199,22 +198,6 @@
       become: yes
       become_method: sudo
 
-- hosts: extraStorage
-  tasks:
-    - name: Create filesystem on attached data disk for extra storage
-      filesystem: fstype=ext4 dev=/dev/sdd
-      become: yes
-      become_method: sudo
-
-    - name: Point /data to larger disk
-      mount:
-        name: /data
-        src: /dev/sdd
-        fstype: ext4
-        state: mounted
-      become: yes
-      become_method: sudo
-
 - hosts: actualProd
   tasks:
     - name: Create filesystem on attached data disk for backup location
@@ -237,5 +220,21 @@
         mode: u=rwX,g=rX,o=rX
         recurse: yes
         owner: ubuntu
+      become: yes
+      become_method: sudo
+
+- hosts: dataDisk
+  tasks:
+    - name: Create filesystem on attached data disk for mongo/extra data
+      filesystem: fstype=ext4 dev=/dev/sdd
+      become: yes
+      become_method: sudo
+
+    - name: Point /data to larger disk
+      mount:
+        name: /data
+        src: /dev/sdd
+        fstype: ext4
+        state: mounted
       become: yes
       become_method: sudo

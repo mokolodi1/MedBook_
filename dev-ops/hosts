@@ -3,7 +3,7 @@
 [dev]
 # for when we put back the git configs
 # 1.2.3.4 git_name="Joe Shmoe" git_email="email@gmail.com"
-mike.medbook.io
+# mike.medbook.io
 ted.medbook.io
 ellen.medbook.io
 teo.medbook.io
@@ -12,18 +12,20 @@ staging.medbook.io
 staging-3.medbook.io
 medbook.io
 new.medbook.io
-rob.medbook.io
+# rob.medbook.io
 backup.medbook.io
+mongo.medbook.io
+mongo-staging.medbook.io
 
 [docker]
-mike.medbook.io
+# mike.medbook.io
 ted.medbook.io
 ellen.medbook.io
 teo.medbook.io
 robert.medbook.io
 staging.medbook.io
 staging-3.medbook.io
-rob.medbook.io
+# rob.medbook.io
 
 medbook.io
 new.medbook.io
@@ -40,8 +42,11 @@ staging-3.medbook.io
 medbook.io
 new.medbook.io
 
-[backup]
-backup.medbook.io
-
 [extraStorage]
+robert.medbook.io
+
+[dataDisk]
+mongo.medbook.io
+mongo-staging.medbook.io
+# Robert's devbox wants extra data
 robert.medbook.io
