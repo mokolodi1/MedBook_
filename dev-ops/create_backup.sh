@@ -10,9 +10,12 @@
 #
 # Usage: ./create_backup.sh
 #
-# Cron command:
+# When setting up the cron command, be aware of the path to your git checkout!
+# Example cron commands:
 # At 3:30 am create a backup and send the logs to /var/log/cron
 # 30 3 * * * /home/ubuntu/MedBook/scripts/create_backup.sh > /home/ubuntu/backup_logs.txt 2>&1
+# 30 3 * * * cd /backup && /home/ubuntu/MedBook_/dev-ops/create_backup.sh >> /backup/backup_logs.txt 2>&1
+
 
 # create folder and go to it
 date=`date +%Y-%m-%d_%H-%M-%S`
@@ -26,21 +29,26 @@ cd $backup_name
 mongo_host="localhost"
 if [ $HOSTNAME = "medbook-prod" ] ; then
   mongo_host="mongo"
+elif [ $HOSTNAME = "medbook-prod-2" ] ; then
+  mongo_host="mongo"
 elif [ $HOSTNAME = "medbook-staging-2" ] ; then
   mongo_host="mongo-staging"
 fi
 mongodump -d MedBook --host $mongo_host
 
 # create a copy of the filestore
+echo "copying filestore..."
 cp -r /filestore .
 
-# get out ofo the folder
+# get out of the folder
 cd ..
 
 # tgz the backup to send it to the backup box
+echo "creating tarball..."
 tar zcvf $backup_name.tgz $backup_name
 
 # send the backup to the backup box
+echo "rsync to the backup server..."
 rsync $backup_name.tgz ubuntu@backup.medbook.io:/backups
 
 # delete the local backup
@@ -48,7 +56,7 @@ rm -rf $backup_name
 rm -rf $backup_name.tgz
 
 # if backing up from production, restore to staging
-if [ $HOSTNAME = "medbook-prod" ] ; then
+if [ $HOSTNAME = "medbook-prod-2" ] ; then
   echo "restoring on staging..."
 
   # call the restore script remotely from production
