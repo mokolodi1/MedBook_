@@ -163,11 +163,6 @@
 
 - hosts: prodLike
   tasks:
-    - name: Install mongo client
-      apt: pkg=mongodb-clients
-      become: yes
-      become_method: sudo
-
     - name: Create filesystem on attached data disk for filestore
       filesystem: fstype=ext4 dev=/dev/sdd
       become: yes
