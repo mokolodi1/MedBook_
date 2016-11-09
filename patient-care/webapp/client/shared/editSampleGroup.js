@@ -336,7 +336,7 @@ Template.formValuesFilter.onCreated(function(){
 
   let dataset_id = instance.data.data_set_id ;
   instance.available_filter_forms = new ReactiveVar(); 
-  instance.available_filter_forms.set([{name: "Loading forms...", urlencodedId: "placeholder_loadingforms"}]);
+  instance.available_filter_forms.set([{name: "Loading forms...", formId: "placeholder_loadingforms"}]);
   instance.filter_forms_options = new ReactiveVar();
   instance.filter_forms_options.set({});
 
@@ -346,7 +346,7 @@ Template.formValuesFilter.onCreated(function(){
   Meteor.call("getFormsMatchingDataSet", dataset_id, function(err, res){
     console.log("got matching forms...");
     if(err) {
-      instance.available_filter_forms.set([{name:'Error loading forms!', urlencodedId: 'Errorloadingforms'}]);
+      instance.available_filter_forms.set([{name:'Error loading forms!', formId: 'Errorloadingforms'}]);
       console.log("Error getting forms for this data set", err);
       throw err; 
     } else {
@@ -379,10 +379,14 @@ Template.formValuesFilter.helpers({
 Template.formValuesFilter.events({
   "click .chosen-form-filter": function(event, instance) {
     
-    // Find the fields for the selected form 
-    let whichFormId = event.target.id;
+    // Find the ids for the selected form from the dropdown
+    let clicked_dataset_id = event.target.dataset.dataset_id ;
+    let clicked_form_id = event.target.dataset.form_id ;
+   
+    // Find the form that matches the current dataset and form id 
     let forms = instance.available_filter_forms.get();
-    let chosenForm = _.find(forms, function(form){ return form.urlencodedId === whichFormId});
+    let chosenForm = _.find(forms, function(form){ 
+      return (form.formId === clicked_form_id) && (form.dataSetId === clicked_dataset_id)});
     let formFields = chosenForm.fields ;
     
     // Then build the filters for the querybuilder
@@ -400,11 +404,10 @@ Template.formValuesFilter.events({
         }
       );
     } 
-
-  // Only show one querybuilder div at a time
-  $(".querybuilder").hide()
-
-  let queryBuilderDivId = "#" + whichFormId + "_querybuilder";
+  
+  // Find the empty querybuilder div we prepared in the formValuesFilter template
+  // and attach a querybuilder object to it
+  let queryBuilderDivId = "#" + clicked_dataset_id + "_" + clicked_form_id + "_querybuilder";
   $(queryBuilderDivId).show()
   $(queryBuilderDivId).queryBuilder({
     filters: queryFilters,
@@ -412,7 +415,7 @@ Template.formValuesFilter.events({
 
   // And set it as active so we can find it later
   instance.active_querybuilder.set(queryBuilderDivId);
-  instance.active_crf.set(whichFormId);
+  instance.active_crf.set(clicked_form_id);
   },
 
   "click .done-editing": function(event, instance){

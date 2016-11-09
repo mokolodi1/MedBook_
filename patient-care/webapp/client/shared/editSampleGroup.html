@@ -145,7 +145,7 @@
     <div class="default text">Select a form...</div>
     <div class="menu">
       {{#each getAvailableFilterForms}}
-      <div class="item chosen-form-filter"  id={{this.urlencodedId}} >{{this.name}}</div>
+      <div class="item chosen-form-filter"  id={{this.formId}} data-form_id={{this.formId}} data-dataset_id={{this.dataSetId}}  >{{this.name}}</div>
       {{/each}}
     </div>
   </div>
@@ -158,8 +158,10 @@
     {{#if length getAvailableFilterForms}}
       {{> formValuesFilterMenu getAvailableFilterForms=getAvailableFilterForms}}
       <!-- Set up the potential queryBuilder divs to be attached in onRendered -->
+      <!-- id needs to be unique across page, so include dataset id as there will be  
+          only one form filter per dataset -->
       {{#each getAvailableFilterForms}}
-        <div class="querybuilder" id="{{this.urlencodedId}}_querybuilder">
+        <div class="querybuilder" id="{{this.dataSetId}}_{{this.formId}}_querybuilder">
         </div>
       {{/each}}
       <div class="ui icon primary mini button done-editing">
