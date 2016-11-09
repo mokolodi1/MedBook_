@@ -337,22 +337,17 @@ Template.formValuesFilter.onCreated(function(){
   let dataset_id = instance.data.data_set_id ;
   instance.available_filter_forms = new ReactiveVar(); 
   instance.available_filter_forms.set([{name: "Loading forms...", formId: "placeholder_loadingforms"}]);
-  instance.filter_forms_options = new ReactiveVar();
-  instance.filter_forms_options.set({});
 
   instance.active_querybuilder = new ReactiveVar("");
   instance.active_crf = new ReactiveVar("");
 
+  // Store forms for this data set in a reactive var for later use.
   Meteor.call("getFormsMatchingDataSet", dataset_id, function(err, res){
-    console.log("got matching forms...");
     if(err) {
       instance.available_filter_forms.set([{name:'Error loading forms!', formId: 'Errorloadingforms'}]);
       console.log("Error getting forms for this data set", err);
       throw err; 
     } else {
-      console.log("got forms!", res);
-      // put the res in the available forms so that we can get it later
-      instance.filter_forms_options.set(res.formFields);
       instance.available_filter_forms.set(res);
     }
   });
@@ -404,6 +399,16 @@ Template.formValuesFilter.events({
         }
       );
     } 
+
+  // If there's already an active querybuilder / form, hide it
+  console.log("active stuff?", instance.active_querybuilder.get(), typeof instance.active_querybuilder.get());
+  console.log("active crf?", instance.active_crf.get());
+
+  if(instance.active_querybuilder.get() !== ""){
+    $(instance.active_querybuilder.get()).hide();
+    instance.active_crf.set("");
+
+  }
   
   // Find the empty querybuilder div we prepared in the formValuesFilter template
   // and attach a querybuilder object to it
