@@ -400,14 +400,10 @@ Template.formValuesFilter.events({
       );
     } 
 
-  // If there's already an active querybuilder / form, hide it
-  console.log("active stuff?", instance.active_querybuilder.get(), typeof instance.active_querybuilder.get());
-  console.log("active crf?", instance.active_crf.get());
-
+  // If there's already an active querybuilder for this dataset, hide it
   if(instance.active_querybuilder.get() !== ""){
     $(instance.active_querybuilder.get()).hide();
     instance.active_crf.set("");
-
   }
   
   // Find the empty querybuilder div we prepared in the formValuesFilter template
