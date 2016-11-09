@@ -1,4 +1,6 @@
 // Template.outlierAnalysis
+import Fuse from 'fuse.js' ;
+import Clipboard from 'clipboard' ;
 
 Template.outlierAnalysis.onCreated(function () {
   const instance = this;
