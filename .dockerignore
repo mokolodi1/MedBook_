@@ -2,3 +2,6 @@ external-tools
 */*/.meteor/local
 
 tools/old-external-tools
+
+patient-care/webapp/node_modules
+job-runner/webapp/node_modules
