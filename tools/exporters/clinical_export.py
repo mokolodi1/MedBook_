@@ -53,6 +53,16 @@ def export_from_object(db, sampleGroup, form_id, work_dir, isPlc):
     out_meta_clin.write("genetic_alteration_type: CLINICAL\n")
     out_meta_clin.write("datatype: SAMPLE_ATTRIBUTES\n")
     out_meta_clin.write("data_filename: data_sample.txt\n")
+
+    out_meta_exp = open("./meta_expression.txt","w")
+    out_meta_exp.write("profile_name: WCDT exp\n")
+    out_meta_exp.write("profile_description: WCDT exp\n")
+    out_meta_exp.write("show_profile_in_analysis_tab: true\n")
+    out_meta_exp.write("stable_id: rna_seq_v2_mrna_median_Zscores\n")
+    out_meta_exp.write("cancer_study_identifier: %s\n"% sample_label)
+    out_meta_exp.write("genetic_alteration_type: MRNA_EXPRESSION\n")
+    out_meta_exp.write("datatype: Z-SCORE\n")
+    out_meta_exp.write("data_filename: data_expression.txt\n")
     out_clin = open("./data_sample.txt","w")
     form = db["forms"].find_one({ "_id": form_id })
     try:
@@ -124,6 +134,7 @@ def export_from_object(db, sampleGroup, form_id, work_dir, isPlc):
         out_clin.write("\n")
     out_study.close()
     out_meta_clin.close()
+    out_meta_exp.close()
     out_clin.close()
 
 def main():

@@ -78,6 +78,7 @@ UpdateCbioData.prototype.run = function () {
   // define up here so as to be available throughout promise chain (so that
   // we can skip a .then block)
   var geneSetGroupPath;
+  var expressionDataPath = path.join(workDir, "data_expression.txt");
 
   Q.all([
       // write mongo data to files
@@ -85,7 +86,8 @@ UpdateCbioData.prototype.run = function () {
       // expression data to a file for use in Limma
       spawnCommand(getSetting("genomic_expression_export"), [
         "--sample_group_id", group._id,
-      ], workDir),
+        "--cbio",
+      ], workDir, { stdoutPath: expressionDataPath }),
       // phenotype file for Limma
       spawnCommand(getSetting("clinical_export"), [
         "--sample_group_id",
@@ -111,7 +113,6 @@ UpdateCbioData.prototype.run = function () {
 
       // save the file paths... order maters for spawnResults
       // (the order depends on the order of `spawnCommand`s in `Q.all`)
-      var expressionDataPath = spawnResults[0].stdoutPath;
       var clinicalPath = spawnResults[1].stdoutPath;
 
       // run CbioImporter
@@ -121,7 +122,7 @@ UpdateCbioData.prototype.run = function () {
         getSetting("cbio_core_jar_path"),
         "-s",
         workDir,
-      ], workDir);
+      ], workDir );
     })
     .then(function (cbioImportResult) {
       if (cbioImportResult.exitCode !== 0) {
