@@ -7,17 +7,18 @@
 - Set up box with ansible: `ansible-playbook playbook.yml -i hosts -u ubuntu`
 - Add necessary ssh keys to box (so that others can access it)
 - Point DNS record to box's IP [here](https://domains.google.com/registrar#d=3530982,medbook.io&z=a&chp=d,z)
+- Run ansible to set up machine (see: [here](#running-ansible))
 
 ## Connected drives
 
 Drives should be connected on Azure in the order listed below in order to be named accordingly in the Azure portal. (Currently the ansible script attaches the drives via `/dev/sdX` listing, where `X` is a sequential letter as drives are attached.)
 
 | Location          | Size   | Production | Staging | Development | Backup | Description |
-| --------          | ------ | ---------- | ------- | ----------- | ----------- |
-| `/var/lib/docker` | 512 gb | Yes | Yes | Yes | No | extra space for docker images, containers, etc.
-| `/filestore`      | 512 gb | Yes | Yes | No | No | extra space for files stored as blobs
-| `/backup`         | 512 gb | Yes | No | No | No | dedicated space to perform backups
-| `/backups`        | 512 gb | No | No | No | Yes | dedicated space to store backups
+| ----------------- | ------ | ---------- | ------- | ----------- | ------ | ----------- |
+| `/var/lib/docker` | 512 gb | Yes | Yes | Yes | No | extra space for docker images, containers, etc. |
+| `/filestore`      | 512 gb | Yes | Yes | No | No | extra space for files stored as blobs |
+| `/backup`         | 512 gb | Yes | No | No | No | dedicated space to perform backups |
+| `/backups`        | 512 gb | No | No | No | Yes | dedicated space to store backups |
 
 ## Creating a new production machine
 
@@ -95,6 +96,19 @@ source /mysql-dump/dump.sql;
 # restore from dump.sql.gz within the docker container (compressed)
 zcat /mysql-dump/dump_new.sql.gz | mysql -h localhost -u cbio -pP@ssword1 cbioportal
 ```
+
+## Running Ansible
+
+Ansible is a tool that does system administration for many remote boxes. Ansible should be run after setting up a new box to mount disks, install Docker, etc. It can be also used to make changes on all or many boxes at the same time.
+
+To run the Ansible "playbook":
+
+```sh
+cd dev-ops
+./runAnsible.sh
+```
+
+Note that the machine on which Ansible is run must have ssh access to all remote boxes.
 
 ## Backups
 
