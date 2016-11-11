@@ -32,11 +32,13 @@ UpdateCbioData.prototype.run = function () {
 
   // combine samples of same data set into single array
   var dataSetHash = {};
+  var dataSetName = "";
   _.each(group.data_sets, function (dataSet) {
     // check if we've seen this data set already
     var seenAlready = dataSetHash[dataSet.data_set_id];
     if (!seenAlready) {
       // if we haven't, set it up
+      dataSetName = dataSet.data_set_name;
       seenAlready = {
         data_set_name: dataSet.data_set_name,
         sample_labels: [],
@@ -79,6 +81,12 @@ UpdateCbioData.prototype.run = function () {
   // we can skip a .then block)
   var geneSetGroupPath;
   var expressionDataPath = path.join(workDir, "data_expression.txt");
+  var logPath = path.join(workDir, "*.log");
+  var associated_object = {
+    collection_name: "SampleGroups",
+    mongo_id: group._id,
+  };
+  var form_id = this.job.args.form_id;
 
   Q.all([
       // write mongo data to files
@@ -87,20 +95,18 @@ UpdateCbioData.prototype.run = function () {
       spawnCommand(getSetting("genomic_expression_export"), [
         "--sample_group_id", group._id,
         "--cbio",
+        "--uq-sample-labels",
       ], workDir, { stdoutPath: expressionDataPath }),
-      // phenotype file for Limma
+      // phenotype file for cbio importer
       spawnCommand(getSetting("clinical_export"), [
         "--sample_group_id",
         this.job.args.sample_group_id,
         "--form_id",
         this.job.args.form_id,
         "--work-dir",
+
         workDir,
       ], workDir),
-      // gene sets file for GSEA
-      //spawnCommand(getSetting("gene_set_group_export"), [
-      //  self.job.args.gene_set_group_id,
-      //], workDir, { stdoutPath: geneSetGroupPath }),
     ])
     .then(function (spawnResults)           {
       console.log("done writing files");
@@ -124,25 +130,21 @@ UpdateCbioData.prototype.run = function () {
         workDir,
       ], workDir );
     })
-    .then(function (cbioImportResult) {
+    .then(Meteor.bindEnvironment(function (cbioImportResult) {
       if (cbioImportResult.exitCode !== 0) {
         throw "Problem running cbio importer";
       }
+      function printError (err) {
+         if (err) {
+           console.log("error creating blob:", err);
+         }
+       }
+      var meta = { form_id: form_id, cbio_import: dataSetName};
+      console.log('importing into cbio form', form_id, dataSetName, associated_object)
+      Blobs2.create(cbioImportResult.stdoutPath, associated_object, meta, printError);
 
-      // "F" is to put a "/" at the end of every folder name
-      return spawnCommand("ls", [ "-1F", expressionDataPath ], workDir);
-    })
-    // can't add another .then: Meteor.bindEnvironment returns immidiately
-    .then(Meteor.bindEnvironment(function (result) {
-
-      // use the ls result to insert all of the blobs
-      var outputString = fs.readFileSync(result.stdoutPath, "utf8");
-      var outputFileNames = _.filter(outputString.split("\n"),
-          function (fileName) {
-        return !!fileName && fileName.slice(-1) !== "/";
-      });
-
-    }, deferred.reject))
+     deferred.resolve(cbioImportResult);
+   }, deferred.reject))
     .catch(Meteor.bindEnvironment(function (reason) {
 
       deferred.reject(reason);

@@ -8,8 +8,6 @@ Usage:
 
 Use the "--plc" option to create a .plc file: http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#RES:_ExpRESsion_.28with_P_and_A_calls.29_file_format_.28.2A.res.29
 Use the "--cbio" option to create a headers for cbio import
-
-TODO:
 Use the "--uq-sample-labels" option to exclude the study_label prefix from the sample names. Ex: a sample will be called "DTB-001" instead of "prad_wcdt/DTB-001" if there are no sample name collisions. If there are sample name collisions this option is ignored.
 
 Dependancies:
@@ -21,7 +19,7 @@ import getopt
 import pymongo
 import os
 
-def export_from_object(db, sampleGroup, isPlc, isCbio):
+def export_from_object(db, sampleGroup, isPlc, isCbio, isStripPrefix):
     # NOTE: from this point on, don't reference sampleGroup["data_sets"]
     #       because we mutate it (only sort, for now)
     sampleGroupDataSets = sampleGroup["data_sets"]
@@ -59,7 +57,11 @@ def export_from_object(db, sampleGroup, isPlc, isCbio):
 
     for study in sampleGroupDataSets:
         for sampleLabel in study["sample_labels"]:
-            sys.stdout.write("\t" + sampleLabel)
+            if isStripPrefix:
+                labelArr = sampleLabel.split('/')
+                sys.stdout.write("\t" + labelArr[1])
+            else:
+                sys.stdout.write("\t" + sampleLabel)
 
     # print out the data (non-header line)
 
@@ -158,7 +160,7 @@ def main():
         print("invalid arguments given to exporter");
         sys.exit(1);
 
-    export_from_object(db, sampleGroup, "--plc" in argv, "--cbio" in argv)
+    export_from_object(db, sampleGroup, "--plc" in argv, "--cbio" in argv, "--uq-sample-labels" in argv)
 
     sys.exit(0)
 
