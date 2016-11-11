@@ -12,11 +12,8 @@ install:
   - docker-compose -f docker-compose-mongo.yml up -d
 script:
   # Run Meteor app tests
-  - docker ps
   - docker-compose -f docker-compose.yml -f docker-compose-test.yml run wrangler
-  - docker ps
   - docker-compose -f docker-compose.yml -f docker-compose-test.yml run job-runner
-  - docker ps
   - docker-compose -f docker-compose.yml -f docker-compose-test.yml run patient-care
   - docker ps
   ## Then, spin them up normally in daemon mode and confirm they run
