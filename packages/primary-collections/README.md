@@ -2,6 +2,50 @@
 
 This package declares the base genomic and clinical collections required for MedBook.
 
+## Security
+
+The MedBook data model has two security models: collaboration security and associated object security. There are some object types for which both security types are valid, but each object can only implement one type of security.
+
+### Collaboration security
+
+Collaboration security means that an object can be "shared" with one or more collaborations.
+
+Unless otherwise specified, the creator of an object starts as the sole collaborator and sole administrator of the object. From that point on, the administrators of an object can share the object (add/remove collaborators and administrators) as well as change (edit) the object as specified in the data model. Collaborators can view the object but cannot edit the object in any way without cloning it.
+
+Collaboration security is implemented with two arrays of strings: `collaborations` and `administrators`. These lists contain one or more collaborations: either personal collaborations or names of collaborations.
+
+An example object with collaboration security:
+```json
+{
+  "administrators": [ "ted@soe.ucsc.edu" ],
+  "collaborations": [ "ted@soe.ucsc.edu", "dtflemin@ucsc.edu", "CKCC" ]
+}
+```
+
+NOTE: Currently, the collaborations list is the same as the administrators list, and collaborators have full administrative power.
+
+### Associated object security
+
+Objects with associated object security inherit security from their associated object. In most (but not all) cases, the inherited security is collaboration security.
+
+Associated objects are notated by their collection name and mongo id. The collection name is the Javascript name, not the mongo name (e.g. `"GeneSets"`, not `"gene_sets"`).
+
+Associated objects can have an optional metadata field that is used to distinguish between multiple objects with the same associated object. For example, if there are three gene sets linked to a single outlier analysis job, they might be distinguished by their outlier type. (See example.) The metadata field is a blackboxed object, which means it has no set schema. (This may change in the future, but for now it's not clear which fields the schema would depend on.)
+
+Example JSON for an  object with associated object security:
+
+```json
+{
+  "associated_object": {
+    "collection_name": "Jobs",
+    "mongo_id": "9jaJQuEwX7ar7Cnva"
+  },
+  "metadata": {
+    "outlier_type": "up"
+  }
+}
+```
+
 ## Data model
 
 ### Collections
@@ -101,13 +145,15 @@ Gene sets are a set of genes that have some relevance to each other. They have a
 
 The data for gene sets (the list of genes and associated values) are stored as records, much like with forms.
 
-Gene sets can have collaboration security or gene set group security depending on if `collaborations` or `gene_set_group_id` is set.
+Gene sets can have collaboration security, gene set group security, or associated object security depending on if `collaborations`, `gene_set_group_id`, or `associated_object` respectively is set. Only one type of security is valid per object. Associated object security would be used when a job created the gene set.
+
+Gene sets may be copied to a new security model. For example, a user may want to share a gene set created by an outlier analysis job without sharing the whole job. The user would copy the gene set to a new gene set with collaboration security.
 
 #### Gene set groups
 
 Gene set groups are a collection of gene sets. They are created by importing a `.gmt` file.
 
-The gene sets in a gene set group are stored as gene sets and are linked by mongo _id.
+The gene sets in a gene set group are stored as gene sets and are linked by mongo id.
 
 Gene sets that are part of gene set groups do not have records associated with them, as they do not have columns other than the gene label. The gene list is already stored on every gene set object, which is where gene set groups should look for the gene data.
 
@@ -117,7 +163,7 @@ Gene set groups have collaboration security and are immutable.
 
 Records are objects in MedBook that users will never directly interact with.
 
-Records are "dumb" data stores for other MedBook data types. (Currently that list includes gene sets, forms, and might soon include mutations.) Records inherit security from their associated objects: a collection name, mongo _id tuple.
+Records are "dumb" data stores for other MedBook data types. (Currently that list includes gene sets, forms, and might soon include mutations.) Records inherit security from their associated objects: a collection name, mongo id tuple.
 
 To use records and their associated widgets, a schema must define the following attributes:
 - the name of the field that will serve as the primary key
@@ -185,14 +231,14 @@ Should we make `study_label` and `sample_label` reserved field names in forms, a
 
 I'm tying down what a record is. I don't want them to be a catch-all. Is this okay?
 
-Should we just rename blobs' files to be the mongo `_id`s instead of nesting them in a folder with the _id?
+Should we just rename blobs' files to be the mongo `_id`s instead of nesting them in a folder with the id?
 
 I don't know if it's a great idea to require patients to have globally unique names. Because patients can be in more than one study, I don't know what container they could go into.
 
 MongoDb keys names (that are in most documents in a collection) should be short to optimize space and performance. Should we use short key names?  See http://christophermaier.name/blog/2011/05/22/MongoDB-key-names
 
 
-### Utilities
+## Utilities
 
 ##### `MedBook.utility.sampleObjToStr()`
 Takes a sample object (`{ study_label, uq_sample_label }`) and returns a fully qualified sample string (`"STUDY/SAMPLE"`).
