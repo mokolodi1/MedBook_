@@ -57,7 +57,7 @@ Meteor.methods({
       // Remove the sample_label_field from the fields because
       // we don't want to be able to query on every individual sample
       let currentFormFields = [];
-      for(field of form.fields){
+      for (let field of form.fields){
         if(field.name !== sample_label_field){
           field.values = [];  // this is ok -- won't write back to DB
           currentFormFields.push(field);
@@ -75,7 +75,7 @@ Meteor.methods({
       };
 
       Records.find(recordsQuery).forEach(function(record){
-        for(field in record){
+        for(let field in record){
           if (fieldsToSkip.indexOf(field) === -1){
 
             // Find the form field by index in currentFormFields to update the .values of
@@ -154,7 +154,7 @@ Meteor.methods({
     // Construct the query to reference only records for the chosen form
 
     let sampleLabelQuery = {};
-    sampleLabelQuery[sample_label_field] = {"$in": samples}
+    sampleLabelQuery[sample_label_field] = {"$in": samples};
 
     let querySpecificForm = {
       "$and": [
@@ -165,7 +165,7 @@ Meteor.methods({
         },
         query,
       ]
-    }
+    };
 
     // Run it, return sample IDs.
     let results = Records.find(querySpecificForm).fetch();
@@ -190,7 +190,7 @@ Meteor.methods({
     }, { sort: { version: -1 } });
 
     if (latestSampleGroup) {
-      return latestSampleGroup.version + 1
+      return latestSampleGroup.version + 1;
     }
 
     return 1; // default value
@@ -269,7 +269,7 @@ Meteor.methods({
         samplesByDataSetId[sample.data_set_id] = [];
       }
 
-      samplesByDataSetId[sample.data_set_id].push(sample.sample_label)
+      samplesByDataSetId[sample.data_set_id].push(sample.sample_label);
     });
 
     let jobId = Jobs.insert({
@@ -309,7 +309,7 @@ Meteor.methods({
       console.log("done loading data");
 
       // do this to allow non-SSL connections (I think)
-      process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
       // do the API call
       apiResponse = HTTP.call("POST",
@@ -337,24 +337,6 @@ Meteor.methods({
     }
   },
 
-  // return a list of the collaborations this user can share with
-  getSharableCollaborations: function () {
-    let user = MedBook.ensureUser(this.userId);
-
-    // TODO: who can we share with?
-    // XXX: can only share with users whose last-used app is using
-    // the new medbook:collaborations code
-    let usersCursor = Meteor.users.find({
-      "collaborations.personal": { $exists: true }
-    }, {
-      fields: { "collaborations.personal": 1 }
-    });
-
-    let usersPersonalCollabs =
-        _.pluck(_.pluck(usersCursor.fetch(), "collaborations"), "personal");
-
-    return _.union(usersPersonalCollabs, user.getCollaborations());
-  },
   // insertRecord: function(values) {
   //   check(values, Object);
   //
@@ -450,12 +432,19 @@ Meteor.methods({
 
     // either add them to the collaboration or to the requests list
     if (collab.adminApprovalRequired) {
+      // require fullName, preferredName for admin approval required
+      let { fullName, preferredName } = user.profile;
+
+      if (!fullName || !preferredName) {
+        throw new Meteor.Error("name-not-set");
+      }
+
       Collaborations.update(collaborationId, {
         $addToSet: {
           requestsToJoin: {
-            firstName: user.profile.firstName,
-            lastName: user.profile.lastName,
-            email: user.collaborations.email_address,
+            fullName,
+            preferredName,
+            email: user.email(),
             personalCollaboration: user.personalCollaboration(),
           },
         }
@@ -465,7 +454,7 @@ Meteor.methods({
       if (Meteor.isServer) {
         this.unblock();
 
-        function getEmails(collabNames) {
+        const getEmails = function(collabNames) {
           // NOTE: will be slow if there are many names
           return _.uniq(_.flatten(_.map(collabNames, (name) => {
             let user = MedBook.findUser({
@@ -487,18 +476,18 @@ Meteor.methods({
               }
             }
           })));
-        }
+        };
 
         let to = getEmails(collab.administrators);
 
-        let requestorName = user.profile.firstName + " " + user.profile.lastName;
-        let subject = requestorName + " has requested access to the " +
+        let { fullName, preferredName } = user.profile;
+        let subject = fullName + " has requested access to the " +
             collab.name + " collaboration in MedBook";
 
         let url = "https://medbook.io/collaborations" +
             "?collaboration_id=" + collab._id;
         let html = "You can view pending requests for access " +
-            "<a href=" + url + ">here</a>. <br><br>Email " + requestorName +
+            "<a href=" + url + ">here</a>. <br><br>Email " + preferredName +
             " at <a href=mailto:" + user.email() + ">" + user.email() + "</a>.";
 
         Email.send({
@@ -514,7 +503,7 @@ Meteor.methods({
       });
 
       // if they've joined the collaboration successfully return the _id
-      return collaborationId
+      return collaborationId;
     }
   },
   leaveCollaboration(collaborationId) {
@@ -530,18 +519,18 @@ Meteor.methods({
       }
     });
   },
-  setProfileName(firstAndLastName) {
-    check(firstAndLastName, new SimpleSchema({
-      firstName: { type: String },
-      lastName: { type: String },
+  setProfileName(fullAndPreferredName) {
+    check(fullAndPreferredName, new SimpleSchema({
+      fullName: { type: String },
+      preferredName: { type: String },
     }));
 
     let user = MedBook.ensureUser(this.userId);
 
     Meteor.users.update(user._id, {
       $set: {
-        "profile.firstName": firstAndLastName.firstName,
-        "profile.lastName": firstAndLastName.lastName,
+        "profile.fullName": fullAndPreferredName.fullName,
+        "profile.preferredName": fullAndPreferredName.preferredName,
       }
     });
   },
@@ -568,14 +557,17 @@ Meteor.methods({
           collaborators: personalCollaboration
         },
         $pull: pullObject,
-      }
+      };
     } else {
       modifier = { $pull: pullObject };
     }
 
     Collaborations.update(collaborationId, modifier);
 
-    // send the email telling them if they were accepted or rejected
+    // Send the email telling them if they were accepted or rejected.
+    // Also refresh the collaborations of the user if approved so that
+    // their subscription reloads if they're on the manage collaborations
+    // page.
     if (Meteor.isServer) {
       this.unblock();
 
@@ -587,6 +579,12 @@ Meteor.methods({
       let html;
 
       if (approvedIfTrue) {
+        // refresh the user's collaborations
+        MedBook.findUser({
+          "collaborations.personal": personalCollaboration
+        }).getCollaborations();
+
+        // now for the email part...
         subject = "Access to " + collab.name + " approved";
 
         html = "Your request for access to the " + collab.name +
@@ -665,8 +663,8 @@ Meteor.methods({
     // remove other linked object types
     if (collection_name === "DataSets") {
       GenomicExpression.remove({ data_set_id: mongo_id });
-    } else if (collection_name === "Forms"
-        || collection_name === "GeneSets") {
+    } else if (collection_name === "Forms" ||
+        collection_name === "GeneSets") {
       Records.remove({
         "associated_object.collection_name": collection_name,
         "associated_object.mongo_id": mongo_id,
@@ -675,18 +673,40 @@ Meteor.methods({
       GeneSets.remove({ gene_set_group_id: mongo_id });
     }
   },
-  updateObjectCollaborations(collectionName, mongoId, collaborations) {
-    check([collectionName, mongoId], [String]);
+  removeObjects(collectionName, mongoIds) {
+    check(collectionName, String);
+    check(mongoIds, [String]);
+
+    // check security
+    let user = MedBook.ensureUser(Meteor.userId());
+    _.each(mongoIds, (mongoId) => {
+      let object = MedBook.collections[collectionName].findOne(mongoId);
+      user.ensureAccess(object);
+    });
+
+    // delete them...
+    _.each(mongoIds, (mongoId) => {
+      Meteor.call("removeObject", collectionName, mongoId);
+    });
+  },
+  updateObjectCollaborations(collectionName, mongoIds, collaborations) {
+    check(collectionName, String);
+    check(mongoIds, [String]);
     check(collaborations, [String]);
 
     let user = MedBook.ensureUser(Meteor.userId());
     let collection = MedBook.collections[collectionName];
-    let object = collection.findOne(mongoId);
-    user.ensureAccess(object);
 
-    collection.update(mongoId, {
-      $set: { collaborations }
+    // TODO: make this faster by doing a mongo query instead of calling
+    // ensureAccess every time
+    _.each(mongoIds, (mongoId) => {
+      let object = collection.findOne(mongoId);
+      user.ensureAccess(object);
     });
+
+    collection.update({ _id: { $in: mongoIds } }, {
+      $set: { collaborations }
+    }, { multi: true });
   },
 
   // manage data sets

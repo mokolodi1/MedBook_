@@ -4,8 +4,7 @@ function UpdateCbioSecurity (job_id) {
 UpdateCbioSecurity.prototype = Object.create(Job.prototype);
 UpdateCbioSecurity.prototype.constructor = UpdateCbioSecurity;
 
-import 'mysql';
-var mysql = Npm.require('mysql');
+import mysql from "mysql";
 
 UpdateCbioSecurity.prototype.run = function () {
 
@@ -126,7 +125,7 @@ UpdateCbioSecurity.prototype.run = function () {
     });
 
   return jobDeferred.promise;
-}
+};
 
 // run the job every 24 hours if running in production (WORLD_URL is set)
 if (process.env.WORLD_URL) {
