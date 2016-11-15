@@ -9,13 +9,19 @@ Template.appBody.helpers({
   invalidUrl() {
     return FlowRouter.getRouteName() === undefined;
   },
-  activeRouteIsInTools() {
+});
+
+// Template.siteBreadcrumbs
+
+Template.siteBreadcrumbs.helpers({
+  isJobResult() {
     return [
-      "listTools",
-      "listLimmaGSEA",
-      "listTumorMap",
-      "listUpDownGenes",
       "upDownGenesJob",
+      "limmaGseaJob",
+      "gseaJob",
+      "pairedAnalysisJob",
+      "limmaJob",
+      "singleSampleTopGenesJob",
     ].indexOf(FlowRouter.getRouteName()) !== -1;
   },
 });

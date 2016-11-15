@@ -6,6 +6,7 @@
 <template name="appBody">
   {{! shared modals that are used on multiple pages}}
   {{> editCollaborationsModal}}
+  {{> gseaFromGeneSetModal}}
 
   <div class="ui container">
     <div class="ui menu">
@@ -16,15 +17,33 @@
       <a href={{pathFor "home"}} class="ui simple dropdown item">
         Tools
         <div class="menu">
+          <a href={{pathFor "listGsea"}} class="item">
+            GSEA
+          </a>
+
+          <a href={{pathFor "listUpDownGenes"}} class="item">
+            Outlier Analysis
+          </a>
+
+          <a href={{pathFor "listPairedAnalysis"}} class="item">
+            Paired Tumor Analysis
+          </a>
+
+          <a href={{pathFor "listLimma"}} class="item">
+            Limma
+          </a>
+
+          <a href={{pathFor "listSingleSampleTopGenes"}} class="item">
+            Single Sample Top Genes
+          </a>
+
           <a href={{pathFor "listLimmaGSEA"}} class="item">
             Limma <i class="right arrow icon"></i> GSEA
           </a>
           <!-- <a href={{pathFor "listTumorMap"}} class="item">
             Tumor Map
           </a> -->
-          <a href={{pathFor "listUpDownGenes"}} class="item">
-            Outlier Analysis
-          </a>
+
         </div>
       </a>
 
@@ -121,7 +140,18 @@
           {{> loggingInMessage}}
         {{/if}}
       {{else}}
-        {{> notLoggedIn}}
+        {{> welcomeToMedBook}}
+
+        {{#if isActiveRoute "home"}}
+          {{> home}}
+        {{else}}
+          <div class="ui massive message">
+            <div class="header">
+              Sign in to continue
+            </div>
+            Please sign in to access MedBook.
+          </div>
+        {{/if}}
       {{/if}}
     {{/if}}
   </div>
@@ -156,6 +186,38 @@
       {{/breadcrumbItem}}
     {{/if}}
 
+    {{#if or (isActiveRoute "listGsea")
+        (isActiveRoute "gseaJob")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listGsea")
+          href=(pathFor "listGsea")}}
+        GSEA
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if or (isActiveRoute "listPairedAnalysis")
+        (isActiveRoute "pairedAnalysisJob")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listPairedAnalysis")
+          href=(pathFor "listPairedAnalysis")}}
+        Paired Tumor Analysis
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if or (isActiveRoute "listLimma")
+        (isActiveRoute "limmaJob")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listLimma")
+          href=(pathFor "listLimma")}}
+        Limma
+      {{/breadcrumbItem}}
+    {{/if}}
+
+    {{#if or (isActiveRoute "listSingleSampleTopGenes")
+        (isActiveRoute "singleSampleTopGenesJob")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listSingleSampleTopGenes")
+          href=(pathFor "listSingleSampleTopGenes")}}
+        Single Sample Top Genes
+      {{/breadcrumbItem}}
+    {{/if}}
+
     <!-- {{#if isActiveRoute "listTumorMap"}}
       {{#breadcrumbItem isActive=true}}
         Tumor Map
@@ -170,7 +232,7 @@
       {{/breadcrumbItem}}
     {{/if}}
 
-    {{#if or (isActiveRoute "upDownGenesJob") (isActiveRoute "limmaGseaJob")}}
+    {{#if isJobResult}}
       {{#breadcrumbItem isActive=true}}
         Result
       {{/breadcrumbItem}}
@@ -213,7 +275,7 @@
   </div>
 </template>
 
-<template name="notLoggedIn">
+<template name="welcomeToMedBook">
   <div class="ui massive message">
     <!-- <i class="warning sign icon"></i> -->
     <div class="content">
@@ -226,11 +288,13 @@
       </p>
       <p>
         MedBook enables you to quickly compare private patient information with
-        <b>publically available data sets</b> and then securely
+        <b>publicly available data sets</b> and then securely
         <b>share findings with collaborators</b>.
       </p>
       <p>
-        MedBook is currently in public beta and is free to use.
+        MedBook is currently in private beta.
+        If you would like to try MedBook, please
+        <a href="mailto:ucscmedbook@gmail.com">contact us</a>.
       </p>
     </div>
   </div>

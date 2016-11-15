@@ -61,7 +61,7 @@ Template.listUpDownGenes.helpers({
   },
   customSampleGroup() { return Template.instance().customSampleGroup; },
   error() { return Template.instance().error; },
-  talkingToServer() { return Template.instance().talkingToServer.get() },
+  talkingToServer() { return Template.instance().talkingToServer.get(); },
   previousJobsCols() {
     return [
       { title: "Sample", field: "args.sample_label" },
@@ -75,7 +75,12 @@ Template.listUpDownGenes.helpers({
       { title: "Up genes", field: "output.up_genes_count" },
       { title: "Down genes", field: "output.down_genes_count" },
     ];
-  }
+  },
+  multipleSamplesSelected() {
+    let samples = AutoForm.getFieldValue("sample_labels", "createUpDownGenes");
+
+    return samples && samples.length > 1;
+  },
 });
 
 Template.listUpDownGenes.events({

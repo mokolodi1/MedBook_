@@ -329,19 +329,20 @@ Template.semanticUICheckbox.onRendered(function () {
   this.$(".ui.checkbox").checkbox(this.data.options);
 });
 
-// // Template.semanticUIPopup
-//
-// // can give:
-// // selector=".ui.popup.hi.yop"
-// // options={ option: "hi" }
-// Template.semanticUIPopup.onRendered(function () {
-//   let { selector } = this.data;
-//   if (!selector) {
-//     selector = ".ui.checkbox";
-//   }
-//
-//   this.$(selector).checkbox(this.data.options);
-// });
+// Template.semanticUIPopup
+
+// can give:
+// selector=".ui.popup.hi.yop"
+// options={ option: "hi" }
+Template.semanticUIPopup.onRendered(function () {
+  let { selector, options } = this.data;
+
+  if (!selector) {
+    console.log("Didn't give a selector to the semanticUIPopup");
+  } else {
+    this.$(selector).popup(options);
+  }
+});
 
 // Template.viewJobButton
 
@@ -411,6 +412,37 @@ Template.jobStatusWrapper.helpers({
     return Jobs.findOne(this.toString());
   },
 });
+
+// Template.jobErrorBlobs
+
+Template.jobErrorBlobs.onCreated(function () {
+  let instance = this;
+
+  instance.subscribe("blobsAssociatedWithObject", "Jobs", instance.data._id);
+});
+
+Template.jobErrorBlobs.helpers({
+  blobs() {
+    return Blobs2.find({}, { sort: { file_name: 1 } });
+  },
+  blobUrl() {
+    let userId = Meteor.userId();
+    let loginToken = Accounts._storedLoginToken();
+    let jobId = Template.instance().data._id;
+
+    return `/download/${userId}/${loginToken}/job-blob/${jobId}/` +
+        this.file_name;
+  }
+});
+
+Template.gseaJob.events({
+  "click .iframe-new-tab"(event, instance) {
+    // open the current iFrame URL in a new tab: magic!
+    console.log("this._id:", this._id);
+    window.open($("#" + this._id).contents().get(0).location.href, "_blank");
+  },
+});
+
 
 // Template.showRecords
 
