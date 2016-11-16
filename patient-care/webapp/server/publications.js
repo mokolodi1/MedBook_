@@ -165,14 +165,33 @@ Meteor.publish("searchableJobs", function (options) {
     searchFields: { type: [String] },
     searchText: { type: String, optional: true },
     mongoIds: { type: [String], optional: true },
+
+    // extra query if needed
+    query: { type: Object, optional: true, blackbox: true },
+
+    // extra fields to send to the client
+    extraFields: { type: [String], optional: true },
   }));
 
   let user = MedBook.ensureUser(this.userId);
 
-  const { jobName, skip, limit, searchFields, searchText, mongoIds } = options;
+  let {
+    jobName,
+    skip,
+    limit,
+    searchFields,
+    searchText,
+    mongoIds,
+    query,
+    extraFields,
+  } = options;
+
+  if (!query) {
+    query = {};
+  }
 
   // NOTE: if searchText is falsey this will return {}
-  let query = MedBook.regexFieldsQuery(searchFields, searchText);
+  _.extend(query, MedBook.regexFieldsQuery(searchFields, searchText));
 
   _.extend(query, {
     name: jobName,
@@ -194,6 +213,13 @@ Meteor.publish("searchableJobs", function (options) {
     date_created: 1,
     status: 1,
   });
+
+  // include the extra fields if required
+  if (extraFields) {
+    _.each(extraFields, (field) => {
+      fields[field] = 1;
+    });
+  }
 
   // NOTE: unsure as to whether we need to use a fresh cursor
   // for this but my gut tells me yes.

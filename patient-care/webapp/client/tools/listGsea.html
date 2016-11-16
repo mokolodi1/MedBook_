@@ -19,18 +19,15 @@
     <p>
       You can also run GSEA from the output of a job that generates
       a signature.
-    </p>
-    <p>
       Try it now with
-      <a href={{pathFor "listLimma"}}>limma</a>,
-      <a href={{pathFor "listPairedAnalysis"}}>paired tumor analysis</a>, or
-      <a href={{pathFor "listUpDownGenes"}}>outlier analysis</a>.
+      <a href={{pathFor "listLimma"}}>limma</a>
+      or <a href={{pathFor "listUpDownGenes"}}>outlier analysis</a>.
     </p>
   </div>
   {{> createGseaForm active=true autoformId="createGsea"}}
 
-  <h2>Previously run analyses</h2>
-  {{> previouslyRunGsea}}
+  {{> searchableJobs name="RunGSEA" columns=previousJobsCols
+      viewJobRouteName="gseaJob"}}
 </template>
 
 <template name="createGseaForm">
@@ -108,63 +105,9 @@
     </div>
 
     {{! don't allow them to start a job that will break}}
-
     <button type="submit" class="ui primary button
         {{#if duplicateGeneSetNames}}disabled{{/if}}">
       Start analysis
     </button>
   {{/autoForm}}
-</template>
-
-<template name="previouslyRunGsea">
-  {{#if Template.subscriptionsReady}}
-    {{#if length getJobs}}
-      <table class="ui single line table">
-        <thead>
-          <tr>
-            {{#unless geneSetNameSet}}
-              <th>Gene set name</th>
-            {{/unless}}
-            <th>Ranking field</th>
-            <th>Gene sets</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#each getJobs}}
-            <tr>
-              {{#unless geneSetNameSet}}
-                <td>{{args.gene_set_name}}</td>
-              {{/unless}}
-              <td>{{args.gene_set_sort_field}}</td>
-              <td>
-                {{#each args.gene_set_group_names}}
-                  {{this}}<br>
-                {{/each}}
-              </td>
-              <td>
-                {{> viewJobButton href=(pathFor "gseaJob" job_id=_id)
-                    job=this}}
-              </td>
-              <td>{{> shareAndDeleteButtons object=this collectionName="Jobs"}}</td>
-            </tr>
-          {{/each}}
-        </tbody>
-      </table>
-    {{else}}
-      <div class="ui message">
-        <div class="content">
-          <div class="header">
-            No analyses... yet!
-          </div>
-          <p>
-            You haven't run any analyses.
-          </p>
-        </div>
-      </div>
-    {{/if}}
-  {{else}}
-    {{> dataLoading}}
-  {{/if}}
 </template>

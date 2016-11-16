@@ -136,3 +136,25 @@ Template.singleSampleTopGenesJob.events({
     });
   },
 });
+
+// Template.showGeneSetAssociatedWithJob
+
+Template.showGeneSetAssociatedWithJob.onCreated(function () {
+  let instance = this;
+
+  instance.subscribe("associatedObjectGeneSet", {
+    collection_name: "Jobs",
+    mongo_id: instance.data._id,
+  });
+});
+
+Template.showGeneSetAssociatedWithJob.helpers({
+  getGeneSet() {
+    // it should be the only one loaded...
+    if (GeneSets.find().count() > 1) {
+      throw "More than one gene set!";
+    }
+
+    return GeneSets.findOne();
+  },
+});

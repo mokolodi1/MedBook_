@@ -25,7 +25,8 @@ Meteor.methods({
       use_filtered_sample_group,
     } = formValues;
 
-    user.ensureAccess(DataSets.findOne(data_set_id));
+    let dataSet = DataSets.findOne(data_set_id);
+    user.ensureAccess(dataSet);
 
     // if we need to create a new sample group, do so
     if (formValues.sample_group_id === "creating") {
@@ -71,11 +72,14 @@ Meteor.methods({
       }
     }
 
+    // args shared by all jobs to be created in just a moment
     let sameArgs = {
       data_set_id,
+      data_set_name: dataSet.name,
       iqr_multiplier,
       sample_group_id,
       sample_group_name: sampleGroup.name,
+      sample_group_version: sampleGroup.version,
       use_filtered_sample_group,
     };
 

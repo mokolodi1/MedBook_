@@ -51,16 +51,27 @@ Template.searchableJobs.onCreated(function() {
     instance.pageIndex.set(0);
   });
 
+  // figure out all the fields to fetch
+  // store it in an instance variable so it can be used elsewhere
+  instance.searchFields = _.flatten(_.map(instance.data.columns, (col) => {
+    if (col.field) {
+      return col.field;
+    }
+
+    return col.fields;
+  }));
+
   // subscribe to the jobs
-  let searchFields = _.pluck(instance.data.columns, "field");
   instance.autorun(() => {
     let rowsPerPage = instance.rowsPerPage.get();
 
     let options = {
       jobName: instance.data.name,
-      searchFields,
+      searchFields: instance.searchFields,
       limit: rowsPerPage,
       skip: rowsPerPage * instance.pageIndex.get(),
+      query: instance.data.query,
+      extraFields: instance.data.extraFields,
     };
 
     if (instance.onlyShowSelected.get()) {
@@ -117,11 +128,16 @@ Template.searchableJobs.helpers({
         _id: { $in: Object.keys(instance.selectedIdMap.get()) }
       };
     } else {
-      let searchFields = _.pluck(this.columns, "field");
       let searchText = Template.instance().searchText.get();
 
-      query = MedBook.regexFieldsQuery(searchFields, searchText);
+      query = MedBook.regexFieldsQuery(instance.searchFields, searchText);
     }
+
+    if (this.query) {
+      _.extend(query, this.query);
+    }
+
+    query.name = this.name;
 
     return Jobs.find(query, {
       sort: { date_created: -1 }
@@ -240,21 +256,26 @@ Template.listSelectableJobs.onCreated(function () {
 
 Template.listSelectableJobs.helpers({
   showColValue(job) {
-    let { field, yes_no } = this;
+    let { field, yes_no, func } = this;
     let value;
 
-    // break up the field if there's a dot
-    // NOTE: currently only a single dot is supported
-    if (field.indexOf(".") === -1) {
-      value = job[field];
-    } else {
-      let splitAttributes = field.split(".");
-      let intermediaryValue = job[splitAttributes[0]];
+    if (field) {
+      // break up the field if there's a dot
+      // NOTE: currently only a single dot is supported
+      if (field.indexOf(".") === -1) {
+        value = job[field];
+      } else {
+        let splitAttributes = field.split(".");
+        let intermediaryValue = job[splitAttributes[0]];
 
-      if (intermediaryValue) {
-        value = intermediaryValue[splitAttributes[1]];
+        if (intermediaryValue) {
+          value = intermediaryValue[splitAttributes[1]];
+        }
       }
+    } else {
+      value = func(job);
     }
+
 
     // convert to "Yes"/"No" if `yes_no`
     if (yes_no) {

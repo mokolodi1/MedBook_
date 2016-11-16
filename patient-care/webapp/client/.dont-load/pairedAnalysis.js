@@ -120,21 +120,3 @@ Template.pairedAnalysisJob.events({
     });
   },
 });
-
-// Template.showPairedAnalysisResult
-
-Template.showPairedAnalysisResult.onCreated(function () {
-  let instance = this;
-
-  instance.subscribe("associatedObjectGeneSet", {
-    collection_name: "Jobs",
-    mongo_id: instance.data._id,
-  });
-});
-
-Template.showPairedAnalysisResult.helpers({
-  getGeneSet() {
-    // it should be the only one loaded...
-    return GeneSets.findOne();
-  },
-});

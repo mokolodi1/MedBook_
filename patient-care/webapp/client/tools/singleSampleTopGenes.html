@@ -130,38 +130,7 @@
   </h1>
 
   {{#jobStatusWrapper (param "job_id")}}
-    <table class="ui celled striped table">
-      <thead>
-        <tr>
-          <th colspan="2">Arguments</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Data set</td>
-          <td>{{args.data_set_name}}</td>
-        </tr>
-        <tr>
-          <td>Sample</td>
-          <td>{{args.sample_label}}</td>
-        </tr>
-        <tr>
-          <td>Top amount</td>
-          <td>
-            {{#if compare args.percent_or_count "percent"}}
-              {{args.top_percent}}% of genes
-            {{else}}
-              {{args.top_count}}
-              {{#if compare args.top_count 1}}
-                gene
-              {{else}}
-                genes
-              {{/if}}
-            {{/if}}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    {{> singleSampleTopGenesArgs}}
 
     <h2>
       Signature
@@ -176,7 +145,59 @@
       </button>
     </h2>
 
-    {{! reuse paired analysis template}}
-    {{> showPairedAnalysisResult}}
+    {{> showGeneSetAssociatedWithJob}}
+  {{else}}
+    {{> singleSampleTopGenesArgs}}
   {{/jobStatusWrapper}}
+</template>
+
+<template name="singleSampleTopGenesArgs">
+  <table class="ui celled striped table">
+    <thead>
+      <tr>
+        <th colspan="2">Arguments</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Data set</td>
+        <td>
+          <a href={{pathFor "manageObjects" collectionSlug="data-sets"
+              selected=args.data_set_id}}>
+            {{args.data_set_name}}
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td>Sample</td>
+        <td>{{args.sample_label}}</td>
+      </tr>
+      <tr>
+        <td>Top amount</td>
+        <td>
+          {{#if compare args.percent_or_count "percent"}}
+            {{args.top_percent}}% of genes
+          {{else}}
+            {{args.top_count}}
+            {{#if compare args.top_count 1}}
+              gene
+            {{else}}
+              genes
+            {{/if}}
+          {{/if}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</template>
+
+<template name="showGeneSetAssociatedWithJob">
+  {{#if Template.subscriptionsReady}}
+    {{#with getGeneSet}}
+      {{> showRecords fields=fields mongoId=_id
+          collectionName="GeneSets" primaryFieldName=gene_label_field}}
+    {{/with}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
 </template>

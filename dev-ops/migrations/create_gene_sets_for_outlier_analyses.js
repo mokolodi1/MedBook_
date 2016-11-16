@@ -136,3 +136,52 @@ db.jobs.find({
     $set: addOutputSummary
   });
 });
+
+// find all gene sets and fix a couple problems with them
+db.jobs.find({
+  name: "UpDownGenes",
+}).forEach(function (job) {
+  // add data_set_name to jobs (some jobs are missing this because
+  // of a bug I just fixed where it wasn't added to the args on the
+  // server)
+  var args = job.args;
+
+  // if it's already set as this super long name, use that
+  if (args.data_set_name_or_patient_label) {
+    args.data_set_name = args.data_set_name_or_patient_label;
+  } else {
+    // otherwise look it up
+    var dataSet = db.data_sets.findOne({
+      _id: job.args.data_set_id
+    }, { name: 1 });
+
+    // don't assume the data set exists
+    // if it doesn't exist, whateves no one cares
+    if (dataSet) {
+      args.data_set_name = dataSet.name;
+    }
+
+    // don't need this anymore
+    delete args.data_set_name_or_patient_label;
+  }
+
+  // add the sample group version to the args
+  var sampleGroup = db.sample_groups.findOne({
+    _id: args.sample_group_id
+  }, { version: 1 });
+
+  // don't assume sample group exists
+  if (sampleGroup) {
+    args.sample_group_version = sampleGroup.version;
+  } else {
+    // a perfectly valid assumption at this point in the project
+    args.sample_group_version = 1;
+  }
+
+  // put back the modified args
+  db.jobs.update({ _id: job._id }, {
+    $set: {
+      args: args
+    }
+  });
+});

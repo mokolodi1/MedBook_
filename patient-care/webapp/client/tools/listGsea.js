@@ -1,3 +1,21 @@
+// Template.listGsea
+
+Template.listGsea.helpers({
+  previousJobsCols() {
+    return [
+      { title: "Gene set name", field: "args.gene_set_name" },
+      { title: "Ranking field", field: "args.gene_set_sort_field" },
+      {
+        title: "Gene sets",
+        func: function (job) {
+          return job.args.gene_set_group_names.join("\n");
+        },
+        fields: [ "args.gene_set_group_names" ],
+      },
+    ];
+  },
+});
+
 // Template.createGseaForm
 
 AutoForm.addHooks([ "createGsea", "createGseaFromOutlierAnalysis" ], {
@@ -173,31 +191,5 @@ Template.createGseaForm.helpers({
     });
 
     return Object.keys(allNamesAsAttributes).length !== allNamesCount;
-  },
-});
-
-// Template.previouslyRunGsea
-
-Template.previouslyRunGsea.onCreated(function() {
-  let instance = this;
-
-  // Query refers to an extra jobs query. Ex: when we want to see the jobs
-  // for a specific gene set
-  instance.autorun(() => {
-    let data = Template.currentData();
-
-    instance.subscribe("jobsOfType", "RunGSEA", data.query);
-  });
-});
-
-Template.previouslyRunGsea.helpers({
-  getJobs() {
-    return Jobs.find({ name: "RunGSEA" }, {
-      sort: { date_created: -1 }
-    });
-  },
-  geneSetNameSet() {
-    let { data } = Template.instance();
-    return data.query && data.query["args.gene_set_name"];
   },
 });

@@ -25,9 +25,9 @@
             Outlier Analysis
           </a>
 
-          <a href={{pathFor "listPairedAnalysis"}} class="item">
+          <!-- <a href={{pathFor "listPairedAnalysis"}} class="item">
             Paired Tumor Analysis
-          </a>
+          </a> -->
 
           <a href={{pathFor "listLimma"}} class="item">
             Limma
@@ -194,13 +194,13 @@
       {{/breadcrumbItem}}
     {{/if}}
 
-    {{#if or (isActiveRoute "listPairedAnalysis")
+    <!-- {{#if or (isActiveRoute "listPairedAnalysis")
         (isActiveRoute "pairedAnalysisJob")}}
       {{#breadcrumbItem isActive=(isActiveRoute "listPairedAnalysis")
           href=(pathFor "listPairedAnalysis")}}
         Paired Tumor Analysis
       {{/breadcrumbItem}}
-    {{/if}}
+    {{/if}} -->
 
     {{#if or (isActiveRoute "listLimma")
         (isActiveRoute "limmaJob")}}
@@ -377,7 +377,10 @@
     </p>
     <p>
       Click here to return to the home page:
-      <a href={{pathFor "home"}} class="ui primary button">
+      {{! NOTE: we have to refresh the page (target="_self") because some of
+          the FlowRouter reactive functions stop working after hitting the
+          invalid page, so the breadcrumbs don't work anymore.}}
+      <a href={{pathFor "home"}} class="ui primary button" target="_self">
         <i class="home icon"></i>
         Go home!
       </a>

@@ -162,17 +162,7 @@
         Run GSEA
       </button>
     </h2>
+    {{! NOTE: reuse the same code as with the single sample top genes}}
     {{> showPairedAnalysisResult}}
   {{/jobStatusWrapper}}
-</template>
-
-<template name="showPairedAnalysisResult">
-  {{#if Template.subscriptionsReady}}
-    {{#with getGeneSet}}
-      {{> showRecords fields=fields mongoId=_id
-          collectionName="GeneSets" primaryFieldName=gene_label_field}}
-    {{/with}}
-  {{else}}
-    {{> dataLoading}}
-  {{/if}}
 </template>

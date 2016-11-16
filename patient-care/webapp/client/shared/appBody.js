@@ -1,19 +1,11 @@
-// Template.appBody
-
-Template.appBody.helpers({
-  getPatientLabel: function () {
-    let patient = Patients.findOne(this.params().patient_id);
-    if (patient) return patient.patient_label;
-    return "loading";
-  },
-  invalidUrl() {
-    return FlowRouter.getRouteName() === undefined;
-  },
-});
-
 // Template.siteBreadcrumbs
 
 Template.siteBreadcrumbs.helpers({
+  // getPatientLabel: function () {
+  //   let patient = Patients.findOne(this.params().patient_id);
+  //   if (patient) return patient.patient_label;
+  //   return "loading";
+  // },
   isJobResult() {
     return [
       "upDownGenesJob",
@@ -23,6 +15,9 @@ Template.siteBreadcrumbs.helpers({
       "limmaJob",
       "singleSampleTopGenesJob",
     ].indexOf(FlowRouter.getRouteName()) !== -1;
+  },
+  invalidUrl() {
+    return !FlowRouter.getRouteName();
   },
 });
 

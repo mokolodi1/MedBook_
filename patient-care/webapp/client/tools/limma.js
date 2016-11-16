@@ -95,21 +95,32 @@ Template.listLimma.helpers({
       return uniqueSamples.length !== selectedSampleCount;
     }
   },
-});
-
-// Template.previouslyRunLimma
-
-Template.previouslyRunLimma.onCreated(function() {
-  let instance = this;
-
-  instance.subscribe("jobsOfType", "RunLimma");
-});
-
-Template.previouslyRunLimma.helpers({
-  getJobs() {
-    return Jobs.find({ name: "RunLimma" }, {
-      sort: { date_created: -1 }
-    });
+  previousJobsCols() {
+    return [
+      {
+        title: "Experimental group",
+        func: function (job) {
+          return job.args.experimental_sample_group_name +
+              ` (v${job.args.experimental_sample_group_version})`;
+        },
+        fields: [
+          "args.experimental_sample_group_name",
+          "args.experimental_sample_group_version",
+        ],
+      },
+      {
+        title: "Reference group",
+        func: function (job) {
+          return job.args.reference_sample_group_name +
+              ` (v${job.args.reference_sample_group_version})`;
+        },
+        fields: [
+          "args.reference_sample_group_name",
+          "args.reference_sample_group_version",
+        ],
+      },
+      { title: "Top genes count", field: "args.top_genes_count" },
+    ];
   },
 });
 
@@ -144,11 +155,11 @@ Template.limmaJob.events({
   },
   "click .voom-iframe-new-tab"(event, instance) {
     // open the current iFrame URL in a new tab: magic!
-    window.open($("#voom-plot").contents().get(0).location.href,'_blank');
+    window.open($("#voom-plot").contents().get(0).location.href, '_blank');
   },
   "click .mds-iframe-new-tab"(event, instance) {
     // open the current iFrame URL in a new tab: magic!
-    window.open($("#mds-plot").contents().get(0).location.href,'_blank');
+    window.open($("#mds-plot").contents().get(0).location.href, '_blank');
   },
 });
 

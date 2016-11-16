@@ -9,7 +9,6 @@ Template.outlierAnalysis.onCreated(function () {
   instance.autorun(function () {
     instance.subscribe("blob", Jobs.findOne().output.up_blob_id);
     instance.subscribe("blob", Jobs.findOne().output.down_blob_id);
-    instance.subscribe("sampleGroups");
   });
 });
 
@@ -20,21 +19,14 @@ Template.outlierAnalysis.helpers({
     // If it's an original blob, ignore the filename; otherwise
     // use it and the job ID to get the blob2 route.
     let isItABlob = Blobs.findOne(blobId);
-    if(isItABlob){
+    if (isItABlob) {
       return isItABlob.url();
-    }else {
+    } else {
       let userId = Meteor.userId();
       let loginToken = Accounts._storedLoginToken();
       let jobId = FlowRouter.getParam("job_id");
       return `/download/${userId}/${loginToken}/job-blob/${jobId}/${blobFileName}`;
     }
-  },
-  // Get version of a sample group visible to this user
-  getSampleGroupVersion(sampleGroupId){
-    let sg = SampleGroups.findOne(sampleGroupId);
-    let version = "";
-    if(sg){ version = sg.version; }
-    return version;
   },
 });
 
@@ -302,12 +294,21 @@ Template.gseaFromGeneSetModal.onRendered(function () {
 });
 
 Template.gseaFromGeneSetModal.helpers({
+  previousJobsCols() {
+    return [
+      { title: "Ranking field", field: "args.gene_set_sort_field" },
+      {
+        title: "Gene sets",
+        func: function (job) {
+          return job.args.gene_set_group_names.join("\n");
+        },
+        fields: [ "args.gene_set_group_names" ],
+      },
+    ];
+  },
   query() {
-    let geneSetId = FlowRouter.getQueryParam("geneSetIdForGsea");
-
     return {
-      "args.gene_set_id": geneSetId,
-      "args.gene_set_name": GeneSets.findOne(geneSetId).name,
+      "args.gene_set_id": FlowRouter.getQueryParam("geneSetIdForGsea"),
     };
   },
   getGeneSet() {
@@ -316,5 +317,8 @@ Template.gseaFromGeneSetModal.helpers({
     if (geneSetId) {
       return GeneSets.findOne(geneSetId);
     }
+  },
+  extraFields() {
+    return [ "args.gene_set_id" ];
   },
 });

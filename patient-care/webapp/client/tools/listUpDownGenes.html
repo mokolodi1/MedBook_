@@ -1,14 +1,17 @@
 <template name="listUpDownGenes">
   <h1>
     Outlier Analysis
-  </h1>
 
-  <p>
-    Outlier genes are defined as being more than N IQRs away from the median.
-    The maximum number of genes returned is 5% of the total number of genes.
-    If there are more than 5% of the total number of genes that are outliers,
-    only the top 5% of the outliers will be returned.
-  </p>
+    {{#semanticUIPopup selector=".help.circle.icon"}}
+      <i class="help circle icon"></i>
+      <p class="ui popup">
+        Outlier genes are defined as being more than N IQRs away from the median.
+        The maximum number of genes returned is 5% of the total number of genes.
+        If there are more than 5% of the total number of genes that are outliers,
+        only the top 5% of the outliers will be returned.
+      </p>
+    {{/semanticUIPopup}}
+  </h1>
 
   <h2>Start a new analysis</h2>
 
@@ -65,7 +68,8 @@
     </button>
   {{/autoForm}}
 
-  {{> searchableJobs name="UpDownGenes" columns=previousJobsCols}}
+  {{> searchableJobs name="UpDownGenes" columns=previousJobsCols
+      viewJobRouteName="upDownGenesJob"}}
 </template>
 
 <template name="previouslyRunUpDownGenes">

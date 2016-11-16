@@ -173,6 +173,16 @@ Template.editCollaborationsModal.onRendered(function() {
 
           instance.collabsList.set(collabsList);
 
+          // clear the search input field and focus it (in case
+          // they used the mouse to click an option, which
+          // unfocuses the search input)
+          Meteor.defer(() => {
+            let searchInput = $(".collaboration-search input")[0];
+
+            searchInput.value = "";
+            searchInput.focus();
+          });
+
           // clear the cache of searches so that we can remove
           // the just-selected item from the results before displaying them
           $(".collaboration-search").search("clear cache");
@@ -207,6 +217,9 @@ Template.editCollaborationsModal.onRendered(function() {
       return false;
     },
     observeChanges: true,
+
+    // TODO: can we do a dimmer over a modal?
+    allowMultiple: true,
   });
 });
 

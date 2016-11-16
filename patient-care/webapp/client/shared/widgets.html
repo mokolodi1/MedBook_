@@ -51,12 +51,16 @@
 
   <h2>
     <code>
-      {{|#jobStatusWrapper "jobId"}} if done {{|/jobStatusWrapper}}
+      {{|#jobStatusWrapper "jobId"}} if done {{|else}} if not done {{|/jobStatusWrapper}}
     </code>
   </h2>
   <p>
     This one is really hard to demonstrate because the job subscription is
     handled from within the template, but that's how you use it!
+  </p>
+  <p>
+    Note that in the else block is shown when the job is in any state other
+    than done.
   </p>
 
   <h2><code>{{|> showRecords}}</code></h2>
@@ -278,6 +282,8 @@
     {{#with getJob}}
       {{#if compare status "done"}}
         {{> Template.contentBlock this}}
+      {{else}}
+        {{> Template.elseBlock this}}
       {{/if}}
 
       {{#if compare status "waiting"}}
