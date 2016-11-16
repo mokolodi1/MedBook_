@@ -127,7 +127,8 @@ UpdateCbioSecurity.prototype.run = function () {
   return jobDeferred.promise;
 };
 
-// run the job every 24 hours if running in production (WORLD_URL is set)
+// run this job immediately and also every 24 hours, but only on production
+// and staging (or wherever it's really running)
 if (process.env.WORLD_URL) {
   Meteor.startup(function () {
     // NOTE: the job can also be called by any user via Meteor method
@@ -152,10 +153,11 @@ if (process.env.WORLD_URL) {
       },
     });
 
-    // also execute immediately
-    Jobs.insert(newJobBlueprint);
+    // (after 5 minutes to make sure the cBio db started)
+    Meteor.setTimeout(function () {
+      Jobs.insert(newJobBlueprint);
+    }, 1000 * 60 * 5);
   });
 }
-
 
 JobClasses.UpdateCbioSecurity = UpdateCbioSecurity;
