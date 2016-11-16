@@ -1,6 +1,20 @@
-// Template.outlierAnalysis
 import Fuse from 'fuse.js';
 import Clipboard from 'clipboard';
+
+// Template.upDownGenesJob
+
+Template.upDownGenesJob.helpers({
+  jobOptions() {
+    return {
+      job_id: FlowRouter.getParam("job_id"),
+      title: "Outlier Analysis Result",
+      listRoute: "listUpDownGenes",
+      argsTemplate: "upDownGenesArgs",
+    };
+  },
+});
+
+// Template.outlierAnalysis
 
 Template.outlierAnalysis.onCreated(function () {
   const instance = this;

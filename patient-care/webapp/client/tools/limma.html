@@ -52,49 +52,7 @@
 </template>
 
 <template name="limmaJob">
-  <h1>
-    Limma Result
-  </h1>
-
-  {{#jobStatusWrapper (param "job_id")}}
-    <table class="ui celled striped table">
-      <thead>
-        <tr>
-          <th colspan="2">Arguments</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Value type</td>
-          <td>{{slugToString args.value_type}}</td>
-        </tr>
-        <tr>
-          <td>Experimental group</td>
-          <td>
-            <a href={{pathFor "manageObjects" collectionSlug="sample-groups"
-                selected=args.experimental_sample_group_id}}>
-              {{args.experimental_sample_group_name}}
-              (v{{args.experimental_sample_group_version}})
-            </a>
-          </td>
-        </tr>
-        <tr>
-          <td>Reference group</td>
-          <td>
-            <a href={{pathFor "manageObjects" collectionSlug="sample-groups"
-                selected=args.reference_sample_group_id}}>
-              {{args.reference_sample_group_name}}
-              (v{{args.reference_sample_group_version}})
-            </a>
-          </td>
-        </tr>
-        <tr>
-          <td>Top genes count</td>
-          <td>{{args.top_genes_count}}</td>
-        </tr>
-      </tbody>
-    </table>
-
+  {{#jobWrapper jobOptions}}
     <h2>
       Signature
 
@@ -132,7 +90,47 @@
     <iframe id="mds-plot" src={{getJobResultUrl "mds.pdf"}}
         style="height: 500px; width: 100%">
     </iframe>
-  {{/jobStatusWrapper}}
+  {{/jobWrapper}}
+</template>
+
+<template name="limmaJobArgs">
+  <table class="ui celled striped table">
+    <thead>
+      <tr>
+        <th colspan="2">Arguments</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Value type</td>
+        <td>{{slugToString args.value_type}}</td>
+      </tr>
+      <tr>
+        <td>Experimental group</td>
+        <td>
+          <a href={{pathFor "manageObjects" collectionSlug="sample-groups"
+              selected=args.experimental_sample_group_id}}>
+            {{args.experimental_sample_group_name}}
+            (v{{args.experimental_sample_group_version}})
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td>Reference group</td>
+        <td>
+          <a href={{pathFor "manageObjects" collectionSlug="sample-groups"
+              selected=args.reference_sample_group_id}}>
+            {{args.reference_sample_group_name}}
+            (v{{args.reference_sample_group_version}})
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td>Top genes count</td>
+        <td>{{args.top_genes_count}}</td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <template name="showLimmaResult">

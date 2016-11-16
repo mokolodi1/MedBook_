@@ -8,7 +8,7 @@ Template.listGsea.helpers({
       {
         title: "Gene sets",
         func: function (job) {
-          return job.args.gene_set_group_names.join("\n");
+          return job.args.gene_set_group_names.join("<br>");
         },
         fields: [ "args.gene_set_group_names" ],
       },
@@ -191,5 +191,41 @@ Template.createGseaForm.helpers({
     });
 
     return Object.keys(allNamesAsAttributes).length !== allNamesCount;
+  },
+});
+
+
+// Template.gseaJob
+
+Template.gseaJob.helpers({
+  jobOptions() {
+    return {
+      job_id: FlowRouter.getParam("job_id"),
+      title: "GSEA Result",
+      listRoute: "listGsea",
+      argsTemplate: "gseaJobArgs",
+    };
+  },
+  getJobResultUrl: function(fileName) {
+    let userId = Meteor.userId();
+    let loginToken = Accounts._storedLoginToken();
+    let jobId = FlowRouter.getParam("job_id");
+
+    return `/download/${userId}/${loginToken}/job-blob/${jobId}/${fileName}`;
+  },
+});
+
+Template.gseaJob.events({
+  "click .gsea-iframe-new-tab"(event, instance) {
+    // open the current iFrame URL in a new tab: magic!
+    window.open($("#gsea-report").contents().get(0).location.href,'_blank');
+  },
+});
+
+// Template.gseaJobArgs
+
+Template.gseaJobArgs.helpers({
+  getGeneSetGroupId(index, job) {
+    return job.args.gene_set_group_ids[index];
   },
 });

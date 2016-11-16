@@ -1,13 +1,7 @@
 <template name="upDownGenesJob">
-  <h1>Outlier Analysis Result</h1>
-
-  {{#jobStatusWrapper (param "job_id")}}
-    {{> upDownGenesArgs}}
-
+  {{#jobWrapper jobOptions}}
     {{> outlierAnalysis}}
-  {{else}}
-    {{> upDownGenesArgs}}
-  {{/jobStatusWrapper}}
+  {{/jobWrapper}}
 </template>
 
 <template name="upDownGenesArgs">

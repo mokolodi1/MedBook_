@@ -409,20 +409,27 @@ Template.viewJobButton.events({
   },
 });
 
-// Template.jobStatusWrapper
+// Template.jobWrapper
 
-Template.jobStatusWrapper.onCreated(function () {
+Template.jobWrapper.onCreated(function () {
   let instance = this;
 
   // subscribe and keep up to date
   instance.autorun(function () {
-    instance.subscribe("specificJob", Template.currentData());
+    instance.subscribe("specificJob", Template.currentData().job_id);
   });
 });
 
-Template.jobStatusWrapper.helpers({
-  getJob: function () {
-    return Jobs.findOne(this.toString());
+Template.jobWrapper.helpers({
+  getJob() {
+    return Jobs.findOne(this.job_id);
+  },
+  onDeleteJob() {
+    let { listRoute } = Template.instance().data;
+
+    return function () {
+      FlowRouter.go(listRoute);
+    };
   },
 });
 

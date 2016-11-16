@@ -99,33 +99,46 @@ Template.listSingleSampleTopGenes.helpers({
 
     return sampleLabels && sampleLabels.length > 1;
   },
-});
-
-// Template.previouslyRunSingleSampleTopGenes
-
-Template.previouslyRunSingleSampleTopGenes.onCreated(function() {
-  let instance = this;
-
-  instance.subscribe("jobsOfType", "RunSingleSampleTopGenes");
-});
-
-Template.previouslyRunSingleSampleTopGenes.helpers({
-  getJobs() {
-    return Jobs.find({ name: "RunSingleSampleTopGenes" }, {
-      sort: { date_created: -1 }
-    });
+  previousJobsCols() {
+    return [
+      {
+        title: "Data set",
+        field: "args.data_set_name",
+      },
+      {
+        title: "Sample",
+        field: "args.sample_label",
+      },
+      {
+        title: "Top amount",
+        func: function ({ args }) {
+          if (args.percent_or_count === "percent") {
+            return `${args.top_percent}% of genes`;
+          } else {
+            return `${args.top_count} genes`;
+          }
+        },
+        fields: [
+          "args.top_count",
+          "args.top_percent",
+          "args.percent_or_count",
+        ],
+      },
+    ];
   },
 });
 
 // Template.singleSampleTopGenesJob
 
-Template.singleSampleTopGenesJob.onCreated(function () {
-  let instance = this;
-
-  // subscribe and keep up to date
-  instance.autorun(function () {
-    instance.subscribe("specificJob", FlowRouter.getParam("job_id"));
-  });
+Template.singleSampleTopGenesJob.helpers({
+  jobOptions() {
+    return {
+      job_id: FlowRouter.getParam("job_id"),
+      title: "Single Sample Top Genes Result",
+      listRoute: "listSingleSampleTopGenes",
+      argsTemplate: "singleSampleTopGenesArgs",
+    };
+  },
 });
 
 Template.singleSampleTopGenesJob.events({

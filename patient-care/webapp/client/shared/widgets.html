@@ -11,6 +11,11 @@
   <br />
   {{> shareAndDeleteButtons extraButtonsClass="large"
       collectionName="DataSets" object=fakeObject}}
+  <p>
+    Note that you can pass an onDelete attribute which
+    will be called if the object is deleted with the
+    delete button.
+  </p>
 
   <h2><code>{{|> showErrorMessage}}</code></h2>
   {{> showErrorMessage reactiveError}}
@@ -51,12 +56,31 @@
 
   <h2>
     <code>
-      {{|#jobStatusWrapper "jobId"}} if done {{|else}} if not done {{|/jobStatusWrapper}}
+      {{|#jobWrapper options}}
+        if done
+      {{|else}}
+        if not done
+      {{|/jobWrapper}}
     </code>
   </h2>
   <p>
     This one is really hard to demonstrate because the job subscription is
     handled from within the template, but that's how you use it!
+  </p>
+  <p>
+    Options include:
+    <ul>
+      <li><code>job_id</code>: the id of the job</li>
+      <li><code>title</code>: The title of the job, to be shown in an <code>h1</code></li>
+      <li>
+        <code>listRoute</code>:
+        the name of the route to be redirected to if the job is deleted
+      </li>
+      <li>
+        <code>argsTemplate</code>:
+        the name of the template describing the job arguments
+      </li>
+    </ul>
   </p>
   <p>
     Note that in the else block is shown when the job is in any state other
@@ -72,7 +96,7 @@
 </template>
 
 <template name="shareAndDeleteButtons">
-  <div class="ui labeled icon tiny buttons {{extraButtonsClass}}">
+  <div class="ui labeled icon small buttons {{extraButtonsClass}}">
     <button class="ui secondary share button">
       <i class="share icon"></i>
       Share
@@ -277,9 +301,20 @@
   </div>
 </template>
 
-<template name="jobStatusWrapper">
+<template name="jobWrapper">
+  <h1>
+    {{title}}
+
+    {{#with getJob}}
+      {{> shareAndDeleteButtons collectionName="Jobs" object=this
+          onDelete=onDeleteJob extraButtonsClass="right floated"}}
+    {{/with}}
+  </h1>
+
   {{#if Template.subscriptionsReady}}
     {{#with getJob}}
+      {{> Template.dynamic template=../argsTemplate}}
+
       {{#if compare status "done"}}
         {{> Template.contentBlock this}}
       {{else}}
@@ -358,7 +393,7 @@
     {{#each blobs}}
       <h4>
         {{file_name}}
-        <div class="ui icon primary button iframe-new-tab">
+        <div class="ui icon primary small button iframe-new-tab">
           <i class="external icon"></i>
           Open in new tab
         </div>
