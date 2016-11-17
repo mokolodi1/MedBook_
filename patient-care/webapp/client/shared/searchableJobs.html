@@ -1,0 +1,226 @@
+<template name="searchableJobs">
+  {{#let style="display: inline-block; margin-top: 20px"}}
+    {{#if smallerHeader}}
+      <h3 style={{style}}>Previously run analyses</h3>
+    {{else}}
+      <h2 style={{style}}>Previously run analyses</h2>
+    {{/if}}
+  {{/let}}
+
+  <div style="float: right; margin-top: 18px;">
+    <div class="ui icon input job-search-box
+        {{#if smallerHeader}}small{{/if}}
+        {{#if or onlyShowSelected deleteClicked}}disabled{{/if}}">
+      <input class="job-search" type="text" placeholder="Search...">
+
+      {{! if there is text in the search box show a clear button}}
+      {{#if searchText}}
+        <i class="remove icon link clear-search-text"></i>
+      {{else}}
+        <i class="search icon"></i>
+      {{/if}}
+    </div>
+
+    {{#if selectMode}}
+      <div class="ui icon buttons {{#if smallerHeader}}small{{/if}}">
+        <button class="ui primary share button share-jobs
+            {{#unless countSelected}}disabled{{/unless}}
+            {{#if deleteClicked}}disabled{{/if}}">
+          <i class="share icon"></i>
+          Share
+        </button>
+        <button class="ui negative delete button delete-jobs
+            {{#unless countSelected}}disabled{{/unless}}
+            {{#if deletingSelected}}loading{{/if}}">
+          <i class="trash icon"></i>
+          {{#if deleteClicked}}
+            Really?
+          {{else}}
+            Delete
+          {{/if}}
+        </button>
+        <div class="ui secondary button clear-selected
+            {{#unless countSelected}}disabled{{/unless}}
+            {{#if deleteClicked}}disabled{{/if}}">
+          <i class="remove icon"></i>
+          Deselect all
+        </div>
+        <div class="ui positive button toggle-select-mode
+            {{#if deleteClicked}}disabled{{/if}}">
+          <i class="check mark icon"></i>
+          Done
+        </div>
+      </div>
+    {{else}}
+      <div class="ui secondary icon button toggle-select-mode
+          {{#if smallerHeader}}small{{/if}}">
+        <i class="edit icon"></i>
+        Select jobs to share or delete
+      </div>
+    {{/if}}
+
+    <p style="text-align: right; display: block">
+      {{#if selectMode}}
+        {{#if countSelected}}
+          {{#if deleteClicked}}
+            <b>
+              {{#if firstGreater countSelected 1}}
+                The {{countSelected}} selected jobs will be deleted.
+              {{else}}
+                The selected job will be deleted.
+              {{/if}}
+            </b>
+          {{else}}
+            <b>{{countSelected}}</b>
+            job{{#if firstGreater countSelected 1}}s{{/if}}
+            selected.
+
+            <b>
+              <a href="" class="toggle-show-only-selected">
+                {{#if onlyShowSelected}}
+                  Exit show selected
+                {{else}}
+                  Show selected
+                {{/if}}
+              </a>
+            </b>
+          {{/if}}
+        {{else}}
+          Hold shift to select consecutive jobs.
+        {{/if}}
+      {{else}}
+        Jobs are sorted by date created.
+      {{/if}}
+    </p>
+  </div>
+
+  {{#if loadedFirstTime Template.subscriptionsReady}}
+    {{#if length jobsQuery}}
+      {{> listSelectableJobs jobsQuery=jobsQuery columns=columns
+          selectMode=selectModeReactiveVar
+          selectedIdMap=selectedIdMapReactiveVar
+          paginationOptions=paginationOptions
+          viewJobRouteName=viewJobRouteName}}
+    {{else}}
+      {{#if getInstanceReactive "searchText"}}
+        <div class="ui message">
+          <div class="content">
+            <div class="header">
+              No matching jobs
+            </div>
+            We couldn't find any jobs with that search criteria.
+          </div>
+        </div>
+      {{else}}
+        <div class="ui message">
+          <div class="content">
+            <div class="header">
+              No analyses... yet!
+            </div>
+            <p>
+              You haven't run any analyses.
+            </p>
+          </div>
+        </div>
+      {{/if}}
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="listSelectableJobs">
+  <table class="ui single line table
+      {{#if selectMode}}selectable{{/if}}"
+      {{! disable text selection during select mode
+      (for some reason [click, shift+click] on a table
+      selects all the text in between the two clicks) }}
+      style="margin-bottom: 20px; {{#if selectMode}}
+        user-select: none;
+        -ms-user-select: none;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+      {{/if}}">
+    <thead>
+      <tr>
+        {{#each columns}}
+          <th>
+            {{title}}
+          </th>
+        {{/each}}
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{! this #let makes it so columns is defined within the #each}}
+      {{#let columns=columns viewJobRouteName=viewJobRouteName}}
+        {{#each jobsQuery}}
+          <tr class="select-job {{activeIfSelected}}">
+            {{#each columns}}
+              <td>
+                {{{showColValue ..}}}
+              </td>
+            {{/each}}
+
+            <td>
+              {{> viewJobButton href=(pathFor viewJobRouteName job_id=_id)
+                  job=this}}
+            </td>
+          </tr>
+        {{/each}}
+      {{/let}}
+    </tbody>
+
+    {{! don't show pagination if there's only a handful of jobs}}
+    {{#if firstGreater (length jobsQuery) 10}}
+      <tfoot>
+        <tr>
+          <th colspan={{totalColumnsCount}}>
+            {{> tablePagination options=paginationOptions}}
+          </th>
+        </tr>
+      </tfoot>
+    {{/if}}
+  </table>
+
+  <!-- {{#if notShownCount}}
+    <div class="ui info message" style="margin-bottom: 20px;">
+      <div class="header">
+        {{notShownCount}} jobs selected but not shown
+      </div>
+      These jobs are hidden because they don't match the search criteria.
+    </div>
+  {{/if}} -->
+</template>
+
+<template name="tablePagination">
+  <span>
+    Showing
+    <div class="ui input" style="width: 100px;">
+      <input placeholder="# results" class="results-per-page"
+          value={{rowsPerPage}} type="text">
+    </div>
+    of {{options.totalRowCount}}</span>
+
+  <div class="ui right floated pagination menu">
+    {{#unless compare pageNumber 1}}
+      <a class="icon item previous-page">
+        <i class="left chevron icon"></i>
+      </a>
+    {{/unless}}
+
+    {{#each pagesToShow}}
+      <a class="item go-to-page
+          {{#if compare this "..."}}disabled{{/if}}
+          {{#if compare this pageNumber}}active{{/if}}">
+        {{this}}
+      </a>
+    {{/each}}
+
+    {{#unless compare pageNumber maxPageNumber}}
+      <a class="icon item next-page">
+        <i class="right chevron icon"></i>
+      </a>
+    {{/unless}}
+  </div>
+</template>

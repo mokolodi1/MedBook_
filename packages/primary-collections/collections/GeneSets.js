@@ -9,24 +9,42 @@ GeneSets = new Meteor.Collection("gene_sets");
 SimpleSchema.messages({
   "metadataAndGeneSetGroupIncompatible":
       "You cannot define metadata fields and also gene_set_group_id.",
+  "collabsAssociatedObjMutuallyExclusive":
+      "You must set either collaborations or associated_object, but not both.",
 });
 
-// - require if the field isn't set
-// - error if the field is set and this field is set as well
-function requireIfUnset (fieldName) {
-  if (this.field(fieldName).isSet) {
-    if (this.isSet) { return "metadataAndGeneSetGroupIncompatible"; }
+function requireIfUnset (fieldName, anotherFieldName) {
+  // error if fieldName or anotherFieldName is set and
+  // this field is set as well
+  if (this.field(fieldName).isSet || this.field(anotherFieldName).isSet) {
+    if (this.isSet) {
+      return "metadataAndGeneSetGroupIncompatible";
+    }
   } else {
-    if (!this.isSet) { return "required"; }
+    // require if neither field is set
+    if (!this.isSet) {
+      return "required";
+    }
   }
 }
 
 var fields = recordFields([ "String", "Number" ]);
-// we have to save this up here so that the custom function doesn't reference
-// itself
+// define up here so that the custom function doesn't reference
+// itself (aka the new custom function)
 var fieldsCustom = fields.custom;
 
-var requireIfNotInGroup = _.partial(requireIfUnset, "gene_set_group_id")
+function exclusivelyRequire(otherFieldName) {
+  var groupError = requireIfUnset.call(this, "gene_set_group_id");
+
+  if (groupError === "required") {
+    if ((this.isSet && this.field(otherFieldName).isSet) ||
+        (!this.isSet && !this.field(otherFieldName.isSet))) {
+      return "collabsAssociatedObjMutuallyExclusive";
+    }
+  } else if (groupError) {
+    return groupError;
+  }
+}
 
 GeneSets.attachSchema(new SimpleSchema({
   name: { type: String },
@@ -38,14 +56,14 @@ GeneSets.attachSchema(new SimpleSchema({
   collaborations: {
     type: [String],
     optional: true,
-    custom: requireIfNotInGroup,
+    custom: _.partial(exclusivelyRequire, "associated_object"),
   },
 
   gene_label_field: {
     type: String,
     label: "Genes",
     optional: true,
-    custom: requireIfNotInGroup
+    custom: _.partial(requireIfUnset, "gene_set_group_id")
   },
   fields: _.extend(fields, {
     optional: true,
@@ -58,17 +76,45 @@ GeneSets.attachSchema(new SimpleSchema({
         if (fieldsError) { return fieldsError; }
       }
 
-      return requireIfNotInGroup.call(this);
+      return requireIfUnset.call(this, "gene_set_group_id");
     },
   }),
 
   gene_labels: { type: [String], min: 1 },
+  // gene_count: { type: Number },
 
   gene_set_group_id: {
     type: String,
     optional: true,
     // still have to require this if collaborations isn't set
     // (collaborations is an arbitrary metadata field)
-    custom: _.partial(requireIfUnset, "collaborations"),
+    custom: _.partial(requireIfUnset, "collaborations", "associated_object"),
+  },
+
+  associated_object: {
+    type: new SimpleSchema({
+      collection_name: {
+        type: String,
+        // allowedValues: [
+        //   // "Patients",
+        // ],
+      },
+      mongo_id: { type: String },
+    }),
+    optional: true,
+    custom: _.partial(exclusivelyRequire, "collaborations")
+  },
+
+  // can put anything here
+  metadata: {
+    type: Object,
+    blackbox: true,
+    optional: true,
+    custom: function () {
+      // don't allow unless security is associated object
+      if (!this.field("associated_object").isSet && this.isSet) {
+        return "notAllowed";
+      }
+    },
   },
 }));

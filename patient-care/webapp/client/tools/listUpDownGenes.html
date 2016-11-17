@@ -1,14 +1,17 @@
 <template name="listUpDownGenes">
   <h1>
     Outlier Analysis
-  </h1>
 
-  <p>
-    Outlier genes are defined as being more than N IQRs away from the median.
-    The maximum number of genes returned is 5% of the total number of genes.
-    If there are more than 5% of the total number of genes that are outliers,
-    only the top 5% of the outliers will be returned.
-  </p>
+    {{#semanticUIPopup selector=".help.circle.icon"}}
+      <i class="help circle icon"></i>
+      <p class="ui popup">
+        Outlier genes are defined as being more than N IQRs away from the median.
+        The maximum number of genes returned is 5% of the total number of genes.
+        If there are more than 5% of the total number of genes that are outliers,
+        only the top 5% of the outliers will be returned.
+      </p>
+    {{/semanticUIPopup}}
+  </h1>
 
   <h2>Start a new analysis</h2>
 
@@ -50,15 +53,12 @@
       {{> editSampleGroup sampleGroup=customSampleGroup}}
     {{/if}}
 
-    <div class="ui info message">
-      <p>
-        A separate outlier analysis job will be created for each sample selected.
-      </p>
-      <p>
-        If a job has already been run with the given arguments, a
-        duplicate will not be created.
-      </p>
-    </div>
+    {{#if multipleSamplesSelected}}
+      <div class="ui info message">
+        A separate outlier analysis job will be created for
+        each sample selected.
+      </div>
+    {{/if}}
 
     {{> showErrorMessage error}}
 
@@ -68,7 +68,8 @@
     </button>
   {{/autoForm}}
 
-  {{> previouslyRunUpDownGenes}}
+  {{> searchableJobs name="UpDownGenes" columns=previousJobsCols
+      viewJobRouteName="upDownGenesJob"}}
 </template>
 
 <template name="previouslyRunUpDownGenes">
@@ -96,12 +97,7 @@
                 <i class="fa fa-flask"></i>{{args.sample_label}}
                 <!-- from {{args.comparison_group_name}} -->
               </td>
-              <td>
-                {{args.sample_group_name}}
-                {{#if getSampleGroupVersion args.sample_group_id}}
-                  (v{{getSampleGroupVersion args.sample_group_id}})
-                {{/if}}
-              </td>
+              <td>{{args.sample_group_name}}</td>
               <td>{{args.iqr_multiplier}}</td>
               <td>
                 {{#if args.use_filtered_sample_group}}
@@ -110,8 +106,8 @@
                   None
                 {{/if}}
               </td>
-              <td>{{output.up_genes.length}}</td>
-              <td>{{output.down_genes.length}}</td>
+              <td>{{output.up_genes_count}}</td>
+              <td>{{output.down_genes_count}}</td>
               <td>
                 {{> viewJobButton href=(pathFor "upDownGenesJob" job_id=_id)
                     job=this}}

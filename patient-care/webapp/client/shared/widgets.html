@@ -11,6 +11,11 @@
   <br />
   {{> shareAndDeleteButtons extraButtonsClass="large"
       collectionName="DataSets" object=fakeObject}}
+  <p>
+    Note that you can pass an onDelete attribute which
+    will be called if the object is deleted with the
+    delete button.
+  </p>
 
   <h2><code>{{|> showErrorMessage}}</code></h2>
   {{> showErrorMessage reactiveError}}
@@ -25,10 +30,13 @@
   {{> listSamplesButton fakeSamples}}
 
   <h2><code>{{|> viewJobButton}}</code></h2>
+  This closes all open modals and goes to the specified link.
   {{> viewJobButton job=(fakeJob "waiting") href="https://google.com"}}
   {{> viewJobButton job=(fakeJob "running") href="https://google.com"}}
   {{> viewJobButton job=(fakeJob "error") href="https://google.com"}}
   {{> viewJobButton job=(fakeJob "done") href="https://google.com"}}
+  {{> viewJobButton job=(fakeJob "done") href="https://google.com"
+      class="tiny"}}
 
   <h2><code>{{|#semanticUIDropdown}}code{{|/semanticUIDropdown}}</code></h2>
   <p>
@@ -48,12 +56,35 @@
 
   <h2>
     <code>
-      {{|#jobStatusWrapper "jobId"}} if done {{|/jobStatusWrapper}}
+      {{|#jobWrapper options}}
+        if done
+      {{|else}}
+        if not done
+      {{|/jobWrapper}}
     </code>
   </h2>
   <p>
     This one is really hard to demonstrate because the job subscription is
     handled from within the template, but that's how you use it!
+  </p>
+  <p>
+    Options include:
+    <ul>
+      <li><code>job_id</code>: the id of the job</li>
+      <li><code>title</code>: The title of the job, to be shown in an <code>h1</code></li>
+      <li>
+        <code>listRoute</code>:
+        the name of the route to be redirected to if the job is deleted
+      </li>
+      <li>
+        <code>argsTemplate</code>:
+        the name of the template describing the job arguments
+      </li>
+    </ul>
+  </p>
+  <p>
+    Note that in the else block is shown when the job is in any state other
+    than done.
   </p>
 
   <h2><code>{{|> showRecords}}</code></h2>
@@ -65,7 +96,7 @@
 </template>
 
 <template name="shareAndDeleteButtons">
-  <div class="ui labeled icon tiny buttons {{extraButtonsClass}}">
+  <div class="ui labeled icon small buttons {{extraButtonsClass}}">
     <button class="ui secondary share button">
       <i class="share icon"></i>
       Share
@@ -82,34 +113,34 @@
 </template>
 
 <template name="editCollaborationsModal">
-  <div class="ui edit-collaborations modal">
+  <div class="ui modal edit-collaborations-modal">
     <i class="close modal icon"></i>
     <div class="header">
-      Edit collaborations
+      Edit collaborators
     </div>
     <div class="content">
       <div class="description">
-        {{#unless sessionPopulated}}
+        {{#unless mongoIds}}
           <h1>You forgot to set the session variables!</h1>
           <p>
             <code>editCollaborationsCollection</code>
           </p>
           <p>
-            <code>editCollaborationsMongoId</code>
+            <code>editCollaborationsMongoIds</code>
           </p>
         {{/unless}}
 
-        <div class="ui header">
-          These collaborations can see and edit this object.
-        </div>
-        {{#if collaborationOptions}}
-          {{#autoForm id="editCollaborations" schema=onlyCollaborations}}
-            {{> afQuickField name="collaborations" options=collaborationOptions
-                type="select" multiple=true search=true
-                value=getObject.collaborations}}
-          {{/autoForm}}
-        {{else}}
-          {{> dataLoading}}
+        <h3>Who has access</h3>
+        {{> listCollaborators collabsList=collabsList
+              collectionName=collectionName mongoIds=mongoIds editing=true}}
+
+        {{#if firstGreater (length mongoIds) 1}}
+          <div class="ui info message">
+            <p>
+              Clicking "Set collaborators" will set the collaborators
+              for all selected items to the list above.
+            </p>
+          </div>
         {{/if}}
       </div>
     </div>
@@ -124,6 +155,59 @@
         <i class="checkmark icon"></i>
       </div>
     </div>
+  </div>
+</template>
+
+<template name="listCollaborators">
+  {{#unless getInstanceReactive "dataLoading"}}
+    <div class="ui divided list">
+      {{! use this let so we can ask about collabsListLength within the #each}}
+      {{#let collabsListLength=(length collabsListFetched)}}
+        {{! NOTE: assumption is that there can never be 0 collaborations}}
+        {{#each collabsListFetched}}
+          <div class="item">
+            {{#if ../editing}}
+              <div class="right floated content">
+                {{! don't show if there's only one left}}
+                {{#if firstGreater collabsListLength 1}}
+                  <i class="remove link icon remove-collaboration"></i>
+                {{/if}}
+              </div>
+            {{/if}}
+            <i class="large middle aligned icon
+                user{{#if compare type "collaboration"}}s{{/if}}"></i>
+            <div class="content">
+              <div class="header">
+                {{title}}
+              </div>
+              <div class="description">
+                {{description}}
+              </div>
+            </div>
+          </div>
+        {{/each}}
+      {{/let}}
+    </div>
+
+    {{#if editing}}
+      {{> addCollaboratorSearch collabsList=collabsList}}
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/unless}}
+</template>
+
+<template name="addCollaboratorSearch">
+  <div class="ui category search collaboration-search {{randomId}}">
+    <div class="ui fluid icon input">
+      <input class="prompt" type="text"
+          placeholder="Add a person or collaboration...">
+      <i class="search icon"></i>
+    </div>
+
+    {{! .collaboration-results: make left margin bigger to
+        fit the word "Collaborations"}}
+    <div class="results collaboration-results"></div>
   </div>
 </template>
 
@@ -195,28 +279,58 @@
   {{> UI.contentBlock}}
 </template>
 
-<!-- <template name="semanticUIPopup">
+<template name="semanticUIPopup">
   {{! Calls $(selector).popup() when rendered}}
   {{> UI.contentBlock}}
-</template> -->
-
-<template name="viewJobButton">
-  <a href={{href}}
-      class="ui right labeled icon {{buttonClass}} button">
-    <i class="right arrow icon"></i>
-    {{#if compare job.status "done"}}
-      View
-    {{else}}
-      {{capitalize job.status}}
-    {{/if}}
-  </a>
 </template>
 
-<template name="jobStatusWrapper">
+<template name="viewJobButton">
+  <div class="ui {{buttonClass}} {{class}} buttons">
+    <a href={{href}} class="ui button">
+      {{#if compare job.status "done"}}
+        View
+      {{else}}
+        {{capitalize job.status}}
+      {{/if}}
+    </a>
+    <div class="ui dropdown icon button">
+      <i class="dropdown icon"></i>
+      <div class="menu">
+        <div class="item share-job">
+          <i class="share icon"></i>
+          Share
+        </div>
+        <div class="item delete-job">
+          <i class="trash icon"></i>
+          {{#if getInstanceReactive "deleteClicked"}}
+            Really?
+          {{else}}
+            Delete
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="jobWrapper">
+  <h1>
+    {{title}}
+
+    {{#with getJob}}
+      {{> shareAndDeleteButtons collectionName="Jobs" object=this
+          onDelete=onDeleteJob extraButtonsClass="right floated"}}
+    {{/with}}
+  </h1>
+
   {{#if Template.subscriptionsReady}}
     {{#with getJob}}
+      {{> Template.dynamic template=../argsTemplate}}
+
       {{#if compare status "done"}}
         {{> Template.contentBlock this}}
+      {{else}}
+        {{> Template.elseBlock this}}
       {{/if}}
 
       {{#if compare status "waiting"}}
@@ -240,7 +354,7 @@
       {{#if compare status "error"}}
         <div class="ui huge error message">
           <div class="header">
-            Error running job.
+            Error running job
           </div>
           <p>
             We have encountered an error running your job.
@@ -258,12 +372,14 @@
           <p>
             {{{contactTeoText}}}
           </p>
+
+          {{> jobErrorBlobs}}
         </div>
       {{/if}}
     {{/with}}
 
     {{#unless getJob}}
-      <div class="ui icon message massive">
+      <div class="ui massive icon error message">
         <i class="warning sign icon"></i>
         <div class="content">
           <div class="header">
@@ -279,6 +395,25 @@
     {{/unless}}
   {{else}}
     {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="jobErrorBlobs">
+  {{#if length blobs}}
+    <h3>Log files</h3>
+
+    {{#each blobs}}
+      <h4>
+        {{file_name}}
+        <div class="ui icon primary small button iframe-new-tab">
+          <i class="external icon"></i>
+          Open in new tab
+        </div>
+      </h4>
+      <iframe id={{_id}} src={{blobUrl}}
+          style="height: 200px; width: 100%">
+      </iframe>
+    {{/each}}
   {{/if}}
 </template>
 
@@ -302,5 +437,53 @@
   {{! height, width, overflow: makes the table scroll when it gets too big}}
   <div id="recordsHOT"
       style="height: {{height}}; width: 100%; overflow: hidden;">
+  </div>
+</template>
+
+<template name="gseaFromGeneSetModal">
+  {{! Included in appBody template}}
+
+  <div class="ui modal gsea-from-gene-set">
+    <i class="close icon"></i>
+    {{#if getGeneSet}}
+      <div class="header">
+        GSEA for {{getGeneSet.name}}
+      </div>
+      <div class="content">
+        <h3>Create a new analysis</h3>
+        {{! NOTE: this template does not subscribe to the gene set and
+            we assume another template has already subscribed to it}}
+        {{> createGseaForm gene_set_id=getGeneSet._id active=getGeneSet
+            autoformId="createGseaFromOutlierAnalysis"}}
+
+        {{> searchableJobs name="RunGSEA" columns=previousJobsCols
+            viewJobRouteName="gseaJob" query=query extraFields=extraFields
+            smallerHeader=true}}
+      </div>
+
+      {{! <div class="actions">
+        <div class="ui button">Done</div>
+      </div> }}
+    {{else}}
+      {{! If this doesn't go away, you either forgot to subscribe
+          to the gene set or forgot to set
+          the <code>geneSetIdForGsea</code> query parameter.}}
+      {{#if permissionLikelyDenied}}
+        <div class="ui large warning message">
+          <div class="header">
+            Permission denied
+          </div>
+          <p>
+            It appears that you don't have access to this gene set.
+          </p>
+          <p>
+            If you believe you are seeing this message in error, please
+            {{> contactUsButton cssClass="tiny"}}
+          </p>
+        </div>
+      {{else}}
+        {{> dataLoading}}
+      {{/if}}
+    {{/if}}
   </div>
 </template>

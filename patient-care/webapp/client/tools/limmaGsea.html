@@ -1,0 +1,42 @@
+<template name="listLimmaGSEA">
+  <h1>
+    Limma <i class="right arrow icon"></i> GSEA
+
+    {{#semanticUIPopup selector=".help.circle.icon"}}
+      <i class="help circle icon"></i>
+      <p class="ui popup">
+        This tool runs Limma on a contrast and then feeds the output from Limma
+        into GSEA. <code>na_pos</code> gene sets in the GSEA output are
+        upregulated in the experimental group compared to the reference group.
+      </p>
+    {{/semanticUIPopup}}
+  </h1>
+
+  <div class="ui large info message">
+    <div class="header">
+      Job creation disabled
+    </div>
+    This job has been deprecated in favor of the new
+    <a href={{pathFor "listGsea"}}>GSEA</a> and
+    <a href={{pathFor "listLimma"}}>Limma</a> tools.
+  </div>
+
+  {{> searchableJobs name="RunLimmaGSEA" columns=previousJobsCols
+      viewJobRouteName="limmaGseaJob"}}
+</template>
+
+<template name="limmaGseaJob">
+  {{#jobWrapper jobOptions}}
+    <h2>
+      GSEA Report
+
+      <div class="ui icon primary button gsea-iframe-new-tab" target="_blank">
+        <i class="external icon"></i>
+        Open in new tab
+      </div>
+    </h2>
+    <iframe id="gsea-report" src={{getJobResultUrl}}
+        style="height: 500px; width: 100%">
+    </iframe>
+  {{/jobWrapper}}
+</template>

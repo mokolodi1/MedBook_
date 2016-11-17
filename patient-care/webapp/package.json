@@ -3,9 +3,9 @@
   "dependencies": {
     "clipboard": "^1.5.15",
     "fuse.js": "^2.5.0",
-    "meteor-node-stubs": "^0.2.3",
+    "meteor-node-stubs": "0.2.3",
     "os-tmpdir": "1.0.0",
     "rimraf": "2.2.6",
-    "temp": "0.8.1"
+    "temp": "^0.8.1"
   }
 }

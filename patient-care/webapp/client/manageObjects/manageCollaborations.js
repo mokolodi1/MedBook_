@@ -1,6 +1,6 @@
 // so that we can resubscribe anywhere in this file
 // (set in manageCollaborations.onCreated)
-var collaborationsResubscribe = undefined;
+var collaborationsResubscribe;
 
 // define this here so it only gets run once and is also close to the other
 // stuff using collaborationsResubscribe
@@ -32,7 +32,9 @@ SimpleSchema.messages({
 });
 // NOTE: result of the function, not a function itself!
 var collaborationSchema = function() {
-  let collabSchemaObject = Collaborations.simpleSchema().schema();
+  // collaborators and administrators are set separately
+  let collabSchemaObject = _.omit(Collaborations.simpleSchema().schema(),
+      "collaborators", "administrators");
 
   let name = collabSchemaObject.name;
   let oldCustom = name.custom;
@@ -62,7 +64,7 @@ var collaborationSchema = function() {
   collabSchemaObject.publiclyListed.optional = true;
   collabSchemaObject.adminApprovalRequired.optional = true;
 
-  return new SimpleSchema(collabSchemaObject)
+  return new SimpleSchema(collabSchemaObject);
 }();
 
 
@@ -75,7 +77,15 @@ Template.manageCollaborations.onCreated(function () {
   collaborationsResubscribe = () => {
     instance.subscribe("adminAndCollaboratorCollaborations");
   };
-  collaborationsResubscribe();
+
+  // resubscribe when the collaboration list changes for whatever reason
+  // (for example if it's updated on another tab or someone approves a
+  // request to join)
+  instance.autorun(() => {
+    let collabs = MedBook.findUser(Meteor.userId()).getCollaborations();
+
+    collaborationsResubscribe();
+  });
 });
 
 Template.manageCollaborations.helpers({
@@ -127,6 +137,9 @@ Template.showCollaboration.onCreated(function() {
     let queryParam = FlowRouter.getQueryParam("collaboration_id");
     instance.editing.set(false);
   });
+
+  instance.collabDescriptions = new ReactiveVar([]);
+  instance.adminDescriptions = new ReactiveVar([]);
 });
 
 Template.showCollaboration.helpers({
@@ -134,6 +147,11 @@ Template.showCollaboration.helpers({
   isAdmin() { return MedBook.findUser(Meteor.userId()).isAdmin(this); },
   editing() { return Template.instance().editing.get(); },
   waitingForServer() { return Template.instance().waitingForServer.get(); },
+  collabDescriptions() { return Template.instance().collabDescriptions; },
+  adminDescriptions() { return Template.instance().adminDescriptions; },
+  mongoIds() {
+    return [ this._id ];
+  },
 });
 
 Template.showCollaboration.events({
@@ -147,6 +165,10 @@ Template.showCollaboration.events({
     var valid = AutoForm.validateForm("editCollaboration");
     if (valid) {
       let values = AutoForm.getFormValues("editCollaboration").insertDoc;
+
+      // grab the collaborators and administrators
+      values.collaborators = _.pluck(instance.collabDescriptions.get(), "id");
+      values.administrators = _.pluck(instance.adminDescriptions.get(), "id");
 
       // make sure they changed something
       let collab = Collaborations.findOne(this._id);
@@ -180,7 +202,7 @@ Template.showCollaboration.events({
       });
     }
   },
-  "click .remove-collaboration": function(event, instance) {
+  "click .remove-or-delete-collab"(event, instance) {
     var removeClicked = instance.removeClicked;
 
     if (removeClicked.get()) {
@@ -268,13 +290,10 @@ Template.browseCollaborations.helpers({
   },
   alreadySetName() {
     let profile = Meteor.user().profile;
-    return profile && profile.firstName && profile.lastName;
+    return profile && profile.fullName && profile.preferredName;
   },
-  firstLastName() {
-    return new SimpleSchema({
-      firstName: { type: String },
-      lastName: { type: String },
-    });
+  not(thing) {
+    return !thing;
   },
 });
 
@@ -302,41 +321,6 @@ Template.alwaysShowCollaborationFields.helpers({
         "What are you trying to accomplish?";
   },
 });
-
-
-
-// Template.listCollaborators
-
-Template.listCollaborators.helpers({
-  isPersonalCollaboration() {
-    return this.indexOf("@") !== -1;
-  },
-});
-
-
-
-// Template.adminAndCollaboratorFields
-
-Template.adminAndCollaboratorFields.onCreated(function() {
-  let instance = this;
-
-  // who the user can share with
-  instance.collabs = new ReactiveVar(null);
-  Meteor.call("getSharableCollaborations", (error, result) => {
-    instance.collabs.set(result);
-  });
-});
-
-Template.adminAndCollaboratorFields.helpers({
-  collabsLoaded() { return Template.instance().collabs.get(); },
-  collaborationOptions() {
-    return _.map(Template.instance().collabs.get(), (collabName) => {
-      return { label: collabName, value: collabName };
-    });
-  },
-});
-
-
 
 // Template.deleteCollabButton
 

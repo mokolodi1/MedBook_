@@ -111,7 +111,6 @@
 
     {{> alwaysShowCollaborationFields}}
 
-
     {{! only one admin: this user}}
     {{> afQuickField name="administrators" type="hidden" value=onlyPersonal}}
     {{> afQuickField name="collaborators" type="hidden" value=onlyPersonal}}
@@ -126,7 +125,7 @@
 </template>
 
 <template name="showCollaboration">
-  <h3>
+  <h2>
     {{name}}
 
     <div class="ui right floated icon buttons">
@@ -148,7 +147,7 @@
         {{> deleteCollabButton
             reallyDelete=(getInstanceReactive "removeClicked")}}
       {{else}}
-        <button class="ui negative button remove-collaboration">
+        <button class="ui negative button remove-or-delete-collab">
           <i class="sign out icon"></i>
           {{#if getInstanceReactive "removeClicked"}}
             Really leave?
@@ -158,15 +157,15 @@
         </button>
       {{/if}}
     </div>
-  </h3>
+  </h2>
 
   {{#if editing}}
-    {{#autoForm id="editCollaboration" schema=collaborationSchema doc=this
-        type="update"}}
-      {{> alwaysShowCollaborationFields}}
-
-      {{> adminAndCollaboratorFields}}
-    {{/autoForm}}
+    <div style="margin-bottom: 20px;">
+      {{#autoForm id="editCollaboration" schema=collaborationSchema doc=this
+          type="update"}}
+        {{> alwaysShowCollaborationFields}}
+      {{/autoForm}}
+    </div>
   {{else}}
     <p>
       {{description}}
@@ -179,9 +178,25 @@
         Admin approval required to join: {{> yesOrNo adminApprovalRequired}}
       </p>
     {{/if}}
-    <p>Collaborators: {{> listCollaborators collaborators}}</p>
-    <p>Administrators: {{> listCollaborators administrators}}</p>
+  {{/if}}
 
+  <div class="ui divided grid">
+    <div class="eight wide column">
+      <h3>Collaborators</h3>
+      {{> listCollaborators collabsList=collabDescriptions
+          collectionName="Collaborations" mongoIds=mongoIds editing=editing
+          attribute="collaborators"}}
+    </div>
+
+    <div class="eight wide column">
+      <h3>Administrators</h3>
+      {{> listCollaborators collabsList=adminDescriptions
+          collectionName="Collaborations" mongoIds=mongoIds editing=editing
+          attribute="administrators"}}
+    </div>
+  </div>
+
+  {{#if editing}}
     {{#if length requestsToJoin}}
       {{#if isAdmin}}
         <h4>The following people have requested access:</h4>
@@ -190,10 +205,10 @@
             <div class="card">
               <div class="content">
                 <div class="header">
-                  {{firstName}} {{lastName}}
+                  {{fullName}}
                 </div>
                 <div class="description">
-                  Email {{firstName}} at
+                  Email {{preferredName}} at
                   <a href="mailto:{{email}}">{{email}}</a>.
                 </div>
               </div>
@@ -216,26 +231,43 @@
 </template>
 
 <template name="browseCollaborations">
-  {{#if Template.subscriptionsReady}}
-    {{#if alreadySetName}}
-      <h3>Browse publicly listed collaborations</h3>
+  {{#unless alreadySetName}}
+    <div class="ui attached message">
+      <div class="header">
+        Just a moment...
+      </div>
       <p>
-        Note that some collaborations choose to not be listed publicly.
-        To join a collaboration that is not listed publicly, contact one of
-        the collaboration administrators directly.
+        You must set your name before applying to any collaborations
+        requiring administration approval.
       </p>
+    </div>
+    {{> askForNameForm formClass="attached fluid segment"}}
+  {{/unless}}
 
-      {{#if length getBrowsingCollaborations}}
-        <div class="ui cards">
-          {{#each getBrowsingCollaborations}}
-            <div class="card">
-              <div class="content">
-                <div class="header">{{name}}</div>
-                <div class="description">{{description}}</div>
+  <h3>Browse publicly listed collaborations</h3>
+  <div class="ui info message">
+    Some collaborations choose to not be listed publicly.
+    To join a collaboration that is not listed publicly, contact one of
+    the collaboration administrators directly.
+  </div>
+
+  {{#if Template.subscriptionsReady}}
+    {{#if length getBrowsingCollaborations}}
+      <div class="ui cards">
+        {{#each getBrowsingCollaborations}}
+          <div class="card">
+            <div class="content">
+              <div class="header">{{name}}</div>
+              <div class="description">{{description}}</div>
+            </div>
+            {{#if alreadyAppliedToJoin}}
+              <div class="ui bottom attached disabled button">
+                Already applied
               </div>
-              {{#if alreadyAppliedToJoin}}
+            {{else}}
+              {{#if and adminApprovalRequired (not alreadySetName)}}
                 <div class="ui bottom attached disabled button">
-                  Already applied
+                  Provide name above to apply
                 </div>
               {{else}}
                 <div class="ui bottom attached button join-collaboration">
@@ -247,36 +279,16 @@
                   {{/if}}
                 </div>
               {{/if}}
-            </div>
-          {{/each}}
-        </div>
-      {{else}}
-        <div class="ui message">
-          <div class="header">No collaborations found</div>
-          There are no publicly listed collaborations that you are not already
-          a member of.
-        </div>
-      {{/if}}
-    {{else}}
-      <h3>Just a moment...</h3>
-      <p>
-        Your name will not be displayed publically like your personal
-        collaboration, but will be sent with every request to join a
-        collaboration that requires administrative approval.
-      </p>
-      {{#autoForm id="setName" type="method" meteormethod="setProfileName"
-          schema=firstLastName}}
-        <div class="field">
-          <label>Name</label>
-          <div class="two fields">
-            {{> afQuickField name="firstName" placeholder="First name"
-                label=false}}
-            {{> afQuickField name="lastName" placeholder="Last name"
-                label=false}}
+            {{/if}}
           </div>
-        </div>
-        <button type="submit" class="ui primary button">Set name</button>
-      {{/autoForm}}
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="ui message">
+        <div class="header">No collaborations found</div>
+        There are no publicly listed collaborations that you are not already
+        a member of.
+      </div>
     {{/if}}
   {{else}}
     {{> dataLoading}}
@@ -305,29 +317,8 @@
   {{/if}}
 </template>
 
-<template name="listCollaborators">
-  {{#each this}}
-    <div class="ui horizontal label collaboration">
-      <i class="{{#if isPersonalCollaboration}}user{{else}}users{{/if}}
-          icon"></i>
-      {{this}}
-    </div>
-  {{/each}}
-</template>
-
-<template name="adminAndCollaboratorFields">
-  {{#if collabsLoaded}}
-    {{> afQuickField name="collaborators" options=collaborationOptions
-        type="select" multiple=true search=true}}
-    {{> afQuickField name="administrators" options=collaborationOptions
-        type="select" multiple=true search=true}}
-  {{else}}
-    {{> dataLoading}}
-  {{/if}}
-</template>
-
 <template name="deleteCollabButton">
-  <button class="ui negative button remove-collaboration show-popup"
+  <button class="ui negative button remove-or-delete-collab show-popup"
       data-content={{deletePopupText}}>
     <i class="trash icon"></i>
     {{#if reallyDelete}}

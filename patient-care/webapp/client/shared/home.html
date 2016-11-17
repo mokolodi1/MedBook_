@@ -1,10 +1,74 @@
 <template name="home">
-  {{> homeWelcome}}
+  {{#if currentUser}}
+    {{> askForName}}
+  {{/if}}
 
   <h1>What would you like to do today?</h1>
 
   <h2>Run Tools</h2>
   <div class="ui cards">
+    <a href={{pathFor "listGsea"}} class="ui card">
+      <!-- <div class="image">
+        <img src="/GSEA-logo.gif">
+      </div> -->
+      <div class="content">
+        <div class="header">
+          GSEA
+        </div>
+        <div class="description">
+          Gene Set Enrichment Analysis developed by the Broad Institute.
+        </div>
+      </div>
+    </a>
+
+    <a href={{pathFor "listUpDownGenes"}} class="ui card">
+      <div class="content">
+        <div class="header">
+          Outlier Analysis
+        </div>
+        <div class="description">
+          UCSC's N-of-One analysis tool to find gene outliers in a sample
+          with a comparison cohort.
+        </div>
+      </div>
+    </a>
+
+    <!-- <a href={{pathFor "listPairedAnalysis"}} class="ui card">
+      <div class="content">
+        <div class="header">
+          Paired Tumor Analysis
+        </div>
+        <div class="description">
+          Compute a signature of differential gene expression
+          between baseline and progression samples from the same patient.
+        </div>
+      </div>
+    </a> -->
+
+    <a href={{pathFor "listLimma"}} class="ui card">
+      <div class="content">
+        <div class="header">
+          Limma
+        </div>
+        <div class="description">
+          Create a genomic signature given a contrast with
+          Bioconductor's limma R package.
+        </div>
+      </div>
+    </a>
+
+    <a href={{pathFor "listSingleSampleTopGenes"}} class="ui card">
+      <div class="content">
+        <div class="header">
+          Single Sample Top Genes
+        </div>
+        <div class="description">
+          Calculate the most highly expressed genes in a single sample,
+          filtering by either count or percent.
+        </div>
+      </div>
+    </a>
+
     <a href={{pathFor "listLimmaGSEA"}} class="ui card">
       <div class="content">
         <div class="header">
@@ -26,18 +90,6 @@
         </div>
       </div>
     </a> -->
-
-    <a href={{pathFor "listUpDownGenes"}} class="ui card">
-      <div class="content">
-        <div class="header">
-          Outlier Analysis
-        </div>
-        <div class="description">
-          UCSC's N-of-One analysis tool to find gene outliers in a sample
-          with a comparison cohort.
-        </div>
-      </div>
-    </a>
   </div>
 
   <h2>View and Manage Data</h2>
@@ -128,31 +180,35 @@
   </div>
 </template>
 
-<template name="homeWelcome">
-  {{#if shouldWelcome}}
-    <div class="row">
-      <div class="column">
-        <div class="ui icon massive info message">
-          <!-- <i class="fa fa-heartbeat icon"></i>
-          <i class="fa fa-user-md icon"></i>
-          <i class="fa fa-medkit icon"></i> -->
-          <i class="treatment icon"></i>
-          <i class="close icon never-show-again"></i>
+<template name="askForName">
+  {{#if needToAskForName}}
+    <div class="ui attached message">
+      <div class="header">
+        Welcome to MedBook!
+      </div>
+      <p>
+        Please provide us with a little more information about yourself
+        to personalize your experience.
+      </p>
+    </div>
 
-          <div class="content">
-            <div class="ui header">
-              Welcome to Patient Care
-            </div>
-            <p>
-              Patient Care is a MedBook app that helps doctors and
-              researchers make personalized treatment decisions
-              for cancer patients.
-            </p>
-          </div>
-        </div>
+    {{> askForNameForm formClass="attached fluid segment"}}
+  {{/if}}
+</template>
+
+<template name="askForNameForm">
+  {{#autoForm id="setName" type="method" meteormethod="setProfileName"
+      schema=nameSchema class=formClass}}
+    <div class="field">
+      <div class="two fields">
+        {{> afQuickField name="fullName"
+            placeholder="Full name (first and last)"}}
+        {{> afQuickField name="preferredName"
+            placeholder="Preferred name (usually your first name)"}}
       </div>
     </div>
-  {{/if}}
+    <button type="submit" class="ui primary button">Set name</button>
+  {{/autoForm}}
 </template>
 
 <template name="wranglerExplanation">

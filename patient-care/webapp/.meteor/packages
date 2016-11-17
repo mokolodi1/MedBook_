@@ -38,7 +38,6 @@ ejson
 spacebars
 check
 ecmascript
-http
 medbook:referential-integrity
 meteorhacks:picker
 
@@ -54,3 +53,6 @@ bshamblen:jquery-querybuilder
 awsp:handsontable
 
 dispatch:mocha
+
+cfs:http-methods
+tmeasday:publish-counts
