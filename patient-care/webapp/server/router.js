@@ -141,7 +141,6 @@ Picker.route("/download/:userId/:loginToken/" +
   let stderrStream = fs.createWriteStream(logfilePath, {flags: "a"});
 
   // spawn the python exporter and pipe the output to the user
-  console.log("spawn", Meteor.settings.genomic_expression_export, exportFirstArg)
   let child = spawn(Meteor.settings.genomic_expression_export,
     [ exportFirstArg, mongoId ], { cwd });
 
