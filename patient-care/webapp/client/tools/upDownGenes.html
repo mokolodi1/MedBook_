@@ -203,36 +203,3 @@
     {{> dataLoading}}
   {{/if}}
 </template>
-
-<template name="gseaFromGeneSetModal">
-  {{! Included in appBody template}}
-
-  <div class="ui modal gsea-from-gene-set">
-    <i class="close icon"></i>
-    {{#if getGeneSet}}
-      <div class="header">
-        GSEA for {{getGeneSet.name}}
-      </div>
-      <div class="content">
-        <h3>Create a new analysis</h3>
-        {{! NOTE: this template does not subscribe to the gene set and
-            we assume another template has already subscribed to it}}
-        {{> createGseaForm gene_set_id=getGeneSet._id active=getGeneSet
-            autoformId="createGseaFromOutlierAnalysis"}}
-
-        <h3>Previously run analyses for {{getGeneSet.name}}</h3>
-        {{> searchableJobs name="RunGSEA" columns=previousJobsCols
-            viewJobRouteName="gseaJob" query=query extraFields=extraFields}}
-      </div>
-
-      {{! <div class="actions">
-        <div class="ui button">Done</div>
-      </div> }}
-    {{else}}
-      {{! If this doesn't go away, you either forgot to subscribe
-          to the gene set or forgot to set
-          the <code>geneSetIdForGsea</code> query parameter.}}
-      {{> dataLoading}}
-    {{/if}}
-  </div>
-</template>

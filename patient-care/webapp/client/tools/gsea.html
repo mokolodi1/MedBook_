@@ -84,7 +84,7 @@
 
         <i class="help circle icon"></i>
         <div class="ui popup">
-          <a href="http://www.broadinstitute.org/cancer/software/gsea/doc/GSEAUserGuideFrame.html">
+          <a href="http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html">
             See here for detailed documentation.
           </a>
         </div>
@@ -149,7 +149,11 @@
       {{! NOTE: these names are also in listGsea.js }}
       <tr>
         <td>Gene set</td>
-        <td>{{args.gene_set_name}}</td>
+        <td>
+          {{#linkToGeneSet args.gene_set_id}}
+            {{../args.gene_set_name}}
+          {{/linkToGeneSet}}
+        </td>
       </tr>
       <tr>
         <td>Gene set sort field</td>
@@ -196,4 +200,14 @@
       </tr>
     </tbody>
   </table>
+</template>
+
+<template name="linkToGeneSet">
+  {{#if Template.subscriptionsReady}}
+    <a href={{geneSetUrl}}>
+      {{> Template.contentBlock this}}
+    </a>
+  {{else}}
+    {{> Template.contentBlock this}}
+  {{/if}}
 </template>

@@ -99,100 +99,10 @@ Template.editCollaborationsModal.onCreated(function() {
 
   instance.waitingForServer = new ReactiveVar(false);
   instance.collabsList = new ReactiveVar([]);
-
-  // who the user can share with
-  instance.autorun(() => {
-    const collectionName = Session.get("editCollaborationsCollection");
-    const mongoIds = Session.get("editCollaborationsMongoIds");
-
-    // wait until we're logged-in because when the user refreshes there's
-    // a slight delay before logging in where it'll run this code and fail
-    if (Meteor.user() && mongoIds) {
-      Meteor.call("getCollabDescriptions", collectionName, mongoIds,
-          (error, result) => {
-        if (error) throw error;
-
-        instance.collabsList.set(result);
-      });
-    }
-  });
 });
 
 Template.editCollaborationsModal.onRendered(function() {
   let instance = this;
-
-  // only initialize the collaboration search when the user is logged in
-  // because the API url depends on it the login token
-  instance.autorun(() => {
-    if (Meteor.user()) {
-      // destroy any possible old search
-      $(".collaboration-search").search("destroy");
-
-      // set up the collaboration search
-      $(".collaboration-search").search({
-        apiSettings: {
-          url: `${location.origin}/search/collaborations` +
-              `?token=${Accounts._storedLoginToken()}&q={query}`,
-          onResponse(response) {
-            // remove existing users/collaborations from the response
-            let allExisting = instance.collabsList.get();
-
-            const removeExisting = (resultsAttribute, type) => {
-              // save the parent so we can set .results easily
-              const resultsParent = response.results[resultsAttribute];
-              const { results } = resultsParent;
-
-              const existingIdsOfType = _.pluck(_.where(allExisting, {
-                type
-              }), "id");
-
-              // we're rarely going to have more than 2
-              // collaborators, so indexOf is fine
-              resultsParent.results = _.filter(results, (result) => {
-                return existingIdsOfType.indexOf(result.id) === -1;
-              });
-
-              // if there are no results, remove the category
-              // so that we get a "No results" thing
-              if (resultsParent.results.length === 0) {
-                delete response.results[resultsAttribute];
-              }
-            };
-
-            removeExisting("collaborations", "collaboration");
-            removeExisting("users", "user");
-
-            return response;
-          },
-        },
-        type: "category",
-        onSelect(result, response) {
-          let collabsList = instance.collabsList.get();
-
-          collabsList.push(result);
-
-          instance.collabsList.set(collabsList);
-
-          // clear the search input field and focus it (in case
-          // they used the mouse to click an option, which
-          // unfocuses the search input)
-          Meteor.defer(() => {
-            let searchInput = $(".collaboration-search input")[0];
-
-            searchInput.value = "";
-            searchInput.focus();
-          });
-
-          // clear the cache of searches so that we can remove
-          // the just-selected item from the results before displaying them
-          $(".collaboration-search").search("clear cache");
-        },
-      });
-    } else {
-      // destroy any possible old search
-      $(".collaboration-search").search("destroy");
-    }
-  });
 
   instance.$('.edit-collaborations-modal').modal({
     onApprove() {
@@ -224,21 +134,51 @@ Template.editCollaborationsModal.onRendered(function() {
 });
 
 Template.editCollaborationsModal.helpers({
-  mongoIds() {
-    return Session.get("editCollaborationsMongoIds");
-  },
   multipleObjects() {
     const ids = Session.get("editCollaborationsMongoIds");
     return ids && ids.length > 1;
   },
   waitingForServer() { return Template.instance().waitingForServer.get(); },
   collabsList() { return Template.instance().collabsList; },
+
+  collectionName() { return Session.get("editCollaborationsCollection"); },
+  mongoIds() { return Session.get("editCollaborationsMongoIds"); },
 });
 
 // Template.listCollaborators
 
+Template.listCollaborators.onCreated(function () {
+  let instance = this;
+
+  instance.dataLoading = new ReactiveVar(false);
+
+  // who the user can share with
+  instance.autorun(() => {
+    let { collectionName, mongoIds, attribute } = Template.currentData();
+
+    // wait until we're logged-in because when the user refreshes there's
+    // a slight delay before logging in where it'll run this code and fail
+    if (Meteor.user() && mongoIds) {
+      // for now show "data loading" UI
+      instance.dataLoading.set(true);
+
+      if (!attribute) {
+        attribute = "collaborations";
+      }
+
+      Meteor.call("getCollabDescriptions", collectionName, mongoIds,
+          attribute, (error, result) => {
+        if (error) throw error;
+
+        instance.data.collabsList.set(result);
+        instance.dataLoading.set(false);
+      });
+    }
+  });
+});
+
 Template.listCollaborators.helpers({
-  collabsList() {
+  collabsListFetched() {
     let data = Template.currentData();
 
     if (data && data.collabsList) {
@@ -256,6 +196,100 @@ Template.listCollaborators.events({
     });
 
     instance.data.collabsList.set(collabsList);
+  },
+});
+
+// Template.addCollaboratorSearch
+
+Template.addCollaboratorSearch.onCreated(function () {
+  let instance = this;
+
+  // each one has a random id assigned so the jquery doesn't interfere
+  instance.randomId = Random.id();
+});
+
+Template.addCollaboratorSearch.onRendered(function () {
+  let instance = this;
+
+  const searchJquery = `.${instance.randomId}.collaboration-search`;
+
+  // only initialize the collaboration search when the user is logged in
+  // because the API url depends on it the login token
+  instance.autorun(() => {
+    if (Meteor.user()) {
+      // destroy any possible old search
+      $(searchJquery).search("destroy");
+
+      // set up the collaboration search
+      $(searchJquery).search({
+        apiSettings: {
+          url: `${location.origin}/search/collaborations` +
+              `?token=${Accounts._storedLoginToken()}&q={query}`,
+          onResponse(response) {
+            // remove existing users/collaborations from the response
+            let allExisting = instance.data.collabsList.get();
+
+            const removeExisting = (resultsAttribute, type) => {
+              // save the parent so we can set .results easily
+              const resultsParent = response.results[resultsAttribute];
+              const { results } = resultsParent;
+
+              const existingIdsOfType = _.pluck(_.where(allExisting, {
+                type
+              }), "id");
+
+              // we're rarely going to have more than 2
+              // collaborators, so indexOf is fine
+              resultsParent.results = _.filter(results, (result) => {
+                return existingIdsOfType.indexOf(result.id) === -1;
+              });
+
+              // if there are no results, remove the category
+              // so that we get a "No results" thing
+              if (resultsParent.results.length === 0) {
+                delete response.results[resultsAttribute];
+              }
+            };
+
+            removeExisting("collaborations", "collaboration");
+            removeExisting("users", "user");
+
+            return response;
+          },
+        },
+        type: "category",
+        onSelect(result, response) {
+          let collabsList = instance.data.collabsList.get();
+
+          collabsList.push(result);
+
+          instance.data.collabsList.set(collabsList);
+
+          // clear the search input field and focus it (in case
+          // they used the mouse to click an option, which
+          // unfocuses the search input)
+          Meteor.defer(() => {
+            let searchInput = $(`${searchJquery} input`)[0];
+
+            searchInput.value = "";
+            searchInput.focus();
+          });
+
+          // clear the cache of searches so that we can remove
+          // the just-selected item from the results before displaying them
+          $(searchJquery).search("clear cache");
+        },
+      });
+    } else {
+      // destroy any possible old search
+      $(searchJquery).search("destroy");
+    }
+  });
+});
+
+Template.addCollaboratorSearch.helpers({
+  randomId() {
+    return Template.instance().randomId;
   },
 });
 
@@ -529,5 +563,104 @@ Template.recordsHandsOnTable.helpers({
     } else {
       return "100%";
     }
+  },
+});
+
+// Template.gseaFromGeneSetModal
+
+// This modal depends on the geneSetIdForGsea query parameter.
+
+Template.gseaFromGeneSetModal.onCreated(function () {
+  instance = this;
+
+  // if we're waiting for more than 10 seconds they probably don't have
+  // access to the gene set, so tell them
+  instance.permissionLikelyDenied = new ReactiveVar(false);
+
+  let lastTimeout;
+
+  // show the modal when the query param is set
+  instance.autorun(() => {
+    let geneSetId = FlowRouter.getQueryParam("geneSetIdForGsea");
+
+    // reset permissionLikelyDenied and any previous timeouts
+    instance.permissionLikelyDenied.set(false);
+    Meteor.clearTimeout(lastTimeout);
+
+    if (geneSetId) {
+      // start a timer to flip permission likely denied on if it hasn't loaded
+      lastTimeout = Meteor.setTimeout(() => {
+        if (!GeneSets.findOne(geneSetId)) {
+          instance.permissionLikelyDenied.set(true);
+        }
+      }, 5000);
+    }
+  });
+});
+
+Template.gseaFromGeneSetModal.onRendered(function () {
+  let instance = this;
+
+  instance.$(".gsea-from-gene-set.modal").modal({
+    // remove geneSetIdForGsea from the query parameters when it is closed
+    onHide() {
+      // Defer setting the query parameters. When a user navigates away from
+      // the page with the modal open (viewing a job, for example), the
+      // query parameter is cleared before the route changes. This means
+      // that when the user hits the back button, the query parameter won't
+      // exist and the modal won't open automatically. Deferring waits
+      // to clear the query param until the route has changed, which solves
+      // this bug.
+      Meteor.defer(() => {
+        FlowRouter.setQueryParams({
+          geneSetIdForGsea: null
+        });
+      });
+    },
+    observeChanges: true,
+  });
+
+  // show the modal when the query param is set
+  instance.autorun(() => {
+    let geneSetId = FlowRouter.getQueryParam("geneSetIdForGsea");
+
+    if (geneSetId) {
+      $(".gsea-from-gene-set.modal").modal("show");
+    } else {
+      $(".gsea-from-gene-set.modal").modal("hide");
+    }
+  });
+});
+
+Template.gseaFromGeneSetModal.helpers({
+  previousJobsCols() {
+    return [
+      { title: "Ranking field", field: "args.gene_set_sort_field" },
+      {
+        title: "Gene sets",
+        func: function (job) {
+          return job.args.gene_set_group_names.join("\n");
+        },
+        fields: [ "args.gene_set_group_names" ],
+      },
+    ];
+  },
+  query() {
+    return {
+      "args.gene_set_id": FlowRouter.getQueryParam("geneSetIdForGsea"),
+    };
+  },
+  getGeneSet() {
+    let geneSetId = FlowRouter.getQueryParam("geneSetIdForGsea");
+
+    if (geneSetId) {
+      return GeneSets.findOne(geneSetId);
+    }
+  },
+  extraFields() {
+    return [ "args.gene_set_id" ];
+  },
+  permissionLikelyDenied() {
+    return Template.instance().permissionLikelyDenied.get();
   },
 });

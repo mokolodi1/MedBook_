@@ -1,10 +1,15 @@
 <template name="searchableJobs">
-  <h2 style="display: inline-block; margin-top: 20px">
-    Previously run analyses
-  </h2>
+  {{#let style="display: inline-block; margin-top: 20px"}}
+    {{#if smallerHeader}}
+      <h3 style={{style}}>Previously run analyses</h3>
+    {{else}}
+      <h2 style={{style}}>Previously run analyses</h2>
+    {{/if}}
+  {{/let}}
 
   <div style="float: right; margin-top: 18px;">
     <div class="ui icon input job-search-box
+        {{#if smallerHeader}}small{{/if}}
         {{#if or onlyShowSelected deleteClicked}}disabled{{/if}}">
       <input class="job-search" type="text" placeholder="Search...">
 
@@ -17,7 +22,7 @@
     </div>
 
     {{#if selectMode}}
-      <div class="ui icon buttons">
+      <div class="ui icon buttons {{#if smallerHeader}}small{{/if}}">
         <button class="ui primary share button share-jobs
             {{#unless countSelected}}disabled{{/unless}}
             {{#if deleteClicked}}disabled{{/if}}">
@@ -47,7 +52,8 @@
         </div>
       </div>
     {{else}}
-      <div class="ui secondary icon button toggle-select-mode">
+      <div class="ui secondary icon button toggle-select-mode
+          {{#if smallerHeader}}small{{/if}}">
         <i class="edit icon"></i>
         Select jobs to share or delete
       </div>

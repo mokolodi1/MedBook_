@@ -131,7 +131,8 @@
         {{/unless}}
 
         <h3>Who has access</h3>
-        {{> listCollaborators collabsList=collabsList}}
+        {{> listCollaborators collabsList=collabsList
+              collectionName=collectionName mongoIds=mongoIds editing=true}}
 
         {{#if firstGreater (length mongoIds) 1}}
           <div class="ui info message">
@@ -141,19 +142,6 @@
             </p>
           </div>
         {{/if}}
-
-        <h3>Add a collaborator:</h3>
-        <div class="ui category search collaboration-search">
-          <div class="ui fluid icon input">
-            <input class="prompt" type="text"
-                placeholder="Search for people or collaboraitons...">
-            <i class="search icon"></i>
-          </div>
-
-          {{! .collaboration-results: make left margin bigger to
-              fit the word "Collaborations"}}
-          <div class="results collaboration-results"></div>
-        </div>
       </div>
     </div>
     <div class="actions">
@@ -171,31 +159,55 @@
 </template>
 
 <template name="listCollaborators">
-  <div class="ui relaxed divided list">
-    {{! use this let so we can ask about collabsListLength within the #each}}
-    {{#let collabsListLength=(length collabsList)}}
-      {{! NOTE: assumption is that there can never be 0 collaborations}}
-      {{#each collabsList}}
-        <div class="item">
-          <div class="right floated content">
-            {{! don't show if there's only one left}}
-            {{#if firstGreater collabsListLength 1}}
-              <i class="remove link icon remove-collaboration"></i>
+  {{#unless getInstanceReactive "dataLoading"}}
+    <div class="ui divided list">
+      {{! use this let so we can ask about collabsListLength within the #each}}
+      {{#let collabsListLength=(length collabsListFetched)}}
+        {{! NOTE: assumption is that there can never be 0 collaborations}}
+        {{#each collabsListFetched}}
+          <div class="item">
+            {{#if ../editing}}
+              <div class="right floated content">
+                {{! don't show if there's only one left}}
+                {{#if firstGreater collabsListLength 1}}
+                  <i class="remove link icon remove-collaboration"></i>
+                {{/if}}
+              </div>
             {{/if}}
-          </div>
-          <i class="large middle aligned icon
-              user{{#if compare type "collaboration"}}s{{/if}}"></i>
-          <div class="content">
-            <div class="header">
-              {{title}}
+            <i class="large middle aligned icon
+                user{{#if compare type "collaboration"}}s{{/if}}"></i>
+            <div class="content">
+              <div class="header">
+                {{title}}
+              </div>
+              <div class="description">
+                {{description}}
+              </div>
             </div>
-            <div class="description">
-              {{description}}
-            </div>
           </div>
-        </div>
-      {{/each}}
-    {{/let}}
+        {{/each}}
+      {{/let}}
+    </div>
+
+    {{#if editing}}
+      {{> addCollaboratorSearch collabsList=collabsList}}
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/unless}}
+</template>
+
+<template name="addCollaboratorSearch">
+  <div class="ui category search collaboration-search {{randomId}}">
+    <div class="ui fluid icon input">
+      <input class="prompt" type="text"
+          placeholder="Add a person or collaboration...">
+      <i class="search icon"></i>
+    </div>
+
+    {{! .collaboration-results: make left margin bigger to
+        fit the word "Collaborations"}}
+    <div class="results collaboration-results"></div>
   </div>
 </template>
 
@@ -425,5 +437,53 @@
   {{! height, width, overflow: makes the table scroll when it gets too big}}
   <div id="recordsHOT"
       style="height: {{height}}; width: 100%; overflow: hidden;">
+  </div>
+</template>
+
+<template name="gseaFromGeneSetModal">
+  {{! Included in appBody template}}
+
+  <div class="ui modal gsea-from-gene-set">
+    <i class="close icon"></i>
+    {{#if getGeneSet}}
+      <div class="header">
+        GSEA for {{getGeneSet.name}}
+      </div>
+      <div class="content">
+        <h3>Create a new analysis</h3>
+        {{! NOTE: this template does not subscribe to the gene set and
+            we assume another template has already subscribed to it}}
+        {{> createGseaForm gene_set_id=getGeneSet._id active=getGeneSet
+            autoformId="createGseaFromOutlierAnalysis"}}
+
+        {{> searchableJobs name="RunGSEA" columns=previousJobsCols
+            viewJobRouteName="gseaJob" query=query extraFields=extraFields
+            smallerHeader=true}}
+      </div>
+
+      {{! <div class="actions">
+        <div class="ui button">Done</div>
+      </div> }}
+    {{else}}
+      {{! If this doesn't go away, you either forgot to subscribe
+          to the gene set or forgot to set
+          the <code>geneSetIdForGsea</code> query parameter.}}
+      {{#if permissionLikelyDenied}}
+        <div class="ui large warning message">
+          <div class="header">
+            Permission denied
+          </div>
+          <p>
+            It appears that you don't have access to this gene set.
+          </p>
+          <p>
+            If you believe you are seeing this message in error, please
+            {{> contactUsButton cssClass="tiny"}}
+          </p>
+        </div>
+      {{else}}
+        {{> dataLoading}}
+      {{/if}}
+    {{/if}}
   </div>
 </template>

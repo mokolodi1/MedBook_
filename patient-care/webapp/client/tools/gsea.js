@@ -228,4 +228,53 @@ Template.gseaJobArgs.helpers({
   getGeneSetGroupId(index, job) {
     return job.args.gene_set_group_ids[index];
   },
+  geneSetAssociatedObj() {
+    return {
+      mongo_id: this.args.gene_set_id,
+      collection_name: "GeneSets",
+    };
+  },
+});
+
+// Template.linkToGeneSet
+
+Template.linkToGeneSet.onCreated(function () {
+  let instance = this;
+
+  instance.subscribe("geneSetParentObj", instance.data.valueOf());
+});
+
+Template.linkToGeneSet.helpers({
+  geneSetUrl() {
+    let geneSetId = this.valueOf();
+    let geneSet = GeneSets.findOne(geneSetId);
+
+    if (geneSet) {
+      // send them to a different page depending on the parent object
+      let { collection_name, mongo_id } = geneSet.associated_object;
+
+      let parentObject = MedBook.collections[collection_name].findOne(mongo_id);
+
+      if (collection_name === "Jobs") {
+        let query = { geneSetIdForGsea: geneSetId };
+
+        if (parentObject.name === "RunLimma") {
+          return FlowRouter.path("limmaJob", { job_id: mongo_id }, query);
+        } else if (parentObject.name === "RunSingleSampleTopGenes") {
+          return FlowRouter.path("singleSampleTopGenesJob",
+              { job_id: mongo_id }, query);
+        } else if (parentObject.name === "UpDownGenes") {
+          return FlowRouter.path("upDownGenesJob", { job_id: mongo_id }, query);
+        }
+      }
+    }
+
+    // If there's no gene set loaded or we don't know where to send them,
+    // send them to the manage gene sets page. Worst case scenario they
+    // see a permission denied message.
+    return FlowRouter.path("manageObjects", {
+      collectionSlug: "gene-sets",
+      selected: geneSetId,
+    });
+  },
 });

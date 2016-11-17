@@ -4,7 +4,6 @@ services:
     command: /app-dev/dockerDev.sh
     volumes:
     - ./packages:/packages
-    - /mnt/filestore:/filestore
     environment:
       PACKAGE_DIRS: "/packages"
 

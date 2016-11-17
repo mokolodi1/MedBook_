@@ -81,6 +81,7 @@ Meteor.publish("adminAndCollaboratorCollaborations", function() {
       { name: { $in: userCollabs } },
       { administrators: { $in: userCollabs } },
     ],
+    "administrators.0": { $exists: true },
   });
 });
 
@@ -89,7 +90,9 @@ Meteor.publish("browseCollaborations", function() {
 
   return Collaborations.find({
     publiclyListed: true,
-    administrators: { $ne: [] }
+
+    // make sure it's not deleted
+    "administrators.0": { $exists: true }
   });
 });
 
@@ -479,4 +482,38 @@ Meteor.publish("geneSetInGroup", function (gene_set_group_id, geneSetNameIndex) 
     gene_set_group_id,
     name: geneSetGroup.gene_set_names[geneSetNameIndex]
   });
+});
+
+Meteor.publish("geneSetParentObj", function (geneSetId) {
+  check(geneSetId, String);
+
+  let user = MedBook.ensureUser(this.userId);
+  let geneSet = GeneSets.findOne(geneSetId);
+
+  // soft-fail if they don't have access or the gene set doesn't have
+  // associated object security
+  if (!geneSet || !geneSet.associated_object || !user.hasAccess(geneSet)) {
+    return [];
+  }
+
+  let { collection_name, mongo_id } = geneSet.associated_object;
+
+  return [
+    // send down the child object's associated_object
+    GeneSets.find(geneSetId, {
+      fields: { associated_object: 1 }
+    }),
+
+    // send down the parent object
+    MedBook.collections[collection_name].find({
+      _id: mongo_id,
+      collaborations: { $in: user.getCollaborations() },
+    }, {
+      fields: {
+        // NOTE: this was just chosen because it's the only thing
+        // needed for linking to Jobs. Add other fields as necessary.
+        name: 1
+      }
+    }),
+  ];
 });

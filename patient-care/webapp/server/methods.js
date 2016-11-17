@@ -515,11 +515,22 @@ Meteor.methods({
   },
   // return a list of description objects for the union
   // of collaborations in multiple objects
-  getCollabDescriptions(collectionName, mongoIds) {
+  getCollabDescriptions(collectionName, mongoIds, attribute) {
     check(collectionName, String);
     check(mongoIds, [String]);
+    check(attribute, String);
 
     let user = MedBook.ensureUser(this.userId);
+
+    // ensure the attribute is valid
+    let allowedAttributes = [
+      "collaborations",
+      "collaborators",
+      "administrators",
+    ];
+    if (allowedAttributes.indexOf(attribute) === -1) {
+      throw new Meteor.Error("invalid-attribute");
+    }
 
     // put all the collab names into this hash map
     let collabNameHash = {};
@@ -527,9 +538,9 @@ Meteor.methods({
     MedBook.collections[collectionName].find({
       _id: { $in: mongoIds }
     }, {
-      fields: { collaborations: 1 }
-    }).forEach(({ collaborations }) => {
-      _.each(collaborations, (collabName) => {
+      fields: { [ attribute ]: 1 }
+    }).forEach((obj) => {
+      _.each(obj[attribute], (collabName) => {
         collabNameHash[collabName] = true;
       });
     });
