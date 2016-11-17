@@ -41,11 +41,13 @@ cd "$backup_name"
 mongo_host="localhost"
 if [ $HOSTNAME = "medbook-prod" ] ; then
   mongo_host="mongo"
+elif [ $HOSTNAME = "medbook-prod-2" ] ; then
+  mongo_host="mongo"
 elif [ $HOSTNAME = "medbook-staging-2" ] ; then
   mongo_host="mongo-staging"
 fi
 mongo MedBook --host $mongo_host --eval "db.dropDatabase()"
-mongorestore --host $mongo_host
+mongorestore --drop --host $mongo_host
 
 # restore the filestore
 sudo rsync -r filestore/ /filestore
