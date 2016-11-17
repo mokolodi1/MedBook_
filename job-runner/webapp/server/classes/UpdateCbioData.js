@@ -28,18 +28,17 @@ UpdateCbioData.prototype.run = function () {
   // create a sample group which is the combination of the two sample groups
   // so that we can easily write out a file
 
- 
+
   var self = this;
   var deferred = Q.defer();
 
   // define up here so as to be available throughout promise chain (so that
   // we can skip a .then block)
-  var geneSetGroupPath;
   var expressionDataPath = path.join(workDir, "data_expression.txt");
   var logPath = path.join(workDir, "*.log");
   var associated_object = {
     collection_name: "SampleGroups",
-    mongo_id: group._id,
+    mongo_id: this.job.args.sample_group_id,
   };
   var form_id = this.job.args.form_id;
 
@@ -48,7 +47,7 @@ UpdateCbioData.prototype.run = function () {
 
       // expression data to a file for use in Limma
       spawnCommand(getSetting("genomic_expression_export"), [
-        "--sample_group_id", group._id,
+        "--sample_group_id", this.job.args.sample_group_id,
         "--cbio",
         "--uq-sample-labels",
       ], workDir, { stdoutPath: expressionDataPath }),
