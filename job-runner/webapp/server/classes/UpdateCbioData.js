@@ -28,52 +28,7 @@ UpdateCbioData.prototype.run = function () {
   // create a sample group which is the combination of the two sample groups
   // so that we can easily write out a file
 
-  var group = SampleGroups.findOne(this.job.args.sample_group_id);
-
-  // combine samples of same data set into single array
-  var dataSetHash = {};
-  var dataSetName = "";
-  _.each(group.data_sets, function (dataSet) {
-    // check if we've seen this data set already
-    var seenAlready = dataSetHash[dataSet.data_set_id];
-    if (!seenAlready) {
-      // if we haven't, set it up
-      dataSetName = dataSet.data_set_name;
-      seenAlready = {
-        data_set_name: dataSet.data_set_name,
-        sample_labels: [],
-      };
-    }
-
-    // combine the samples together
-    seenAlready.sample_labels =
-        seenAlready.sample_labels.concat(dataSet.sample_labels)
-    dataSetHash[dataSet.data_set_id] = seenAlready;
-  });
-  var comboSampleGroupDataSets = _.map(dataSetHash,
-      function (samplesAndName, data_set_id) {
-    return {
-      data_set_id: data_set_id,
-      data_set_name: samplesAndName.data_set_name,
-      sample_labels: samplesAndName.sample_labels,
-
-      // I think we can fake this
-      unfiltered_sample_count: 1,
-    };
-  });
-
-  //var comboSampleGroupId = SampleGroups.insert({
-  //  name: "temp - created in UpdateCbioData to call an adapter",
-  //  version: 1,
-  //  data_sets: comboSampleGroupDataSets,
-  //  value_type: group.value_type,
-
-    // invisible
-  //  collaborations: [],
-  //});
-
-  // star the promise chain: woohoo!
-
+ 
   var self = this;
   var deferred = Q.defer();
 

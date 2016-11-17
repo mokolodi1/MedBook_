@@ -20,14 +20,13 @@ Meteor.methods({
     //
   getFormsMatchingDataSet: function(data_set_id) {
 
-    //console.log("getting forms for", data_set_id); // XXX
-
     check(data_set_id, String);
 
     // Client-side stub:
     if( Meteor.isClient) {
       let stub = [{
-          urlencodedId: "placeholder_loadingforms",
+          formId: "ph_formid",
+          dataSetId: "ph_datasetid",
           name: "Loading forms...",
           fields: [],
         }];
@@ -47,6 +46,8 @@ Meteor.methods({
       collaborations: { $in: user.getCollaborations() },
       sample_labels: { $in: dataset.sample_labels }
     });
+
+    let encoded_data_set_id = encodeURIComponent(data_set_id);
 
     formsCursor.forEach(function(form){
       // Populate the form field table with its fields
@@ -101,7 +102,8 @@ Meteor.methods({
 
       // add to the modified form object to return
       formsWithFields.push({
-        urlencodedId: encoded_form_id,
+        formId: encoded_form_id,
+        dataSetId: encoded_data_set_id,
         name: form.name,
         fields: currentFormFields
       });
