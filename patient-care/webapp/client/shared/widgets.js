@@ -261,9 +261,12 @@ Template.addCollaboratorSearch.onRendered(function () {
         onSelect(result, response) {
           let collabsList = instance.data.collabsList.get();
 
-          collabsList.push(result);
+          // only add if it doesn't already exist
+          if (_.pluck(collabsList, "id").indexOf(result.id) === 1) {
+            collabsList.push(result);
 
-          instance.data.collabsList.set(collabsList);
+            instance.data.collabsList.set(collabsList);
+          }
 
           // clear the search input field and focus it (in case
           // they used the mouse to click an option, which
