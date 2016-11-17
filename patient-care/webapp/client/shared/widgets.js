@@ -262,7 +262,7 @@ Template.addCollaboratorSearch.onRendered(function () {
           let collabsList = instance.data.collabsList.get();
 
           // only add if it doesn't already exist
-          if (_.pluck(collabsList, "id").indexOf(result.id) === 1) {
+          if (_.pluck(collabsList, "id").indexOf(result.id) === -1) {
             collabsList.push(result);
 
             instance.data.collabsList.set(collabsList);
