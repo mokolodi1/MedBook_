@@ -1,86 +1,66 @@
 <template name="editSampleGroup">
-  <div class="ui top attached menu">
-    {{#if length addableDataSets}}
-      {{> addDataSetMenu addableDataSets=addableDataSets
-          sampleGroup=sampleGroup}}
-    {{else}}
-      <div class="ui item">
-        No more data sets
-      </div>
-    {{/if}}
-
-    <div class="right menu">
-      <div class="item">
-        <div class="ui transparent icon input">
-          <input class="sample-group-name" type="text"
-              placeholder="Name of sample group...">
-          <!-- <i class="idea icon"></i> -->
-          <div class="ui basic label sample-group-version"
-              data-content="Sample group version">
-            v{{getSampleGroup.version}}
-          </div>
+  <div class="ui form">
+    <div class="field">
+      <label>Sample group name</label>
+      <div class="ui fluid right labeled input">
+        <input type="text" class="sample-group-name"
+            placeholder="Sample group name">
+        <div class="ui basic label sample-group-version">
+          v{{getSampleGroup.version}}
         </div>
       </div>
     </div>
   </div>
 
-  {{#if Template.subscriptionsReady}}
-    <div class="ui bottom attached segment">
-      {{#with getSampleGroup}}
-        <div class="ui list">
-          {{#if length data_sets}}
-            {{! show all of the data sets}}
-            {{#each data_sets}}
-              <div class="item">
-                <!-- <i class="icon"></i> {{! blank icons create indentation}} -->
-                <div class="content">
-                  <div class="header">
-                    {{dataSetName}}
+  {{#with getSampleGroup}}
+    {{#if length data_sets}}
+      {{! show all of the data sets}}
+      <div class="ui list">
+        {{#each data_sets}}
+          <div class="item">
+            <div class="content">
+              <div class="header">
+                {{dataSetName}}
 
-                    <div class="ui mini buttons">
-                      {{> addFilterButton data_set=this sampleGroup=sampleGroup
-                          dataSetIndex=@index}}
-                      <div class="ui icon button remove-data-set">
-                        <i class="minus icon"></i> Remove
-                      </div>
-                    </div>
-                  </div>
-                  <div class="description"></div>
-                  <div class="list" style="padding-top: 0px;">
-                    {{#let dataSetIndex=@index}}
-                      {{#each filters}}
-                        {{> showFilter dataSetIndex=dataSetIndex
-                            filterIndex=@index
-                            sampleGroup=sampleGroup}}
-                      {{/each}}
-                    {{/let}}
+                <div class="ui mini buttons">
+                  {{> addFilterButton data_set=this sampleGroup=sampleGroup
+                      dataSetIndex=@index}}
+                  <div class="ui icon button remove-data-set">
+                    <i class="minus icon"></i> Remove
                   </div>
                 </div>
               </div>
-            {{/each}}
-          {{else}}
-            No data sets have been added yet.
-          {{/if}}
+              <div class="description"></div>
+              <div class="list" style="padding-top: 0px;">
+                {{#let dataSetIndex=@index}}
+                  {{#each filters}}
+                    {{> showFilter dataSetIndex=dataSetIndex
+                        filterIndex=@index
+                        sampleGroup=sampleGroup}}
+                  {{/each}}
+                {{/let}}
+              </div>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="ui message">
+        <div class="header">
+          No data sets added
         </div>
-      {{/with}}
-    </div>
-  {{else}}
-    {{> dataLoading}}
-  {{/if}}
-</template>
+        Use the search bar below to add a data set.
+      </div>
+    {{/if}}
+  {{/with}}
 
-<template name="addDataSetMenu">
-  <div class="ui item dropdown"> {{! "dropdown" for hand as mouse}}
-    Add a data set <i class="dropdown icon"></i>
-  </div>
-  <div class="ui flowing popup">
-    <div class="ui list">
-      {{#each addableDataSets}}
-        <a class="item add-data-set-to-sample-group">
-          {{name}}
-        </a>
-      {{/each}}
+  <div class="ui search data-set-search" style="margin-bottom: 10px;">
+    <div class="ui fluid icon input">
+      <input class="prompt add-data-set" type="text"
+          placeholder="Add a data set">
+      <i class="search icon"></i>
     </div>
+    <div class="results"></div>
   </div>
 </template>
 
@@ -158,7 +138,7 @@
     {{#if length getAvailableFilterForms}}
       {{> formValuesFilterMenu getAvailableFilterForms=getAvailableFilterForms}}
       <!-- Set up the potential queryBuilder divs to be attached in onRendered -->
-      <!-- id needs to be unique across page, so include dataset id as there will be  
+      <!-- id needs to be unique across page, so include dataset id as there will be
           only one form filter per dataset -->
       {{#each getAvailableFilterForms}}
         <div class="querybuilder" id="{{this.dataSetId}}_{{this.formId}}_querybuilder">
@@ -173,7 +153,7 @@
         <button class="ui icon button remove-filter" type="button">
           <i class="minus icon"></i> Remove filter
         </button>
-      </div>  
+      </div>
     {{/if}}
  {{else}}
     <div class="ui mini buttons">

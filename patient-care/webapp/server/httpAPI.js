@@ -15,7 +15,8 @@ HTTP.methods({
     let collabDescriptions = Collaborations.find({
       name: { $in: user.getCollaborations() }
     }, {
-      fields: { name: 1, description: 1 }
+      fields: { name: 1, description: 1 },
+      sort: { name: 1 },
     }).map((collab) => {
       // set semantic-ui required variables
       collab.id = collab.name;
@@ -38,6 +39,10 @@ HTTP.methods({
         "collaborations.personal": 1,
         "profile.fullName": 1,
         "profile.preferredName": 1,
+      },
+      sort: {
+        "profile.fullName": 1,
+        "collaborations.personal": 1,
       }
     }).map((user) => {
       let description = {
@@ -82,6 +87,44 @@ HTTP.methods({
           results: userDescriptions
         }
       }
+    };
+  },
+  "/search/data-sets": function () {
+    const user = MedBook.ensureUser(this.userId);
+
+    const regexQuery = {
+      $regex: new RegExp(this.query.q, "i")
+    };
+
+    let dataSets = DataSets.find({
+      $or: [
+        // search both name and description
+        // TODO: split into multiple words, search for each separately
+        { name: regexQuery },
+        { description: regexQuery },
+      ],
+      collaborations: { $in: user.getCollaborations() },
+    }, {
+      fields: {
+        name: 1,
+        description: 1
+      },
+      limit: 10,
+      sort: {
+        name: 1
+      },
+    });
+
+    return {
+      results: dataSets.map((dataSet) => {
+        return {
+          // id required for semantic ui (not required but that's what
+          // it'll add on its own if it's not included)
+          id: dataSet._id,
+          title: dataSet.name,
+          description: dataSet.description,
+        };
+      }),
     };
   },
 });

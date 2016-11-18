@@ -3,8 +3,8 @@
 Template.listUpDownGenes.onCreated(function() {
   let instance = this;
 
-  instance.subscribe("dataSetNamesSamples");
-  instance.subscribe("sampleGroups");
+  instance.subscribe("allOfCollectionOnlyMetadata", "DataSets");
+  instance.subscribe("allOfCollectionOnlyMetadata", "SampleGroups");
 
   instance.customSampleGroup = new ReactiveVar();
   instance.error = new ReactiveVar(); // { header: "Uh oh", message: "hi" }

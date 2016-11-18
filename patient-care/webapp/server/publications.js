@@ -132,14 +132,6 @@ Meteor.publish("objectFromCollection", function(collectionName, objectId) {
 
 // tools
 
-Meteor.publish("dataSets", function() {
-  var user = MedBook.ensureUser(this.userId);
-
-  return DataSets.find({
-    collaborations: {$in: user.getCollaborations() },
-  });
-});
-
 Meteor.publish("dataSetNamesSamples", function() {
   var user = MedBook.ensureUser(this.userId);
 
@@ -275,19 +267,22 @@ Meteor.publish("gseaFormData", function (maybeGeneSetId) {
   ];
 });
 
-// send down the sample labels for a specific data set
-Meteor.publish("dataSetSampleLabels", function (dataSetId) {
-  check(dataSetId, String);
+// send down data set names and sample_labels, filtering by
+// _id list if provided
+Meteor.publish("dataSetNamesSamples", function(dataSetIds) {
+  check(dataSetIds, Match.Maybe([String]));
 
-  let user = MedBook.ensureUser(this.userId);
+  var user = MedBook.ensureUser(this.userId);
 
-  return DataSets.find({
-    _id: dataSetId,
-    collaborations: { $in: user.getCollaborations() },
-  }, {
-    name: 1,
-    sample_labels: 1,
-  });
+  let query = {
+    collaborations: {$in: user.getCollaborations() },
+  };
+
+  if (dataSetIds) {
+    query._id = { $in: dataSetIds };
+  }
+
+  return DataSets.find(query, { fields: { name: 1, sample_labels: 1 } });
 });
 
 Meteor.publish("limmaFormData", function (value_type) {
@@ -441,14 +436,6 @@ Meteor.publish("geneSetGroups", function () {
   let user = MedBook.ensureUser(this.userId);
 
   return GeneSetGroups.find({
-    collaborations: { $in: user.getCollaborations() },
-  });
-});
-
-Meteor.publish("sampleGroups", function () {
-  let user = MedBook.ensureUser(this.userId);
-
-  return SampleGroups.find({
     collaborations: { $in: user.getCollaborations() },
   });
 });
