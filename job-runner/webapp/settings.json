@@ -3,6 +3,7 @@
   "outlier_analysis":"/tools/OutlierAnalysis/outlier-analysis.sh",
   "calculate_outlier_genes":"/tools/OutlierAnalysis/calculate_outlier_genes.R",
   "genomic_expression_export":"/tools/exporters/genomic_expression_export.py",
+  "cbio_genomic_expression_export":"/tools/cbioportal/genomic_expression_export.py",
   "gene_set_group_export":"/tools/exporters/gene_set_group_export.py",
   "cbio_importer_path":"/tools/cbioportal/importer/cbioportalImporter.py",
   "cbio_core_jar_path":"/tools/cbioportal/core-1.2.1.jar",

@@ -77,7 +77,7 @@ UpdateCbioData.prototype.run = function () {
       // write mongo data to files
 
       // expression data to a file for use in Limma
-      spawnCommand(getSetting("genomic_expression_export"), [
+      spawnCommand(getSetting("cbio_genomic_expression_export"), [
         "--sample_group_id", this.job.args.sample_group_id,
         "--cbio",
         "--uq-sample-labels",
