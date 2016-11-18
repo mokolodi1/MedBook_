@@ -132,22 +132,6 @@ Meteor.publish("objectFromCollection", function(collectionName, objectId) {
 
 // tools
 
-Meteor.publish("dataSetNamesSamples", function() {
-  var user = MedBook.ensureUser(this.userId);
-
-  return DataSets.find({
-    collaborations: {$in: user.getCollaborations() },
-  }, {
-    fields: {
-      name: 1,
-      sample_labels: 1,
-
-      // to get rid of ensureAccess errors client-side
-      collaborations: 1,
-    }
-  });
-});
-
 Meteor.publish("searchableJobs", function (options) {
   check(options, new SimpleSchema({
     jobName: { type: String },
@@ -275,7 +259,7 @@ Meteor.publish("dataSetNamesSamples", function(dataSetIds) {
   var user = MedBook.ensureUser(this.userId);
 
   let query = {
-    collaborations: {$in: user.getCollaborations() },
+    collaborations: { $in: user.getCollaborations() },
   };
 
   if (dataSetIds) {
