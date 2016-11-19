@@ -7,7 +7,7 @@
   "gene_set_group_export":"/tools/exporters/gene_set_group_export.py",
   "cbio_importer_path":"/tools/cbioportal/importer/cbioportalImporter.py",
   "cbio_core_jar_path":"/tools/cbioportal/core-1.2.1.jar",
-  "clinical_export": "/tools/exporters/clinical_export.py",
+  "clinical_export": "/tools/cbioportal/clinical_export.py",
   "limma_phenotype_export":"/tools/exporters/limma_phenotype_export.py",
   "gsea_path":"/tools/gsea/rgGSEA.py",
   "gsea_jar_path":"/tools/gsea/gsea2-2.2.2.jar",

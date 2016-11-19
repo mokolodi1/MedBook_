@@ -10,7 +10,7 @@
 
  "cbio_importer_path":"/Users/baertsch/src/MedBook_/tools/cbioportal/importer/cbioportalImporter.py",
  "cbio_core_jar_path":"/Users/baertsch/src/MedBook_/tools/cbioportal/core-1.2.1.localhost.jar",
- "clinical_export": "/Users/baertsch/src/MedBook_/tools/exporters/clinical_export.py",
+ "clinical_export": "/Users/baertsch/src/MedBook_/tools/cbioportal/clinical_export.py",
  "gene_set_group_export": "/Users/baertsch/src/MedBook_/tools/exporters/gene_set_group_export.py",
  "limma_phenotype_export": "/Users/baertsch/src/MedBook_/tools/exporters/limma_phenotype_export.py",
  "apply_signature_path" : "/data/MedBook/External-Tools/signature/apply_signature.py",
