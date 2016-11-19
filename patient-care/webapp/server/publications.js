@@ -269,6 +269,21 @@ Meteor.publish("dataSetNamesSamples", function(dataSetIds) {
   return DataSets.find(query, { fields: { name: 1, sample_labels: 1 } });
 });
 
+// send down the sample labels for a specific data set
+Meteor.publish("dataSetSampleLabels", function (dataSetId) {
+  check(dataSetId, String);
+
+  let user = MedBook.ensureUser(this.userId);
+
+  return DataSets.find({
+    _id: dataSetId,
+    collaborations: { $in: user.getCollaborations() },
+  }, {
+    name: 1,
+    sample_labels: 1,
+  });
+});
+
 Meteor.publish("limmaFormData", function (value_type) {
   check(value_type, String);
 

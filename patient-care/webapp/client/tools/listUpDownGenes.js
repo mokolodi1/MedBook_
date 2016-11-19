@@ -3,13 +3,23 @@
 Template.listUpDownGenes.onCreated(function() {
   let instance = this;
 
-  instance.subscribe("allOfCollectionOnlyMetadata", "DataSets");
-  instance.subscribe("allOfCollectionOnlyMetadata", "SampleGroups");
-
   instance.customSampleGroup = new ReactiveVar();
   instance.error = new ReactiveVar(); // { header: "Uh oh", message: "hi" }
 
   instance.talkingToServer = new ReactiveVar(false);
+
+  instance.subscribe("allOfCollectionOnlyMetadata", "DataSets");
+  instance.subscribe("allOfCollectionOnlyMetadata", "SampleGroups");
+
+  // subscribe to the selected data set's sample labels
+  instance.autorun(() => {
+    let dataSetId = AutoForm.getFieldValue("data_set_id",
+        "createUpDownGenes");
+
+    if (dataSetId) {
+      instance.subscribe("dataSetSampleLabels", dataSetId);
+    }
+  });
 });
 
 Template.listUpDownGenes.helpers({
@@ -34,16 +44,19 @@ Template.listUpDownGenes.helpers({
   },
   sampleOptions() {
     let _id = AutoForm.getFieldValue("data_set_id", "createUpDownGenes");
+    let dataSet = DataSets.findOne(_id);
 
-    // http://stackoverflow.com/questions/8996963/
-    // how-to-perform-case-insensitive-sorting-in-javascript
-    let samples = DataSets.findOne(_id).sample_labels.sort((a, b) => {
-      return a.toLowerCase().localeCompare(b.toLowerCase());
-    });
+    if (dataSet.sample_labels) {
+      // http://stackoverflow.com/questions/8996963/
+      // how-to-perform-case-insensitive-sorting-in-javascript
+      let samples = dataSet.sample_labels.sort((a, b) => {
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+      });
 
-    return _.map(samples, (label) => {
-      return { value: label, label };
-    });
+      return _.map(samples, (label) => {
+        return { value: label, label };
+      });
+    }
   },
   sampleGroupOptions() {
     let query = SampleGroups.find({}, { sort: { name: 1 } });
@@ -113,6 +126,9 @@ Template.listUpDownGenes.events({
         if (jobIds.length === 1) {
           FlowRouter.go("upDownGenesJob", { job_id: jobIds[0] });
         }
+
+        // reset form values
+        AutoForm._forceResetFormValues("createUpDownGenes");
       }
     });
   },

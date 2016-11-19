@@ -416,6 +416,7 @@ Template.viewJobButton.helpers({
   buttonClass() {
     if (this.job.status === "done") { return "primary"; }
     else if (this.job.status === "error") { return "negative"; }
+    else if (this.job.status === "running") { return "secondary"; }
     // else { return "" }
   },
 });

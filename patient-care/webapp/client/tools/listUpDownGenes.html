@@ -4,12 +4,18 @@
 
     {{#semanticUIPopup selector=".help.circle.icon"}}
       <i class="help circle icon"></i>
-      <p class="ui popup">
-        Outlier genes are defined as being more than N IQRs away from the median.
-        The maximum number of genes returned is 5% of the total number of genes.
-        If there are more than 5% of the total number of genes that are outliers,
-        only the top 5% of the outliers will be returned.
-      </p>
+      <div class="ui popup">
+        <p>
+          Outlier genes are defined as being more than N IQRs away
+          from the median.
+        </p>
+        <p>
+          The maximum number of genes returned is 5% of the total number
+          of genes. If there are more than 5% of the total number of
+          genes that are outliers, only the top 5% of the outliers will
+          be returned.
+        </p>
+      </div>
     {{/semanticUIPopup}}
   </h1>
 
@@ -50,7 +56,9 @@
     </div>
 
     {{#if afFieldValueIs name="sample_group_id" value="creating"}}
-      {{> editSampleGroup sampleGroup=customSampleGroup}}
+      <div class="ui segment">
+        {{> editSampleGroup sampleGroup=customSampleGroup}}
+      </div>
     {{/if}}
 
     {{#if multipleSamplesSelected}}

@@ -65,13 +65,13 @@ HTTP.methods({
       // NOTE: threshold of 0 requires perfect match, 1 matches everything
       let collabFuse = new Fuse(collabDescriptions, {
         keys: [ "title", "description" ],
-        threshold: 0.3
+        threshold: 0.4
       });
       collabDescriptions = collabFuse.search(query);
 
       let userFuse = new Fuse(userDescriptions, {
         keys: [ "title", "description", "preferredName" ],
-        threshold: 0.3
+        threshold: 0.4
       });
       userDescriptions = userFuse.search(query);
     }
