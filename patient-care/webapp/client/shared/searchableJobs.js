@@ -462,18 +462,26 @@ Template.tablePagination.events({
   "blur .results-per-page"(event, instance) {
     instance.perPageFocus.set(false);
   },
-  "change .results-per-page"(event, instance) {
-    let strValue = event.target.value;
-    let newValue = parseInt(strValue, 10);
+  "keypress .results-per-page"(event, instance) {
+    // only run if they pressed enter (aka 13, obviously)
+    if (event.keyCode === 13) {
+      let strValue = event.target.value;
+      let newValue = parseInt(strValue, 10);
 
-    // if the value is over 0 and the number is exactly the string entered
-    // (newValue + "" converts the number to a string for comparison)
-    if (newValue && newValue > 0 && newValue + "" === strValue) {
-      instance.data.options.rowsPerPage.set(newValue);
+      // if the value is over 0 and the number is exactly the string entered
+      // (newValue + "" converts the number to a string for comparison)
+      if (newValue && newValue > 0 && newValue + "" === strValue) {
+        instance.data.options.rowsPerPage.set(newValue);
 
-      instance.perPageError.set(false);
-    } else {
-      instance.perPageError.set(true);
+        instance.perPageError.set(false);
+      } else {
+        // if they're being annoying (wrong twice), remind them who's in charge
+        if (instance.perPageError.get()) {
+          instance.$('.reset-per-page').transition('bounce');
+        }
+
+        instance.perPageError.set(true);
+      }
     }
   },
   "click .reset-per-page"(event, instance) {
