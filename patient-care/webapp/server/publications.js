@@ -212,6 +212,11 @@ Meteor.publish("searchableJobs", function (options) {
   });
 });
 
+// for searchableJobs sorting
+Moko.ensureIndex(Jobs, {
+  date_created: 1,
+});
+
 // all data necessary for the GSEA form
 Meteor.publish("gseaFormData", function (maybeGeneSetId) {
   // See below for string validation. maybeGeneSetId can be null sometimes,

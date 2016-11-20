@@ -276,7 +276,6 @@ Template.listSelectableJobs.helpers({
       value = func(job);
     }
 
-
     // convert to "Yes"/"No" if `yes_no`
     if (yes_no) {
       return value ? "Yes" : "No";
@@ -296,15 +295,6 @@ Template.listSelectableJobs.helpers({
   selectMode() {
     return Template.instance().data.selectMode.get();
   },
-  // notShownCount() {
-  //   let jobIds = Object.keys(Template.instance().data.selectedIdMap.get());
-  //
-  //   let shownCount = Jobs.find({
-  //     _id: { $in: jobIds }
-  //   }).count();
-  //
-  //   return jobIds.length - shownCount;
-  // },
   totalColumnsCount() {
     return this.columns.length + 1;
   },
@@ -366,6 +356,11 @@ Template.listSelectableJobs.events({
 
 Template.tablePagination.onCreated(function () {
   let instance = this;
+
+  // keep track of if they're focussed on the input.results-per-page
+  // and if there's an error in it
+  instance.perPageFocus = new ReactiveVar(false);
+  instance.perPageError = new ReactiveVar(false);
 
   // keep max page index up to date
   instance.autorun(function () {
@@ -461,11 +456,36 @@ Template.tablePagination.events({
       instance.data.options.pageIndex.set(value - 1);
     }
   },
-  "change .results-per-page": function (event, instance) {
-    let newValue = parseInt(event.target.value, 10);
+  "focus .results-per-page"(event, instance) {
+    instance.perPageFocus.set(true);
+  },
+  "blur .results-per-page"(event, instance) {
+    instance.perPageFocus.set(false);
+  },
+  "change .results-per-page"(event, instance) {
+    let strValue = event.target.value;
+    let newValue = parseInt(strValue, 10);
 
-    if (newValue) {
+    // if the value is over 0 and the number is exactly the string entered
+    // (newValue + "" converts the number to a string for comparison)
+    if (newValue && newValue > 0 && newValue + "" === strValue) {
       instance.data.options.rowsPerPage.set(newValue);
+
+      instance.perPageError.set(false);
+    } else {
+      instance.perPageError.set(true);
     }
+  },
+  "click .reset-per-page"(event, instance) {
+    // set the value in the text box
+    let oldValue = instance.data.options.rowsPerPage.get();
+
+    instance.$("input.results-per-page")[0].value = oldValue;
+
+    instance.perPageError.set(false);
+  },
+  "submit .table-pagination"(event, instance) {
+    // prevent form submit when they change the input
+    event.preventDefault();
   },
 });
