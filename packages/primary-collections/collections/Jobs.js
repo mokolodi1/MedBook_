@@ -61,6 +61,7 @@ var jobSchemas = {
   UpdateCbioData: {
     args: new SimpleSchema({
       sample_group_id: { type: String },
+      form_id: { type: String },
     }),
   },
   ApplyExprAndVarianceFilters: {
