@@ -2,6 +2,11 @@
 
 import Fuse from 'fuse.js';
 
+// This HTTP API is required to use Semantic UI's search widgets.
+// It's possible we could use a publish instead of an HTTP method,
+// but I couldn't figure out how to do that in the 30 minutes I
+// tried for.
+
 HTTP.methods({
   "/search/collaborations": function() {
     const user = MedBook.ensureUser(this.userId);
