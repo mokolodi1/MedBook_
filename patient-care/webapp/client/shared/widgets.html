@@ -29,6 +29,8 @@
   {{> viewJobButton job=(fakeJob "running") href="https://google.com"}}
   {{> viewJobButton job=(fakeJob "error") href="https://google.com"}}
   {{> viewJobButton job=(fakeJob "done") href="https://google.com"}}
+  {{> viewJobButton job=(fakeJob "done") href="https://google.com"
+      class="tiny"}}
 
   <h2><code>{{|#semanticUIDropdown}}code{{|/semanticUIDropdown}}</code></h2>
   <p>
@@ -82,35 +84,47 @@
 </template>
 
 <template name="editCollaborationsModal">
-  <div class="ui edit-collaborations modal">
+  <div class="ui modal edit-collaborations-modal">
     <i class="close modal icon"></i>
     <div class="header">
-      Edit collaborations
+      Edit collaborators
     </div>
     <div class="content">
       <div class="description">
-        {{#unless sessionPopulated}}
+        {{#unless mongoIds}}
           <h1>You forgot to set the session variables!</h1>
           <p>
             <code>editCollaborationsCollection</code>
           </p>
           <p>
-            <code>editCollaborationsMongoId</code>
+            <code>editCollaborationsMongoIds</code>
           </p>
         {{/unless}}
 
-        <div class="ui header">
-          These collaborations can see and edit this object.
-        </div>
-        {{#if collaborationOptions}}
-          {{#autoForm id="editCollaborations" schema=onlyCollaborations}}
-            {{> afQuickField name="collaborations" options=collaborationOptions
-                type="select" multiple=true search=true
-                value=getObject.collaborations}}
-          {{/autoForm}}
-        {{else}}
-          {{> dataLoading}}
+        <h3>Who has access</h3>
+        {{> listCollaborators collabsList=collabsList}}
+
+        {{#if firstGreater (length mongoIds) 1}}
+          <div class="ui info message">
+            <p>
+              Clicking "Set collaborators" will set the collaborators
+              for all selected items to the list above.
+            </p>
+          </div>
         {{/if}}
+
+        <h3>Add a collaborator:</h3>
+        <div class="ui category search collaboration-search">
+          <div class="ui fluid icon input">
+            <input class="prompt" type="text"
+                placeholder="Search for people or collaboraitons...">
+            <i class="search icon"></i>
+          </div>
+
+          {{! .collaboration-results: make left margin bigger to
+              fit the word "Collaborations"}}
+          <div class="results collaboration-results"></div>
+        </div>
       </div>
     </div>
     <div class="actions">
@@ -124,6 +138,35 @@
         <i class="checkmark icon"></i>
       </div>
     </div>
+  </div>
+</template>
+
+<template name="listCollaborators">
+  <div class="ui relaxed divided list">
+    {{! use this let so we can ask about collabsListLength within the #each}}
+    {{#let collabsListLength=(length collabsList)}}
+      {{! NOTE: assumption is that there can never be 0 collaborations}}
+      {{#each collabsList}}
+        <div class="item">
+          <div class="right floated content">
+            {{! don't show if there's only one left}}
+            {{#if firstGreater collabsListLength 1}}
+              <i class="remove link icon remove-collaboration"></i>
+            {{/if}}
+          </div>
+          <i class="large middle aligned icon
+              user{{#if compare type "collaboration"}}s{{/if}}"></i>
+          <div class="content">
+            <div class="header">
+              {{title}}
+            </div>
+            <div class="description">
+              {{description}}
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    {{/let}}
   </div>
 </template>
 
@@ -201,15 +244,32 @@
 </template> -->
 
 <template name="viewJobButton">
-  <a href={{href}}
-      class="ui right labeled icon {{buttonClass}} button">
-    <i class="right arrow icon"></i>
-    {{#if compare job.status "done"}}
-      View
-    {{else}}
-      {{capitalize job.status}}
-    {{/if}}
-  </a>
+  <div class="ui {{buttonClass}} {{class}} buttons">
+    <a href={{href}} class="ui button">
+      {{#if compare job.status "done"}}
+        View
+      {{else}}
+        {{capitalize job.status}}
+      {{/if}}
+    </a>
+    <div class="ui dropdown icon button">
+      <i class="dropdown icon"></i>
+      <div class="menu">
+        <div class="item share-job">
+          <i class="share icon"></i>
+          Share
+        </div>
+        <div class="item delete-job">
+          <i class="trash icon"></i>
+          {{#if getInstanceReactive "deleteClicked"}}
+            Really?
+          {{else}}
+            Delete
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <template name="jobStatusWrapper">

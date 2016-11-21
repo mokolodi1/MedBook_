@@ -145,51 +145,57 @@ Meteor.publish("dataSetNamesSamples", function() {
   }, { fields: { name: 1, sample_labels: 1 } });
 });
 
-Meteor.publish("jobsOfType", function (name) {
-  check(name, String);
+Meteor.publish("searchableJobs", function (options) {
+  check(options, new SimpleSchema({
+    jobName: { type: String },
+
+    // for pagination
+    skip: { type: Number },
+    limit: { type: Number },
+
+    // searching and such
+    searchFields: { type: [String] },
+    searchText: { type: String, optional: true },
+    mongoIds: { type: [String], optional: true },
+  }));
 
   let user = MedBook.ensureUser(this.userId);
 
-  // only allow certain job names
-  let allowedJobNames = [
-    "RunLimmaGSEA",
-    "UpDownGenes",
-    "TumorMapOverlay",
-    "ApplyExprAndVarianceFilters",
-  ];
-  if (allowedJobNames.indexOf(name) === -1) {
-    return null;
-  }
+  const { jobName, skip, limit, searchFields, searchText, mongoIds } = options;
 
-  return Jobs.find({
-    name,
+  // NOTE: if searchText is falsey this will return {}
+  let query = MedBook.regexFieldsQuery(searchFields, searchText);
+
+  _.extend(query, {
+    name: jobName,
     collaborations: { $in: user.getCollaborations() },
   });
-});
 
-// publish all UpDownGenes jobs to be shown in a list view
-Meteor.publish("upDownGenesJobs", function () {
-  let user = MedBook.ensureUser(this.userId);
+  if (mongoIds) {
+    query._id = { $in: mongoIds };
+  }
 
-  return Jobs.find({
-    name: "UpDownGenes",
-    collaborations: { $in: user.getCollaborations() },
+  // create fields object for the mongo query
+  let fields = _.reduce(searchFields, (memo, field) => {
+    memo[field] = 1;
+    return memo;
   }, {
-    fields: {
-      // for showing the job
-      name: 1,
-      collaborations: 1,
-      status: 1,
-      args: 1,
+    // for removing, sharing, sorting, and showing the status, respectively
+    name: 1,
+    collaborations: 1,
+    date_created: 1,
+    status: 1,
+  });
 
-      // only send down relevant output
-      // (the list of genes itself is relatively large)
-      "output.up_genes_count": 1,
-      "output.down_genes_count": 1,
+  // NOTE: unsure as to whether we need to use a fresh cursor
+  // for this but my gut tells me yes.
+  Counts.publish(this, "searchable-jobs", Jobs.find(query));
 
-      // client-side sorting
-      date_created: 1,
-    },
+  return Jobs.find(query, {
+    fields,
+    limit,
+    skip,
+    sort: { date_created: -1 },
   });
 });
 

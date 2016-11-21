@@ -1,6 +1,6 @@
 // so that we can resubscribe anywhere in this file
 // (set in manageCollaborations.onCreated)
-var collaborationsResubscribe = undefined;
+var collaborationsResubscribe;
 
 // define this here so it only gets run once and is also close to the other
 // stuff using collaborationsResubscribe
@@ -62,7 +62,7 @@ var collaborationSchema = function() {
   collabSchemaObject.publiclyListed.optional = true;
   collabSchemaObject.adminApprovalRequired.optional = true;
 
-  return new SimpleSchema(collabSchemaObject)
+  return new SimpleSchema(collabSchemaObject);
 }();
 
 
@@ -75,7 +75,15 @@ Template.manageCollaborations.onCreated(function () {
   collaborationsResubscribe = () => {
     instance.subscribe("adminAndCollaboratorCollaborations");
   };
-  collaborationsResubscribe();
+
+  // resubscribe when the collaboration list changes for whatever reason
+  // (for example if it's updated on another tab or someone approves a
+  // request to join)
+  instance.autorun(() => {
+    let collabs = MedBook.findUser(Meteor.userId()).getCollaborations();
+
+    collaborationsResubscribe();
+  });
 });
 
 Template.manageCollaborations.helpers({
@@ -268,13 +276,10 @@ Template.browseCollaborations.helpers({
   },
   alreadySetName() {
     let profile = Meteor.user().profile;
-    return profile && profile.firstName && profile.lastName;
+    return profile && profile.fullName && profile.preferredName;
   },
-  firstLastName() {
-    return new SimpleSchema({
-      firstName: { type: String },
-      lastName: { type: String },
-    });
+  not(thing) {
+    return !thing;
   },
 });
 
@@ -305,9 +310,9 @@ Template.alwaysShowCollaborationFields.helpers({
 
 
 
-// Template.listCollaborators
+// Template.showCollaborationChips
 
-Template.listCollaborators.helpers({
+Template.showCollaborationChips.helpers({
   isPersonalCollaboration() {
     return this.indexOf("@") !== -1;
   },

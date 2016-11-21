@@ -42,7 +42,7 @@ Template.widgetsDemo.helpers({
   noAction() {
     return {
       action: "nothing"
-    }
+    };
   },
 });
 
@@ -61,9 +61,9 @@ Template.shareAndDeleteButtons.helpers({
 Template.shareAndDeleteButtons.events({
   "click .share.button"(event, instance) {
     Session.set("editCollaborationsCollection", instance.data.collectionName);
-    Session.set("editCollaborationsMongoId", instance.data.object._id);
+    Session.set("editCollaborationsMongoIds", [ instance.data.object._id ]);
 
-    $('.edit-collaborations.modal').modal('show');
+    $('.edit-collaborations-modal').modal('show');
   },
   "click .delete.button": function(event, instance) {
     var deleteClicked = instance.deleteClicked;
@@ -98,19 +98,21 @@ Template.editCollaborationsModal.onCreated(function() {
   let instance = this;
 
   instance.waitingForServer = new ReactiveVar(false);
+  instance.collabsList = new ReactiveVar([]);
 
   // who the user can share with
-  instance.collabs = new ReactiveVar(null);
   instance.autorun(() => {
-    // wait until we're logged in before getting sharable collaborations
-    // also wait until they set one of the session variables to communicate
-    // they're about to open the modal
-    if (MedBook.findUser(Meteor.userId()) &&
-        Session.get("editCollaborationsMongoId")) {
-      Meteor.call("getSharableCollaborations", (error, result) => {
+    const collectionName = Session.get("editCollaborationsCollection");
+    const mongoIds = Session.get("editCollaborationsMongoIds");
+
+    // wait until we're logged-in because when the user refreshes there's
+    // a slight delay before logging in where it'll run this code and fail
+    if (Meteor.user() && mongoIds) {
+      Meteor.call("getCollabDescriptions", collectionName, mongoIds,
+          (error, result) => {
         if (error) throw error;
 
-        instance.collabs.set(result);
+        instance.collabsList.set(result);
       });
     }
   });
@@ -119,56 +121,129 @@ Template.editCollaborationsModal.onCreated(function() {
 Template.editCollaborationsModal.onRendered(function() {
   let instance = this;
 
-  instance.$('.edit-collaborations.modal').modal({
+  // only initialize the collaboration search when the user is logged in
+  // because the API url depends on it the login token
+  instance.autorun(() => {
+    if (Meteor.user()) {
+      // destroy any possible old search
+      $(".collaboration-search").search("destroy");
+
+      // set up the collaboration search
+      $(".collaboration-search").search({
+        apiSettings: {
+          url: `${location.origin}/search/collaborations` +
+              `?token=${Accounts._storedLoginToken()}&q={query}`,
+          onResponse(response) {
+            // remove existing users/collaborations from the response
+            let allExisting = instance.collabsList.get();
+
+            const removeExisting = (resultsAttribute, type) => {
+              // save the parent so we can set .results easily
+              const resultsParent = response.results[resultsAttribute];
+              const { results } = resultsParent;
+
+              const existingIdsOfType = _.pluck(_.where(allExisting, {
+                type
+              }), "id");
+
+              // we're rarely going to have more than 2
+              // collaborators, so indexOf is fine
+              resultsParent.results = _.filter(results, (result) => {
+                return existingIdsOfType.indexOf(result.id) === -1;
+              });
+
+              // if there are no results, remove the category
+              // so that we get a "No results" thing
+              if (resultsParent.results.length === 0) {
+                delete response.results[resultsAttribute];
+              }
+            };
+
+            removeExisting("collaborations", "collaboration");
+            removeExisting("users", "user");
+
+            return response;
+          },
+        },
+        type: "category",
+        onSelect(result, response) {
+          let collabsList = instance.collabsList.get();
+
+          collabsList.push(result);
+
+          instance.collabsList.set(collabsList);
+
+          // clear the cache of searches so that we can remove
+          // the just-selected item from the results before displaying them
+          $(".collaboration-search").search("clear cache");
+        },
+      });
+    } else {
+      // destroy any possible old search
+      $(".collaboration-search").search("destroy");
+    }
+  });
+
+  instance.$('.edit-collaborations-modal').modal({
     onApprove() {
-      var valid = AutoForm.validateForm("editCollaborations");
-      if (valid) {
-        let values = AutoForm.getFormValues("editCollaborations").insertDoc;
-        instance.waitingForServer.set(true);
+      // TODO: another modal if they're going to lose access to the objects
 
-        let collectionName = Session.get("editCollaborationsCollection");
-        let mongoId = Session.get("editCollaborationsMongoId");
+      let newCollabs = _.pluck(instance.collabsList.get(), "id");
 
-        Meteor.call("updateObjectCollaborations",
-            collectionName, mongoId,
-            values.collaborations,
-            (error) => {
-          instance.waitingForServer.set(false);
-          if (!error) {
-            $('.edit-collaborations.modal').modal("hide");
-          }
-        });
-      }
+      instance.waitingForServer.set(true);
+
+      let collectionName = Session.get("editCollaborationsCollection");
+      let mongoIds = Session.get("editCollaborationsMongoIds");
+
+      Meteor.call("updateObjectCollaborations",
+          collectionName, mongoIds, newCollabs,
+          (error) => {
+        instance.waitingForServer.set(false);
+        if (!error) {
+          $('.edit-collaborations-modal').modal("hide");
+        }
+      });
 
       return false;
-    }
+    },
+    observeChanges: true,
   });
 });
 
 Template.editCollaborationsModal.helpers({
-  sessionPopulated() {
-    return Session.get("editCollaborationsCollection") &&
-        Session.get("editCollaborationsMongoId");
+  mongoIds() {
+    return Session.get("editCollaborationsMongoIds");
   },
-  isPersonalCollaboration() { return this.indexOf("@") !== -1; },
-  getObject() {
-    let collectionName = Session.get("editCollaborationsCollection");
-    let mongoId = Session.get("editCollaborationsMongoId");
-
-    let collection = MedBook.collections[collectionName];
-    if (collection) {
-      return collection.findOne(mongoId);
-    }
-  },
-  onlyCollaborations() {
-    return new SimpleSchema({ collaborations: { type: [String] } });
-  },
-  collaborationOptions() {
-    return _.map(Template.instance().collabs.get(), (collabName) => {
-      return { label: collabName, value: collabName };
-    });
+  multipleObjects() {
+    const ids = Session.get("editCollaborationsMongoIds");
+    return ids && ids.length > 1;
   },
   waitingForServer() { return Template.instance().waitingForServer.get(); },
+  collabsList() { return Template.instance().collabsList; },
+});
+
+// Template.listCollaborators
+
+Template.listCollaborators.helpers({
+  collabsList() {
+    let data = Template.currentData();
+
+    if (data && data.collabsList) {
+      return data.collabsList.get();
+    }
+  },
+});
+
+Template.listCollaborators.events({
+  "click .remove-collaboration"(event, instance) {
+    let collabsList = instance.data.collabsList.get();
+
+    collabsList = _.filter(collabsList, (collabDesc) => {
+      return collabDesc.id !== this.id;
+    });
+
+    instance.data.collabsList.set(collabsList);
+  },
 });
 
 // Template.showErrorMessage
@@ -270,6 +345,19 @@ Template.semanticUICheckbox.onRendered(function () {
 
 // Template.viewJobButton
 
+Template.viewJobButton.onCreated(function () {
+  let instance = this;
+
+  instance.deleteClicked = new ReactiveVar(false);
+});
+
+Template.viewJobButton.onRendered(function () {
+  this.$(".ui.dropdown").dropdown({
+    // don't bold what's clicked
+    action: "nothing"
+  });
+});
+
 Template.viewJobButton.helpers({
   capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -278,6 +366,32 @@ Template.viewJobButton.helpers({
     if (this.job.status === "done") { return "primary"; }
     else if (this.job.status === "error") { return "negative"; }
     // else { return "" }
+  },
+});
+
+Template.viewJobButton.events({
+  "click .share-job"(event, instance) {
+    Session.set("editCollaborationsCollection", "Jobs");
+    Session.set("editCollaborationsMongoIds", [this.job._id]);
+
+    $(".edit-collaborations-modal").modal("show");
+  },
+  "click .delete-job"(event, instance) {
+    var deleteClicked = instance.deleteClicked;
+
+    if (deleteClicked.get()) {
+      Meteor.call("removeObjects", "Jobs", [this.job._id]);
+    } else {
+      deleteClicked.set(true);
+
+      // if they click elsewhere, cancel remove
+      // wait until propogation finishes before registering event handler
+      Meteor.defer(() => {
+        $("html").one("click", () => {
+          deleteClicked.set(false);
+        });
+      });
+    }
   },
 });
 
