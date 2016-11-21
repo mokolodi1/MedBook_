@@ -41,8 +41,7 @@
 </template>
 
 <template name="manageObjectsGrid">
-
-  <div class="two column equal height ui grid">
+  <div class="ui grid">
     <div class="row">
       <div class="six wide column" id="manage-obj-context">
         <div class="ui vertical fluid tabular menu">
@@ -76,11 +75,15 @@
           {{/each}}
         </div>
       </div>
-      <div class="ten wide stretched column" style="min-height: 551px;">
-        {{! `z-index: -1` does "send to back" with the sticky. Without this
+      <div class="ten wide stretched column">
+        {{! `z-index: 1` does "send to back" with the sticky. Without this
             the sticky content covers the main menu}}
-        <div class="ui sticky" style="z-index: -1;">
-          <div class="ui sticky" id="manage-obj-detail">
+        <div style="z-index: 1;">
+          {{! bottom padding is needed because sometimes the sticky
+              doesn't think it's tall enough and you can't see the last
+              couple lines}}
+          <div class="ui sticky" id="manage-obj-detail"
+              style="padding-bottom: 20px;">
             {{#if Template.subscriptionsReady}}
               {{#if compare (param "selected") "create"}}
                 {{> Template.dynamic template=createTemplate}}
