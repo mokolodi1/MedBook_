@@ -1,3 +1,6 @@
+# NOTE: this file should only be used in development as it
+# mounts /data/db to /mnt, which can disappear at any time.
+
 version: '2'
 services:
   mongo:
