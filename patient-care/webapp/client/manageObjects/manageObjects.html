@@ -41,43 +41,57 @@
 </template>
 
 <template name="manageObjectsGrid">
-  <div class="ui grid">
-    <div class="six wide column">
-      <div class="ui vertical fluid tabular menu">
-        <a href={{pathFor "manageObjects" collectionSlug=../collectionSlug
-                  selected="create"}}
-            class="{{#if compare (param "selected") "create"}}active{{/if}}
-                item">
-          <b>Create new</b>
-          <i class="plus icon"></i>
-        </a>
 
-        {{#each getObjects}}
+  <div class="two column equal height ui grid">
+    <div class="row">
+      <div class="six wide column" id="manage-obj-context">
+        <div class="ui vertical fluid tabular menu">
+          <!-- <div class="ui item">
+            <div class="ui transparent icon input">
+              <input class="prompt" type="text"
+                  placeholder="Search {{lowerHumanName}}...">
+              <i class="search link icon"></i>
+            </div>
+          </div> -->
+
           <a href={{pathFor "manageObjects" collectionSlug=../collectionSlug
-                    selected=_id}}
-              class="{{#if managingObject}}active{{/if}} item">
-            {{#if showVersion}}
-              <div class="ui basic grey label" style="margin-top: -0.3em;">
-                v{{version}}
-              </div>
-            {{/if}}
-            {{name}}
+                    selected="create"}}
+              class="{{#if compare (param "selected") "create"}}active{{/if}}
+                  item">
+            <b>Create new</b>
+            <i class="plus icon"></i>
           </a>
-        {{/each}}
+
+          {{#each getObjects}}
+            <a href={{pathFor "manageObjects" collectionSlug=../collectionSlug
+                      selected=_id}}
+                class="{{#if managingObject}}active{{/if}} item">
+              {{#if showVersion}}
+                <div class="ui basic grey label" style="margin-top: -0.3em;">
+                  v{{version}}
+                </div>
+              {{/if}}
+              {{name}}
+            </a>
+          {{/each}}
+        </div>
       </div>
-    </div>
-    <div class="ten wide stretched column">
-      {{! some things look funky if we remove this wrapper div}}
-      <div>
-        {{#if Template.subscriptionsReady}}
-          {{#if compare (param "selected") "create"}}
-            {{> Template.dynamic template=createTemplate}}
-          {{else}}
-            {{> manageObject}}
-          {{/if}}
-        {{else}}
-          {{> dataLoading}}
-        {{/if}}
+      <div class="ten wide stretched column" style="min-height: 551px;">
+        {{! `z-index: -1` does "send to back" with the sticky. Without this
+            the sticky content covers the main menu}}
+        <div class="ui sticky" style="z-index: -1;">
+          <div class="ui sticky" id="manage-obj-detail">
+            {{#if Template.subscriptionsReady}}
+              {{#if compare (param "selected") "create"}}
+                {{> Template.dynamic template=createTemplate}}
+              {{else}}
+                {{> manageObject}}
+              {{/if}}
+            {{else}}
+              {{> dataLoading}}
+            {{/if}}
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -124,6 +124,29 @@ Template.manageObjectsGrid.onCreated(function () {
   });
 });
 
+Template.manageObjectsGrid.onRendered(function () {
+  let instance = this;
+
+  // make the manage object detail sticky so it moves down
+  // the page as the user scrolls down
+  instance.$("#manage-obj-detail").sticky({
+    context: "#manage-obj-context",
+    offset: 55,
+  });
+
+  // Refresh the sticky when
+  // - the count of objects on the left changes.
+  // This is important because the sticky does weird things
+  // if the height of the context or detail changes and
+  // it's not refreshed.
+  instance.autorun(() => {
+    // observe the count reactively
+    getObjects(instance).count();
+
+    $("#manage-obj-detail").sticky("refresh");
+  });
+});
+
 function getObjects (instance, query = {}) {
   // get all the objects for this data type
   let slug = FlowRouter.getParam("collectionSlug");
@@ -150,6 +173,9 @@ Template.manageObjectsGrid.helpers({
           getObjects(instance, { name: this.name }).count() > 1;
     }
   },
+  // lowerHumanName() {
+  //   return this.humanName.toLowerCase();
+  // },
 });
 
 // Template.manageObject
@@ -165,6 +191,16 @@ Template.manageObject.onCreated(function () {
     if (selectedId) {
       instance.subscribe("objectFromCollection", collectionName, selectedId);
     }
+  });
+
+  // refresh the sticky whenever the object finishes loading
+  instance.autorun(() => {
+    instance.subscriptionsReady();
+
+    // wait until Blaze has re-rendered the page
+    Meteor.defer(() => {
+      $("#manage-obj-detail").sticky("refresh");
+    });
   });
 });
 
