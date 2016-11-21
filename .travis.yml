@@ -15,7 +15,6 @@ script:
   - docker-compose -f docker-compose.yml -f docker-compose-test.yml run wrangler
   - docker-compose -f docker-compose.yml -f docker-compose-test.yml run job-runner
   - docker-compose -f docker-compose.yml -f docker-compose-test.yml run patient-care
-  - docker ps
   # Then, spin them up normally in daemon mode and confirm they run
   - docker-compose -f docker-compose.yml up -d
   - docker ps
