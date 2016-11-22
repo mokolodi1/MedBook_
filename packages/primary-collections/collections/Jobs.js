@@ -62,6 +62,7 @@ var jobSchemas = {
     args: new SimpleSchema({
       sample_group_id: { type: String },
       form_id: { type: String },
+      patient_form_id: { type: String, optional: true },
     }),
   },
   ApplyExprAndVarianceFilters: {

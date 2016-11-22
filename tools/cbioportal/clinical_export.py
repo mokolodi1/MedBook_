@@ -19,7 +19,7 @@ import getopt
 import pymongo
 import os
 
-def export_from_object(db, sampleGroup, form_id, work_dir, isPlc):
+def export_from_object(db, sampleGroup, form_id, patient_form_id, work_dir, isPlc):
     sampleGroupDataSets = sampleGroup["data_sets"]
     dataset_name = "generic name"
     desc = "generic description"
@@ -53,6 +53,13 @@ def export_from_object(db, sampleGroup, form_id, work_dir, isPlc):
     out_meta_clin.write("genetic_alteration_type: CLINICAL\n")
     out_meta_clin.write("datatype: SAMPLE_ATTRIBUTES\n")
     out_meta_clin.write("data_filename: data_sample.txt\n")
+    if patient_form_id is not None:
+        out_meta_clin_patient = open("./meta_patient.txt","w")
+        out_meta_clin_patient.write("cancer_study_identifier: %s\n"% dataset_label)
+        out_meta_clin_patient.write("genetic_alteration_type: CLINICAL\n")
+        out_meta_clin_patient.write("datatype: PATIENT_ATTRIBUTES\n")
+        out_meta_clin_patient.write("data_filename: data_patient.txt\n")
+        out_meta_clin_patient.close()
 
     out_meta_exp = open("./meta_expression.txt","w")
     out_meta_exp.write("profile_name: WCDT exp\n")
@@ -132,6 +139,81 @@ def export_from_object(db, sampleGroup, form_id, work_dir, isPlc):
     				out_clin.write("\t%s" % "NA"),
 
         out_clin.write("\n")
+    if patient_form_id is not None:
+        out_clin_patient = open("./data_patient.txt","w")
+        form = db["forms"].find_one({ "_id": patient_form_id })
+        try:
+    	    field_list = form[u'fields']
+        except:
+    	    print "Form", form_id, "not found"
+        sample_label_field = form[u'sample_label_field']
+        print "field_list", field_list, sample_label_field
+
+        #line 1 - field names
+        out_clin_patient.write("#%s" % field_list[0][u'name']),
+        #out_clin_patient.write("\t%s" % "Sample_ID" ),
+        for field in field_list[1:]:
+        	#if field[u'name'] != sample_label_field:
+    		out_clin_patient.write("\t%s" % field[u'name'] ),
+        out_clin_patient.write("\n")
+        #line 2 - field descriptions
+        out_clin_patient.write("#%s" % field_list[0][u'name']),
+        #out_clin_patient.write("\t%s" % "Sample_ID" ),
+        for field in field_list[1:]:
+        	#if field[u'name'] != sample_label_field:
+    		out_clin_patient.write("\t%s" % field[u'name'] ),
+        out_clin_patient.write("\n")
+
+        #line 3 - field types
+        out_clin_patient.write("#%s" % "STRING" ),
+        #out_clin_patient.write("\t%s" % "STRING" ),
+        for field in field_list[1:]:
+            #if field[u'name'] != sample_label_field:
+            ftype = str(field[u'value_type'])
+            out_clin_patient.write("\t%s" % ftype.upper() ),
+        out_clin_patient.write("\n")
+        #line 4 - priority
+        out_clin_patient.write("#%s" % "1" ),
+        #out_clin_patient.write("\t%s" % "1" ),
+        for field in field_list[1:]:
+        	#if field[u'name'] != sample_label_field:
+        	out_clin_patient.write("\t%s" % "1" ),
+        out_clin_patient.write("\n")
+        #line 5 - mysql field names
+        out_clin_patient.write("%s" % "PATIENT_ID" ),
+        #out_clin_patient.write("\t%s" % "SAMPLE_ID" ),
+        for field in field_list[1:]:
+        	#if field[u'name'] != sample_label_field:
+    		out_clin_patient.write("\t%s" % field[u'name'].upper().replace(" ","_").replace("-","_").replace("?","_").replace(",","_")),
+        out_clin_patient.write("\n")
+        # db.records.find({"associated_object.mongo_id":"6QpxSMZymmL28Ge8k"},{Age:1,Race:1,_id:0,"Patient ID":1})
+        record_list = db["records"].find({ "associated_object.mongo_id": patient_form_id })
+
+        for record in record_list:
+            print "#record", record
+            print "#form", form
+            #pid = record["Patient_ID"]
+            pid = form[u"sample_label_field"]
+            print "pid", pid
+            sid = record[sample_label_field]
+            name_arr = []
+            if '/' in sid:
+        		name_arr = sid.split('/')
+        		sid = name_arr[1]
+
+            out_clin_patient.write("%s" % (sid))
+            for field in field_list[1:]:
+                name = field[u'name']
+                if field[u'name'] == sample_label_field:
+                    out_clin_patient.write("\t%s" % sid),
+                else:
+                    try:
+                        out_clin_patient.write("\t%s" % record[name]),
+                    except:
+        				out_clin_patient.write("\t%s" % "NA"),
+
+            out_clin_patient.write("\n")
+        out_clin_patient.close()
     out_study.close()
     out_meta_clin.close()
     out_meta_exp.close()
@@ -180,6 +262,11 @@ def main():
     else:
         print("--form_id missing");
         sys.exit(1);
+    if "--patient_form_id" in argv:
+        formIndex = argv.index("--patient_form_id") + 1
+        patient_form_id = argv[formIndex]
+    else:
+        patient_form_id = None
     if "--work-dir" in argv:
         workIndex = argv.index("--work-dir") + 1
         work_dir = argv[workIndex]
@@ -189,7 +276,7 @@ def main():
      	print("--work-dir missing");
     	sys.exit(1);
 
-    export_from_object(db, sampleGroup, form_id, work_dir, "--plc" in argv)
+    export_from_object(db, sampleGroup, form_id, patient_form_id, work_dir, "--plc" in argv)
 
     sys.exit(0)
 
