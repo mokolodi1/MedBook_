@@ -1,43 +1,39 @@
-// Template.homeWelcome
+// Template.askForName
 
-Template.homeWelcome.helpers({
-  shouldWelcome: function () {
+Template.askForName.helpers({
+  needToAskForName: function () {
     const user = Meteor.user();
 
-    if (!user ||
-        !user.profile ||
-        !user.profile.patientCare ||
-        !user.profile.patientCare.dismissedHomeWelcome) {
-      return true;
-    }
+    return !user || !user.profile ||
+        !user.profile.fullName ||
+        !user.profile.preferredName;
   },
 });
 
-Template.homeWelcome.events({
-  "click .never-show-again": function (event, instance) {
-    // we can update user.profile on the client: yoohoo weird Meteor exceptions
-    Meteor.users.update(Meteor.userId(), {
-      $set: {
-        "profile.patientCare.dismissedHomeWelcome": true
-      }
+// Template.askForNameForm
+
+Template.askForNameForm.helpers({
+  nameSchema() {
+    return new SimpleSchema({
+      fullName: { type: String },
+      preferredName: { type: String },
     });
-  }
+  },
 });
 
 // Template.wranglerExplanation
+// TODO: also show this for the app button
 
 Template.wranglerExplanation.helpers({
   directWranglerLink() {
     const user = Meteor.user();
 
-    if (!user ||
-        !user.profile ||
-        !user.profile.patientCare ||
-        !user.profile.patientCare.dismissedWranglerExplanation) {
-      return "";
+    if (user &&
+        user.profile &&
+        user.profile.patientCare &&
+        user.profile.patientCare.dismissedWranglerExplanation) {
+      return "https://medbook.io/wrangler";
     }
-
-    return "https://medbook.io/wrangler";
   },
 });
 

@@ -1,6 +1,6 @@
 // Template.outlierAnalysis
-import Fuse from 'fuse.js' ;
-import Clipboard from 'clipboard' ;
+import Fuse from 'fuse.js';
+import Clipboard from 'clipboard';
 
 Template.outlierAnalysis.onCreated(function () {
   const instance = this;
@@ -64,10 +64,10 @@ Template.outlierGenesTable.onCreated(function () {
       // Show the genelist, just omitting stain info.
       instance.gotGeneInfosVar.set(true);
     }
-    if (result){
+    if (result) {
       instance.geneInfos.set(result) ;
       instance.gotGeneInfosVar.set(true);
-    };
+    }
   });
 
   let unfilteredData = instance.data.data;
@@ -141,10 +141,12 @@ Template.outlierGenesTable.helpers({
   currentPageData: function () {
     return Template.instance().currentPageData.get();
   },
-  pageNumber: function () { // not pageIndex
+  pageNumber: function () {
+    // add one b/c index !== number
     return Template.instance().pageIndex.get() + 1;
   },
-  maxPageNumber: function () { // not pageIndex
+  maxPageNumber: function () {
+    // add one b/c index !== number
     return Template.instance().maxPageIndex.get() + 1;
   },
   totalRows: function () {
@@ -168,7 +170,7 @@ Template.outlierGenesTable.helpers({
     let pageNumbers = _.map(Object.keys(pages), (numString) => {
       return parseInt(numString, 10);
     });
-    pageNumbers.sort((a, b) => { return a - b }); // don't sort lexically
+    pageNumbers.sort((a, b) => { return a - b; }); // don't sort lexically
 
     // filter them...
     let filteredNumbers = _.filter(pageNumbers, (num) => {
