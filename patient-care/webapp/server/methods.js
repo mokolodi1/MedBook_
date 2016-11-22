@@ -532,4 +532,22 @@ Meteor.methods({
     // wait for future.throw or future.return to be called
     return future.wait();
   },
+  // refresh the cBioPortal data
+  // NOTE: the only security here for now is that they have a MedBook account
+  refreshCBioPortalData(args) {
+    check(args, new SimpleSchema({
+      form_id: { type: String },
+      sample_group_id: { type: String },
+    }));
+
+    let user = MedBook.ensureUser(Meteor.userId());
+    user.ensureAccess(Forms.findOne(args.form_id));
+    user.ensureAccess(SampleGroups.findOne(args.sample_group_id));
+
+    return Jobs.insert({
+      name: "UpdateCbioData",
+      user_id: user._id,
+      args
+    });
+  },
 });

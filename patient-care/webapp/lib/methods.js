@@ -989,7 +989,7 @@ Meteor.methods({
     // at least make sure they're logged in so we know who they are...
     let user = MedBook.ensureUser(Meteor.userId());
 
-    Jobs.insert({
+    return Jobs.insert({
       name: "UpdateCbioSecurity",
       user_id: user._id,
       args: {
