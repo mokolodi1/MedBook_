@@ -9,7 +9,7 @@ install:
   # Build all containers
   # - ./scripts/buildAll.sh
   #For this branch:  Just build patient care
-  - docker-compose -f docker-compose.yml -f docker-compose-build.yml build
+  - docker-compose -f docker-compose.yml -f docker-compose-build.yml build patient-care
   # Start up mongo
   - docker-compose -f docker-compose-mongo.yml up -d
 script:
