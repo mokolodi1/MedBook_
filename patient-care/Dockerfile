@@ -22,4 +22,5 @@ COPY tools/exporters /tools/exporters
 # I don't know that it will make it faster overall because now meteor-tool will just be
 # downloaded in the docker build step instead, but if it causes a change in the relative times
 # of the steps we can observe that.
-RUN meteor update
+# Let's try it as the superuser since everything inside the docker seems to get run as root anyhow
+RUN meteor --allow-superuser update
