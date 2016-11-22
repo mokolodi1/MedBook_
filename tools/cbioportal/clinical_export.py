@@ -24,15 +24,15 @@ def export_from_object(db, sampleGroup, form_id, work_dir, isPlc):
     dataset_name = "generic name"
     desc = "generic description"
     data_set_id = ""
-    sample_label = ""
+    dataset_label = ""
+    dataset_name = sampleGroup["name"]
     for d in sampleGroupDataSets:
-        dataset_name = d[u'data_set_name']
         data_set_id = d[u'data_set_id']
         # assume dataset has only one study **FIX**
         for s in d[u'sample_labels']:
-            sample_label = s.split('/')[0]
-    # **FIX** assume sample_label is composed of cancer_type "_" "name"
-    cancer_type = sample_label.split('_')[0]
+            dataset_label = s.split('/')[0]
+    # **FIX** assume dataset_label is composed of cancer_type "_" "name"
+    cancer_type = dataset_label.split('_')[0]
     data_set = db["data_sets"].find_one({ "_id": data_set_id })
     desc = data_set[u'description']
     collaboration_list = data_set[u'collaborations']
@@ -41,15 +41,15 @@ def export_from_object(db, sampleGroup, form_id, work_dir, isPlc):
         collabs = collabs+collab.encode('ascii','ignore')+';'
     out_study = open("./meta_study.txt","w")
     out_study.write("type_of_cancer: %s\n" % cancer_type);
-    out_study.write("cancer_study_identifier:  %s\n" % sample_label);
+    out_study.write("cancer_study_identifier:  %s\n" % dataset_label);
     out_study.write("name: %s\n" % dataset_name);
     out_study.write("description: %s\n" % desc);
     out_study.write("citation: unpublished\n");
     out_study.write("groups: %s\n" % collabs);
-    out_study.write("short_name: %s\n" % sample_label);
+    out_study.write("short_name: %s\n" % dataset_label);
 
     out_meta_clin = open("./meta_sample.txt","w")
-    out_meta_clin.write("cancer_study_identifier: %s\n"% sample_label)
+    out_meta_clin.write("cancer_study_identifier: %s\n"% dataset_label)
     out_meta_clin.write("genetic_alteration_type: CLINICAL\n")
     out_meta_clin.write("datatype: SAMPLE_ATTRIBUTES\n")
     out_meta_clin.write("data_filename: data_sample.txt\n")
@@ -59,7 +59,7 @@ def export_from_object(db, sampleGroup, form_id, work_dir, isPlc):
     out_meta_exp.write("profile_description: WCDT exp\n")
     out_meta_exp.write("show_profile_in_analysis_tab: true\n")
     out_meta_exp.write("stable_id: rna_seq_v2_mrna_median_Zscores\n")
-    out_meta_exp.write("cancer_study_identifier: %s\n"% sample_label)
+    out_meta_exp.write("cancer_study_identifier: %s\n"% dataset_label)
     out_meta_exp.write("genetic_alteration_type: MRNA_EXPRESSION\n")
     out_meta_exp.write("datatype: Z-SCORE\n")
     out_meta_exp.write("data_filename: data_expression.txt\n")
