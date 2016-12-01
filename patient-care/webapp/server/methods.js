@@ -538,11 +538,16 @@ Meteor.methods({
     check(args, new SimpleSchema({
       form_id: { type: String },
       sample_group_id: { type: String },
+      patient_form_id: { type: String, optional: true },
     }));
 
     let user = MedBook.ensureUser(Meteor.userId());
     user.ensureAccess(Forms.findOne(args.form_id));
     user.ensureAccess(SampleGroups.findOne(args.sample_group_id));
+
+    if (args.patient_form_id) {
+      user.ensureAccess(Forms.findOne(args.patient_form_id));
+    }
 
     return Jobs.insert({
       name: "UpdateCbioData",
