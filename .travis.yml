@@ -6,11 +6,19 @@ env:
   # using prodStart.sh or devStart.sh
   - MONGO_URL="mongodb://mongo:27017/MedBook"
 install:
+  # DEBUG XXX
+  - sudo netstat -nlp | grep 3306
+  - sudo netstat -nlp | head -5
+  - sudo netstat -nlp | wc -l
+
   # Build all containers
   - ./scripts/buildAll.sh
   # Start up mongo
   - docker-compose -f docker-compose-mongo.yml up -d
 script:
+  # DEBUG XXX
+  - sudo netstat -nlp | grep 3306
+
   # Run Meteor app tests
   - docker-compose -f docker-compose.yml -f docker-compose-test.yml run wrangler
   - docker-compose -f docker-compose.yml -f docker-compose-test.yml run job-runner
