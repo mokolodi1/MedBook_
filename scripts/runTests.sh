@@ -1,4 +1,4 @@
 #! /usr/bin/env bash
 
 cd /app
-meteor --allow-superuser test --once --driver-package dispatch:mocha
+meteor test --once --driver-package dispatch:mocha
