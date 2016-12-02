@@ -52,7 +52,7 @@ UpdateCbioData.prototype.run = function () {
       ], workDir, { stdoutPath: expressionDataPath }),
 
       // phenotype file for cbio importer
-      spawnCommand(getSetting("clinical_export"), clin_cmd, workDir),
+      spawnCommand(getSetting("cbioportal_clinical_export"), clin_cmd, workDir),
     ])
     .then(function (spawnResults)           {
       console.log("done writing files");
