@@ -7,9 +7,9 @@ env:
   - MONGO_URL="mongodb://mongo:27017/MedBook"
 install:
   # DEBUG XXX
-  - sudo netstat -nlp | grep 3306
-  - sudo netstat -nlp | head -5
   - sudo netstat -nlp | wc -l
+  - sudo netstat -nlp | grep 3306
+  - sudo netstat -nlp
 
   # Build all containers
   - ./scripts/buildAll.sh
