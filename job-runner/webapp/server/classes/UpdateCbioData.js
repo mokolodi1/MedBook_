@@ -74,7 +74,7 @@ UpdateCbioData.prototype.run = function () {
         getSetting("cbio_core_jar_path"),
         "-s",
         workDir,
-      ], workDir);
+      ], workDir, { stdoutPath: "cbio_update_data_stdout.txt" });
     })
     .then(Meteor.bindEnvironment(function (cbioImportResult) {
       if (cbioImportResult.exitCode !== 0) {
