@@ -10,11 +10,18 @@ install:
   - ./scripts/buildAll.sh
   # Start up mongo
   - docker-compose -f docker-compose-mongo.yml up -d
+
+before_script:
+  # Disable services enabled by default
+  # See http://stackoverflow.com/q/27382295/1092640
+  - sudo service mysql stop
+  - sudo service postgresql stop
+
 script:
   # Run Meteor app tests
-  - docker-compose -f docker-compose.yml -f docker-compose-test.yml run wrangler
-  - docker-compose -f docker-compose.yml -f docker-compose-test.yml run job-runner
-  - docker-compose -f docker-compose.yml -f docker-compose-test.yml run patient-care
+  # - docker-compose -f docker-compose.yml -f docker-compose-test.yml run wrangler
+  # - docker-compose -f docker-compose.yml -f docker-compose-test.yml run job-runner
+  # - docker-compose -f docker-compose.yml -f docker-compose-test.yml run patient-care
   # Then, spin them up normally in daemon mode and confirm they run
   - docker-compose -f docker-compose.yml up -d
   - docker ps
