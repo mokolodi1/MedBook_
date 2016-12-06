@@ -174,7 +174,7 @@ Technically, all apps should be stopped before restoring from a backup. Currentl
 
 ## Migrations
 
-Migrations are one-off Javascript code to update mongo objects to a new schema. Generally speaking, they should be run only when MedBook is offline (when all the docker containers have been stopped).
+Migrations are one-off pieces of Javascript code which update mongo objects to a new schema. They should be run only when MedBook is offline (when all the docker containers have been stopped).
 
 To run a migration:
 ```sh
@@ -182,5 +182,5 @@ To run a migration:
 ssh ubuntu@medbook.io
 
 // run the migration
-mongo MedBook < /path/to/migration/migration_name.js
+mongo -host mongo MedBook < /path/to/migration/migration_name.js
 ```
