@@ -93,7 +93,8 @@
       {{> listSelectableJobs jobsQuery=jobsQuery columns=columns
           selectMode=selectModeReactiveVar
           selectedIdMap=selectedIdMapReactiveVar
-          paginationOptions=paginationOptions}}
+          paginationOptions=paginationOptions
+          viewJobRouteName=viewJobRouteName}}
     {{else}}
       {{#if getInstanceReactive "searchText"}}
         <div class="ui message">
@@ -146,7 +147,7 @@
     </thead>
     <tbody>
       {{! this #let makes it so columns is defined within the #each}}
-      {{#let columns=columns}}
+      {{#let columns=columns viewJobRouteName=viewJobRouteName}}
         {{#each jobsQuery}}
           <tr class="select-job {{activeIfSelected}}">
             {{#each columns}}
@@ -156,7 +157,7 @@
             {{/each}}
 
             <td>
-              {{> viewJobButton href=(pathFor "upDownGenesJob" job_id=_id)
+              {{> viewJobButton href=(pathFor viewJobRouteName job_id=_id)
                   job=this}}
             </td>
           </tr>
