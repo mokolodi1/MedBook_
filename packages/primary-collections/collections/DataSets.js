@@ -32,6 +32,7 @@ MedBook.dataSetTypes = [
             { value: "raw_counts", label: "Raw counts" },
             { value: "quan_norm_counts", label: "Quantile normalized counts" },
             { value: "fpkm", label: "FPKM" },
+            { value: "rpkm", label: "RPKM" },
             { value: "tpm", label: "TPM" },
           ]
         },
