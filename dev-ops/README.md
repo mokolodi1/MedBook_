@@ -98,6 +98,29 @@ source /mysql-dump/dump.sql;
 zcat /mysql-dump/dump_new.sql.gz | mysql -h localhost -u cbio -pP@ssword1 cbioportal
 ```
 
+### Refreshing cBioPortal
+
+To refresh cBioPortal with the latest list of collaborators in the WCDT collaboration, run the following in the Javascript console while logged into MedBook.
+```
+Meteor.call("refreshCBioPortalAccess");
+```
+
+To refresh the cBioPortal with the latest WCDT data, run the following in the Javascript console while logged into MedBook. This code will open a new tab to view the log file for the job. Until the job finishes, it will display a 404 error as the log file hasn't completed writing yet.
+```
+Meteor.call("refreshCBioPortalData", {
+  // replace these three IDs with the data you'd like to load
+  form_id: "DPm4uNN4RyeyCc5w6",
+  sample_group_id: "eQaaTBMDEkj2wJm3h",
+  patient_form_id: "uQ2qBhPiCJqGmZiRd"
+}, (error, jobId) => {
+  if (error) {
+    console.log("ERROR:", error);
+  } else {
+    window.open(`${location.origin}/download/${Meteor.userId()}/${Accounts._storedLoginToken()}/job-blob/${jobId}/cbio_update_data_stdout.txt`);
+  }
+});
+```
+
 ## Running Ansible
 
 Ansible is a tool that does system administration for many remote boxes. Ansible should be run after setting up a new box to mount disks, install Docker, etc. It can be also used to make changes on all or many boxes at the same time.
