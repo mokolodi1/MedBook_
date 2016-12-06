@@ -78,6 +78,10 @@ while sleep 15; do rsync -rah ubuntu@medbook.io:/filestore /filestore; done
 # https://domains.google.com/registrar#d=3530982,medbook.io&z=a&chp=d,z
 ```
 
+## cBioPortal
+
+cBioPortal is currently only available to WCDT users. Only WCDT data should be loaded into cBioPortal though there is no software limit to which data can be loaded.
+
 ### Setting up cBioPortal
 ```sh
 # move the sql db to where you can restore it from
@@ -107,12 +111,11 @@ To refresh cBioPortal with the latest list of collaborators in the WCDT collabor
 Meteor.call("refreshCBioPortalAccess");
 ```
 
-To refresh the cBioPortal with new data, run the following in the Javascript console while logged into MedBook. This code will open a new tab to view the log file for the job. This tab will display a 404 error initially; once the job finishes, a log file will be available at the URL opened.
+To refresh the cBioPortal with new data, run the following in the Javascript console while logged into MedBook. The job will wipe out the current `prad_wcdt` data and replace it with the new data.
 
-#### Arguments
- - `sample_group_id`: id of the sample group that defines which expression data will be loaded
- - `form_id`: id of the clinical form for sample level data, sample_labels in this form **must match** sample labels from the sample_group defined above.
- - `patient_form_id`: id of the clinical form with patient level attributes.
+This code snippet will open a new tab to view the log file for the job. This tab will display a 404 error initially; once the job finishes, a log file will be available at the URL opened. (You'll have to manually refresh the page.)
+
+[See here for documentation of the arguments provided to `refreshCBioPortalData` (`form_id`, etc.).](/job-runner#cbioupdatedata-updatecbiodata)
 
 ```
 Meteor.call("refreshCBioPortalData", {
