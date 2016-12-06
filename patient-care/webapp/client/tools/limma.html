@@ -63,8 +63,10 @@
         <i class="right arrow icon"></i>
         Run GSEA
       </button>
+      {{> recordsDownloadButton hotPassback=hotPassback filename=filename
+          cssClass="secondary"}}
     </h2>
-    {{> showLimmaResult}}
+    {{> showLimmaResult job=this hotPassback=hotPassback}}
 
     <h2>
       Voom plot
@@ -134,10 +136,13 @@
 
 <template name="showLimmaResult">
   {{#if Template.subscriptionsReady}}
-    {{#with getGeneSet}}
-      {{> showRecords fields=fields mongoId=_id
-          collectionName="GeneSets" primaryFieldName=gene_label_field}}
-    {{/with}}
+    {{! define in a #let to be used inside the #with}}
+    {{#let hotPassback=hotPassback}}
+      {{#with getGeneSet}}
+        {{> showRecords fields=fields mongoId=_id hotPassback=hotPassback
+            collectionName="GeneSets" primaryFieldName=gene_label_field}}
+      {{/with}}
+    {{/let}}
   {{else}}
     {{> dataLoading}}
   {{/if}}

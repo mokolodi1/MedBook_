@@ -188,9 +188,8 @@
     Data
 
     {{> recordsDownloadButton hotPassback=hotPassback filename=name
-        cssClass="small"}}
+        cssClass="small secondary"}}
   </h3>
-  {{print 'hotPassback ::' hotPassback}}
   {{> showRecords fields=fields mongoId=(param "selected")
       collectionName="GeneSets" primaryFieldName=gene_label_field
       hotPassback=hotPassback}}

@@ -71,15 +71,18 @@
 
       {{! Show a list of previously run GSEA jobs as well as a form to
           create a new GSEA job}}
-      <button class="ui labeled icon button
+      <button class="ui labeled icon primary button
           {{#if Template.subscriptionsReady}}
-            primary run-gsea{{else}}loading{{/if}}">
+            run-gsea{{else}}loading{{/if}}">
         <i class="right arrow icon"></i>
         Run GSEA
       </button>
+
+      {{> recordsDownloadButton hotPassback=hotPassback
+          cssClass="secondary" filename=filename}}
     </h2>
 
-    {{> showGeneSetAssociatedWithJob}}
+    {{> showGeneSetAssociatedWithJob job=this hotPassback=hotPassback}}
   {{/jobWrapper}}
 </template>
 
@@ -125,10 +128,13 @@
 
 <template name="showGeneSetAssociatedWithJob">
   {{#if Template.subscriptionsReady}}
-    {{#with getGeneSet}}
-      {{> showRecords fields=fields mongoId=_id
-          collectionName="GeneSets" primaryFieldName=gene_label_field}}
-    {{/with}}
+    {{! define in a #let to be used inside the #with}}
+    {{#let hotPassback=hotPassback}}
+      {{#with getGeneSet}}
+        {{> showRecords fields=fields mongoId=_id collectionName="GeneSets"
+            primaryFieldName=gene_label_field hotPassback=hotPassback}}
+      {{/with}}
+    {{/let}}
   {{else}}
     {{> dataLoading}}
   {{/if}}

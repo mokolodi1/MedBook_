@@ -560,7 +560,6 @@ Template.recordsHandsOnTable.onRendered(function () {
 
   let { hotPassback } = instance.data;
 
-  console.log("hotPassback:", hotPassback);
   if (hotPassback) {
     hotPassback.hotInstance = hot;
     hotPassback.initialized.set(true);
@@ -685,6 +684,6 @@ Template.recordsDownloadButton.events({
     let { hotPassback, filename } = instance.data;
 
     let exportPlugin = hotPassback.hotInstance.getPlugin('exportFile');
-    exportPlugin.downloadFile("tsv", { filename });
+    exportPlugin.downloadFile("csv", { filename });
   },
 });

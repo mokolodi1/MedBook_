@@ -507,8 +507,7 @@
 </template>
 
 <template name="recordsDownloadButton">
-  {{print 'hotPassback.initialized.get ::' hotPassback.initialized.get}}
-  <button class="ui icon secondary button {{cssClass}} download-hot-data
+  <button class="ui {{cssClass}} button download-hot-data
       {{#unless hotPassback.initialized.get}}loading{{/unless}}">
     Download
   </button>

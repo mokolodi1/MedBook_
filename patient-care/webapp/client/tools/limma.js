@@ -133,6 +133,10 @@ Template.limmaJob.onCreated(function () {
   instance.autorun(function () {
     instance.subscribe("specificJob", FlowRouter.getParam("job_id"));
   });
+
+  instance.hotPassback = {
+    initialized: new ReactiveVar(false),
+  };
 });
 
 Template.limmaJob.helpers({
@@ -150,6 +154,17 @@ Template.limmaJob.helpers({
       listRoute: "listLimma",
       argsTemplate: "limmaJobArgs",
     };
+  },
+  hotPassback() {
+    return Template.instance().hotPassback;
+  },
+  filename() {
+    let { args } = this;
+
+    return `Limma: ${args.reference_sample_group_name} ` +
+        `(v${args.reference_sample_group_version}) vs. ` +
+        `${args.experimental_sample_group_name} ` +
+        `(v${args.experimental_sample_group_version})`;
   },
 });
 
@@ -183,7 +198,7 @@ Template.showLimmaResult.onCreated(function () {
 
   instance.subscribe("associatedObjectGeneSet", {
     collection_name: "Jobs",
-    mongo_id: instance.data._id,
+    mongo_id: instance.data.job._id,
   });
 });
 
