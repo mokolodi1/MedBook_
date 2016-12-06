@@ -100,12 +100,14 @@ zcat /mysql-dump/dump_new.sql.gz | mysql -h localhost -u cbio -pP@ssword1 cbiopo
 
 ### Refreshing cBioPortal
 
+Note that the following functions can be performed by any logged-in MedBook user. This is considered okay because user creation is locked down (only existing users can create new ones) and someone would have to read this documentation to figure out how to use this functionality. The worst that someone could do would be to run these commands with bad data, which would likely be noticed and corrected immediately.
+
 To refresh cBioPortal with the latest list of collaborators in the WCDT collaboration, run the following in the Javascript console while logged into MedBook.
 ```
 Meteor.call("refreshCBioPortalAccess");
 ```
 
-To refresh the cBioPortal with the latest WCDT data, run the following in the Javascript console while logged into MedBook. This code will open a new tab to view the log file for the job. Until the job finishes, it will display a 404 error as the log file hasn't completed writing yet.
+To refresh the cBioPortal with the latest WCDT data, run the following in the Javascript console while logged into MedBook. This code will open a new tab to view the log file for the job. Until the job finishes, it will display a 404 error as the log file won't have completed writing yet.
 ```
 Meteor.call("refreshCBioPortalData", {
   // replace these three IDs with the data you'd like to load
