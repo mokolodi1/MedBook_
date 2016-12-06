@@ -513,6 +513,7 @@ Meteor.methods({
     // wait for future.throw or future.return to be called
     return future.wait();
   },
+
   // return a list of description objects for the union
   // of collaborations in multiple objects
   getCollabDescriptions(collectionName, mongoIds, attribute) {
@@ -583,6 +584,29 @@ Meteor.methods({
 
         return userDescription;
       }
+    });
+  },
+  // refresh the cBioPortal data
+  // NOTE: the only security here for now is that they have a MedBook account
+  refreshCBioPortalData(args) {
+    check(args, new SimpleSchema({
+      form_id: { type: String },
+      sample_group_id: { type: String },
+      patient_form_id: { type: String, optional: true },
+    }));
+
+    let user = MedBook.ensureUser(Meteor.userId());
+    user.ensureAccess(Forms.findOne(args.form_id));
+    user.ensureAccess(SampleGroups.findOne(args.sample_group_id));
+
+    if (args.patient_form_id) {
+      user.ensureAccess(Forms.findOne(args.patient_form_id));
+    }
+
+    return Jobs.insert({
+      name: "UpdateCbioData",
+      user_id: user._id,
+      args
     });
   },
 });
