@@ -344,7 +344,6 @@ Meteor.methods({
 
         // defaultValues don't work with upserts, so set some fields manually
         timeout_length: 7 * 24 * 60 * 60 * 1000, // a week
-        collaborations: [],
         prerequisite_job_ids: [],
         retry_count: 0,
       }
@@ -365,16 +364,17 @@ Meteor.methods({
       genesWithInfo.icon = geneSet.name.split(" ")[1];
       genesWithInfo.description = geneSet.description ;
       genesWithInfo.genes = geneSet.gene_labels;
-      return genesWithInfo ;
-    }
+      return genesWithInfo;
+    };
+
     let howManyBlessed = GeneSetGroups.find(findBlessedSet).count();
     // If we don't find the collection -- OR someone else has attempted to hijack the icons by
     // making their own collection -- shut the whole thing down
     // TODO: This isn't the best implementation --
     // We need a better way / UI to indicate this collection.
     if(howManyBlessed !== 1){
-      console.log("Can't determine which gene sets to display as icons.")
-     return [];
+      console.log("Can't determine which gene sets to display as icons.");
+      return [];
     }
     let blessedGeneSet = GeneSetGroups.findOne(findBlessedSet);
 
@@ -531,5 +531,90 @@ Meteor.methods({
 
     // wait for future.throw or future.return to be called
     return future.wait();
+  },
+
+  // return a list of description objects for the union
+  // of collaborations in multiple objects
+  getCollabDescriptions(collectionName, mongoIds) {
+    check(collectionName, String);
+    check(mongoIds, [String]);
+
+    let user = MedBook.ensureUser(this.userId);
+
+    // put all the collab names into this hash map
+    let collabNameHash = {};
+
+    MedBook.collections[collectionName].find({
+      _id: { $in: mongoIds }
+    }, {
+      fields: { collaborations: 1 }
+    }).forEach(({ collaborations }) => {
+      _.each(collaborations, (collabName) => {
+        collabNameHash[collabName] = true;
+      });
+    });
+
+    let combinedCollabs = Object.keys(collabNameHash);
+
+    return _.map(combinedCollabs, (name) => {
+      if (name.indexOf("@") === -1) {
+        // if it's a collaboration name...
+        let collab = Collaborations.findOne({ name }, {
+          fields: {
+            name: 1,
+            description: 1,
+          }
+        });
+
+        collab.id = collab.name;
+        collab.title = collab.name;
+        delete collab.name;
+        collab.type = "collaboration";
+
+        return collab;
+      } else {
+        // if it's a personal collaboration...
+        let user = Meteor.users.findOne({
+          "collaborations.personal": name
+        });
+
+        let userDescription = {
+          id: user.collaborations.personal,
+          _id: user._id,
+          type: "user",
+          description: user.collaborations.personal,
+        };
+
+        // can't assume user.profile is set
+        if (user.profile) {
+          userDescription.title = user.profile.fullName;
+        }
+
+        return userDescription;
+      }
+    });
+  },
+  // refresh the cBioPortal data
+  // NOTE: the only security here for now is that they have a MedBook account
+  refreshCBioPortalData(args) {
+    check(args, new SimpleSchema({
+      form_id: { type: String },
+      sample_group_id: { type: String },
+      patient_form_id: { type: String, optional: true },
+    }));
+
+    let user = MedBook.ensureUser(Meteor.userId());
+    user.ensureAccess(Forms.findOne(args.form_id));
+    user.ensureAccess(SampleGroups.findOne(args.sample_group_id));
+
+    if (args.patient_form_id) {
+      user.ensureAccess(Forms.findOne(args.patient_form_id));
+    }
+
+    return Jobs.insert({
+      name: "UpdateCbioData",
+      user_id: user._id,
+      args
+    });
   },
 });

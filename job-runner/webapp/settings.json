@@ -1,0 +1,17 @@
+{
+  "limma_path":"/tools/limma/limma_ng.R",
+  "outlier_analysis":"/tools/OutlierAnalysis/outlier-analysis.sh",
+  "calculate_outlier_genes":"/tools/OutlierAnalysis/calculate_outlier_genes.R",
+  "genomic_expression_export":"/tools/exporters/genomic_expression_export.py",
+  "gene_set_group_export":"/tools/exporters/gene_set_group_export.py",
+  "limma_phenotype_export":"/tools/exporters/limma_phenotype_export.py",
+  "gsea_path":"/tools/gsea/rgGSEA.py",
+  "gsea_jar_path":"/tools/gsea/gsea2-2.2.2.jar",
+  "cbio_importer_path":"/tools/cbioportal/importer/cbioportalImporter.py",
+  "cbio_core_jar_path":"/tools/cbioportal/core-1.2.1.jar",
+  "cbioportal_clinical_export": "/tools/cbioportal/clinical_export.py",
+  "expression_level_gene_filter":"/tools/ExpressionAndVarianceFilters/filter_out_genes_unexpressed_in_most_samples.py",
+  "variance_gene_filter":"/tools/ExpressionAndVarianceFilters/filter_out_lowest_varying_genes.py",
+  "gene_set_export":"/tools/exporters/gene_set_export.py",
+  "gene_set_import":"/tools/importers/gene_set_import.py"
+}

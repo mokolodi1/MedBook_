@@ -62,6 +62,20 @@ Template.listUpDownGenes.helpers({
   customSampleGroup() { return Template.instance().customSampleGroup; },
   error() { return Template.instance().error; },
   talkingToServer() { return Template.instance().talkingToServer.get() },
+  previousJobsCols() {
+    return [
+      { title: "Sample", field: "args.sample_label" },
+      { title: "Comparison group", field: "args.sample_group_name" },
+      { title: "IQR", field: "args.iqr_multiplier" },
+      {
+        title: "Gene filters",
+        field: "args.use_filtered_sample_group",
+        yes_no: true
+      },
+      { title: "Up genes", field: "output.up_genes_count" },
+      { title: "Down genes", field: "output.down_genes_count" },
+    ];
+  }
 });
 
 Template.listUpDownGenes.events({
@@ -96,29 +110,5 @@ Template.listUpDownGenes.events({
         }
       }
     });
-  },
-});
-
-// Template.previouslyRunUpDownGenes
-
-Template.previouslyRunUpDownGenes.onCreated(function() {
-  let instance = this;
-
-  instance.subscribe("upDownGenesJobs");
-  instance.subscribe("sampleGroups");
-});
-
-Template.previouslyRunUpDownGenes.helpers({
-  getJobs() {
-    return Jobs.find({ name: "UpDownGenes" }, {
-      sort: { date_created: -1 }
-    });
-  },
-  // Get version of a sample group visible to this user
-  getSampleGroupVersion(sampleGroupId){
-    let sg = SampleGroups.findOne(sampleGroupId);
-    let version = "";
-    if(sg){ version = sg.version; }
-    return version;
   },
 });

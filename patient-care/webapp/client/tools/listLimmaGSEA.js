@@ -16,7 +16,7 @@ Template.listLimmaGSEA.onCreated(function () {
         collaborations: [ Meteor.user().collaborations.personal ],
         data_sets: []
       }),
-    }
+    };
   }
   instance.groupA = makeDefaultGroup("Reference group", "sampleGroupA");
   instance.groupB = makeDefaultGroup("Experimental group", "sampleGroupB");
@@ -32,12 +32,23 @@ Template.listLimmaGSEA.onRendered(function () {
 });
 
 Template.listLimmaGSEA.helpers({
-  groupA: function () { return Template.instance().groupA },
-  groupB: function () { return Template.instance().groupB },
+  groupA: function () { return Template.instance().groupA; },
+  groupB: function () { return Template.instance().groupB; },
   error: function () { return Template.instance().error; },
   creatingJob: function () { return Template.instance().creatingJob.get(); },
   getGeneSetGroups: function () {
     return GeneSetGroups.find({});
+  },
+  previousJobsCols() {
+    return [
+      { title: "Reference group", field: "args.sample_group_a_name" },
+      { title: "Experimental group", field: "args.sample_group_b_name" },
+      {
+        title: "Top genes count for Limma",
+        field: "args.limma_top_genes_count"
+      },
+      { title: "Gene sets", field: "args.gene_set_group_name" },
+    ];
   },
 });
 
@@ -48,7 +59,7 @@ function getSampleGroupId (group, instance) {
 
       if (!sgObj.name) {
         reject(Meteor.Error("Name missing",
-            `Please enter a name for ${group.title}.`))
+            `Please enter a name for ${group.title}.`));
         return;
       }
       if (sgObj.data_sets.length === 0) {
@@ -194,23 +205,5 @@ Template.limmaGSEAGroupSelector.helpers({
   },
   customSampleGroup: function () {
     return Template.instance().customSampleGroup;
-  },
-});
-
-
-
-// Template.previouslyRunLimmaGSEA
-
-Template.previouslyRunLimmaGSEA.onCreated(function () {
-  let instance = this;
-
-  instance.subscribe("jobsOfType", "RunLimmaGSEA");
-});
-
-Template.previouslyRunLimmaGSEA.helpers({
-  getJobs: function () {
-    return Jobs.find({ name: "RunLimmaGSEA" }, {
-      sort: { date_created: -1 }
-    });
   },
 });

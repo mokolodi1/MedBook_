@@ -1,4 +1,5 @@
 // actual globals
+
 import * as Q_module from 'q';
 import * as ntemp_module from 'temp';
 import byline from "byline";
@@ -44,7 +45,7 @@ spawnCommand = function (command, args, cwd, pathDefinitions) {
   // NOTE: we should really be using temp.path here...
   function hashCode(str) {
     var hash = 0;
-    if (str.length == 0) return hash;
+    if (str.length === 0) return hash;
     for (i = 0; i < str.length; i++) {
       char = str.charCodeAt(i);
       hash = ((hash<<5)-hash)+char;
