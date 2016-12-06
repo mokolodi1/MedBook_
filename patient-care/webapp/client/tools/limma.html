@@ -58,9 +58,8 @@
 
       {{! Show a list of previously run GSEA jobs as well as a form to
           create a new GSEA job}}
-      <button class="ui labeled icon button
-          {{#if Template.subscriptionsReady}}
-            primary run-gsea{{else}}loading{{/if}}">
+      <button class="ui labeled icon primary button
+          {{#if Template.subscriptionsReady}}run-gsea{{else}}loading{{/if}}">
         <i class="right arrow icon"></i>
         Run GSEA
       </button>
