@@ -25,6 +25,7 @@ MedBook.dataSetTypes = [
           "raw_counts",
           "quan_norm_counts",
           "fpkm",
+          "rpkm",
           "tpm",
         ],
         autoform: {
