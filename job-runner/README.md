@@ -91,6 +91,23 @@ TODO
 
 NOTE: no gene set will be created when there are 0 outliers.
 
+### CBioUpdateData (`UpdateCbioData`)
+
+Import data into local copy of cBioPortal.
+
+This job exports data from mongo and runs Java code from cbioportal.org to load expression data clinical data from MedBook to cBioPortal.
+
+#### Arguments
+- `sample_group_id`: id of the sample group that defines which expression data will be loaded
+- `form_id`: id of the clinical form for sample level data, sample_labels in this form must match sample labels from the sample_group defined above.
+- `patient_form_id`: id of the clinical form with patient level attributes.
+
+[See here for Cbioportal importer tool documentation](https://cbioportal.readthedocs.io/en/latest/#data-loading).
+
+#### Output
+
+Creates a log file of the resulting run and stores it in a blob in mongo.
+
 ## Steps to adding a new tools
 
 1. create a feature branch in git

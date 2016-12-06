@@ -1,4 +1,4 @@
-FROM medbook/meteor-base:meteor1.3_v1.0.0
+FROM medbook/meteor-base:meteor1.3_v1.0.1
 MAINTAINER Mike Risse
 
 # Builds job-runner on meteor 1.3.
@@ -10,7 +10,7 @@ RUN apt-get update \
     && apt-get install -y --force-yes --no-install-recommends \
         r-base \
         r-recommended \
-	r-base-dev
+	      r-base-dev
 
 # End Rscript install
 

@@ -7,6 +7,7 @@
 - Set up box with ansible: `ansible-playbook playbook.yml -i hosts -u ubuntu`
 - Add necessary ssh keys to box (so that others can access it)
 - Point DNS record to box's IP [here](https://domains.google.com/registrar#d=3530982,medbook.io&z=a&chp=d,z)
+- Run ansible to set up machine (see: [here](#running-ansible))
 
 ## Connected drives
 
@@ -96,6 +97,19 @@ source /mysql-dump/dump.sql;
 # restore from dump.sql.gz within the docker container (compressed)
 zcat /mysql-dump/dump_new.sql.gz | mysql -h localhost -u cbio -pP@ssword1 cbioportal
 ```
+
+## Running Ansible
+
+Ansible is a tool that does system administration for many remote boxes. Ansible should be run after setting up a new box to mount disks, install Docker, etc. It can be also used to make changes on all or many boxes at the same time.
+
+To run the Ansible "playbook":
+
+```sh
+cd dev-ops
+./runAnsible.sh
+```
+
+Note that the machine on which Ansible is run must have ssh access to all remote boxes.
 
 ## Backups
 

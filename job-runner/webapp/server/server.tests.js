@@ -23,10 +23,3 @@ describe('no running jobs or wrangling datasets on startup',function(){
   });
 });
 
-describe('synched cron', function(){
-  it('is scheduled to start another job', function(){
-    let nextdate = SyncedCron.nextScheduledAtDate("start-next-job");
-    console.log(nextdate);
-    assert.strictEqual(typeof(nextdate), 'object', "start next job at some date.");
-  });
-});

@@ -10,4 +10,4 @@ fi
 export PATIENT_CARE_SETTINGS=$(cat ./patient-care/webapp/settings.json)
 export JOB_RUNNER_SETTINGS=$(cat ./job-runner/webapp/settings.json)
 
-docker-compose -f docker-compose.yml up
+docker-compose -f docker-compose.yml up $1
