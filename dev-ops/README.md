@@ -14,12 +14,12 @@
 Drives should be connected on Azure in the order listed below in order to be named accordingly in the Azure portal. (Currently the ansible script attaches the drives via `/dev/sdX` listing, where `X` is a sequential letter as drives are attached.)
 
 | Location          | Size   | Production | Staging | Mongo | Development | Backup | Description |
-| --------          | ------ | ---------- | ------- | ----------- | ----------- |
-| `/var/lib/docker` | 512 gb | Yes | Yes | Yes | Yes | No | extra space for docker images, containers, etc.
-| `/filestore`      | 512 gb | Yes | Yes | No | No | No | extra space for files stored as blobs
-| `/backup`         | 512 gb | Yes | No | No | No | No | dedicated space to perform backups
-| `/backups`        | 512 gb | No | No | No | No | Yes | dedicated space to store backups
-| `/data`           | 512 gb | No | No | Yes | No | No | where the mongo data lives
+| ----------------- | ------ | ---------- | ------- | ----- | ----------- | ------ | ----------- |
+| `/var/lib/docker` | 512 gb | Yes | Yes | Yes | Yes | No  | extra space for docker images, containers, etc.
+| `/filestore`      | 512 gb | Yes | Yes | No  | No  | No  | extra space for files stored as blobs
+| `/backup`         | 512 gb | Yes | No  | No  | No  | No  | dedicated space to perform backups
+| `/backups`        | 512 gb | No  | No  | No  | No  | Yes | dedicated space to store backups
+| `/data`           | 512 gb | No  | No  | Yes | No  | No  | where the mongo data lives 
 
 ## Creating a new production machine
 
