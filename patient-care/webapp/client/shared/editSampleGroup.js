@@ -88,7 +88,7 @@ Template.editSampleGroup.events({
     let sampleGroup = instance.sampleGroup.get();
 
     sampleGroup.data_sets = _.filter(sampleGroup.data_sets, (dataSet) => {
-      return dataSet.data_set_id !== this.data_set_id
+      return dataSet.data_set_id !== this.data_set_id;
     });
 
     instance.sampleGroup.set(sampleGroup);
@@ -137,7 +137,7 @@ Template.addFilterButton.onCreated(function () {
     let sampleGroup = instance.data.sampleGroup.get();
     sampleGroup.data_sets[instance.data.dataSetIndex].filters.push(filterObject);
     instance.data.sampleGroup.set(sampleGroup);
-  }
+  };
   // Only allow one form values filter
 });
 
@@ -337,7 +337,7 @@ Template.formValuesFilter.onCreated(function(){
 
   let dataset_id = instance.data.data_set_id ;
   instance.available_filter_forms = new ReactiveVar();
-  instance.available_filter_forms.set([{name: "Loading forms...", urlencodedId: "placeholder_loadingforms"}]);
+  instance.available_filter_forms.set([{name: "Loading forms...", formId: "placeholder_loadingforms"}]);
   instance.filter_forms_options = new ReactiveVar();
   instance.filter_forms_options.set({});
 
@@ -383,7 +383,7 @@ Template.formValuesFilter.events({
     // Find the form that matches the current dataset and form id
     let forms = instance.available_filter_forms.get();
     let chosenForm = _.find(forms, function(form){
-      return (form.formId === clicked_form_id) && (form.dataSetId === clicked_dataset_id)});
+      return (form.formId === clicked_form_id) && (form.dataSetId === clicked_dataset_id);});
     let formFields = chosenForm.fields ;
 
     // Then build the filters for the querybuilder
@@ -411,7 +411,7 @@ Template.formValuesFilter.events({
   // Find the empty querybuilder div we prepared in the formValuesFilter template
   // and attach a querybuilder object to it
   let queryBuilderDivId = "#" + clicked_dataset_id + "_" + clicked_form_id + "_querybuilder";
-  $(queryBuilderDivId).show()
+  $(queryBuilderDivId).show();
   $(queryBuilderDivId).queryBuilder({
     filters: queryFilters,
     });
