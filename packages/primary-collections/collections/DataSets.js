@@ -44,6 +44,7 @@ MedBook.dataSetTypes = [
           options: [
             { value: "rsem", label: "RSEM" },
             { value: "cufflinks", label: "Cufflinks" },
+            { value: "other", label: "Other" },
           ]
         },
         label: "Quantification method",
@@ -146,7 +147,7 @@ DataSets.attachSchema(new SimpleSchema({
         value_type: this.field("value_type").value
       });
 
-      var context = new SimpleSchema(schemaObj.metadata_schema).newContext()
+      var context = new SimpleSchema(schemaObj.metadata_schema).newContext();
 
       if (!context.validate(this.value)) {
         return "datasetMetadataInvalid";
