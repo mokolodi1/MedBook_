@@ -107,14 +107,19 @@ To refresh cBioPortal with the latest list of collaborators in the WCDT collabor
 Meteor.call("refreshCBioPortalAccess");
 ```
 
-To refresh the cBioPortal with the latest WCDT data, run the following in the Javascript console while logged into MedBook. This code will open a new tab to view the log file for the job. This tab will display a 404 error initially; once the job finishes, a log file will be available at the URL opened.
+To refresh the cBioPortal with new data, run the following in the Javascript console while logged into MedBook. This code will open a new tab to view the log file for the job. This tab will display a 404 error initially; once the job finishes, a log file will be available at the URL opened.
+
+#### Arguments
+ - `sample_group_id`: id of the sample group that defines which expression data will be loaded
+ - `form_id`: id of the clinical form for sample level data, sample_labels in this form **must match** sample labels from the sample_group defined above.
+ - `patient_form_id`: id of the clinical form with patient level attributes.
 
 ```
 Meteor.call("refreshCBioPortalData", {
   // replace these three IDs with the data you'd like to load
-  form_id: "DPm4uNN4RyeyCc5w6",
-  sample_group_id: "eQaaTBMDEkj2wJm3h",
-  patient_form_id: "uQ2qBhPiCJqGmZiRd"
+  form_id: "INSERT_ID_HERE",
+  sample_group_id: "INSERT_ID_HERE",
+  patient_form_id: "INSERT_ID_HERE"
 }, (error, jobId) => {
   if (error) {
     console.log("ERROR:", error);
