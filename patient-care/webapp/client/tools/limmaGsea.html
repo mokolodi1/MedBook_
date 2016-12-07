@@ -1,6 +1,6 @@
 <template name="listLimmaGSEA">
   <h1>
-    Limma <i class="right arrow icon"></i> GSEA
+    Limma <i class="right arrow icon"></i> GSEA (Legacy)
 
     {{#semanticUIPopup selector=".help.circle.icon"}}
       <i class="help circle icon"></i>
@@ -14,11 +14,11 @@
 
   <div class="ui large info message">
     <div class="header">
-      Job creation disabled
+      Legacy Limma<i class="right arrow icon"></i>GSEA Results
     </div>
-    This job has been deprecated in favor of the new
-    <a href={{pathFor "listGsea"}}>GSEA</a> and
-    <a href={{pathFor "listLimma"}}>Limma</a> tools.
+      To run a new Limma<i class="right arrow icon"></i>GSEA analysis,
+    run <a href={{pathFor "listLimma"}}>Limma</a>, then
+    run <a href={{pathFor "listGsea"}}>GSEA</a> on the result.
   </div>
 
   {{> searchableJobs name="RunLimmaGSEA" columns=previousJobsCols
