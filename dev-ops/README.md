@@ -19,7 +19,7 @@ Drives should be connected on Azure in the order listed below in order to be nam
 | `/filestore`      | 512 gb | Yes | Yes | No  | No  | No  | extra space for files stored as blobs
 | `/backup`         | 512 gb | Yes | No  | No  | No  | No  | dedicated space to perform backups
 | `/backups`        | 512 gb | No  | No  | No  | No  | Yes | dedicated space to store backups
-| `/data`           | 512 gb | No  | No  | Yes | No  | No  | where the mongo data lives 
+| `/data`           | 512 gb | No  | No  | Yes | No  | No  | where the mongo data lives
 
 ## Creating a new production machine
 
@@ -156,7 +156,7 @@ The backup files are stored here: `backup.medbook.io:/backups`. `/backups` is a 
 `~/MedBook/scripts/create_backup.sh` will create a backup from mongo and `/filestore`.
 
 A couple notes/gotchas:
-- Backups are named as follows: backup.[hostname].[year]-[month]-[day]_[hour]-[minute]-[second]
+- Backups are named as follows: `backup.[hostname].[year]-[month]-[day]_[hour]-[minute]-[second]`
 - Backups on the production machine run at `/backup` (a mounted disk) so there's enough space to dump and compress the database.
 - When a backup is run on the production machine (`HOSTNAME="medbook-prod"`) the backup is restored on staging as part of the backup script.
 - The mongo host is assumed to be `localhost` except for on `medbook-prod` (medbook.io) and `medbook-staging-2` (staging.medbook.io), where the hostname is hardcoded as `mongo` and `mongo-staging` respectively.
@@ -171,3 +171,16 @@ The restore command *deletes everything* in the mongo database as well as `/file
 Currently the only way to view stored backups is by `ssh`ing into `backup.medbook.io`. On that box, the backups are stored at `/backups`.
 
 Technically, all apps should be stopped before restoring from a backup. Currently, they aren't stopped on staging when we restore at ~4 am because no one is using staging at that time and it hasn't caused any problems yet. Problems could arise if a user created objects (or created a new user) before the new mongo data was restored, which would cause the `mongorestore` command to fail.
+
+## Migrations
+
+Migrations are one-off pieces of Javascript code which update mongo objects to a new schema. They should be run only when MedBook is offline (when all the docker containers have been stopped).
+
+To run a migration:
+```sh
+// ssh onto the production machine
+ssh ubuntu@medbook.io
+
+// run the migration
+mongo -host mongo MedBook < /path/to/migration/migration_name.js
+```
