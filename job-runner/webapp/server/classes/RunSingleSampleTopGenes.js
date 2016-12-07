@@ -75,7 +75,7 @@ RunSingleSampleTopGenes.prototype.run = function () {
 
     // sort by expression value
     expressionData.sort(function (a, b) {
-      return a.exp_value < b.exp_value;
+      return b.exp_value - a.exp_value;
     });
 
     // figure out how many genes there will be
