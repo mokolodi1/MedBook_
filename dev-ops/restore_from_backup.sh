@@ -22,6 +22,7 @@ if [ -z "$backup_name" ] ; then
 fi
 
 # download the backup from the backup box
+echo "Downloading backup..."
 rsync "ubuntu@backup.medbook.io:/backups/$backup_name.tgz" .
 
 # if the download failed, tell the user
@@ -31,8 +32,26 @@ if [ $? -ne 0 ] ; then
 fi
 
 # uncompress the backup, delete compressed backup
+echo "Extracting backup..."
 tar zxf "$backup_name.tgz"
 rm -rf "$backup_name.tgz"
+
+# If we're on staging and there are docker containers running, stop them
+# and restart them after the restore. Nothing special is required even if
+# the images were originally started with docker-compose.
+# see here for "string contains if": http://stackoverflow.com/a/24753942/1092640
+should_restart_docker=""
+to_restart_hashes=""
+if [ $(docker ps | wc -l) -gt 1 ] ; then
+  case "$HOSTNAME" in
+  *staging*) should_restart_docker=true ;;
+  esac
+fi
+
+if [ $should_restart_docker ] ; then
+  to_restart_hashes=$(docker ps -q)
+  docker stop $to_restart_hashes
+fi
 
 # go to the backup folder
 cd "$backup_name"
@@ -43,15 +62,23 @@ if [ $HOSTNAME = "medbook-prod" ] ; then
   mongo_host="mongo"
 elif [ $HOSTNAME = "medbook-prod-2" ] ; then
   mongo_host="mongo"
-elif [ $HOSTNAME = "medbook-staging-2" ] ; then
+elif [ $HOSTNAME = "medbook-staging-3" ] ; then
   mongo_host="mongo-staging"
 fi
 mongo MedBook --host $mongo_host --eval "db.dropDatabase()"
 mongorestore --drop --host $mongo_host
 
 # restore the filestore
+echo "Restoring filestore..."
 sudo rsync -r filestore/ /filestore
+
+# restart the images we stopped before the restore took place
+if [ $should_restart_docker ] ; then
+  echo "Restarting Docker containers..."
+  docker start $to_restart_hashes
+fi
 
 # delete the uncompressed local backup
 cd ..
+echo "Deleting local backup..."
 rm -rf "$backup_name"
