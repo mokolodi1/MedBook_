@@ -22,6 +22,7 @@ if [ -z "$backup_name" ] ; then
 fi
 
 # download the backup from the backup box
+echo "Downloading backup..."
 rsync "ubuntu@backup.medbook.io:/backups/$backup_name.tgz" .
 
 # if the download failed, tell the user
@@ -31,6 +32,7 @@ if [ $? -ne 0 ] ; then
 fi
 
 # uncompress the backup, delete compressed backup
+echo "Extracting backup..."
 tar zxf "$backup_name.tgz"
 rm -rf "$backup_name.tgz"
 
@@ -67,13 +69,16 @@ mongo MedBook --host $mongo_host --eval "db.dropDatabase()"
 mongorestore --drop --host $mongo_host
 
 # restore the filestore
+echo "Restoring filestore..."
 sudo rsync -r filestore/ /filestore
 
 # restart the images we stopped before the restore took place
 if [ $should_restart_docker ] ; then
+  echo "Restarting Docker containers..."
   docker start $to_restart_hashes
 fi
 
 # delete the uncompressed local backup
 cd ..
+echo "Deleting local backup..."
 rm -rf "$backup_name"
