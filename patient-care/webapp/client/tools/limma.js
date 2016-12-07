@@ -29,6 +29,7 @@ Template.listLimma.helpers({
         type: String,
         allowedValues,
         autoform: {
+          value: allowedValues[0],
           options: _.map(allowedValues, (value) => {
             return {
               value,
