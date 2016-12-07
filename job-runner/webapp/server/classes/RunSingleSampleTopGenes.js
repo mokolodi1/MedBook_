@@ -32,7 +32,6 @@ RunSingleSampleTopGenes.prototype.run = function () {
   }
 
   GeneSets.rawCollection().insert({
-    // XXX: change mongo's _id creation function to use simple strings
     _id: Random.id(),
 
     name: "Top " + topString + " in " + uq_sample_label,
