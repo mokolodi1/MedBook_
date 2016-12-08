@@ -36,6 +36,9 @@ RunGSEA.prototype.run = function () {
   // NOTE: this is intentionally nonspecific between the two GSEA tools
   //       as in certain cases it can be either.
   var gseaSpawnResult;
+  // if gsea only finds 1 enriched gene set, leading edge will
+  // null pointer error -- track whether to skip it.
+  var skipLeadingEdge = false;
 
   // star the promise chain: woohoo!
   var self = this;
@@ -197,18 +200,28 @@ RunGSEA.prototype.run = function () {
           });
         });
 
-        // spawn the LeadingEdgeTool command to generate the heatmap
-        return spawnCommand("java", [
-          "-Xmx6G", // 6 gb of RAM
-          "-cp", getSetting("gsea_jar_path"),
-          "xtools.gsea.LeadingEdgeTool",
-          "-dir", gseaPrerankedPath,
-          "-gsets", geneSetNames.join(","),
-          "-out", gseaOutputPath,
-        ], workDir, {
-          stdoutPath: path.join(workDir, "LeadingEdgeTool_stdout.txt"),
-          stderrPath: path.join(workDir, "LeadingEdgeTool_stderr.txt"),
-        });
+        // Leading Edge analysis throws a null pointer error if you run it
+        // with exactly 1 gene set. If this is the case, instead skip it and
+        // track that it was skipped in the gseaSpawnResult
+        if(geneSetNames.length === 1){
+            console.log("Exactly 1 gene set found; skipping leading edge analysis.")
+            leadingEdgeSpawnResult = {exitCode:0}
+            skipLeadingEdge = true;
+            return leadingEdgeSpawnResult;
+        } else {
+            // spawn the LeadingEdgeTool command to generate the heatmap
+            return spawnCommand("java", [
+              "-Xmx6G", // 6 gb of RAM
+              "-cp", getSetting("gsea_jar_path"),
+              "xtools.gsea.LeadingEdgeTool",
+              "-dir", gseaPrerankedPath,
+              "-gsets", geneSetNames.join(","),
+              "-out", gseaOutputPath,
+            ], workDir, {
+              stdoutPath: path.join(workDir, "LeadingEdgeTool_stdout.txt"),
+              stderrPath: path.join(workDir, "LeadingEdgeTool_stderr.txt"),
+            });
+        }
       }
     })
     .then(function (leadingEdgeSpawnResult) {
@@ -222,6 +235,7 @@ RunGSEA.prototype.run = function () {
           // If the LeadingEdgeTool failed, set the gseaSpawnResult
           // to be the LeadingEdgeTool result so the next bit doesn't run
           // and we scoop up the log files.
+          // (This will never happen if it's skipped; exitCode is 0)
           gseaSpawnResult = leadingEdgeSpawnResult;
         }
       }
@@ -246,22 +260,24 @@ RunGSEA.prototype.run = function () {
               associated_object, {}, errorResultResolver(def));
         });
 
-        // also insert the heatmap image file
-        var gseaLeadingEdgeName = _.find(gseaOutputFileNames, function (name) {
-          // Ex: "my_analysis.LeadingEdgeTool.1473338595363"
-          return /\.LeadingEdgeTool\./g.test(name);
-        });
-        var heatmapPath = path.join(gseaOutputPath, gseaLeadingEdgeName,
-            "leading_edge_heat_map_clustered.png");
+        // also insert the heatmap image file if leading edge ran
+        if(!skipLeadingEdge){
+            var gseaLeadingEdgeName = _.find(gseaOutputFileNames, function (name) {
+              // Ex: "my_analysis.LeadingEdgeTool.1473338595363"
+              return /\.LeadingEdgeTool\./g.test(name);
+            });
+            var heatmapPath = path.join(gseaOutputPath, gseaLeadingEdgeName,
+                "leading_edge_heat_map_clustered.png");
 
-        var def = Q.defer();
-        Blobs2.create(heatmapPath, associated_object, {},
-            errorResultResolver(def));
-        blobPromises.push(def.promise);
+            var def = Q.defer();
+            Blobs2.create(heatmapPath, associated_object, {},
+                errorResultResolver(def));
+            blobPromises.push(def.promise);
+        }
 
         Q.all(blobPromises)
           .then(function (values) {
-            deferred.resolve({});
+            deferred.resolve({skipped_leading_edge:skipLeadingEdge});
           })
           .catch(deferred.reject);
       } else {
