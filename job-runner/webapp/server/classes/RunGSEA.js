@@ -202,12 +202,11 @@ RunGSEA.prototype.run = function () {
 
         // Leading Edge analysis throws a null pointer error if you run it
         // with exactly 1 gene set. If this is the case, instead skip it and
-        // track that it was skipped in the gseaSpawnResult
+        // return a fake exit code so the job thinks the spawn succeeded
         if(geneSetNames.length === 1){
             console.log("Exactly 1 gene set found; skipping leading edge analysis.")
-            leadingEdgeSpawnResult = {exitCode:0}
             skipLeadingEdge = true;
-            return leadingEdgeSpawnResult;
+            return {exitCode:0};
         } else {
             // spawn the LeadingEdgeTool command to generate the heatmap
             return spawnCommand("java", [
