@@ -298,6 +298,12 @@ Meteor.publish("limmaFormData", function (value_type) {
   return SampleGroups.find({
     value_type,
     collaborations: { $in: user.getCollaborations() },
+  }, {
+    fields: {
+      name: 1,
+      version: 1,
+      value_type: 1,
+    }
   });
 });
 
