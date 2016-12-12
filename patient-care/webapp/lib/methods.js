@@ -786,6 +786,11 @@ Meteor.methods({
       Blobs2.delete({
         "associated_object.collection_name": collection_name,
         "associated_object.mongo_id": mongo_id,
+      }, (err, out) => {
+        if (err) {
+          console.log("Error deleting blobs for:",
+              collection_name, mongo_id, err);
+        }
       });
     }
 
