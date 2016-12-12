@@ -134,13 +134,8 @@ Template.editCollaborationsModal.onRendered(function() {
 });
 
 Template.editCollaborationsModal.helpers({
-  multipleObjects() {
-    const ids = Session.get("editCollaborationsMongoIds");
-    return ids && ids.length > 1;
-  },
   waitingForServer() { return Template.instance().waitingForServer.get(); },
   collabsList() { return Template.instance().collabsList; },
-
   collectionName() { return Session.get("editCollaborationsCollection"); },
   mongoIds() { return Session.get("editCollaborationsMongoIds"); },
 });

@@ -112,22 +112,40 @@ Blobs2.delete = function (selector, callback) {
   }
 
   var rmPromises = [];
+  var pathsToRemove = [];
   Blobs2.find(selector).forEach(function (blob) {
-    rmPromises.push(Q.nfcall(remove, blob.getFilePath()));
+    var filePath = blob.getFilePath();
+
+    pathsToRemove.push(filePath);
+    rmPromises.push(Q.nfcall(remove, filePath));
   });
 
   // NOTE: anything attached to the returned promise will happen *after*
   // the .then and .catch here.
-  return Q.all(rmPromises)
-    .then(Meteor.bindEnvironment(function (result) {
-      var asdf = Blobs2.remove(selector, { multi: true });
+  return Q.allSettled(rmPromises)
+    .then(Meteor.bindEnvironment(function(settledResult) {
+      // remove the blobs from mongo
+      // NOTE: This will happen even if some of the blobs failed to be
+      // rm-ed for whatever reason. The fact that they are still sitting
+      // around is an internal issue, and it's not one that the client code
+      // should have to deal with.
+      // Blobs2.remove(selector, { multi: true });
+      Blobs2.remove(selector);
 
-      if (callback) callback(null, rmPromises.length);
-    }))
-    .catch(function (yop) {
+      console.log("selector:", selector);
+      console.log("settledResult:", settledResult);
+
+      // console.error("FAILED TO REMOVE SOME BLOBS FILES! (in Blobs2.delete)");
+      // console.log("If you see this it means that something is very " +
+      //     "wrong with the place MedBook stores files.");
+      // console.log("selector:", selector);
+      // console.log("asdf:", asdf);
+
       if (callback) {
-        callback(new Meteor.Error("failed-to-remove-blobs",
-            "Failed to remove all blobs."));
+        callback(null, rmPromises.length);
       }
-    });
+    }))
+    .catch(Meteor.bindEnvironment(function () {
+      console.error("Had a problem dealing with allSettled in Blobs2.delete");
+    }));
 };
