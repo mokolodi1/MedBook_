@@ -88,10 +88,7 @@ Template.sampleGroupExprVarFilters.onRendered(function () {
     // reactively watch this
     instance.subscriptionsReady();
 
-    // wait until Blaze rerenders the view
-    Meteor.defer(() => {
-      $("#manage-obj-detail").sticky("refresh");
-    });
+    instance.data.refreshSticky();
   });
 });
 

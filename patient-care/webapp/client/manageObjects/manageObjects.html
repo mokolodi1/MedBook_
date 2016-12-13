@@ -44,7 +44,7 @@
   <div class="ui grid">
     <div class="row">
       <div class="six wide column" id="manage-obj-context">
-        <div class="ui vertical fluid tabular menu">
+        <div class="ui vertical fluid tabular menu" id="manage-obj-master">
           <!-- <div class="ui item">
             <div class="ui transparent icon input">
               <input class="prompt" type="text"
@@ -88,7 +88,7 @@
               {{#if compare (param "selected") "create"}}
                 {{> Template.dynamic template=createTemplate}}
               {{else}}
-                {{> manageObject}}
+                {{> manageObject managableTypeAndRefreshSticky}}
               {{/if}}
             {{else}}
               {{> dataLoading}}
@@ -113,7 +113,8 @@
     </h2>
 
     {{#if Template.subscriptionsReady}}
-      {{> Template.dynamic template=showTemplate data=getObject}}
+      {{> Template.dynamic template=showTemplate
+          data=(addRefreshSticky getObject)}}
     {{else}}
       {{> dataLoading}}
     {{/if}}

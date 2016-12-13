@@ -127,24 +127,64 @@ Template.manageObjectsGrid.onCreated(function () {
 Template.manageObjectsGrid.onRendered(function () {
   let instance = this;
 
-  // make the manage object detail sticky so it moves down
-  // the page as the user scrolls down
-  instance.$("#manage-obj-detail").sticky({
-    context: "#manage-obj-context",
-    offset: 55,
-  });
+  // NOTE: a deferred versino of refreshSticky is passed down all
+  // the way to the create/showTemplate level
 
-  // Refresh the sticky when
-  // - the count of objects on the left changes.
-  // This is important because the sticky does weird things
-  // if the height of the context or detail changes and
-  // it's not refreshed.
+  // keep track of whether it's been stickied yet
+  // start this out as false because it hasn't been stickied yet
+  let stickied = false;
+
+  // Make the manage object detail sticky so it moves down
+  // the page as the user scrolls down.
+  function refreshSticky() {
+    console.log("refreshSticky");
+    // reactively watch the count of the items on the left so it'll update
+    // when it changes, but don't do anything with the return value
+    let hi = getObjects(instance).count();
+
+    // Only activate the sticky when the height of the master list is
+    // greater than a pageful. Don't have a sticky when creating a new object
+    // because it's too annoying to keep refreshing the sticky.
+    // (Creation UIs tend to get bigger as the user fills in information.)
+    if (instance.$("#manage-obj-master").height() > $(window).height() &&
+        FlowRouter.getParam("selected") !== "create") {
+      if (stickied) {
+        // refresh the sticky because it's been set up already
+        instance.$("#manage-obj-detail").sticky("refresh");
+      } else {
+        // set up the sticky for the first time
+        instance.$("#manage-obj-detail").sticky({
+          context: "#manage-obj-context",
+          offset: 55,
+        });
+      }
+
+      stickied = true;
+    } else {
+      // destroy the sticky
+      instance.$("#manage-obj-detail").sticky("destroy");
+
+      stickied = false;
+    }
+  }
+
+  // call it only after Blaze has rerendered
+  deferredRefreshSticky = () => {
+
+  };
+
+  // call refreshSticky when a reactive variable changes
   instance.autorun(() => {
-    // observe the count reactively
-    getObjects(instance).count();
-
-    $("#manage-obj-detail").sticky("refresh");
+    refreshSticky();
   });
+
+  // only call it 300 seconds after the thing has stopped resizing
+  instance.debouncedRefreshSticky = _.debounce(function() {
+    Meteor.defer(refreshSticky);
+  }, 300);
+
+  // call refreshSticky when the window is resized
+  $(window).resize(instance.debouncedRefreshSticky);
 });
 
 function getObjects (instance, query = {}) {
@@ -173,9 +213,13 @@ Template.manageObjectsGrid.helpers({
           getObjects(instance, { name: this.name }).count() > 1;
     }
   },
-  // lowerHumanName() {
-  //   return this.humanName.toLowerCase();
-  // },
+  managableTypeAndRefreshSticky() {
+    added = this;
+
+    added.refreshSticky = Template.instance().debouncedRefreshSticky;
+
+    return added;
+  },
 });
 
 // Template.manageObject
@@ -191,16 +235,6 @@ Template.manageObject.onCreated(function () {
     if (selectedId) {
       instance.subscribe("objectFromCollection", collectionName, selectedId);
     }
-  });
-
-  // refresh the sticky whenever the object finishes loading
-  instance.autorun(() => {
-    instance.subscriptionsReady();
-
-    // wait until Blaze has re-rendered the page
-    Meteor.defer(() => {
-      $("#manage-obj-detail").sticky("refresh");
-    });
   });
 });
 
@@ -219,5 +253,10 @@ Template.manageObject.helpers({
     return () => {
       FlowRouter.setParams({ selected: null });
     };
+  },
+  addRefreshSticky(obj) {
+    obj.refreshSticky = this.refreshSticky;
+
+    return obj;
   },
 });
