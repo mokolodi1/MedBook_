@@ -30,15 +30,20 @@
     {{> afQuickField name="top_genes_count" value=1000
         placeholder="Top N differential genes to be used in the signature"}}
 
-    {{#if duplicateSamples}}
+    {{#if length conflictingSamples}}
       <div class="ui warning message">
         <div class="header">
-          Sample selected twice
+          Conflicting
+          sample{{#if firstGreater (length conflictingSamples) 1}}s{{/if}}
         </div>
         <p>
-          One or more samples are selected both as a
-          primary and progression sample.
+          The reference and experimental groups cannot have samples in common
+          for this tool.
         </p>
+        <p>
+          The following samples are in both of the selected groups.
+        </p>
+        {{> listSamplesButton conflictingSamples}}
       </div>
     {{else}}
       <button type="submit" class="ui primary button">

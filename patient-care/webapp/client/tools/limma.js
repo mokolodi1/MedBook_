@@ -17,6 +17,21 @@ Template.listLimma.onCreated(function () {
       instance.subscribe("limmaFormData", valueType);
     }
   });
+
+  // subscribe to the sample groups' sample_labels and collaborations lists
+  // (without collaborations there is a client-side permission-denied error)
+  function subscribeToLists(expOrRef) {
+    instance.autorun(() => {
+      let id = AutoForm.getFieldValue(`${expOrRef}_sample_group_id`,
+          "createLimma");
+
+      if (id) {
+        instance.subscribe("sgSampleLabelsCollabs", id);
+      }
+    });
+  }
+  subscribeToLists("reference");
+  subscribeToLists("experimental");
 });
 
 Template.listLimma.helpers({
@@ -81,19 +96,44 @@ Template.listLimma.helpers({
       };
     });
   },
-  duplicateSamples() {
-    // this should return true when a sample is selected both as a primary
-    // and a progression tumor
-    let primarySamples = AutoForm.getFieldValue("primary_sample_labels",
-        "createLimma");
-    let progressionSamples = AutoForm.getFieldValue("progression_sample_labels",
-        "createLimma");
+  conflictingSamples() {
+    function grabSampleLabels(expOrRef) {
+      let id = AutoForm.getFieldValue(`${expOrRef}_sample_group_id`,
+          "createLimma");
 
-    if (primarySamples && progressionSamples) {
-      let uniqueSamples = _.uniq(primarySamples.concat(progressionSamples));
-      let selectedSampleCount = primarySamples.length + progressionSamples.length;
+      if (id) {
+        let sampleGroup = SampleGroups.findOne(id);
 
-      return uniqueSamples.length !== selectedSampleCount;
+        // If the sample_labels haven't loaded, this will
+        // just return undefined and not make any problems.
+        return sampleGroup.sample_labels;
+      }
+    }
+
+    let refLabels = grabSampleLabels("reference");
+    let expLabels = grabSampleLabels("experimental");
+
+    if (refLabels && expLabels) {
+      // now that ref/expLabels have been selected and loaded,
+      // calculate if there's any intersections
+      // NOTE: _.intersection is too slow when these arrays are very large
+      
+      let seenAlready = {};
+      let collisions = {};
+
+      let findCollisions = (labels) => {
+        _.each(labels, (label) => {
+          if (seenAlready[label]) {
+            collisions[label] = true;
+          }
+
+          seenAlready[label] = true;
+        });
+      };
+      findCollisions(refLabels);
+      findCollisions(expLabels);
+
+      return Object.keys(collisions);
     }
   },
   previousJobsCols() {

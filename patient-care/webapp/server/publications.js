@@ -298,8 +298,20 @@ Meteor.publish("limmaFormData", function (value_type) {
       name: 1,
       version: 1,
       value_type: 1,
+    }
+  });
+});
 
-      // avoid client-side permission-denied errors
+// publishes the collaborations and sample_labels list for a sample group
+Meteor.publish("sgSampleLabelsCollabs", function (sampleGroupId) {
+  check(sampleGroupId, String);
+
+  let user = MedBook.ensureUser(this.userId);
+  user.ensureAccess(SampleGroups.findOne(sampleGroupId));
+
+  return SampleGroups.find(sampleGroupId, {
+    fields: {
+      sample_labels: 1,
       collaborations: 1,
     }
   });
