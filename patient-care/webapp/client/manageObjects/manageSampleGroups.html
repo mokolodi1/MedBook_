@@ -73,50 +73,58 @@
   <h3>Filters applied to data sets</h3>
 
   <div class="ui list">
-    {{#each data_sets}}
-      <div class="item">
-        <div class="content">
-          <div class="header">{{data_set_name}}</div>
-          {{#if length filters}}
-            Filtered to {{sample_count}}
-            {{> optionalS word="sample" count=sample_count}}
-            from
-            {{unfiltered_sample_count}}.
-          {{else}}
-            All {{unfiltered_sample_count}} samples included without filtering.
-          {{/if}}
-          {{> listSamplesButton sample_labels}}
+    {{#let sampleGroupName=name}}
+      {{#each data_sets}}
+        <div class="item">
+          <div class="content">
+            <div class="header">{{data_set_name}}</div>
+            {{#if length filters}}
+              Filtered to {{sample_count}}
+              {{> optionalS word="sample" count=sample_count}}
+              from
+              {{unfiltered_sample_count}}.
+            {{else}}
+              All {{unfiltered_sample_count}} samples included
+              without filtering.
+            {{/if}}
+            {{> listSamplesButton sampleLabels=sample_labels
+                filename=(concat sampleGroupName " filtered samples")}}
+
+            {{#if length filters}}
+              Filters applied:
+            {{/if}}
+          </div>
 
           {{#if length filters}}
-            Filters applied:
+            <div class="ui ordered list">
+              {{#each filters}}
+                <div class="item">
+                  {{#if compare type "include_sample_list"}}
+                    Included only {{options.sample_count}}
+                    {{> optionalS word="sample" count=options.sample_count}}.
+                    {{> listSamplesButton sampleLabels=options.sample_labels
+                        filename=(concat sampleGroupName
+                            " sample list filter")}}
+                  {{/if}}
+
+                  {{#if compare type "exclude_sample_list"}}
+                    Excluded {{options.sample_count}}
+                    {{> optionalS word="sample" count=options.sample_count}}.
+                    {{> listSamplesButton sampleLabels=options.sample_labels
+                        filename=(concat sampleGroupName
+                            " sample list filter")}}
+                  {{/if}}
+
+                  {{#if compare type "form_values"}}
+                    Filtered by clinical forms.
+                  {{/if}}
+                </div>
+              {{/each}}
+            </div>
           {{/if}}
         </div>
-
-        {{#if length filters}}
-          <div class="ui ordered list">
-            {{#each filters}}
-              <div class="item">
-                {{#if compare type "include_sample_list"}}
-                  Included only {{options.sample_count}}
-                  {{> optionalS word="sample" count=options.sample_count}}.
-                  {{> listSamplesButton options.sample_labels}}
-                {{/if}}
-
-                {{#if compare type "exclude_sample_list"}}
-                  Excluded {{options.sample_count}}
-                  {{> optionalS word="sample" count=options.sample_count}}.
-                  {{> listSamplesButton options.sample_labels}}
-                {{/if}}
-
-                {{#if compare type "form_values"}}
-                  Filtered by clinical forms.
-                {{/if}}
-              </div>
-            {{/each}}
-          </div>
-        {{/if}}
-      </div>
-    {{/each}}
+      {{/each}}
+    {{/let}}
   </div>
 </template>
 

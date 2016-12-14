@@ -26,16 +26,23 @@
   </p>
   {{> contactUsButton}}
 
-  <h2><code>{{|> listSamplesButton sample_labels}}</code></h2>
-  {{> listSamplesButton fakeSamplesSmall}}
-  {{> listSamplesButton fakeSamples}}
+  <h2><code>{{|> listSamplesButton sampleLabels=sample_labels filename="Samples.txt"}}</code></h2>
+  {{> listSamplesButton sampleLabels=fakeSamplesSmall filename="small list.txt"}}
+  {{> listSamplesButton sampleLabels=fakeSamples filename="larger list.txt"}}
+  <p>
+    <b>
+      If you don't want a download button, don't pass <code>filename</code>.
+    </b>
+  </p>
+  {{> listSamplesButton sampleLabels=fakeSamplesSmall}}
+  {{> listSamplesButton sampleLabels=fakeSamples}}
 
   <h2>
-    <code>{{|> listFeaturesButton feature_labels=array filename="Yop.txt"}}</code>
+    <code>{{|> listFeaturesButton featureLabels=array filename="Yop.txt"}}</code>
   </h2>
-  {{> listFeaturesButton feature_labels=fakeFeaturesSmall
+  {{> listFeaturesButton featureLabels=fakeFeaturesSmall
       filename="a small list of features.txt"}}
-  {{> listFeaturesButton feature_labels=fakeFeatures
+  {{> listFeaturesButton featureLabels=fakeFeatures
       filename="isn't this cool.txt"}}
 
   <h2><code>{{|> viewJobButton}}</code></h2>
@@ -257,48 +264,60 @@
 </template>
 
 <template name="listSamplesButton">
-  <ul>
-    {{! hide the bullet point for the button}}
-    <li style="list-style-type: none;">
-      <div class="ui mini buttons">
-        {{#if firstGreater (length this) 5}}
-          {{! show a "show all samples" button with "hide study labels" hidden
-              in a dropdown}}
-          <div class="ui button show-list" style="display: inline;">
-            Show {{#if showAllSamples}}fewer{{else}}all{{/if}} samples
-          </div>
-          {{#semanticUIDropdown options=dropdownOptions}}
-            <div class="ui floating dropdown icon button">
-              <i class="dropdown icon"></i>
-              <div class="menu">
-                <div class="item toggle-study-labels">
-                  <i class="{{#unless showStudyLabels}}un{{/unless}}hide
-                      icon"></i>
-                  {{#if showStudyLabels}}Hide{{else}}Show{{/if}} study labels
-                </div>
-              </div>
-            </div>
-          {{/semanticUIDropdown}}
-        {{else}}
-          {{! only show a "hide study labels" button}}
-          <div class="ui button toggle-study-labels" style="display: inline;">
-            <i class="{{#unless showStudyLabels}}un{{/unless}}hide icon"></i>
-            {{#if showStudyLabels}}Hide{{else}}Show{{/if}} study labels
-          </div>
+  <div class="ui mini buttons">
+    {{#unless alwaysShowAll}}
+      {{! show a "show all samples" button with "hide study labels" hidden
+          in a dropdown}}
+      <div class="ui button toggle-list" style="display: inline;">
+        Show {{#if showAllSamples}}fewer{{else}}all{{/if}} samples
+      </div>
+    {{/unless}}
+
+    {{#if filename}}
+      <div class="ui button download-list">
+        <i class="download icon"></i>
+        Download
+        {{#if alwaysShowAll}}
+          sample list
         {{/if}}
       </div>
-    </li>
+    {{/if}}
 
-    {{! list the samples!}}
+    {{#if and alwaysShowAll (not filename)}}
+      <div class="ui button toggle-study-labels">
+        {{> iconAndTextForListSamplesButton showStudyLabels}}
+      </div>
+    {{else}}
+      {{#semanticUIDropdown options=dropdownOptions}}
+        <div class="ui floating dropdown icon button">
+          <i class="dropdown icon"></i>
+          <div class="menu">
+            <div class="item toggle-study-labels">
+              {{> iconAndTextForListSamplesButton showStudyLabels}}
+            </div>
+          </div>
+        </div>
+      {{/semanticUIDropdown}}
+    {{/if}}
+  </div>
+
+  <ul style="word-wrap: break-word;">
+    {{! list the samples}}
     {{#each sampleToShow}}
       <li>{{this}}</li>
     {{/each}}
   </ul>
 </template>
 
+<template name="iconAndTextForListSamplesButton">
+  <i class="{{#unless this}}un{{/unless}}hide
+      icon"></i>
+  {{#if this}}Hide{{else}}Show{{/if}} study labels
+</template>
+
 <template name="listFeaturesButton">
-  {{#if firstGreater (length feature_labels) 5}}
-    <div class="ui mini buttons">
+  <div class="ui mini buttons">
+    {{#if firstGreater (length featureLabels) 5}}
       <div class="ui button toggle-list">
         {{#if showAllFeatures}}
           Hide
@@ -307,12 +326,16 @@
         {{/if}}
         all features
       </div>
-      <div class="ui button download-list">
-        <i class="download icon"></i>
-        Download
-      </div>
+    {{/if}}
+
+    <div class="ui button download-list">
+      <i class="download icon"></i>
+      Download
+      {{#unless firstGreater (length featureLabels) 5}}
+        feature list
+      {{/unless}}
     </div>
-  {{/if}}
+  </div>
 
   <ul>
     {{#each featuresToShow}}
@@ -546,12 +569,12 @@
     <div class="column">
       <h4>Samples</h4>
 
-      {{> listSamplesButton sample_labels}}
+      {{> listSamplesButton sampleLabels=sample_labels}}
     </div>
     <div class="column">
       <h4>Features</h4>
 
-      {{> listFeaturesButton feature_labels=feature_labels
+      {{> listFeaturesButton featureLabels=feature_labels
           filename=featuresFilename}}
     </div>
   </div>

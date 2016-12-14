@@ -52,7 +52,8 @@
   <h3 style="display: inline-block; margin-bottom: 0px;">
     Samples
   </h3>
-  {{> listSamplesButton sample_labels}}
+  {{> listSamplesButton sampleLabels=sample_labels
+      filename=(concat name " samples")}}
 </template>
 
 <template name="viewFormRecords">

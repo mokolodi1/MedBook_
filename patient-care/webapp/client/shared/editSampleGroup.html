@@ -158,7 +158,7 @@
     {{#if length getAvailableFilterForms}}
       {{> formValuesFilterMenu getAvailableFilterForms=getAvailableFilterForms}}
       <!-- Set up the potential queryBuilder divs to be attached in onRendered -->
-      <!-- id needs to be unique across page, so include dataset id as there will be  
+      <!-- id needs to be unique across page, so include dataset id as there will be
           only one form filter per dataset -->
       {{#each getAvailableFilterForms}}
         <div class="querybuilder" id="{{this.dataSetId}}_{{this.formId}}_querybuilder">
@@ -173,7 +173,7 @@
         <button class="ui icon button remove-filter" type="button">
           <i class="minus icon"></i> Remove filter
         </button>
-      </div>  
+      </div>
     {{/if}}
  {{else}}
     <div class="ui mini buttons">
@@ -216,7 +216,7 @@
     </button>
   {{else}}
     {{#if length options.sample_labels}}
-      {{> listSamplesButton options.sample_labels}}
+      {{> listSamplesButton sampleLabels=options.sample_labels}}
     {{else}}
       None
     {{/if}}

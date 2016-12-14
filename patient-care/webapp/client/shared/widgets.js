@@ -350,8 +350,16 @@ Template.contactUsButton.helpers({
 Template.listSamplesButton.onCreated(function () {
   let instance = this;
 
-  let showAllDefault = instance.data.length <= 5;
-  instance.showAllSamples = new ReactiveVar(showAllDefault);
+  instance.showAllSamples = new ReactiveVar(false);
+
+  // set the showAllSamples default value whenever the data changes
+  instance.autorun(() => {
+    let { sampleLabels } = Template.currentData();
+
+    if (sampleLabels) {
+      instance.showAllSamples.set(sampleLabels.length <= 6);
+    }
+  });
 });
 
 Template.listSamplesButton.helpers({
@@ -364,7 +372,7 @@ Template.listSamplesButton.helpers({
   sampleToShow() {
     let instance = Template.instance();
 
-    let sampleLabels = instance.data;
+    let { sampleLabels } = instance.data;
 
     // remove study labels if necessary
     let { profile } = Meteor.user();
@@ -386,10 +394,16 @@ Template.listSamplesButton.helpers({
       action: "nothing"
     };
   },
+  alwaysShowAll() {
+    return this.sampleLabels && this.sampleLabels.length <= 6;
+  },
+  not(variable) {
+    return !variable;
+  }
 });
 
 Template.listSamplesButton.events({
-  "click .show-list"(event, instance) {
+  "click .toggle-list"(event, instance) {
     instance.showAllSamples.set(!instance.showAllSamples.get());
   },
   "click .toggle-study-labels"(event, instance) {
@@ -401,6 +415,17 @@ Template.listSamplesButton.events({
         "profile.showStudyLabels": newValue
       }
     });
+  },
+  "click .download-list"(event, instance) {
+    let { sampleLabels } = instance.data;
+
+    // unqualify sample labels before downloading the list
+    let { profile } = Meteor.user();
+    if (!profile || !profile.showStudyLabels) {
+      sampleLabels = MedBook.utility.unqualifySampleLabels(sampleLabels);
+    }
+
+    saveStringAsFile(sampleLabels.join("\n"), instance.data.filename);
   },
 });
 
@@ -426,8 +451,16 @@ let saveStringAsFile = function () {
 Template.listFeaturesButton.onCreated(function () {
   let instance = this;
 
-  let showAllDefault = instance.data.feature_labels.length <= 5;
-  instance.showAllFeatures = new ReactiveVar(showAllDefault);
+  instance.showAllFeatures = new ReactiveVar(false);
+
+  // set the showAllFeatures default value whenever the data changes
+  instance.autorun(() => {
+    let { featureLabels } = Template.currentData();
+
+    if (featureLabels) {
+      instance.showAllFeatures.set(featureLabels.length <= 6);
+    }
+  });
 });
 
 Template.listFeaturesButton.helpers({
@@ -435,15 +468,17 @@ Template.listFeaturesButton.helpers({
   featuresToShow() {
     let instance = Template.instance();
 
-    let { feature_labels } = instance.data;
+    let { featureLabels } = instance.data;
 
-    // return either the whole list or the first couple items
-    if (instance.showAllFeatures.get()) {
-      return feature_labels;
-    } else {
-      return feature_labels
-        .slice(0, 3)
-        .concat([`... and ${feature_labels.length - 3} more samples`]);
+    if (featureLabels) {
+      // return either the whole list or the first couple items
+      if (instance.showAllFeatures.get()) {
+        return featureLabels;
+      } else {
+        return featureLabels
+          .slice(0, 3)
+          .concat([`... and ${featureLabels.length - 3} more samples`]);
+      }
     }
   },
 });
@@ -453,7 +488,7 @@ Template.listFeaturesButton.events({
     instance.showAllFeatures.set(!instance.showAllFeatures.get());
   },
   "click .download-list"(event, instance) {
-    let text = instance.data.feature_labels.join("\n");
+    let text = instance.data.featureLabels.join("\n");
 
     saveStringAsFile(text, instance.data.filename);
   },
