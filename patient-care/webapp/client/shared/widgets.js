@@ -352,20 +352,23 @@ Template.listSamplesButton.onCreated(function () {
 
   let showAllDefault = instance.data.length <= 5;
   instance.showAllSamples = new ReactiveVar(showAllDefault);
-
-  instance.hideStudyLabels = new ReactiveVar(false);
 });
 
 Template.listSamplesButton.helpers({
   showAllSamples() { return Template.instance().showAllSamples.get(); },
-  hideStudyLabels() { return Template.instance().hideStudyLabels.get(); },
+  showStudyLabels() {
+    let { profile } = Meteor.user();
+
+    return profile && profile.showStudyLabels;
+  },
   sampleToShow() {
     let instance = Template.instance();
 
     let sampleLabels = instance.data;
 
     // remove study labels if necessary
-    if (instance.hideStudyLabels.get()) {
+    let { profile } = Meteor.user();
+    if (!profile || !profile.showStudyLabels) {
       sampleLabels = MedBook.utility.unqualifySampleLabels(sampleLabels);
     }
 
@@ -390,7 +393,14 @@ Template.listSamplesButton.events({
     instance.showAllSamples.set(!instance.showAllSamples.get());
   },
   "click .toggle-study-labels"(event, instance) {
-    instance.hideStudyLabels.set(!instance.hideStudyLabels.get());
+    let { profile } = Meteor.user();
+    let newValue = !profile || !profile.showStudyLabels;
+
+    Meteor.users.update(Meteor.userId(), {
+      $set: {
+        "profile.showStudyLabels": newValue
+      }
+    });
   },
 });
 
