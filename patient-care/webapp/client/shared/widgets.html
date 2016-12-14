@@ -242,26 +242,39 @@
 </template>
 
 <template name="listSamplesButton">
-  {{#if firstGreater (length this) 5}}
-    <div class="ui mini buttons">
-      <div class="ui button show-list" style="display: inline;">
-        Show {{#if showAllSamples}}fewer{{else}}all{{/if}} samples
-      </div>
-      {{#semanticUIDropdown options=dropdownOptions}}
-        <div class="ui floating dropdown icon button">
-          <i class="dropdown icon"></i>
-          <div class="menu">
-            <div class="item toggle-study-labels">
-              <i class="{{#if hideStudyLabels}}un{{/if}}hide icon"></i>
-              {{#if hideStudyLabels}}Show{{else}}Hide{{/if}} study labels
-            </div>
-          </div>
-        </div>
-      {{/semanticUIDropdown}}
-    </div>
-  {{/if}}
-
   <ul>
+    {{! hide the bullet point for the button}}
+    <li style="list-style-type: none;">
+      <div class="ui mini buttons">
+        {{#if firstGreater (length this) 5}}
+          {{! show a "show all samples" button with "hide study labels" hidden
+              in a dropdown}}
+          <div class="ui button show-list" style="display: inline;">
+            Show {{#if showAllSamples}}fewer{{else}}all{{/if}} samples
+          </div>
+          {{#semanticUIDropdown options=dropdownOptions}}
+            <div class="ui floating dropdown icon button">
+              <i class="dropdown icon"></i>
+              <div class="menu">
+                <div class="item toggle-study-labels">
+                  <i class="{{#unless showStudyLabels}}un{{/unless}}hide
+                      icon"></i>
+                  {{#if showStudyLabels}}Hide{{else}}Show{{/if}} study labels
+                </div>
+              </div>
+            </div>
+          {{/semanticUIDropdown}}
+        {{else}}
+          {{! only show a "hide study labels" button}}
+          <div class="ui button toggle-study-labels" style="display: inline;">
+            <i class="{{#unless showStudyLabels}}un{{/unless}}hide icon"></i>
+            {{#if showStudyLabels}}Hide{{else}}Show{{/if}} study labels
+          </div>
+        {{/if}}
+      </div>
+    </li>
+
+    {{! list the samples!}}
     {{#each sampleToShow}}
       <li>{{this}}</li>
     {{/each}}
