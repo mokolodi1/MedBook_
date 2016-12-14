@@ -119,7 +119,6 @@ RunSingleSampleTopGenes.prototype.run = function () {
         deferred.reject(error);
       } else {
         // update the gene set so that people can see it
-        // NOTE:
         GeneSets.rawCollection().update({ _id: geneSetId }, {
           $set: {
             // link it to the job so it's viewable
