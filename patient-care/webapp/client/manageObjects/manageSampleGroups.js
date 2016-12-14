@@ -11,8 +11,8 @@ Template.createSampleGroup.helpers({
   nameAndDescription() {
     return SampleGroups.simpleSchema().pick(["name", "description"]);
   },
-  error() { return Template.instance().error },
-  newSampleGroup() { return Template.instance().newSampleGroup },
+  error() { return Template.instance().error; },
+  newSampleGroup() { return Template.instance().newSampleGroup; },
 });
 
 Template.createSampleGroup.events({
@@ -55,11 +55,6 @@ Template.showSampleGroup.helpers({
 
     return `/download/${userId}/${loginToken}/data-collection/` +
         `SampleGroups/${this._id}`;
-  },
-  totalSampleCount() {
-    return _.reduce(this.data_sets, (memo, sgDataSet) => {
-      return memo + sgDataSet.sample_count;
-    }, 0);
   },
 });
 
@@ -121,7 +116,7 @@ function getFilterJobStatus(sampleGroupId){
         {status: {$in: ["creating", "waiting", "running","error"]}},
         {'args.sample_group_id': sampleGroupId},
       ],
-    },);
+    });
     if(currentJob){ return currentJob.status; } else { return false; }
 }
 

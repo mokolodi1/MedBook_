@@ -22,6 +22,14 @@ Template.widgetsDemo.helpers({
     };
   },
   reactiveError() { return Template.instance().error; },
+  fakeSamplesSmall() {
+    return [
+      "ckcc/A01",
+      "ckcc/A02",
+      "ckcc/A03",
+      "ckcc/A04",
+    ];
+  },
   fakeSamples() {
     return [
       "ckcc/A01",
@@ -34,6 +42,30 @@ Template.widgetsDemo.helpers({
       "ckcc/B03",
       "ckcc/B04",
       "ckcc/B05",
+    ];
+  },
+  fakeFeaturesSmall() {
+    return [
+      "FABP4",
+      "ADIPOQ",
+      "PPARG",
+    ];
+  },
+  fakeFeatures() {
+    return [
+      "FABP4",
+      "ADIPOQ",
+      "PPARG",
+      "LIPE",
+      "DGAT1",
+      "LPL",
+      "CPT2",
+      "CD36",
+      "GPAM",
+      "ADIPOR2",
+      "ACAA2",
+      "ETFB",
+      "ACOX1",
     ];
   },
   fakeJob(status) {
@@ -362,6 +394,61 @@ Template.listSamplesButton.events({
   },
 });
 
+// Template.listFeaturesButton
+
+let saveStringAsFile = function () {
+  // run this once and then return a function which knows about this a tag
+  var a = document.createElement("a");
+  document.body.appendChild(a);
+  a.style = "display: none";
+
+  return function (data, fileName) {
+    let blob = new Blob([data], { type: "text/plain" });
+    let url = window.URL.createObjectURL(blob);
+
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+}();
+
+Template.listFeaturesButton.onCreated(function () {
+  let instance = this;
+
+  let showAllDefault = instance.data.feature_labels.length <= 5;
+  instance.showAllFeatures = new ReactiveVar(showAllDefault);
+});
+
+Template.listFeaturesButton.helpers({
+  showAllFeatures() { return Template.instance().showAllFeatures.get(); },
+  featuresToShow() {
+    let instance = Template.instance();
+
+    let { feature_labels } = instance.data;
+
+    // return either the whole list or the first couple items
+    if (instance.showAllFeatures.get()) {
+      return feature_labels;
+    } else {
+      return feature_labels
+        .slice(0, 3)
+        .concat([`... and ${feature_labels.length - 3} more samples`]);
+    }
+  },
+});
+
+Template.listFeaturesButton.events({
+  "click .toggle-list"(event, instance) {
+    instance.showAllFeatures.set(!instance.showAllFeatures.get());
+  },
+  "click .download-list"(event, instance) {
+    let text = instance.data.feature_labels.join("\n");
+
+    saveStringAsFile(text, instance.data.filename);
+  },
+});
+
 // Template.semanticUIDropdown
 
 Template.semanticUIDropdown.onRendered(function () {
@@ -660,5 +747,13 @@ Template.gseaFromGeneSetModal.helpers({
   },
   permissionLikelyDenied() {
     return Template.instance().permissionLikelyDenied.get();
+  },
+});
+
+// Template.samplesAndFeatures
+
+Template.samplesAndFeatures.helpers({
+  featuresFilename() {
+    return this.name + " features";
   },
 });

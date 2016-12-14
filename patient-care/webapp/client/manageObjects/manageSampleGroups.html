@@ -48,7 +48,11 @@
       </tr>
       <tr>
         <td>Samples</td>
-        <td>{{totalSampleCount}}</td>
+        <td>{{length sample_labels}}</td>
+      </tr>
+      <tr>
+        <td>Features</td>
+        <td>{{length feature_labels}}</td>
       </tr>
     </tbody>
   </table>
@@ -62,7 +66,9 @@
     </a>
   </h3>
 
-  {{>sampleGroupExprVarFilters}}
+  {{> sampleGroupExprVarFilters}}
+
+  {{> samplesAndFeatures}}
 
   <h3>Filters applied to data sets</h3>
 

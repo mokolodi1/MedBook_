@@ -26,8 +26,17 @@
   </p>
   {{> contactUsButton}}
 
-  <h2><code>{{|> listSamplesButton}}</code></h2>
+  <h2><code>{{|> listSamplesButton sample_labels}}</code></h2>
+  {{> listSamplesButton fakeSamplesSmall}}
   {{> listSamplesButton fakeSamples}}
+
+  <h2>
+    <code>{{|> listFeaturesButton feature_labels=array filename="Yop.txt"}}</code>
+  </h2>
+  {{> listFeaturesButton feature_labels=fakeFeaturesSmall
+      filename="a small list of features.txt"}}
+  {{> listFeaturesButton feature_labels=fakeFeatures
+      filename="isn't this cool.txt"}}
 
   <h2><code>{{|> viewJobButton}}</code></h2>
   This closes all open modals and goes to the specified link.
@@ -92,6 +101,12 @@
     This will show records in a Handsontable.
 
     See manageForms or manageGeneSets for a code example.
+  </p>
+
+  <h2><code>{{|> samplesAndFeatures}}</code></h2>
+  <p>
+    This is used in the manage detail view of sample groups and data
+    sets to show the samples and features for that data set or sample group.
   </p>
 </template>
 
@@ -268,6 +283,30 @@
   </ul>
 </template>
 
+<template name="listFeaturesButton">
+  {{#if firstGreater (length feature_labels) 5}}
+    <div class="ui mini buttons">
+      <div class="ui button toggle-list">
+        {{#if showAllFeatures}}
+          Hide
+        {{else}}
+          Show
+        {{/if}}
+        all features
+      </div>
+      <div class="ui button download-list">
+        <i class="download icon"></i>
+        Download
+      </div>
+    </div>
+  {{/if}}
+
+  <ul>
+    {{#each featuresToShow}}
+      <li>{{this}}</li>
+    {{/each}}
+  </ul>
+</template>
 
 <template name="semanticUIDropdown">
   {{! Calls $(".ui.dropdown").dropdown() when rendered}}
@@ -485,5 +524,22 @@
         {{> dataLoading}}
       {{/if}}
     {{/if}}
+  </div>
+</template>
+
+<template name="samplesAndFeatures">
+  <h3>Samples and Features</h3>
+  <div class="ui two column grid">
+    <div class="column">
+      <h4>Samples</h4>
+
+      {{> listSamplesButton sample_labels}}
+    </div>
+    <div class="column">
+      <h4>Features</h4>
+
+      {{> listFeaturesButton feature_labels=feature_labels
+          filename=featuresFilename}}
+    </div>
   </div>
 </template>
