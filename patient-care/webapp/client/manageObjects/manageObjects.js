@@ -137,7 +137,6 @@ Template.manageObjectsGrid.onRendered(function () {
   // Make the manage object detail sticky so it moves down
   // the page as the user scrolls down.
   function refreshSticky() {
-    console.log("refreshSticky");
     // reactively watch the count of the items on the left so it'll update
     // when it changes, but don't do anything with the return value
     let hi = getObjects(instance).count();
