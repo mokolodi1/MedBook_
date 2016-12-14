@@ -5,6 +5,9 @@
 Usage:
 ./gene_set_group_export.py [gene set collection id]
 
+.rnk documentation:
+http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#RNK:_Ranked_list_file_format_.28.2A.rnk.29
+
 Dependancies:
 pymongo
 """
@@ -28,8 +31,9 @@ def main():
     # set up the database client
     db = pymongo.MongoClient(os.getenv("MONGO_URL", "mongodb://mongo:27017/MedBook"))["MedBook"]
 
-    if len(argv) == 2:
-        exportGeneSetGroup(db, argv[1])
+    if len(argv) > 1:
+        for arg in argv[1:]:
+            exportGeneSetGroup(db, arg)
 
         sys.exit(0)
 

@@ -208,136 +208,267 @@ Meteor.methods({
   },
 
   // jobs
-  createLimmaGSEA: function (args) {
+  createGsea: function (args) {
     check(args, new SimpleSchema({
-      sample_group_a_id: { type: String },
-      sample_group_b_id: { type: String },
-      limma_top_genes_count: { type: Number, min: 1 },
-      gene_set_group_id: { type: String },
+      gene_set_id: { type: String },
+      gene_set_sort_field: { type: String },
+      gene_set_group_ids: { type: [String] },
+      set_max: { type: Number },
+      set_min: { type: Number },
+      plot_top_x: { type: Number, min: 0 },
+      nperm: { type: Number, min: 0 },
+      metric: { type: String },
+      scoring_scheme: { type: String },
     }));
 
     let user = MedBook.ensureUser(Meteor.userId());
 
-    let geneSetColl = GeneSetGroups.findOne(args.gene_set_group_id);
-    user.ensureAccess(geneSetColl);
+    // ensure access for gene_set_id
+    let geneSet = GeneSets.findOne(args.gene_set_id);
+    user.ensureAccess(geneSet);
 
-    // ensure access to sample group, data sets inside
-    _.each([
-      args.sample_group_a_id,
-      args.sample_group_b_id
-    ], (sampleGroupId) => {
-      let sampleGroup = SampleGroups.findOne(sampleGroupId);
-      user.ensureAccess(sampleGroup);
+    // ensure access for gene_set_group_id
+    // Don't do this on the client because collaborations aren't necessarily
+    // loaded client-side.
+    if (Meteor.isServer) {
+      // NOTE: this will also fail if the gene_set_group_ids aren't unique
+      let accessableGSGCount = GeneSetGroups.find({
+        _id: { $in: args.gene_set_group_ids },
+        collaborations: { $in: user.getCollaborations() },
+      }).count();
 
-      // data sets not necessarily loaded on client
-      if (Meteor.isServer) {
-        _.each(sampleGroup.data_sets, (dataSet) => {
-          user.ensureAccess(DataSets.findOne(dataSet.data_set_id));
-        });
+      if (accessableGSGCount !== args.gene_set_group_ids.length) {
+        throw new Meteor.Error("invalid-gene-set-group-ids");
       }
-    });
-
-    // add the sample group names in there to make joins on the client easy
-    // TODO: don't do to SampleGroups.findOne()s
-    _.extend(args, {
-      sample_group_a_name: SampleGroups.findOne(args.sample_group_a_id).name,
-      sample_group_b_name: SampleGroups.findOne(args.sample_group_b_id).name,
-      gene_set_group_name: geneSetColl.name,
-    });
-
-    // if it's been run before return that
-    let duplicateJob = Jobs.findOne({ args });
-    if (duplicateJob) {
-      return duplicateJob._id;
     }
 
+    // validate gene_set_sort_field (make sure it exists in the gene set)
+    let sortField = _.findWhere(geneSet.fields, {
+      name: args.gene_set_sort_field,
+    });
+    if (!sortField) {
+      throw new Meteor.Error("gene-set-sort-field-invalid");
+    }
+
+    // set a bunch of denormalization args
+    args.gene_set_name = geneSet.name;
+    args.gene_set_associated_object = geneSet.associated_object;
+    args.gene_set_group_names = _.map(args.gene_set_group_ids, (gsgId) => {
+      // NOTE: we have to do this as a findOne to preserve the order of the
+      // gene sets because they're not sorted by anything
+      return GeneSetGroups.findOne(gsgId).name;
+    });
+
     return Jobs.insert({
-      name: "RunLimmaGSEA",
+      name: "RunGSEA",
+      status: "waiting",
+      user_id: user._id,
+      collaborations: [ user.personalCollaboration() ],
+      args
+    });
+  },
+  createPairedAnalysis(args) {
+    check(args, new SimpleSchema({
+      data_set_id: { type: String, label: "Data set" },
+      primary_sample_labels: { type: [ String ] },
+      progression_sample_labels: { type: [ String ] },
+    }));
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    let dataSet = DataSets.findOne(args.data_set_id);
+    user.ensureAccess(dataSet);
+
+    args.data_set_name = dataSet.name;
+
+    return Jobs.insert({
+      name: "RunPairedAnalysis",
+      status: "waiting",
+      user_id: user._id,
+      collaborations: [ user.personalCollaboration() ],
+      args
+    });
+  },
+  createSingleSampleTopGenes(args) {
+    check(args, new SimpleSchema({
+      data_set_id: { type: String },
+      sample_labels: { type: [String]},
+      percent_or_count: {
+        type: String,
+        allowedValues: [
+          "percent",
+          "count",
+        ],
+      },
+      top_percent: {
+        type: Number,
+        optional: true,
+        min: 0.0001,
+        max: 100,
+        decimal: true,
+      },
+      top_count: { type: Number, optional: true, min: 1 },
+    }));
+
+    // make they've specified the necessary one
+    // It's not a problem if they specify both because it'll be ignored.
+    if (args.percent_or_count === "percent") {
+      // can't use Match becuase it doesn't do decimals
+      if (!args.top_percent) {
+        throw new Meteor.Error("must-provide-top-percent");
+      }
+    } else if (args.percent_or_count === "count") {
+      check(args.top_count, Number);
+    }
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    let dataSet = DataSets.findOne(args.data_set_id);
+    user.ensureAccess(dataSet);
+
+    args.data_set_name = dataSet.name;
+
+    let sampleLabels = args.sample_labels;
+    delete args.sample_labels;
+
+    return _.map(sampleLabels, (sample_label) => {
+      // will override previous values
+      args.sample_label = sample_label;
+
+      return Jobs.insert({
+        name: "RunSingleSampleTopGenes",
+        status: "waiting",
+        user_id: user._id,
+        collaborations: [ user.personalCollaboration() ],
+        args
+      });
+    });
+  },
+  createLimma(args) {
+    check(args, new SimpleSchema({
+      // No allowed values for value_type becuase we check if the value_types
+      // of the sample groups match this, and those have allowedValues on
+      // insert.
+      value_type: { type: String },
+
+      experimental_sample_group_id: { type: String },
+      reference_sample_group_id: { type: String },
+      top_genes_count: { type: Number, min: 1 },
+    }));
+
+    // ensure access to all of the things
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    let experimental = SampleGroups.findOne(args.experimental_sample_group_id);
+    let reference = SampleGroups.findOne(args.reference_sample_group_id);
+    user.ensureAccess(experimental);
+    user.ensureAccess(reference);
+
+    // TODO: make sure the groups don't share samples from the same data set
+
+    // make sure the sample groups match the value type
+    function ensureValueType (sampleGroup) {
+      if (sampleGroup.value_type !== args.value_type) {
+        throw new Meteor.Error("value-type-mismatch");
+      }
+    }
+    ensureValueType(experimental);
+    ensureValueType(reference);
+
+    // set denormalized args
+    args.experimental_sample_group_name = experimental.name;
+    args.reference_sample_group_name = reference.name;
+    args.experimental_sample_group_version = experimental.version;
+    args.reference_sample_group_version = reference.version;
+
+    // insert the job
+    return Jobs.insert({
+      name: "RunLimma",
       status: "waiting",
       user_id: user._id,
       collaborations: [ user.personalCollaboration() ],
       args,
     });
   },
-  createTumorMapOverlay(args) {
-    check(args, MedBook.jobSchemas.TumorMapOverlay.args);
-
-    let user = MedBook.ensureUser(Meteor.userId());
-
-    // group sample labels by data set id
-    let samplesByDataSetId = {};
-    _.each(args.samples, (sample) => {
-      if (!samplesByDataSetId[sample.data_set_id]) {
-        samplesByDataSetId[sample.data_set_id] = [];
-      }
-
-      samplesByDataSetId[sample.data_set_id].push(sample.sample_label);
-    });
-
-    let jobId = Jobs.insert({
-      name: "TumorMapOverlay",
-      status: "creating",
-      user_id: user._id,
-      collaborations: [ user.personalCollaboration() ],
-      args,
-    });
-
-    // if it's on the server go get the bookmark
-    if (Meteor.isServer) {
-      this.unblock();
-
-      // build up the sample (aka "nodes") data
-      console.log("loading data for tumor map");
-      let nodes = {};
-
-      _.each(samplesByDataSetId, (sampleLabels, data_set_id) => {
-        // data set security
-        let dataSet = DataSets.findOne(data_set_id);
-        user.ensureAccess(dataSet);
-
-        // initialize nodes[sampleLabels] to put gene data there
-        _.each(sampleLabels, (label) => { nodes[label] = {}; });
-
-        // load the data for this data set
-        GeneExpression.find({ data_set_id }).forEach((doc) => {
-          _.each(sampleLabels, (sample_label) => {
-            let sampleIndex = dataSet.gene_expression_index[sample_label];
-            let expValue = doc.rsem_quan_log2[sampleIndex];
-
-            nodes[sample_label][doc.gene_label] = expValue;
-          });
-        });
-      });
-      console.log("done loading data");
-
-      // do this to allow non-SSL connections (I think)
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-      // do the API call
-      apiResponse = HTTP.call("POST",
-          "https://tumormap.ucsc.edu:8112/query/overlayNodes", {
-        data: {
-          map: "CKCC/v1",
-          layout: "mRNA",
-          nodes
-        }
-      });
-
-      if (apiResponse.statusCode === 200) {
-        Jobs.update(jobId, {
-          $set: {
-            status: "done",
-            output: {
-              // TODO: should be `bookmark`
-              bookmark_url: apiResponse.data.bookmarks[0],
-            }
-          }
-        });
-      } else {
-        Jobs.update(jobId, { $set: { status: "error" } });
-      }
-    }
-  },
+  // createTumorMapOverlay(args) {
+  //   check(args, MedBook.jobSchemas.TumorMapOverlay.args);
+  //
+  //   let user = MedBook.ensureUser(Meteor.userId());
+  //
+  //   // group sample labels by data set id
+  //   let samplesByDataSetId = {};
+  //   _.each(args.samples, (sample) => {
+  //     if (!samplesByDataSetId[sample.data_set_id]) {
+  //       samplesByDataSetId[sample.data_set_id] = [];
+  //     }
+  //
+  //     samplesByDataSetId[sample.data_set_id].push(sample.sample_label);
+  //   });
+  //
+  //   let jobId = Jobs.insert({
+  //     name: "TumorMapOverlay",
+  //     status: "creating",
+  //     user_id: user._id,
+  //     collaborations: [ user.personalCollaboration() ],
+  //     args,
+  //   });
+  //
+  //   // if it's on the server go get the bookmark
+  //   if (Meteor.isServer) {
+  //     this.unblock();
+  //
+  //     // build up the sample (aka "nodes") data
+  //     console.log("loading data for tumor map");
+  //     let nodes = {};
+  //
+  //     _.each(samplesByDataSetId, (sampleLabels, data_set_id) => {
+  //       // data set security
+  //       let dataSet = DataSets.findOne(data_set_id);
+  //       user.ensureAccess(dataSet);
+  //
+  //       // initialize nodes[sampleLabels] to put gene data there
+  //       _.each(sampleLabels, (label) => { nodes[label] = {}; });
+  //
+  //       // load the data for this data set
+  //       GeneExpression.find({ data_set_id }).forEach((doc) => {
+  //         _.each(sampleLabels, (sample_label) => {
+  //           let sampleIndex = dataSet.gene_expression_index[sample_label];
+  //           let expValue = doc.rsem_quan_log2[sampleIndex];
+  //
+  //           nodes[sample_label][doc.gene_label] = expValue;
+  //         });
+  //       });
+  //     });
+  //     console.log("done loading data");
+  //
+  //     // do this to allow non-SSL connections (I think)
+  //     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  //
+  //     // do the API call
+  //     apiResponse = HTTP.call("POST",
+  //         "https://tumormap.ucsc.edu:8112/query/overlayNodes", {
+  //       data: {
+  //         map: "CKCC/v1",
+  //         layout: "mRNA",
+  //         nodes
+  //       }
+  //     });
+  //
+  //     if (apiResponse.statusCode === 200) {
+  //       Jobs.update(jobId, {
+  //         $set: {
+  //           status: "done",
+  //           output: {
+  //             // TODO: should be `bookmark`
+  //             bookmark_url: apiResponse.data.bookmarks[0],
+  //           }
+  //         }
+  //       });
+  //     } else {
+  //       Jobs.update(jobId, { $set: { status: "error" } });
+  //     }
+  //   }
+  // },
 
   // insertRecord: function(values) {
   //   check(values, Object);
@@ -635,18 +766,19 @@ Meteor.methods({
     // do some collection-specific checking before actually removing the object
     if (collection_name === "Jobs") {
       let deleteableJobs = [
+        "RunGSEA",
         "RunLimmaGSEA",
         "TumorMapOverlay",
         "UpDownGenes",
+        "RunPairedAnalysis",
+        "RunLimma",
+        "RunSingleSampleTopGenes",
       ];
 
       if (deleteableJobs.indexOf(object.name) === -1) {
         throw new Meteor.Error("permission-denied");
       }
     }
-
-    // remove original object
-    MedBook.collections[collection_name].remove(mongo_id);
 
     // remove associated blobs
     // NOTE: Blobs2.delete isn't defined on the client
@@ -663,6 +795,11 @@ Meteor.methods({
     }
 
     // remove other linked object types
+    let associatedQuery = {
+      "associated_object.collection_name": collection_name,
+      "associated_object.mongo_id": mongo_id,
+    };
+
     if (collection_name === "DataSets") {
       GenomicExpression.remove({ data_set_id: mongo_id });
     } else if (collection_name === "Forms" ||
@@ -674,6 +811,21 @@ Meteor.methods({
     } else if (collection_name === "GeneSetGroups") {
       GeneSets.remove({ gene_set_group_id: mongo_id });
     }
+
+    // recursively remove associated gene sets
+    // ==> we need to remove not just the gene sets but the gene sets
+    //     associated objects
+    // Only do this on the server because the data isn't necessarily loaded.
+    if (Meteor.isServer) {
+      GeneSets.find(associatedQuery).forEach((geneSet) => {
+        Meteor.call("removeObject", "GeneSets", geneSet._id);
+      });
+    }
+
+    // remove original object
+    // NOTE: do this after so the associated objects can still look
+    // it up for security until the very end
+    MedBook.collections[collection_name].remove(mongo_id);
   },
   removeObjects(collectionName, mongoIds) {
     check(collectionName, String);
@@ -1018,3 +1170,11 @@ Meteor.methods({
     });
   },
 });
+
+if (Meteor.isServer) {
+  // for deleting records
+  Moko.ensureIndex(Records, {
+    "associated_object.collection_name": 1,
+    "associated_object.mongo_id": 1,
+  });
+}

@@ -1,22 +1,23 @@
-// Template.appBody
+// Template.siteBreadcrumbs
 
-Template.appBody.helpers({
-  getPatientLabel: function () {
-    let patient = Patients.findOne(this.params().patient_id);
-    if (patient) return patient.patient_label;
-    return "loading";
+Template.siteBreadcrumbs.helpers({
+  // getPatientLabel: function () {
+  //   let patient = Patients.findOne(this.params().patient_id);
+  //   if (patient) return patient.patient_label;
+  //   return "loading";
+  // },
+  isJobResult() {
+    return [
+      "upDownGenesJob",
+      "limmaGseaJob",
+      "gseaJob",
+      "pairedAnalysisJob",
+      "limmaJob",
+      "singleSampleTopGenesJob",
+    ].indexOf(FlowRouter.getRouteName()) !== -1;
   },
   invalidUrl() {
-    return FlowRouter.getRouteName() === undefined;
-  },
-  activeRouteIsInTools() {
-    return [
-      "listTools",
-      "listLimmaGSEA",
-      "listTumorMap",
-      "listUpDownGenes",
-      "upDownGenesJob",
-    ].indexOf(FlowRouter.getRouteName()) !== -1;
+    return !FlowRouter.getRouteName();
   },
 });
 

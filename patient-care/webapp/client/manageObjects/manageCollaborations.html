@@ -111,7 +111,6 @@
 
     {{> alwaysShowCollaborationFields}}
 
-
     {{! only one admin: this user}}
     {{> afQuickField name="administrators" type="hidden" value=onlyPersonal}}
     {{> afQuickField name="collaborators" type="hidden" value=onlyPersonal}}
@@ -126,7 +125,7 @@
 </template>
 
 <template name="showCollaboration">
-  <h3>
+  <h2>
     {{name}}
 
     <div class="ui right floated icon buttons">
@@ -148,7 +147,7 @@
         {{> deleteCollabButton
             reallyDelete=(getInstanceReactive "removeClicked")}}
       {{else}}
-        <button class="ui negative button remove-collaboration">
+        <button class="ui negative button remove-or-delete-collab">
           <i class="sign out icon"></i>
           {{#if getInstanceReactive "removeClicked"}}
             Really leave?
@@ -158,15 +157,15 @@
         </button>
       {{/if}}
     </div>
-  </h3>
+  </h2>
 
   {{#if editing}}
-    {{#autoForm id="editCollaboration" schema=collaborationSchema doc=this
-        type="update"}}
-      {{> alwaysShowCollaborationFields}}
-
-      {{> adminAndCollaboratorFields}}
-    {{/autoForm}}
+    <div style="margin-bottom: 20px;">
+      {{#autoForm id="editCollaboration" schema=collaborationSchema doc=this
+          type="update"}}
+        {{> alwaysShowCollaborationFields}}
+      {{/autoForm}}
+    </div>
   {{else}}
     <p>
       {{description}}
@@ -179,9 +178,25 @@
         Admin approval required to join: {{> yesOrNo adminApprovalRequired}}
       </p>
     {{/if}}
-    <p>Collaborators: {{> showCollaborationChips collaborators}}</p>
-    <p>Administrators: {{> showCollaborationChips administrators}}</p>
+  {{/if}}
 
+  <div class="ui divided grid">
+    <div class="eight wide column">
+      <h3>Collaborators</h3>
+      {{> listCollaborators collabsList=collabDescriptions
+          collectionName="Collaborations" mongoIds=mongoIds editing=editing
+          attribute="collaborators"}}
+    </div>
+
+    <div class="eight wide column">
+      <h3>Administrators</h3>
+      {{> listCollaborators collabsList=adminDescriptions
+          collectionName="Collaborations" mongoIds=mongoIds editing=editing
+          attribute="administrators"}}
+    </div>
+  </div>
+
+  {{#if editing}}
     {{#if length requestsToJoin}}
       {{#if isAdmin}}
         <h4>The following people have requested access:</h4>
@@ -302,29 +317,8 @@
   {{/if}}
 </template>
 
-<template name="showCollaborationChips">
-  {{#each this}}
-    <div class="ui horizontal label collaboration">
-      <i class="{{#if isPersonalCollaboration}}user{{else}}users{{/if}}
-          icon"></i>
-      {{this}}
-    </div>
-  {{/each}}
-</template>
-
-<template name="adminAndCollaboratorFields">
-  {{#if collabsLoaded}}
-    {{> afQuickField name="collaborators" options=collaborationOptions
-        type="select" multiple=true search=true}}
-    {{> afQuickField name="administrators" options=collaborationOptions
-        type="select" multiple=true search=true}}
-  {{else}}
-    {{> dataLoading}}
-  {{/if}}
-</template>
-
 <template name="deleteCollabButton">
-  <button class="ui negative button remove-collaboration show-popup"
+  <button class="ui negative button remove-or-delete-collab show-popup"
       data-content={{deletePopupText}}>
     <i class="trash icon"></i>
     {{#if reallyDelete}}

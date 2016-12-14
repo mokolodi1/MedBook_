@@ -58,7 +58,9 @@ Blobs2.create = function (pathOnServer, associated_object,
     mongo_id: { type: String },
   }));
   check(metadata, Object);
-  if (typeof callback !== "function") throw new Meteor.Error("no-callback");
+  if (callback && typeof callback !== "function") {
+    throw new Meteor.Error("invalid-callback");
+  }
 
   // create the blob
   // NOTE: don't set associated_object until it's actually done so if there's
@@ -75,10 +77,13 @@ Blobs2.create = function (pathOnServer, associated_object,
 
   // only throw an error if the problem is something other than the folder
   // already existing
+  var deferred = Q.defer();
+
   mv(pathOnServer, path.join(storageRootPath, storage_path), { mkdirp: true },
         Meteor.bindEnvironment(function (err, out) {
     if (err) {
       callback(err);
+      deferred.reject(err);
     } else {
       Blobs2.update(blobId, {
         $set: {
@@ -88,7 +93,10 @@ Blobs2.create = function (pathOnServer, associated_object,
         }
       });
 
-      callback(null, Blobs2.findOne(blobId));
+      var blob = Blobs2.findOne(blobId);
+
+      if (callback) callback(null, blob);
+      deferred.resolve(blob);
     }
   }));
 };
@@ -99,19 +107,27 @@ Blobs2.delete = function (selector, callback) {
   } else {
     check(selector, Object);
   }
-  if (typeof callback !== "function") throw new Meteor.Error("no-callback");
+  if (callback && typeof callback !== "function") {
+    throw new Meteor.Error("invalid-callback");
+  }
 
   var rmPromises = [];
   Blobs2.find(selector).forEach(function (blob) {
     rmPromises.push(Q.nfcall(remove, blob.getFilePath()));
   });
 
-  Q.all(rmPromises)
+  // NOTE: anything attached to the returned promise will happen *after*
+  // the .then and .catch here.
+  return Q.all(rmPromises)
     .then(Meteor.bindEnvironment(function (result) {
-      callback(null, rmPromises.length);
+      var asdf = Blobs2.remove(selector, { multi: true });
+
+      if (callback) callback(null, rmPromises.length);
     }))
     .catch(function (yop) {
-      callback(new Meteor.Error("failed-to-remove-blobs",
-          "Failed to remove all blobs."));
+      if (callback) {
+        callback(new Meteor.Error("failed-to-remove-blobs",
+            "Failed to remove all blobs."));
+      }
     });
 };

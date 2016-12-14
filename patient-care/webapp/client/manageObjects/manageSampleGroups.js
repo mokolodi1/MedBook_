@@ -84,7 +84,7 @@ Template.sampleGroupExprVarFilters.helpers({
       "associated_object.mongo_id":this._id,
       "metadata.type":"ExprAndVarFilteredSampleGroupData",
     });
-    
+
     if(!foundBlob){return false;}
     // Construct the URL a la downloadUrl above
 
@@ -126,7 +126,7 @@ function getFilterJobStatus(sampleGroupId){
 }
 
 Template.sampleGroupExprVarFilters.events({
-  // initiate the expression & variance filter job 
+  // initiate the expression & variance filter job
   "click .button.run-job": function(event, instance){
     let sampleGroupId = instance.data._id ;
     Meteor.call("applyExprVarianceFilters", sampleGroupId, (error, result) => {

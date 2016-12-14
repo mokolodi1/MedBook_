@@ -25,7 +25,8 @@ Meteor.methods({
       use_filtered_sample_group,
     } = formValues;
 
-    user.ensureAccess(DataSets.findOne(data_set_id));
+    let dataSet = DataSets.findOne(data_set_id);
+    user.ensureAccess(dataSet);
 
     // if we need to create a new sample group, do so
     if (formValues.sample_group_id === "creating") {
@@ -71,11 +72,14 @@ Meteor.methods({
       }
     }
 
+    // args shared by all jobs to be created in just a moment
     let sameArgs = {
       data_set_id,
+      data_set_name: dataSet.name,
       iqr_multiplier,
       sample_group_id,
       sample_group_name: sampleGroup.name,
+      sample_group_version: sampleGroup.version,
       use_filtered_sample_group,
     };
 
@@ -84,38 +88,15 @@ Meteor.methods({
       var args = _.clone(sameArgs);
       args.sample_label = sample_label;
 
-      // check to see if a job like this one has already been run,
-      // and if so, return that job's _id
-      // NOTE: I believe there could be a race condition here, but
-      // I don't think Meteor handles more than one Meteor method at once.
-      // (That said, we unblock above to create a sample group, but because
-      // that is a new object, this should be the first thing run with the
-      // new _id.)
-
-      // Jobs that predate sample group filters will match for new jobs using
-      // an unfiltered sample group as neither has 'use_filtered_sample_group'
-      // as an arg.
-      let duplicateJob = Jobs.findOne({
+      // insert the job
+      Jobs.insert({
+        name: "UpDownGenes",
+        status: "waiting",
+        user_id: user._id,
+        collaborations: [ user.personalCollaboration() ],
         args,
-        collaborations: user.personalCollaboration(),
-        status: { $ne: "error" }
+        prerequisite_job_ids
       });
-
-      let jobId;
-      if (duplicateJob) {
-        jobId = duplicateJob._id;
-      } else {
-        jobId = Jobs.insert({
-          name: "UpDownGenes",
-          status: "waiting",
-          user_id: user._id,
-          collaborations: [ user.personalCollaboration() ],
-          args,
-          prerequisite_job_ids
-        });
-      }
-
-      return jobId;
     });
   },
   createSampleGroup: function (sampleGroup) {
@@ -535,11 +516,22 @@ Meteor.methods({
 
   // return a list of description objects for the union
   // of collaborations in multiple objects
-  getCollabDescriptions(collectionName, mongoIds) {
+  getCollabDescriptions(collectionName, mongoIds, attribute) {
     check(collectionName, String);
     check(mongoIds, [String]);
+    check(attribute, String);
 
     let user = MedBook.ensureUser(this.userId);
+
+    // ensure the attribute is valid
+    let allowedAttributes = [
+      "collaborations",
+      "collaborators",
+      "administrators",
+    ];
+    if (allowedAttributes.indexOf(attribute) === -1) {
+      throw new Meteor.Error("invalid-attribute");
+    }
 
     // put all the collab names into this hash map
     let collabNameHash = {};
@@ -547,9 +539,9 @@ Meteor.methods({
     MedBook.collections[collectionName].find({
       _id: { $in: mongoIds }
     }, {
-      fields: { collaborations: 1 }
-    }).forEach(({ collaborations }) => {
-      _.each(collaborations, (collabName) => {
+      fields: { [ attribute ]: 1 }
+    }).forEach((obj) => {
+      _.each(obj[attribute], (collabName) => {
         collabNameHash[collabName] = true;
       });
     });

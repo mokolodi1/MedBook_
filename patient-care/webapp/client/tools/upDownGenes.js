@@ -1,6 +1,20 @@
-// Template.outlierAnalysis
 import Fuse from 'fuse.js';
 import Clipboard from 'clipboard';
+
+// Template.upDownGenesJob
+
+Template.upDownGenesJob.helpers({
+  jobOptions() {
+    return {
+      job_id: FlowRouter.getParam("job_id"),
+      title: "Outlier Analysis Result",
+      listRoute: "listUpDownGenes",
+      argsTemplate: "upDownGenesArgs",
+    };
+  },
+});
+
+// Template.outlierAnalysis
 
 Template.outlierAnalysis.onCreated(function () {
   const instance = this;
@@ -9,7 +23,6 @@ Template.outlierAnalysis.onCreated(function () {
   instance.autorun(function () {
     instance.subscribe("blob", Jobs.findOne().output.up_blob_id);
     instance.subscribe("blob", Jobs.findOne().output.down_blob_id);
-    instance.subscribe("sampleGroups");
   });
 });
 
@@ -20,21 +33,14 @@ Template.outlierAnalysis.helpers({
     // If it's an original blob, ignore the filename; otherwise
     // use it and the job ID to get the blob2 route.
     let isItABlob = Blobs.findOne(blobId);
-    if(isItABlob){
+    if (isItABlob) {
       return isItABlob.url();
-    }else {
+    } else {
       let userId = Meteor.userId();
       let loginToken = Accounts._storedLoginToken();
       let jobId = FlowRouter.getParam("job_id");
       return `/download/${userId}/${loginToken}/job-blob/${jobId}/${blobFileName}`;
     }
-  },
-  // Get version of a sample group visible to this user
-  getSampleGroupVersion(sampleGroupId){
-    let sg = SampleGroups.findOne(sampleGroupId);
-    let version = "";
-    if(sg){ version = sg.version; }
-    return version;
   },
 });
 
@@ -45,6 +51,16 @@ Template.outlierAnalysis.helpers({
 Template.outlierGenesTable.onCreated(function () {
   const instance = this;
 
+  // subscribe to the gene set that was generated
+  instance.associatedObj = {
+    collection_name: "Jobs",
+    mongo_id: FlowRouter.getParam("job_id"),
+  };
+  instance.subscribe("associatedObjectGeneSet", instance.associatedObj, {
+    outlier_type: instance.data.outlierType
+  });
+
+  // a bunch of instance variables for the table
   instance.filterText = new ReactiveVar("");
   instance.filteredData = new ReactiveVar([]);
   instance.pageIndex = new ReactiveVar(0);
@@ -70,6 +86,7 @@ Template.outlierGenesTable.onCreated(function () {
     }
   });
 
+  // search with Fuse.js
   let unfilteredData = instance.data.data;
   let f = new Fuse(unfilteredData, {
     keys: [ "gene_label" ],
@@ -112,6 +129,7 @@ Template.outlierGenesTable.onCreated(function () {
 Template.outlierGenesTable.onRendered(function () {
   let instance = this;
 
+  // set up the clipboard copy button
   let clipboard = new Clipboard(instance.$('.copy-genes-to-clipboard')[0], {
     text: () => {
       return _.pluck(instance.data.data, "gene_label").join("\n");
@@ -225,8 +243,24 @@ Template.outlierGenesTable.events({
       instance.rowsPerPage.set(newValue);
     }
   },
+  "click .run-gsea"(event, instance) {
+    let { mongo_id, collection_name } = instance.associatedObj;
+
+    // find the gene set;
+    let geneSet = GeneSets.findOne({
+      "associated_object.mongo_id": mongo_id,
+      "associated_object.collection_name": collection_name,
+      "metadata.outlier_type": instance.data.outlierType,
+    });
+
+    // pass the gene set to the modal via a query
+    FlowRouter.setQueryParams({
+      "geneSetIdForGsea": geneSet._id
+    });
+  },
 });
 
+// Template.geneWithInfo
 
 Template.geneWithInfo.onRendered(function(){
   this.$(".geneInfoIcon.icon").popup({
