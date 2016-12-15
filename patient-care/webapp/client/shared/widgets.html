@@ -569,13 +569,14 @@
     <div class="column">
       <h4>Samples</h4>
 
-      {{> listSamplesButton sampleLabels=sample_labels}}
+      {{> listSamplesButton sampleLabels=sample_labels
+          filename=(concat name " samples")}}
     </div>
     <div class="column">
       <h4>Features</h4>
 
       {{> listFeaturesButton featureLabels=feature_labels
-          filename=featuresFilename}}
+          filename=(concat name " features")}}
     </div>
   </div>
 </template>

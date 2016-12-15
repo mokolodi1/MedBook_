@@ -794,11 +794,3 @@ Template.gseaFromGeneSetModal.helpers({
     return Template.instance().permissionLikelyDenied.get();
   },
 });
-
-// Template.samplesAndFeatures
-
-Template.samplesAndFeatures.helpers({
-  featuresFilename() {
-    return this.name + " features";
-  },
-});
