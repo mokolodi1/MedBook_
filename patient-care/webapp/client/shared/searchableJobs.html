@@ -172,7 +172,7 @@
     </tbody>
 
     {{! don't show pagination if there's only a handful of jobs}}
-    {{#if firstGreater (length jobsQuery) 10}}
+    {{#if firstGreater paginationOptions.totalRowCount 10}}
       <tfoot>
         <tr>
           <th colspan={{totalColumnsCount}}>
@@ -182,25 +182,30 @@
       </tfoot>
     {{/if}}
   </table>
-
-  <!-- {{#if notShownCount}}
-    <div class="ui info message" style="margin-bottom: 20px;">
-      <div class="header">
-        {{notShownCount}} jobs selected but not shown
-      </div>
-      These jobs are hidden because they don't match the search criteria.
-    </div>
-  {{/if}} -->
 </template>
 
 <template name="tablePagination">
-  <span>
-    Showing
-    <div class="ui input" style="width: 100px;">
+  <form class="ui fluid form table-pagination" style="display: inline-block;">
+    <div class="inline field">
+      <label style="margin-right: 2px;">Showing</label>
       <input placeholder="# results" class="results-per-page"
-          value={{rowsPerPage}} type="text">
+          value={{rowsPerPage}} type="text" style="width: 90px;">
+      {{#if getInstanceReactive "perPageError"}}
+        <div class="ui left pointing red basic label reset-per-page"
+            style="cursor: pointer;">
+          Positive integers only, please! (Max: 250)
+          Click to reset.
+        </div>
+      {{else}}
+        {{#if getInstanceReactive "perPageFocus"}}
+          <div class="ui left pointing basic label">
+            Press enter to set
+          </div>
+        {{/if}}
+      {{/if}}
+      <label>of {{options.totalRowCount}}</label>
     </div>
-    of {{options.totalRowCount}}</span>
+  </form>
 
   <div class="ui right floated pagination menu">
     {{#unless compare pageNumber 1}}

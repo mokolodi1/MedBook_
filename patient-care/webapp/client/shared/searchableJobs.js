@@ -108,7 +108,7 @@ Template.searchableJobs.onRendered(function () {
       $(".delete-jobs").popup({
         content: "Click anywhere to cancel.",
         delay: {
-          // wait 2 seconds before hiding
+          // wait 5 seconds before hiding
           hide: 5000
         },
       }).popup("show");
@@ -276,7 +276,6 @@ Template.listSelectableJobs.helpers({
       value = func(job);
     }
 
-
     // convert to "Yes"/"No" if `yes_no`
     if (yes_no) {
       return value ? "Yes" : "No";
@@ -296,15 +295,6 @@ Template.listSelectableJobs.helpers({
   selectMode() {
     return Template.instance().data.selectMode.get();
   },
-  // notShownCount() {
-  //   let jobIds = Object.keys(Template.instance().data.selectedIdMap.get());
-  //
-  //   let shownCount = Jobs.find({
-  //     _id: { $in: jobIds }
-  //   }).count();
-  //
-  //   return jobIds.length - shownCount;
-  // },
   totalColumnsCount() {
     return this.columns.length + 1;
   },
@@ -367,6 +357,11 @@ Template.listSelectableJobs.events({
 Template.tablePagination.onCreated(function () {
   let instance = this;
 
+  // keep track of if they're focussed on the input.results-per-page
+  // and if there's an error in it
+  instance.perPageFocus = new ReactiveVar(false);
+  instance.perPageError = new ReactiveVar(false);
+
   // keep max page index up to date
   instance.autorun(function () {
     let { options } = Template.currentData();
@@ -376,6 +371,14 @@ Template.tablePagination.onCreated(function () {
 
     options.maxPageIndex.set(Math.floor((totalRowCount - 1) / rowsPerPage));
   });
+
+  // if we've cached a rowsPerPage, show that number of jobs
+  let { profile } = Meteor.user();
+  if (profile &&
+      profile.tablePagination &&
+      profile.tablePagination.rowsPerPage) {
+    instance.data.options.rowsPerPage.set(profile.tablePagination.rowsPerPage);
+  }
 });
 
 Template.tablePagination.helpers({
@@ -461,11 +464,71 @@ Template.tablePagination.events({
       instance.data.options.pageIndex.set(value - 1);
     }
   },
-  "change .results-per-page": function (event, instance) {
-    let newValue = parseInt(event.target.value, 10);
+  "focus .results-per-page"(event, instance) {
+    instance.perPageFocus.set(true);
+  },
+  "blur .results-per-page"(event, instance) {
+    instance.perPageFocus.set(false);
+  },
+  "keypress .results-per-page"(event, instance) {
+    // only run if they pressed enter (aka 13, obviously)
+    if (event.keyCode === 13) {
+      let strValue = event.target.value;
+      let newValue = parseInt(strValue, 10);
 
-    if (newValue) {
-      instance.data.options.rowsPerPage.set(newValue);
+      // if the value is over 0 and the number is exactly the string entered
+      // (newValue + "" converts the number to a string for comparison)
+      if (newValue && newValue > 0 && newValue + "" === strValue &&
+          newValue <= 250) {
+        instance.data.options.rowsPerPage.set(newValue);
+
+        // update the saved rowsPerPage
+        Meteor.users.update(Meteor.userId(), {
+          $set: {
+            [ `profile.tablePagination.rowsPerPage` ]: newValue
+          }
+        });
+
+        instance.perPageError.set(false);
+
+        // blur the input they're in so they know it worked
+        instance.$(".results-per-page").trigger("blur");
+      } else {
+        // if they're being annoying (wrong twice), remind them who's in charge
+        if (instance.perPageError.get()) {
+          instance.$('.reset-per-page').transition('bounce');
+        }
+
+        instance.perPageError.set(true);
+      }
     }
+  },
+  "click .reset-per-page"(event, instance) {
+    // set the value in the text box
+    let oldValue = instance.data.options.rowsPerPage.get();
+    let perPageInput = instance.$("input.results-per-page")[0];
+
+    // If they're trying to put in something over 250, reset to 250
+    // (instead of resetting it to the oldValue).
+    // It's okay if parseInt returns NaN as this will be false.
+    if (parseInt(perPageInput.value) > 250) {
+      oldValue = 250;
+
+      // update the rowsPerPage and the saved rowsPerPage
+      instance.data.options.rowsPerPage.set(oldValue);
+      Meteor.users.update(Meteor.userId(), {
+        $set: {
+          [ `profile.tablePagination.rowsPerPage` ]: oldValue
+        }
+      });
+    }
+
+    perPageInput.value = oldValue;
+
+    instance.perPageError.set(false);
+  },
+  "submit .table-pagination"(event, instance) {
+    // prevent form submit when they change the input
+    event.preventDefault();
   },
 });
