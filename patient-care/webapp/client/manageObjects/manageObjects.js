@@ -127,7 +127,7 @@ Template.manageObjectsGrid.onCreated(function () {
 Template.manageObjectsGrid.onRendered(function () {
   let instance = this;
 
-  // NOTE: a deferred versino of refreshSticky is passed down all
+  // NOTE: a deferred version of refreshSticky is passed down all
   // the way to the create/showTemplate level
 
   // keep track of whether it's been stickied yet
@@ -137,10 +137,6 @@ Template.manageObjectsGrid.onRendered(function () {
   // Make the manage object detail sticky so it moves down
   // the page as the user scrolls down.
   function refreshSticky() {
-    // reactively watch the count of the items on the left so it'll update
-    // when it changes, but don't do anything with the return value
-    let hi = getObjects(instance).count();
-
     // Only activate the sticky when the height of the master list is
     // greater than a pageful. Don't have a sticky when creating a new object
     // because it's too annoying to keep refreshing the sticky.
@@ -167,20 +163,19 @@ Template.manageObjectsGrid.onRendered(function () {
     }
   }
 
-  // call it only after Blaze has rerendered
-  deferredRefreshSticky = () => {
-
-  };
-
   // call refreshSticky when a reactive variable changes
   instance.autorun(() => {
-    refreshSticky();
+    // reactively watch the count of the items on the left so it'll update
+    // when it changes, but don't do anything with the return value
+    getObjects(instance).count();
+
+    Meteor.defer(refreshSticky);
   });
 
-  // only call it 300 seconds after the thing has stopped resizing
+  // only call it 200 milliseconds after the thing has stopped resizing
   instance.debouncedRefreshSticky = _.debounce(function() {
     Meteor.defer(refreshSticky);
-  }, 300);
+  }, 200);
 
   // call refreshSticky when the window is resized
   $(window).resize(instance.debouncedRefreshSticky);
@@ -234,6 +229,21 @@ Template.manageObject.onCreated(function () {
     if (selectedId) {
       instance.subscribe("objectFromCollection", collectionName, selectedId);
     }
+  });
+});
+
+Template.manageObject.onRendered(function () {
+  let instance = this;
+
+  // refreshSticky when the the subscription status changes
+  // NOTE: We don't have to depend on the "selected" parameter down here
+  // because FlowRouter.getParam is called as part of refreshSticky.
+  instance.autorun(() => {
+    // call this reactive function to depend on it, but don't use the
+    // return value
+    instance.subscriptionsReady();
+
+    instance.data.refreshSticky();
   });
 });
 
