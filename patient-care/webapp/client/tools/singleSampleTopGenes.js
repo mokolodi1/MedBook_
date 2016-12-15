@@ -8,6 +8,9 @@ AutoForm.addHooks("createSingleSampleTopGenes", {
         job_id: jobIds[0]
       });
     }
+
+    // reset form values
+    AutoForm._forceResetFormValues("createSingleSampleTopGenes");
   },
 });
 

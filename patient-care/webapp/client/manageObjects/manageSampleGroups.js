@@ -5,6 +5,7 @@ Template.createSampleGroup.onCreated(function() {
 
   instance.newSampleGroup = new ReactiveVar();
   instance.error = new ReactiveVar();
+  instance.creatingSampleGroup = new ReactiveVar(false);
 });
 
 Template.createSampleGroup.helpers({
@@ -19,7 +20,12 @@ Template.createSampleGroup.events({
   "click .create-sample-group"(event, instance) {
     let sampleGroup = instance.newSampleGroup.get();
 
+    // make sure the user knows they clicked the button
+    instance.creatingSampleGroup.set(true);
+
     Meteor.call("createSampleGroup", sampleGroup, (error, selected) => {
+      instance.creatingSampleGroup.set(false);
+
       if (error) {
         if (error.reason === "Match failed") {
           // there might be edge cases here which I haven't found yet so other
@@ -67,6 +73,18 @@ Template.sampleGroupExprVarFilters.onCreated(function(){
   // use Template.subscriptionsReady to know when these are available
   instance.subscribe("sampleGroupFilterJobs", sampleGroupId);
   instance.subscribe("blobsAssociatedWithObject", "SampleGroups", sampleGroupId);
+});
+
+Template.sampleGroupExprVarFilters.onRendered(function () {
+  let instance = this;
+
+  // refresh the manage objects sticky when the subscriptions load
+  instance.autorun(() => {
+    // reactively watch this
+    instance.subscriptionsReady();
+
+    instance.data.refreshSticky();
+  });
 });
 
 Template.sampleGroupExprVarFilters.helpers({

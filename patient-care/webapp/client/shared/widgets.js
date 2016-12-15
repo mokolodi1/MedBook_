@@ -543,6 +543,7 @@ Template.viewJobButton.helpers({
   buttonClass() {
     if (this.job.status === "done") { return "primary"; }
     else if (this.job.status === "error") { return "negative"; }
+    else if (this.job.status === "running") { return "secondary"; }
     // else { return "" }
   },
 });
@@ -686,12 +687,12 @@ Template.recordsHandsOnTable.onRendered(function () {
 
 Template.recordsHandsOnTable.helpers({
   height() {
-    if (this.recordsData.length > 150) {
+    if (this.recordsData.length > 100) {
       // make the table as tall as the viewfinder
       // http://stackoverflow.com/a/16837667/1092640
       return "100vh";
     } else {
-      return "100%";
+      return "auto";
     }
   },
 });

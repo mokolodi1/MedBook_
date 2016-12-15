@@ -3,9 +3,6 @@
 Template.editSampleGroup.onCreated(function () {
   let instance = this;
 
-  // load all available data sets
-  instance.subscribe("dataSets");
-
   instance.sampleGroup = instance.data.sampleGroup;
 
   // make sure it's initialized
@@ -17,6 +14,15 @@ Template.editSampleGroup.onCreated(function () {
       data_sets: []
     });
   }
+
+  // subscribe to the added data sets (names and sample_labels)
+  instance.autorun(() => {
+    let ids = _.pluck(instance.data.sampleGroup.get().data_sets, "data_set_id");
+
+    if (ids.length) {
+      instance.subscribe("dataSetNamesSamples", ids);
+    }
+  });
 
   // store this seperately so that we don't look for a version every time
   // something that's not the name changes
@@ -51,6 +57,46 @@ Template.editSampleGroup.onRendered(function () {
 
   instance.$(".sample-group-version").popup({
     position : "bottom right",
+    content: "Sample group version",
+  });
+
+  instance.$(".data-set-search").search({
+    apiSettings: {
+      url: `${location.origin}/search/data-sets` +
+          `?token=${Accounts._storedLoginToken()}&q={query}`,
+      onResponse(response) {
+        // modify the response to remove existing data sets
+        let addedDataSets = instance.sampleGroup.get().data_sets;
+        let existingIds = _.pluck(addedDataSets, "data_set_id");
+
+        // only return data sets that haven't already been added
+        response.results = _.filter(response.results, (result) => {
+          return existingIds.indexOf(result.id) === -1;
+        });
+
+        return response;
+      },
+    },
+    minCharacters: 0,
+    onSelect(result, response) {
+      let sampleGroup = instance.data.sampleGroup.get();
+
+      sampleGroup.data_sets.push({
+        data_set_id: result.id,
+        filters: [],
+      });
+
+      instance.data.sampleGroup.set(sampleGroup);
+
+      // clear the input for the next search
+      Meteor.defer(() => {
+        instance.$(".add-data-set")[0].value = "";
+      });
+
+      // clear the cache of searches so that we can remove
+      // the just-selected item from the results before displaying them
+      $(".data-set-search").search("clear cache");
+    },
   });
 });
 
@@ -61,21 +107,17 @@ Template.editSampleGroup.helpers({
   getSampleGroup: function () {
     return Template.instance().sampleGroup.get();
   },
-  addableDataSets: function () {
-    let addedDataSets = Template.instance().sampleGroup.get().data_sets;
-
-    // only return data sets that haven't already been added
-    return DataSets.find({
-      _id: { $nin: _.pluck(addedDataSets, "data_set_id") },
-    });
-  },
   dataSetName: function () {
     let dataSet = DataSets.findOne(this.data_set_id);
 
     if (dataSet) {
       return dataSet.name;
     } else {
-      return "You don't have access to this data set.";
+      // NOTE: this could also mean they don't have access,
+      // but that would be rare.
+      // (Someone would have to delete/remove access to the
+      // data set while they were working on the new sample group.)
+      return "Loading...";
     }
   },
 });
@@ -94,35 +136,6 @@ Template.editSampleGroup.events({
     instance.sampleGroup.set(sampleGroup);
   },
 });
-
-
-
-// Template.addDataSetMenu
-
-Template.addDataSetMenu.onRendered(function () {
-  let instance = this;
-
-  instance.$(".dropdown").popup({
-    hoverable: true,
-    on: "click",
-    position: "bottom left",
-  });
-});
-
-Template.addDataSetMenu.events({
-  "click .add-data-set-to-sample-group": function (event, instance) {
-    let sampleGroup = instance.data.sampleGroup.get();
-
-    sampleGroup.data_sets.push({
-      data_set_id: this._id,
-      filters: [],
-    });
-
-    instance.data.sampleGroup.set(sampleGroup);
-  },
-});
-
-
 
 // Template.addFilterButton
 
@@ -381,7 +394,9 @@ Template.formValuesFilter.events({
     // Find the form that matches the current dataset and form id
     let forms = instance.available_filter_forms.get();
     let chosenForm = _.find(forms, function(form){
-      return (form.formId === clicked_form_id) && (form.dataSetId === clicked_dataset_id);});
+      return (form.formId === clicked_form_id) &&
+          (form.dataSetId === clicked_dataset_id);
+    });
     let formFields = chosenForm.fields ;
 
     // Then build the filters for the querybuilder
