@@ -159,6 +159,9 @@ Template.manageObjectsGrid.onRendered(function () {
       // destroy the sticky
       instance.$("#manage-obj-detail").sticky("destroy");
 
+      // set some CSS that isn't cleared when the sticky is destroyed
+      instance.$("#manage-obj-detail-container").css("min-height", "auto");
+
       stickied = false;
     }
   }
