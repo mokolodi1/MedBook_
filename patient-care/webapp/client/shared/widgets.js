@@ -134,13 +134,8 @@ Template.editCollaborationsModal.onRendered(function() {
 });
 
 Template.editCollaborationsModal.helpers({
-  multipleObjects() {
-    const ids = Session.get("editCollaborationsMongoIds");
-    return ids && ids.length > 1;
-  },
   waitingForServer() { return Template.instance().waitingForServer.get(); },
   collabsList() { return Template.instance().collabsList; },
-
   collectionName() { return Session.get("editCollaborationsCollection"); },
   mongoIds() { return Session.get("editCollaborationsMongoIds"); },
 });
@@ -568,12 +563,12 @@ Template.recordsHandsOnTable.onRendered(function () {
 
 Template.recordsHandsOnTable.helpers({
   height() {
-    if (this.recordsData.length > 150) {
+    if (this.recordsData.length > 100) {
       // make the table as tall as the viewfinder
       // http://stackoverflow.com/a/16837667/1092640
       return "100vh";
     } else {
-      return "100%";
+      return "auto";
     }
   },
 });

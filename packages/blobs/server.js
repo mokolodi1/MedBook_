@@ -58,7 +58,9 @@ Blobs2.create = function (pathOnServer, associated_object,
     mongo_id: { type: String },
   }));
   check(metadata, Object);
-  if (typeof callback !== "function") throw new Meteor.Error("no-callback");
+  if (callback && typeof callback !== "function") {
+    throw new Meteor.Error("invalid-callback");
+  }
 
   // create the blob
   // NOTE: don't set associated_object until it's actually done so if there's
@@ -75,10 +77,13 @@ Blobs2.create = function (pathOnServer, associated_object,
 
   // only throw an error if the problem is something other than the folder
   // already existing
+  var deferred = Q.defer();
+
   mv(pathOnServer, path.join(storageRootPath, storage_path), { mkdirp: true },
         Meteor.bindEnvironment(function (err, out) {
     if (err) {
       callback(err);
+      deferred.reject(err);
     } else {
       Blobs2.update(blobId, {
         $set: {
@@ -88,30 +93,53 @@ Blobs2.create = function (pathOnServer, associated_object,
         }
       });
 
-      callback(null, Blobs2.findOne(blobId));
+      var blob = Blobs2.findOne(blobId);
+
+      if (callback) callback(null, blob);
+      deferred.resolve(blob);
     }
   }));
 };
 
-Blobs2.delete = function (selector, callback) {
+Blobs2.delete = function (selector) {
   if (typeof selector === "string") {
     check(selector, String);
   } else {
     check(selector, Object);
   }
-  if (typeof callback !== "function") throw new Meteor.Error("no-callback");
 
   var rmPromises = [];
   Blobs2.find(selector).forEach(function (blob) {
     rmPromises.push(Q.nfcall(remove, blob.getFilePath()));
   });
 
-  Q.all(rmPromises)
-    .then(Meteor.bindEnvironment(function (result) {
-      callback(null, rmPromises.length);
-    }))
-    .catch(function (yop) {
-      callback(new Meteor.Error("failed-to-remove-blobs",
-          "Failed to remove all blobs."));
+  // remove the blobs from mongo
+  // NOTE: This will happen even if some of the blobs fail to be
+  // rm-ed for whatever reason. The fact that they are still sitting
+  // around is an internal issue, and it's not one that the client code
+  // should have to deal with.
+  Blobs2.remove(selector);
+
+  return Q.allSettled(rmPromises)
+    .then(function(settledResult) {
+      // only show the general error message once
+      var firstProblem = true;
+
+      _.each(settledResult, function (result, index) {
+        if (result.state !== "fulfilled") {
+          if (firstProblem) {
+            firstProblem = false;
+
+            console.error("FAILED TO REMOVE SOME BLOBS FILES! " +
+                "(in Blobs2.delete) If you see this it means that something " +
+                "is very wrong with the place MedBook stores files.");
+          }
+
+          console.log("Error reason:", result.reason.toString());
+        }
+      });
+    })
+    .catch(function () {
+      console.error("Had problem dealing with allSettled in Blobs2.delete");
     });
 };

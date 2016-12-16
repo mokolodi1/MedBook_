@@ -34,7 +34,7 @@ RunLimma.prototype.run = function () {
 
     // combine the samples together
     seenAlready.sample_labels =
-        seenAlready.sample_labels.concat(dataSet.sample_labels)
+        seenAlready.sample_labels.concat(dataSet.sample_labels);
     dataSetHash[dataSet.data_set_id] = seenAlready;
   });
   var comboSampleGroupDataSets = _.map(dataSetHash,
@@ -69,6 +69,9 @@ RunLimma.prototype.run = function () {
   var voomPlotPath = path.join(workDir, "mds.pdf");
   var topGenePath = path.join(workDir, "top_genes.rnk");
 
+  // define this up here so we can pass data between the .thens
+  var limmaResultPass;
+
   // write out the data for use in limma
   Q.all([
       spawnCommand(getSetting("genomic_expression_export"), [
@@ -102,39 +105,59 @@ RunLimma.prototype.run = function () {
       ], workDir);
     })
     .then(function (limmaResult) {
-      if (limmaResult.exitCode !== 0) {
-        throw "Problem running limma";
+      limmaResultPass = limmaResult;
+
+      // We can only have one bindEnvironment, so deal with any possible
+      // limma problems down below. Only run the gene set import if limma
+      // exited successfully.
+      if (limmaResult.exitCode === 0) {
+        // insert the gene set created by Limma
+        return spawnCommand(getSetting("gene_set_import"), [
+          topGenePath,
+          "Limma: " + args.reference_sample_group_name +
+              "(v" + args.reference_sample_group_version + ")" +
+              " vs. " + args.experimental_sample_group_name +
+              "(v" + args.experimental_sample_group_version + ")",
+          "Biocondoctor's limma package with a top genes count of " +
+              args.top_genes_count,
+          "GeneID",
+
+          // security
+          // NOTE: need to put everything in single quotes to stop it
+          // from splitting into two args at the comma
+          '\'{"collection_name":"Jobs","mongo_id":"' + self.job._id + '"}\'',
+
+          "--fieldDefinitions",
+          "GeneID", "String",
+          "Log_Fold_Change", "Number",
+          "Expression_Mean", "Number",
+          "t_Score", "Number",
+          "P_Value", "Number",
+          "Adjusted_P_Value", "Number",
+          "B_Statistic_Log_Odds", "Number",
+        ], workDir);
       }
-
-      // TODO: if there's a problem with Limma, insert the log files
-
-      // insert the gene set created by Limma
-      return spawnCommand(getSetting("gene_set_import"), [
-        topGenePath,
-        "Limma: " + args.reference_sample_group_name +
-            "(v" + args.reference_sample_group_version + ")" +
-            " vs. " + args.experimental_sample_group_name +
-            "(v" + args.experimental_sample_group_version + ")",
-        "Biocondoctor's limma package with a top genes count of " +
-            args.top_genes_count,
-        "GeneID",
-
-        // security
-        // NOTE: need to put everything in single quotes to stop it
-        // from splitting into two args at the comma
-        '\'{"collection_name":"Jobs","mongo_id":"' + self.job._id + '"}\'',
-
-        "--fieldDefinitions",
-        "GeneID", "String",
-        "Log_Fold_Change", "Number",
-        "Expression_Mean", "Number",
-        "t_Score", "Number",
-        "P_Value", "Number",
-        "Adjusted_P_Value", "Number",
-        "B_Statistic_Log_Odds", "Number",
-      ], workDir);
     })
     .then(Meteor.bindEnvironment(function (createGeneSetSpawn) {
+      if (limmaResultPass.exitCode !== 0) {
+        // insert the stdout and stderr files from GSEA
+        // NOTE: blobs are created asyncronously
+
+        let associated = {
+          collection_name: "Jobs",
+          mongo_id: self.job._id,
+        };
+
+        Q.all([
+          Blobs2.create(limmaResultPass.stdoutPath, associated, {}),
+          Blobs2.create(limmaResultPass.stderrPath, associated, {}),
+        ]).catch(function (error) {
+          console.log("Error adding error blobs for Limma:", error);
+        });
+
+        throw "Problem running Limma";
+      }
+
       if (createGeneSetSpawn.exitCode !== 0) {
         throw "Problem creating gene set from limma result";
       }

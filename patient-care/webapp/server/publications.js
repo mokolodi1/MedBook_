@@ -219,10 +219,7 @@ Moko.ensureIndex(Jobs, {
 
 // all data necessary for the GSEA form
 Meteor.publish("gseaFormData", function (maybeGeneSetId) {
-  // See below for string validation. maybeGeneSetId can be null sometimes,
-  // so Match.Optional will fail. This should be Match.Maybe but that's
-  // not available until Meteor 1.3.
-  check(maybeGeneSetId, Match.Any);
+  check(maybeGeneSetId, Match.Maybe(String));
 
   let user = MedBook.ensureUser(this.userId);
 
@@ -234,8 +231,6 @@ Meteor.publish("gseaFormData", function (maybeGeneSetId) {
 
   // send only the selected gene set if provided
   if (maybeGeneSetId) {
-    check(maybeGeneSetId, String);
-
     geneSetsQuery._id = maybeGeneSetId;
   }
 
@@ -297,6 +292,15 @@ Meteor.publish("limmaFormData", function (value_type) {
   return SampleGroups.find({
     value_type,
     collaborations: { $in: user.getCollaborations() },
+  }, {
+    fields: {
+      name: 1,
+      version: 1,
+      value_type: 1,
+
+      // avoid client-side permission-denied errors
+      collaborations: 1,
+    }
   });
 });
 

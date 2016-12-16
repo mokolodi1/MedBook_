@@ -350,9 +350,7 @@ Template.formValuesFilter.onCreated(function(){
 
   let dataset_id = instance.data.data_set_id ;
   instance.available_filter_forms = new ReactiveVar();
-  instance.available_filter_forms.set([{name: "Loading forms...", urlencodedId: "placeholder_loadingforms"}]);
-  instance.filter_forms_options = new ReactiveVar();
-  instance.filter_forms_options.set({});
+  instance.available_filter_forms.set([{name: "Loading forms...", formId: "placeholder_loadingforms"}]);
 
   instance.active_querybuilder = new ReactiveVar("");
   instance.active_crf = new ReactiveVar("");

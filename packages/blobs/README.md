@@ -17,6 +17,8 @@ git submodule add https://github.com/UCSC-MedBook/blobs
 
 #### Insert
 
+Blobs can be created using `Blobs2.create`, which returns a Promise.
+
 Inserting a blob on the server will move the original file!
 
 `Blobs2.create(pathToFileOnServer, associatedObject, metadata, callback)`
@@ -36,10 +38,8 @@ let blobId = Blobs2.create("/path/to/file/on/server", {
 
 #### Delete
 
-Blobs can be deleted using `Blobs2.delete`, which takes a selector and a
-callback function.
-
-Calling `Blobs2.delete` will also delete the files on disk.
+Blobs can be deleted using `Blobs2.delete`, which takes a selector and returns
+a Q.Promise. Calling `Blobs2.delete` will also delete the files on disk.
 
 ```js
 let associated_object = {

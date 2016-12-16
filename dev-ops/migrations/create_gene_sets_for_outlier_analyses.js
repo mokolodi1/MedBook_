@@ -37,10 +37,8 @@ function createGeneSet(job, outlier_type, fields, prependToName, description) {
     gene_labels.push(dataArray[i].gene_label);
   }
 
-  // TODO: is this _id okay? I can't figure out how to get the _id from
-  // the result of an insert with mongo. It's also a requirement for MedBook
-  // that _ids be strings.
-  var geneSetId = job._id + "_" + prependToName.replace(" ", "_").toLowerCase();
+  // generate a random ID for the new gene set
+  var geneSetId = (new ObjectId()).valueOf();
 
   var name = prependToName + ": " + job.args.sample_label;
   if (outlier_type !== "top5percent") {
@@ -82,9 +80,9 @@ function createGeneSet(job, outlier_type, fields, prependToName, description) {
     bulk.insert(record);
   }
 
-  // TODO: apparently the writeConcern needs to be an object? I tried
-  // giving it a normal node callback function but it complained.
-  bulk.execute({});
+  // use default write concern for bulk execution
+  // See: https://docs.mongodb.com/v3.0/reference/method/Bulk.execute/
+  bulk.execute({ w: 1 });
 }
 
 var outlierFields = [
