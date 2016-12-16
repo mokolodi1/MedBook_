@@ -25,6 +25,7 @@ MedBook.dataSetTypes = [
           "raw_counts",
           "quan_norm_counts",
           "fpkm",
+          "rpkm",
           "tpm",
         ],
         autoform: {
@@ -32,6 +33,7 @@ MedBook.dataSetTypes = [
             { value: "raw_counts", label: "Raw counts" },
             { value: "quan_norm_counts", label: "Quantile normalized counts" },
             { value: "fpkm", label: "FPKM" },
+            { value: "rpkm", label: "RPKM" },
             { value: "tpm", label: "TPM" },
           ]
         },
@@ -39,11 +41,12 @@ MedBook.dataSetTypes = [
       },
       quantification_method: {
         type: String,
-        allowedValues: [ "rsem", "cufflinks" ],
+        allowedValues: [ "rsem", "cufflinks", "other" ],
         autoform: {
           options: [
             { value: "rsem", label: "RSEM" },
             { value: "cufflinks", label: "Cufflinks" },
+            { value: "other", label: "Other" },
           ]
         },
         label: "Quantification method",
@@ -146,7 +149,7 @@ DataSets.attachSchema(new SimpleSchema({
         value_type: this.field("value_type").value
       });
 
-      var context = new SimpleSchema(schemaObj.metadata_schema).newContext()
+      var context = new SimpleSchema(schemaObj.metadata_schema).newContext();
 
       if (!context.validate(this.value)) {
         return "datasetMetadataInvalid";
