@@ -131,10 +131,9 @@ Meteor.methods({
     }
 
     // filter through each data set
-    sampleGroup.data_sets = _.map(sampleGroup.data_sets,
-        (sampleGroupDataSet) => {
+    sampleGroup.data_sets = _.map(sampleGroup.data_sets, (sgDataSet) => {
       // ensure access
-      let dataSet = DataSets.findOne(sampleGroupDataSet.data_set_id);
+      let dataSet = DataSets.findOne(sgDataSet.data_set_id);
       user.ensureAccess(dataSet);
 
       // make sure they're all the same type
@@ -150,34 +149,35 @@ Meteor.methods({
       }
 
       // don't trust the client's name or unfiltered count
-      sampleGroupDataSet.data_set_name = dataSet.name;
-      sampleGroupDataSet.unfiltered_sample_count =
-          dataSet.sample_labels.length;
+      sgDataSet.data_set_name = dataSet.name;
+      sgDataSet.unfiltered_sample_count = dataSet.sample_labels.length;
 
       // Apply the sample group's filters.
       // We start with all the sample labels in a data set.
       // Then, apply filters as follows.
-      // -  Filter by form values: Run the passed query in mongo and remove all samples
-      //    that are not included in the query results
+      // -  Filter by form values: Run the passed query in mongo and remove
+      //    all samples that are not included in the query results
       // -  Include Specific Samples : remove all samples NOT on the include list
       // -  Exclude Specific Samples : remove all samples on the exclude list
-      let allSamples = dataSet.sample_labels;
-      let sample_labels = allSamples; // need a copy of this
+      let { sample_labels } = dataSet;
 
+      // make a copy of the whole list before filtering
+      let allSamples = sample_labels;
 
-      _.each(sampleGroupDataSet.filters, (filter) => {
+      _.each(sgDataSet.filters, (filter) => {
         let { options } = filter;
 
         if (filter.type === "form_values"){
           if (!options.mongo_query) {
-            throw new Meteor.Error("mongo-query-empty", "Not done editing filters",
+            throw new Meteor.Error("mongo-query-empty",
+                "Not done editing filters",
                 "Please click done to continue.");
           }
 
           // Run the mongo_query
           // Get the result sample labels synchronously
           let result_sample_labels = Meteor.call('getSamplesFromFormFilter',
-            sampleGroupDataSet.data_set_id,
+            sgDataSet.data_set_id,
             options.mongo_query,
             options.form_id
           );
@@ -208,9 +208,9 @@ Meteor.methods({
             "Remove filters or remove the data set to continue.");
       }
 
-      sampleGroupDataSet.sample_labels = sample_labels;
+      sgDataSet.sample_labels = sample_labels;
 
-      return sampleGroupDataSet; // NOTE: _.map at beginning
+      return sgDataSet; // NOTE: _.map at beginning
     });
 
     // We can't use the regular SampleGroups.insert because SimpleSchema can't
