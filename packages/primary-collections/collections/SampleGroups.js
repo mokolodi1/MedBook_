@@ -41,6 +41,9 @@ SampleGroups.attachSchema(new SimpleSchema({
 
   value_type: DataSets.simpleSchema().schema().value_type,
 
+  sample_labels: { type: [String] },
+  feature_labels: { type: [String] },
+
   data_sets: {
     type: [
       new SimpleSchema({

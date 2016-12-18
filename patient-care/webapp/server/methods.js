@@ -100,10 +100,23 @@ Meteor.methods({
     });
   },
   createSampleGroup: function (sampleGroup) {
-    // NOTE: this method might produce "unclean" errors because I don't
-    // feel like rewriting most of the schema for SampleGroups for the
-    // check function (above)
-    check(sampleGroup, Object);
+    check(sampleGroup, new SimpleSchema({
+      name: { type: String },
+      version: { type: Number, min: 1 },
+      collaborations: { type: [String] },
+
+      data_sets: {
+        type: [
+          new SimpleSchema({
+            data_set_id: { type: String },
+            filters: {
+              type: [Object],
+              blackbox: true,
+            },
+          })
+        ]
+      },
+    }));
 
     let user = MedBook.ensureUser(Meteor.userId());
     user.ensureAccess(sampleGroup);
@@ -125,14 +138,32 @@ Meteor.methods({
         Meteor.call("getSampleGroupVersion", sampleGroup.name);
 
     // ensure uniqueness for data sets
-    let uniqueDataSets = _.uniq(_.pluck(sampleGroup.data_sets, "data_set_id"));
-    if (uniqueDataSets.length !== sampleGroup.data_sets.length) {
+    let dataSetIds = _.uniq(_.pluck(sampleGroup.data_sets, "data_set_id"));
+    if (dataSetIds.length !== sampleGroup.data_sets.length) {
       throw new Meteor.Error("non-unique-data-sets");
     }
 
-    // keep track of each sample label to throw an error if there are
-    // is the same sample group in multiple data sets
+    // keep track of each sample label, throw an error if a label exists in
+    // multiple data sets
     let sampleLabelIndex = {};
+
+    // Store each data sets' feature labels list to the hash map
+    // organized by data set _id. This is used at the end to compute
+    // the intersection of the sample labels.
+    let dataSetFeaturesHash = {};
+
+    // utility function for adding to the dataSetFeaturesHash
+    function addToDSSampleLabelHash(dataSetId, sampleLabels) {
+      dataSetFeaturesHash[dataSetId] = {};
+
+      _.each(sampleLabels, (label) => {
+        dataSetFeaturesHash[dataSetId][label] = true;
+      });
+    }
+
+    // Store the feature labels of the first data set in the sample group
+    // for use later on.
+    let masterFeatureLabels;
 
     // filter through each data set
     sampleGroup.data_sets = _.map(sampleGroup.data_sets, (sgDataSet) => {
@@ -195,14 +226,22 @@ Meteor.methods({
           if (_.difference(options.sample_labels, allSamples).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
+
           sample_labels = _.intersection(sample_labels, options.sample_labels);
         } else if (filter.type === "exclude_sample_list") {
           if (_.difference(options.sample_labels, allSamples).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
+
           sample_labels = _.difference(sample_labels, options.sample_labels);
         } else {
           throw new Meteor.Error("invalid-filter-type");
+        }
+
+        // set the sample_count for include/exclude lists
+        if (filter.type === "include_sample_list" ||
+            filter.type === "exclude_sample_list") {
+          filter.options.sample_count = filter.options.sample_labels.length;
         }
       });
 
@@ -225,41 +264,64 @@ Meteor.methods({
         sampleLabelIndex[label] = true;
       });
 
+      // set the working sample_labels list to be the list for the data set
       sgDataSet.sample_labels = sample_labels;
+      sgDataSet.sample_count = sample_labels.length;
+
+      // add the data set's features to the hash map
+      addToDSSampleLabelHash(dataSet._id, dataSet.feature_labels);
+
+      if (!masterFeatureLabels) {
+        masterFeatureLabels = dataSet.feature_labels;
+      }
 
       // NOTE: _.map at beginning
       return sgDataSet;
     });
 
+    // set the sample labels for the whole sample group
+    sampleGroup.sample_labels = Object.keys(sampleLabelIndex);
+
+    // Now that we have the dataSetFeaturesHash populated, we can calculate
+    // the intersection of the data sets' sample labels
+    let featureLabels = [];
+
+    // for each label in the masterFeatureLabels, check to see if it's in
+    // every data set
+    masterFeatureLabels.forEach(function (featureLabel) {
+      var inEachDataSet = true;
+
+      // loop through the data sets
+      dataSetIds.forEach(function (dataSetId) {
+        // if it's not in the data set, flip the flag
+        if (!dataSetFeaturesHash[dataSetId][featureLabel]) {
+          inEachDataSet = false;
+        }
+      });
+
+      // push it to the master list if it's in every data set
+      if (inEachDataSet) {
+        featureLabels.push(featureLabel);
+      }
+    });
+    console.log("featureLabels.length:", featureLabels.length);
+    console.log("featureLabels.slice(0, 5):", featureLabels.slice(0, 5));
+
+    sampleGroup.feature_labels = featureLabels;
+
     // We can't use the regular SampleGroups.insert because SimpleSchema can't
     // handle inserting objects with very large arrays (ex. sample_labels).
     // Instead, handle the autoValues and check the schema manually...
 
-    // check to make sure sample_labels are valid in actual sample group
-    // (not done below because SimpleSchema hangs)
-    _.each(sampleGroup.data_sets, (dataSet) => {
-      check(dataSet.sample_labels, [String]);
-
-      dataSet.sample_count = dataSet.sample_labels.length;
-      check(dataSet.sample_count, Number);
-
-      // Confirm the filter options (include / exclude sample list only)
-      _.each(dataSet.filters, (filter) => {
-        if((filter.type === "include_sample_list") ||
-            (filter.type === "exclude_sample_list")){
-          check(filter.options.sample_labels, [String]);
-          filter.options.sample_count = filter.options.sample_labels.length;
-        }
-      });
-    });
-
     // clone object to be checked for the schema
     let clonedSampleGroup = JSON.parse(JSON.stringify(sampleGroup));
-    _.each(clonedSampleGroup.data_sets, (dataSet) => {
-      // SimpleSchema can't handle large arrays, so set this to one
-      dataSet.sample_labels = [ "yop" ];
-      dataSet.sample_count = 1;
+    _.each(clonedSampleGroup.data_sets, (sgDataSet) => {
+      // SimpleSchema can't handle large arrays, so use a fake array of strings
+      sgDataSet.sample_labels = [ "yop" ];
+      sgDataSet.sample_count = 1;
     });
+    clonedSampleGroup.feature_labels = [ "yop" ];
+    clonedSampleGroup.sample_labels = [ "yop/yop" ];
 
     let validationContext = SampleGroups.simpleSchema().newContext();
     var isValid = validationContext.validate(clonedSampleGroup);
