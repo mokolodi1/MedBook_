@@ -75,18 +75,6 @@ Template.sampleGroupExprVarFilters.onCreated(function(){
   instance.subscribe("blobsAssociatedWithObject", "SampleGroups", sampleGroupId);
 });
 
-Template.sampleGroupExprVarFilters.onRendered(function () {
-  let instance = this;
-
-  // refresh the manage objects sticky when the subscriptions load
-  instance.autorun(() => {
-    // reactively watch this
-    instance.subscriptionsReady();
-
-    instance.data.refreshSticky();
-  });
-});
-
 Template.sampleGroupExprVarFilters.helpers({
 
   // if a filter has been applied, the download URL for the

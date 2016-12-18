@@ -141,16 +141,24 @@ Template.manageObjectsGrid.onRendered(function () {
     // greater than a pageful. Don't have a sticky when creating a new object
     // because it's too annoying to keep refreshing the sticky.
     // (Creation UIs tend to get bigger as the user fills in information.)
-    if (instance.$("#manage-obj-master").height() > $(window).height() &&
+    let masterHeight = instance.$("#manage-obj-master").height();
+    let detailHeight = instance.$("#manage-obj-detail").height();
+
+    if (detailHeight < masterHeight &&
         FlowRouter.getParam("selected") !== "create") {
       if (stickied) {
         // refresh the sticky because it's been set up already
-        instance.$("#manage-obj-detail").sticky("refresh");
+        // instance.$("#manage-obj-detail").sticky("refresh");
       } else {
         // set up the sticky for the first time
         instance.$("#manage-obj-detail").sticky({
           context: "#manage-obj-context",
           offset: 55,
+          observeChanges: true,
+          onReposition() {
+            // NOTE: recursive
+            refreshSticky();
+          },
         });
       }
 
@@ -168,20 +176,14 @@ Template.manageObjectsGrid.onRendered(function () {
 
   // call refreshSticky when a reactive variable changes
   instance.autorun(() => {
-    // reactively watch the count of the items on the left so it'll update
+    // reactively watch these reactive functions so it'll update
     // when it changes, but don't do anything with the return value
     getObjects(instance).count();
 
+    FlowRouter.getParam("selected");
+
     Meteor.defer(refreshSticky);
   });
-
-  // only call it 200 milliseconds after the thing has stopped resizing
-  instance.debouncedRefreshSticky = _.debounce(function() {
-    Meteor.defer(refreshSticky);
-  }, 200);
-
-  // call refreshSticky when the window is resized
-  $(window).resize(instance.debouncedRefreshSticky);
 });
 
 function getObjects (instance, query = {}) {
@@ -210,13 +212,6 @@ Template.manageObjectsGrid.helpers({
           getObjects(instance, { name: this.name }).count() > 1;
     }
   },
-  managableTypeAndRefreshSticky() {
-    added = this;
-
-    added.refreshSticky = Template.instance().debouncedRefreshSticky;
-
-    return added;
-  },
 });
 
 // Template.manageObject
@@ -235,21 +230,6 @@ Template.manageObject.onCreated(function () {
   });
 });
 
-Template.manageObject.onRendered(function () {
-  let instance = this;
-
-  // refreshSticky when the the subscription status changes
-  // NOTE: We don't have to depend on the "selected" parameter down here
-  // because FlowRouter.getParam is called as part of refreshSticky.
-  instance.autorun(() => {
-    // call this reactive function to depend on it, but don't use the
-    // return value
-    instance.subscriptionsReady();
-
-    instance.data.refreshSticky();
-  });
-});
-
 Template.manageObject.helpers({
   getObjects() {
     return getObjects(Template.instance().parent());
@@ -265,10 +245,5 @@ Template.manageObject.helpers({
     return () => {
       FlowRouter.setParams({ selected: null });
     };
-  },
-  addRefreshSticky(obj) {
-    obj.refreshSticky = this.refreshSticky;
-
-    return obj;
   },
 });
