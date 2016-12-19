@@ -29,6 +29,7 @@
   <h2><code>{{|> listSamplesButton sampleLabels=sample_labels filename="Samples.txt"}}</code></h2>
   {{> listSamplesButton sampleLabels=fakeSamplesSmall filename="small list.txt"}}
   {{> listSamplesButton sampleLabels=fakeSamples filename="larger list.txt"}}
+  {{> listSamplesButton sampleLabels=fakeSamplesHuge filename="huge list.txt"}}
   <p>
     <b>
       If you don't want a download button, don't pass <code>filename</code>.
@@ -268,25 +269,17 @@
     {{#unless alwaysShowAll}}
       {{! show a "show all samples" button with "hide study labels" hidden
           in a dropdown}}
-      <div class="ui button toggle-list" style="display: inline;">
-        Show
-        {{#if showMore}}
-          fewer
-        {{else}}
-          {{#if tooManyToShowAll}}
-            more
-          {{else}}
-            all
-          {{/if}}
-        {{/if}}
-        samples
-      </div>
       {{#if tooManyToShowAll}}
-        {{#semanticUIPopup selector=".toggle-list"}}
+        {{#semanticUIPopup selector=".toggle-list" jQueryScope=jQueryScope}}
+          {{> toggleListSampleLabelsButton showMore=showMore
+              tooManyToShowAll=tooManyToShowAll}}
           <div class="ui popup">
             Download for full list
           </div>
         {{/semanticUIPopup}}
+      {{else}}
+        {{> toggleListSampleLabelsButton showMore=showMore
+              tooManyToShowAll=tooManyToShowAll}}
       {{/if}}
     {{/unless}}
 
@@ -324,6 +317,22 @@
       <li>{{this}}</li>
     {{/each}}
   </ul>
+</template>
+
+<template name="toggleListSampleLabelsButton">
+  <div class="ui button toggle-list" style="display: inline;">
+    Show
+    {{#if showMore}}
+      fewer
+    {{else}}
+      {{#if tooManyToShowAll}}
+        more
+      {{else}}
+        all
+      {{/if}}
+    {{/if}}
+    samples
+  </div>
 </template>
 
 <template name="iconAndTextForListSamplesButton">
