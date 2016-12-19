@@ -44,7 +44,8 @@ SampleGroups.attachSchema(new SimpleSchema({
   sample_labels: { type: [String] },
   feature_labels: { type: [String] },
 
-  data_sets: {
+  // The samples broken out by data set. No futher internal structure
+  sample_data_sets: {
     type: [
       new SimpleSchema({
         data_set_id: { type: String },
@@ -54,18 +55,67 @@ SampleGroups.attachSchema(new SimpleSchema({
         sample_count: {
           type: Number,
           min: 0,
-          custom: function () {
-            return requiredIfTrue.call(this,
-                !!this.siblingField("sample_labels").value);
-          },
           autoValue: function () {
-            var filteredSamples = this.siblingField("sample_labels").value;
-            if (filteredSamples) {
-              return filteredSamples.length;
+            return this.siblingField("sample_labels").value.length;
+          },
+        },
+      })
+    ],
+    min: 1
+  },
+
+  // the various data sets/sample groups that were filtered to get this
+  // sample group, complete with filter information
+  sample_filtered_sources: {
+    type: [
+      new SimpleSchema({
+        collection_name: {
+          type: String,
+          allowedValues: [
+            "DataSets",
+            "SampleGroups",
+          ],
+        },
+        mongo_id: { type: String },
+
+        name: { type: String },
+        version: {
+          type: Number,
+          min: 0,
+          custom: function () {
+            // only required if it's from a sample group
+            if (this.siblingField("collection_name").value === "SampleGroups") {
+              if (!this.value) {
+                return "required";
+              }
+            } else {
+              if (this.value) {
+                return "notAllowed";
+              }
             }
           },
         },
-        unfiltered_sample_count: { type: Number },
+
+        sample_labels: { type: [String] },
+        sample_count: {
+          type: Number,
+          min: 0,
+          autoValue: function () {
+            return this.siblingField("sample_labels").value.length;
+          },
+        },
+
+        // pre-filtering
+        unfiltered_sample_count: {
+          type: Number,
+          autoValue: function () {
+            var collection_name = this.siblingField("collection_name").value;
+            var mongo_id = this.siblingField("mongo_id").value;
+
+            var collection = MedBook.collections[collection_name];
+            return collection.findOne(mongo_id).sample_labels.length;
+          },
+        },
 
         filters: {
           type: [ new SimpleSchema({
@@ -88,15 +138,10 @@ SampleGroups.attachSchema(new SimpleSchema({
               },
             },
 
-            // TODO: should we do something like this?
-            // // the number of samples after this filter was applied
-            // // (so that users can see that a certain filter filtered from
-            // // 143 samples to 59 samples)
-            // sample_count_after_filter: { type: Number },
+
           }) ],
 
           defaultValue: [],
-          optional: true, // TODO: remove (?)
         },
       })
     ],
