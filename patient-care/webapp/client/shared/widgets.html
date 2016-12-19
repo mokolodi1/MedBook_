@@ -269,8 +269,25 @@
       {{! show a "show all samples" button with "hide study labels" hidden
           in a dropdown}}
       <div class="ui button toggle-list" style="display: inline;">
-        Show {{#if showAllSamples}}fewer{{else}}all{{/if}} samples
+        Show
+        {{#if showMore}}
+          fewer
+        {{else}}
+          {{#if tooManyToShowAll}}
+            more
+          {{else}}
+            all
+          {{/if}}
+        {{/if}}
+        samples
       </div>
+      {{#if tooManyToShowAll}}
+        {{#semanticUIPopup selector=".toggle-list"}}
+          <div class="ui popup">
+            Download for full list
+          </div>
+        {{/semanticUIPopup}}
+      {{/if}}
     {{/unless}}
 
     {{#if filename}}
@@ -319,13 +336,25 @@
   <div class="ui mini buttons">
     {{#if firstGreater (length featureLabels) 5}}
       <div class="ui button toggle-list">
-        {{#if showAllFeatures}}
-          Hide
+        Show
+        {{#if showMore}}
+          fewer
         {{else}}
-          Show
+          {{#if tooManyToShowAll}}
+            more
+          {{else}}
+            all
+          {{/if}}
         {{/if}}
-        all features
+        features
       </div>
+      {{#if tooManyToShowAll}}
+        {{#semanticUIPopup selector=".toggle-list"}}
+          <div class="ui popup">
+            Download for full list
+          </div>
+        {{/semanticUIPopup}}
+      {{/if}}
     {{/if}}
 
     <div class="ui button download-list">

@@ -350,20 +350,20 @@ Template.contactUsButton.helpers({
 Template.listSamplesButton.onCreated(function () {
   let instance = this;
 
-  instance.showAllSamples = new ReactiveVar(false);
+  instance.showMore = new ReactiveVar(false);
 
-  // set the showAllSamples default value whenever the data changes
+  // set the showMore default value whenever the data changes
   instance.autorun(() => {
     let { sampleLabels } = Template.currentData();
 
     if (sampleLabels) {
-      instance.showAllSamples.set(sampleLabels.length <= 6);
+      instance.showMore.set(sampleLabels.length <= 6);
     }
   });
 });
 
 Template.listSamplesButton.helpers({
-  showAllSamples() { return Template.instance().showAllSamples.get(); },
+  showMore() { return Template.instance().showMore.get(); },
   showStudyLabels() {
     let { profile } = Meteor.user();
 
@@ -381,7 +381,13 @@ Template.listSamplesButton.helpers({
     }
 
     // return either the whole list or the first couple items
-    if (instance.showAllSamples.get()) {
+    if (instance.showMore.get()) {
+      if (instance.data.sampleLabels.length > 1000) {
+        return sampleLabels
+          .slice(0, 1000)
+          .concat([`... and ${sampleLabels.length - 1000} more samples`]);
+      }
+
       return sampleLabels;
     } else {
       return sampleLabels
@@ -399,12 +405,15 @@ Template.listSamplesButton.helpers({
   },
   not(variable) {
     return !variable;
-  }
+  },
+  tooManyToShowAll() {
+    return this.sampleLabels.length > 1000;
+  },
 });
 
 Template.listSamplesButton.events({
   "click .toggle-list"(event, instance) {
-    instance.showAllSamples.set(!instance.showAllSamples.get());
+    instance.showMore.set(!instance.showMore.get());
   },
   "click .toggle-study-labels"(event, instance) {
     let { profile } = Meteor.user();
@@ -451,20 +460,20 @@ let saveStringAsFile = function () {
 Template.listFeaturesButton.onCreated(function () {
   let instance = this;
 
-  instance.showAllFeatures = new ReactiveVar(false);
+  instance.showMore = new ReactiveVar(false);
 
-  // set the showAllFeatures default value whenever the data changes
+  // set the showMore default value whenever the data changes
   instance.autorun(() => {
     let { featureLabels } = Template.currentData();
 
     if (featureLabels) {
-      instance.showAllFeatures.set(featureLabels.length <= 6);
+      instance.showMore.set(featureLabels.length <= 6);
     }
   });
 });
 
 Template.listFeaturesButton.helpers({
-  showAllFeatures() { return Template.instance().showAllFeatures.get(); },
+  showMore() { return Template.instance().showMore.get(); },
   featuresToShow() {
     let instance = Template.instance();
 
@@ -472,20 +481,29 @@ Template.listFeaturesButton.helpers({
 
     if (featureLabels) {
       // return either the whole list or the first couple items
-      if (instance.showAllFeatures.get()) {
+      if (instance.showMore.get()) {
+        if (instance.data.featureLabels.length > 1000) {
+          return featureLabels
+            .slice(0, 1000)
+            .concat([`... and ${featureLabels.length - 1000} more features`]);
+        }
+
         return featureLabels;
       } else {
         return featureLabels
           .slice(0, 3)
-          .concat([`... and ${featureLabels.length - 3} more samples`]);
+          .concat([`... and ${featureLabels.length - 3} more features`]);
       }
     }
+  },
+  tooManyToShowAll() {
+    return this.featureLabels.length > 1000;
   },
 });
 
 Template.listFeaturesButton.events({
   "click .toggle-list"(event, instance) {
-    instance.showAllFeatures.set(!instance.showAllFeatures.get());
+    instance.showMore.set(!instance.showMore.get());
   },
   "click .download-list"(event, instance) {
     let text = instance.data.featureLabels.join("\n");
@@ -517,7 +535,7 @@ Template.semanticUIPopup.onRendered(function () {
   if (!selector) {
     console.log("Didn't give a selector to the semanticUIPopup");
   } else {
-    this.$(selector).popup(options);
+    $(selector).popup(options);
   }
 });
 
