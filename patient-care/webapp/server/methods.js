@@ -155,7 +155,7 @@ Meteor.methods({
     let dataSetFeaturesHash = {};
 
     // utility function for adding to the dataSetFeaturesHash
-    function addToDSSampleLabelHash(dataSetId, sampleLabels) {
+    function addToDSFeatureLabelHash(dataSetId, sampleLabels) {
       dataSetFeaturesHash[dataSetId] = {};
 
       _.each(sampleLabels, (label) => {
@@ -271,7 +271,7 @@ Meteor.methods({
       sgDataSet.sample_count = sample_labels.length;
 
       // add the data set's features to the hash map
-      addToDSSampleLabelHash(dataSet._id, dataSet.feature_labels);
+      addToDSFeatureLabelHash(dataSet._id, dataSet.feature_labels);
 
       if (!masterFeatureLabels) {
         masterFeatureLabels = dataSet.feature_labels;
