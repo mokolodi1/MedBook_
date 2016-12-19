@@ -44,6 +44,15 @@ Template.widgetsDemo.helpers({
       "ckcc/B05",
     ];
   },
+  fakeSamplesHuge() {
+    let sampleLabels = [];
+
+    _.times(1500, (n) => {
+      sampleLabels.push(`ckcc/${n}`);
+    });
+
+    return sampleLabels;
+  },
   fakeFeaturesSmall() {
     return [
       "FABP4",
@@ -533,9 +542,9 @@ Template.semanticUIPopup.onRendered(function () {
   let { selector, options } = this.data;
 
   if (!selector) {
-    console.log("Didn't give a selector to the semanticUIPopup");
+    console.error("Didn't give a selector to the semanticUIPopup");
   } else {
-    $(selector).popup(options);
+    this.$(selector).popup(options);
   }
 });
 
