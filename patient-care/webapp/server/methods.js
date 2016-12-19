@@ -111,6 +111,8 @@ Meteor.methods({
             data_set_id: { type: String },
             filters: {
               type: [Object],
+
+              // we do a thorough check of this before inserting
               blackbox: true,
             },
           })
@@ -149,7 +151,7 @@ Meteor.methods({
 
     // Store each data sets' feature labels list to the hash map
     // organized by data set _id. This is used at the end to compute
-    // the intersection of the sample labels.
+    // the intersection of the feature labels.
     let dataSetFeaturesHash = {};
 
     // utility function for adding to the dataSetFeaturesHash
@@ -264,7 +266,7 @@ Meteor.methods({
         sampleLabelIndex[label] = true;
       });
 
-      // set the working sample_labels list to be the list for the data set
+      // set the working sample_labels list to be the list for this data set
       sgDataSet.sample_labels = sample_labels;
       sgDataSet.sample_count = sample_labels.length;
 
@@ -304,9 +306,8 @@ Meteor.methods({
         featureLabels.push(featureLabel);
       }
     });
-    console.log("featureLabels.length:", featureLabels.length);
-    console.log("featureLabels.slice(0, 5):", featureLabels.slice(0, 5));
 
+    // set the feature labels for the sample group
     sampleGroup.feature_labels = featureLabels;
 
     // We can't use the regular SampleGroups.insert because SimpleSchema can't
