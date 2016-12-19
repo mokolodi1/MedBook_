@@ -137,19 +137,22 @@ Template.manageObjectsGrid.onRendered(function () {
   // Make the manage object detail sticky so it moves down
   // the page as the user scrolls down.
   function refreshSticky() {
-    // Only activate the sticky when the height of the master list is
-    // greater than a pageful. Don't have a sticky when creating a new object
-    // because it's too annoying to keep refreshing the sticky.
-    // (Creation UIs tend to get bigger as the user fills in information.)
+    // Only activate the sticky when the height of the master list is larger
+    // than that of the detail view. Semantic UI doesn't handle the sticky
+    // well when the stickied content is taller than the wrapper.
+    // Once a sticky has been destroyed for a route (it got taller than
+    // the master list), don't watch to see if it gets shorter again. Instead,
+    // wait until the selected item changes to check if we should recreate
+    // the sticky.
+    // Don't have a sticky when creating a new object because those UIs tend
+    // to grow as the user fills in information.
+
     let masterHeight = instance.$("#manage-obj-master").height();
     let detailHeight = instance.$("#manage-obj-detail").height();
 
     if (detailHeight < masterHeight &&
         FlowRouter.getParam("selected") !== "create") {
-      if (stickied) {
-        // refresh the sticky because it's been set up already
-        // instance.$("#manage-obj-detail").sticky("refresh");
-      } else {
+      if (!stickied) {
         // set up the sticky for the first time
         instance.$("#manage-obj-detail").sticky({
           context: "#manage-obj-context",
@@ -157,12 +160,12 @@ Template.manageObjectsGrid.onRendered(function () {
           observeChanges: true,
           onReposition() {
             // NOTE: recursive
-            refreshSticky();
+            Meteor.defer(refreshSticky);
           },
         });
-      }
 
-      stickied = true;
+        stickied = true;
+      }
     } else {
       // destroy the sticky
       instance.$("#manage-obj-detail").sticky("destroy");
@@ -174,10 +177,9 @@ Template.manageObjectsGrid.onRendered(function () {
     }
   }
 
-  // call refreshSticky when a reactive variable changes
+  // watch these reactive functions so it'll update
+  // when they change, but don't do anything with the return value
   instance.autorun(() => {
-    // reactively watch these reactive functions so it'll update
-    // when it changes, but don't do anything with the return value
     getObjects(instance).count();
 
     FlowRouter.getParam("selected");
