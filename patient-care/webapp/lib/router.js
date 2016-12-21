@@ -62,6 +62,11 @@ tools.route("/limma-gsea", sameNameAndAction("listLimmaGSEA"));
 tools.route("/limma-gsea/:job_id", sameNameAndAction("limmaGseaJob"));
 tools.route("/tumor-map", sameNameAndAction("listTumorMap"));
 
+// charts
+
+var charts = FlowRouter.group({ prefix: "/charts" });
+charts.route("/", sameNameAndAction("listCharts"));
+charts.route("/:chart_id", sameNameAndAction("editChart"));
 
 // documentation
 

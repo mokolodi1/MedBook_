@@ -512,3 +512,11 @@ Meteor.publish("geneSetParentObj", function (geneSetId) {
     }),
   ];
 });
+
+Meteor.publish("listCharts", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  return Charts.find({
+    collaborations: { $in: user.getCollaborations() }
+  });
+});

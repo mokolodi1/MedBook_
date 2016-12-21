@@ -29,6 +29,10 @@
   <h2><code>{{|> listSamplesButton}}</code></h2>
   {{> listSamplesButton fakeSamples}}
 
+  <h2><code>{{|#shareDeleteDropdownButton object href buttonClass}}</code></h2>
+  This creates a button which has a dropdown on the right side which
+  can be used to share or delete the object.
+
   <h2><code>{{|> viewJobButton}}</code></h2>
   This closes all open modals and goes to the specified link.
   {{> viewJobButton job=(fakeJob "waiting") href="https://google.com"}}
@@ -285,22 +289,29 @@
 </template>
 
 <template name="viewJobButton">
+  {{#shareDeleteDropdownButton object=job href=href buttonClass=buttonClass
+      collectionName="Jobs"}}
+    {{#if compare job.status "done"}}
+      View
+    {{else}}
+      {{capitalize job.status}}
+    {{/if}}
+  {{/shareDeleteDropdownButton}}
+</template>
+
+<template name="shareDeleteDropdownButton">
   <div class="ui {{buttonClass}} {{class}} buttons">
     <a href={{href}} class="ui button">
-      {{#if compare job.status "done"}}
-        View
-      {{else}}
-        {{capitalize job.status}}
-      {{/if}}
+      {{> UI.contentBlock}}
     </a>
     <div class="ui dropdown icon button">
       <i class="dropdown icon"></i>
       <div class="menu">
-        <div class="item share-job">
+        <div class="item share">
           <i class="share icon"></i>
           Share
         </div>
-        <div class="item delete-job">
+        <div class="item delete">
           <i class="trash icon"></i>
           {{#if getInstanceReactive "deleteClicked"}}
             Really?

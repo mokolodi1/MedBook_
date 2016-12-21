@@ -1,0 +1,63 @@
+<template name="listCharts">
+  <h1>
+    Charts
+
+    <div class="ui primary large icon button right floated create-chart">
+      <i class="plus icon"></i>
+      Create new
+    </div>
+  </h1>
+
+  {{#if Template.subscriptionsReady}}
+    {{#if length getCharts}}
+      <table class="ui single line table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Date modified</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each getCharts}}
+            <tr>
+              <td>
+                {{#if name}}
+                  {{name}}
+                {{else}}
+                  Untitled chart
+                {{/if}}
+              </td>
+              <td>
+                {{formatDate date_modified}}
+              </td>
+              <td>
+                {{#shareDeleteDropdownButton object=this buttonClass="secondary"
+                    href=(pathFor "editChart" chart_id=_id)
+                    collectionName="Charts"}}
+                  Edit
+                {{/shareDeleteDropdownButton}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="ui huge message">
+        <div class="header">
+          No charts... yet!
+        </div>
+        To create your first chart, click on the big blue button
+        that says <a href="" class="create-chart">create chart</a>.
+      </div>
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>
+
+<template name="editChart">
+  <h1>Edit chart</h1>
+
+
+</template>

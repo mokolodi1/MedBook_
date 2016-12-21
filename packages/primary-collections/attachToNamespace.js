@@ -8,6 +8,7 @@ MedBook.collections = {
   Jobs: Jobs,
   GeneSets: GeneSets,
   GeneSetGroups: GeneSetGroups,
+  Charts: Charts,
 
    // deprecated
   Blobs: Blobs,

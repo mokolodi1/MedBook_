@@ -758,6 +758,7 @@ Meteor.methods({
       "GeneSets",
       "GeneSetGroups",
       "Studies",
+      "Charts",
     ];
     if (removeAllowedCollections.indexOf(collection_name) === -1) {
       throw new Meteor.Error("permission-denied");
@@ -1146,6 +1147,13 @@ Meteor.methods({
           });
         }
       });
+    });
+  },
+  createChart() {
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    return Charts.insert({
+      collaborations: [ user.personalCollaboration() ],
     });
   },
 

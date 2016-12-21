@@ -389,45 +389,34 @@ Template.semanticUIPopup.onRendered(function () {
   }
 });
 
-// Template.viewJobButton
+// Template.shareDeleteDropdownButton
 
-Template.viewJobButton.onCreated(function () {
+Template.shareDeleteDropdownButton.onCreated(function () {
   let instance = this;
 
   instance.deleteClicked = new ReactiveVar(false);
 });
 
-Template.viewJobButton.onRendered(function () {
+Template.shareDeleteDropdownButton.onRendered(function () {
   this.$(".ui.dropdown").dropdown({
     // don't bold what's clicked
     action: "nothing"
   });
 });
 
-Template.viewJobButton.helpers({
-  capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  },
-  buttonClass() {
-    if (this.job.status === "done") { return "primary"; }
-    else if (this.job.status === "error") { return "negative"; }
-    else if (this.job.status === "running") { return "secondary"; }
-    // else { return "" }
-  },
-});
-
-Template.viewJobButton.events({
-  "click .share-job"(event, instance) {
-    Session.set("editCollaborationsCollection", "Jobs");
-    Session.set("editCollaborationsMongoIds", [this.job._id]);
+Template.shareDeleteDropdownButton.events({
+  "click .share"(event, instance) {
+    Session.set("editCollaborationsCollection", this.collectionName);
+    Session.set("editCollaborationsMongoIds", [this.object._id]);
 
     $(".edit-collaborations-modal").modal("show");
   },
-  "click .delete-job"(event, instance) {
+  "click .delete"(event, instance) {
     var deleteClicked = instance.deleteClicked;
 
     if (deleteClicked.get()) {
-      Meteor.call("removeObjects", "Jobs", [this.job._id]);
+      Meteor.call("removeObject", this.collectionName,
+          this.object._id);
     } else {
       deleteClicked.set(true);
 
@@ -439,6 +428,20 @@ Template.viewJobButton.events({
         });
       });
     }
+  },
+});
+
+// Template.viewJobButton
+
+Template.viewJobButton.helpers({
+  capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  },
+  buttonClass() {
+    if (this.job.status === "done") { return "primary"; }
+    else if (this.job.status === "error") { return "negative"; }
+    else if (this.job.status === "running") { return "secondary"; }
+    // else { return "" }
   },
 });
 

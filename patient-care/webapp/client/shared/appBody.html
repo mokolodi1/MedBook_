@@ -77,8 +77,11 @@
         </div>
       </a>
 
-      <a href={{pathFor "manageCollaborations"}}
-          class="item">
+      <a href={{pathFor "listCharts"}} class="item">
+        Charts
+      </a>
+
+      <a href={{pathFor "manageCollaborations"}} class="item">
         Collaborations
       </a>
 
@@ -259,6 +262,19 @@
       {{#if isActiveRoute "viewFormRecords"}}
         {{#breadcrumbItem isActive=true}}
           View records
+        {{/breadcrumbItem}}
+      {{/if}}
+    {{/if}}
+
+    {{#if or (isActiveRoute "listCharts") (isActiveRoute "editChart")}}
+      {{#breadcrumbItem isActive=(isActiveRoute "listCharts")
+          href=(pathFor "listCharts")}}
+        Charts
+      {{/breadcrumbItem}}
+
+      {{#if isActiveRoute "editChart"}}
+        {{#breadcrumbItem isActive=true}}
+          Edit
         {{/breadcrumbItem}}
       {{/if}}
     {{/if}}
