@@ -183,7 +183,7 @@
 
 <template name="listCollaborators">
   {{#unless getInstanceReactive "dataLoading"}}
-    <div class="ui divided list">
+    <div class="ui relaxed divided list">
       {{! use this let so we can ask about collabsListLength within the #each}}
       {{#let collabsListLength=(length collabsListFetched)}}
         {{! NOTE: assumption is that there can never be 0 collaborations}}
