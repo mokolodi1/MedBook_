@@ -44,8 +44,9 @@ SampleGroups.attachSchema(new SimpleSchema({
   sample_labels: { type: [String] },
   feature_labels: { type: [String] },
 
-  // The samples broken out by data set. No futher internal structure
-  sample_data_sets: {
+  // The samples broken out by data set. No futher internal structure.
+  // NOTE: could be named better but a bunch of code depends on this structure
+  data_sets: {
     type: [
       new SimpleSchema({
         data_set_id: { type: String },
@@ -66,15 +67,12 @@ SampleGroups.attachSchema(new SimpleSchema({
 
   // the various data sets/sample groups that were filtered to get this
   // sample group, complete with filter information
-  sample_filtered_sources: {
+  filtered_sample_sources: {
     type: [
       new SimpleSchema({
         collection_name: {
           type: String,
-          allowedValues: [
-            "DataSets",
-            "SampleGroups",
-          ],
+          allowedValues: [ "DataSets", "SampleGroups", ],
         },
         mongo_id: { type: String },
 
@@ -137,8 +135,6 @@ SampleGroups.attachSchema(new SimpleSchema({
                 }
               },
             },
-
-
           }) ],
 
           defaultValue: [],
