@@ -295,27 +295,31 @@ Meteor.methods({
     check([collection_name, mongo_id], [String]);
 
     let user = MedBook.ensureUser(this.userId);
-    let obj = MedBook.collections[collection_name].findOne(mongo_id);
-    user.ensureAccess(obj);
+    let parentObj = MedBook.collections[collection_name].findOne(mongo_id);
+    user.ensureAccess(parentObj);
 
-    // make sure the collection name is okay, figure out the sort object
-    let sort;
+    // make sure the collection name is valid, figure out the sort object
+    let sortField;
     if (collection_name === "Forms") {
-      sort = {
-        [obj.sample_label_field]: 1
-      };
+      sortField = parentObj.sample_label_field;
     } else if (collection_name === "GeneSets") {
-      sort = {
-        [obj.gene_label_field]: 1
-      };
+      sortField = parentObj.gene_label_field;
     } else {
       throw new Meteor.Error("permission-denied");
     }
 
-    return Records.find({
+    // grab the records
+    // NOTE: Sorting a query requires an index with that sorting attribute,
+    // so we'll sort the records after fetching them so we can still take
+    // advantage of using an index to fetch them. (Otherwise we'd have to
+    // create an index for every gene/sample_label_field.)
+    let records = Records.find({
       "associated_object.mongo_id": mongo_id,
       "associated_object.collection_name": collection_name,
-    }, { sort }).fetch();
+    }).fetch();
+
+    // sort the records
+    return _.sortBy(records, sortField);
   },
   // Applies the expression and variance filters to a sample group
   // returns the upsert return value
@@ -627,4 +631,9 @@ Meteor.methods({
       args
     });
   },
+});
+
+Moko.ensureIndex(Records, {
+  "associated_object.mongo_id": 1,
+  "associated_object.collection_name": 1,
 });
