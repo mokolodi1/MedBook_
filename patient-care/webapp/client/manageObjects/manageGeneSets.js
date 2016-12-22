@@ -187,7 +187,7 @@ Template.createGeneSet.helpers({
   },
   warnBlankNumbersZero() {
     return _.some(Template.instance().computedColumns.get(), (column) => {
-      let falseyValues = _.some(column.values, (value) => { return !value });
+      let falseyValues = _.some(column.values, (value) => { return !value; });
 
       return column.value_type === "Number" && falseyValues;
     });
@@ -252,4 +252,20 @@ Template.geneLabelFieldWithPopup.onRendered(function () {
   instance.$("label.rules-popup").popup({
     popup: instance.$(".ui.popup.gene-set-field-rules"),
   });
+});
+
+// Template.showGeneSet
+
+Template.showGeneSet.onCreated(function () {
+  let instance = this;
+
+  instance.hotPassback = {
+    initialized: new ReactiveVar(false),
+  };
+});
+
+Template.showGeneSet.helpers({
+  hotPassback() {
+    return Template.instance().hotPassback;
+  },
 });
