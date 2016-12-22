@@ -130,6 +130,10 @@ Meteor.methods({
       throw new Meteor.Error("non-unique-data-sets");
     }
 
+    // keep track of each sample label to throw an error if there are
+    // is the same sample group in multiple data sets
+    let sampleLabelIndex = {};
+
     // filter through each data set
     sampleGroup.data_sets = _.map(sampleGroup.data_sets,
         (sampleGroupDataSet) => {
@@ -208,9 +212,23 @@ Meteor.methods({
             "Remove filters or remove the data set to continue.");
       }
 
+      // check to make sure the sample labels are unique throughout the
+      // entire sample group (across data sets)
+      _.each(sample_labels, (label) => {
+        if (sampleLabelIndex[label]) {
+          throw new Meteor.Error("duplicate-sample-label",
+              "Duplicate sample label",
+              `Sample ${label} is in multiple data sets in this sample group.` +
+              " Within a sample group, samples must be unique.");
+        }
+
+        sampleLabelIndex[label] = true;
+      });
+
       sampleGroupDataSet.sample_labels = sample_labels;
 
-      return sampleGroupDataSet; // NOTE: _.map at beginning
+      // NOTE: _.map at beginning
+      return sampleGroupDataSet;
     });
 
     // We can't use the regular SampleGroups.insert because SimpleSchema can't
