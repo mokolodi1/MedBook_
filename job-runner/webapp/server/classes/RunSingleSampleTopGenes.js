@@ -150,7 +150,7 @@ RunSingleSampleTopGenes.prototype.onSuccess = function () {
 
   Notifications.insert({
     user_id: this.job.user_id,
-    href: `/tools/limma/${this.job._id}`,
+    href: `/tools/single-sample-top-genes/${this.job._id}`,
     content: `Finished finding <b>top ${topText}</b> for ` +
         `<b>${args.sample_label}</b>`,
   });
@@ -169,7 +169,7 @@ RunSingleSampleTopGenes.prototype.onError = function (reason) {
 
   Notifications.insert({
     user_id: job.user_id,
-    href: `/tools/limma/${job._id}`,
+    href: `/tools/single-sample-top-genes/${job._id}`,
     content,
   });
 };

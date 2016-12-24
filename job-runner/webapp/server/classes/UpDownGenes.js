@@ -153,7 +153,7 @@ UpDownGenes.prototype.run = function () {
       if (commandResult.exitCode !== 0) {
         throw new Error("Error code running outlier analysis script");
       }
-      console.log("done with single sample analysis");
+      console.log("done with single sample analysis; inserting...");
 
       // save the intermediary files if necessary
       if (regenerateFiles) {

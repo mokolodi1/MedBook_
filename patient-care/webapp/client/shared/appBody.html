@@ -394,8 +394,8 @@
       <div class="floating ui red label">{{unseenCount}}</div>
     {{/if}}
   </a>
-  <div id="notifications-popup" class="ui wide popup">
-    <div class="ui divided selection list">
+  <div id="notifications-popup" class="ui very wide popup">
+    <div class="ui relaxed divided selection list">
       {{! style so as to not look like a link}}
       <div class="item" style="background-color: transparent; cursor: auto;">
         <div class="content">
@@ -414,6 +414,9 @@
             <i class="{{#if icon}}{{icon}}{{else}}alarm{{/if}} icon"></i>
             <div class="content">
               <div class="description">{{{content}}}</div>
+              <div class="extra">
+                {{formatDate date_created}}
+              </div>
             </div>
           </a>
         {{/each}}

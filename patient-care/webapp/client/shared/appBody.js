@@ -101,10 +101,15 @@ Template.notificationsMenuItem.helpers({
       sort: { date_created: -1 },
     });
   },
+  formatDate(date) {
+    return moment(date).fromNow();
+  },
 });
 
 Template.notificationsMenuItem.events({
   "click .visit-notification"(event, instance) {
     Meteor.call("visitedNotification", this._id);
+
+    instance.$("#view-notifications").popup("hide");
   },
 });
