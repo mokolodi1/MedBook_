@@ -1,0 +1,99 @@
+<template name="notificationsMenuItem">
+  <a id="view-notifications" class="ui icon item">
+    <i class="alarm icon"></i>
+    {{#if unseenCount}}
+      <div class="floating ui red label">{{unseenCount}}</div>
+    {{/if}}
+  </a>
+  <div id="notifications-popup" class="ui very wide popup">
+    <div class="ui relaxed divided selection list">
+      {{! style so as to not look like a link}}
+      <div class="item non-selectable">
+        <div class="content">
+          <div class="header" style="display: inline;">Notifications</div>
+          <!-- <div class="right floated content">
+            <a href="#" id="notification-settings">Settings</a>
+          </div> -->
+        </div>
+      </div>
+
+      {{#if length getNotifications}}
+        {{#each getNotifications}}
+          {{> notificationItem}}
+        {{/each}}
+
+        {{! the "see all" button}}
+        <a class="item" href={{pathFor "viewAllNotifications"}}>
+          <div class="content">
+            <div class="header" style="text-align: center;">
+              See more
+            </div>
+          </div>
+        </a>
+      {{else}}
+        <div class="item non-selectable">
+          <div class="content">
+            <div class="description">
+              This is where you'll find notifications about activity on MedBook.
+            </div>
+          </div>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+</template>
+
+<template name="notificationItem">
+  <a class="item {{#unless visited}}unvisited-notification{{/unless}}
+          visit-notification"
+      href={{href}}>
+    <i class="{{#if icon}}{{icon}}{{else}}alarm{{/if}} icon"></i>
+    <div class="content">
+      <div class="description">{{{content}}}</div>
+      <div class="extra">
+        {{formatDate date_created}}
+      </div>
+    </div>
+  </a>
+</template>
+
+<template name="viewAllNotifications">
+  <h1>Notifications</h1>
+
+  {{#if firstTimeLoading}}
+    {{#if length getNotifications}}
+      <div class="ui very relaxed divided selection list">
+        {{#each getNotifications}}
+          {{> notificationItem}}
+        {{/each}}
+
+        {{#if Template.subscriptionsReady}}
+          {{#if thereMightBeMore}}
+            <a class="item load-more">
+              <div class="header" style="text-align: center;">
+                Load more!
+              </div>
+            </a>
+          {{else}}
+            <div class="item non-selectable">
+              <div class="header" style="text-align: center;">
+                No more notifications
+              </div>
+            </div>
+          {{/if}}
+        {{else}}
+          {{> dataLoading}}
+        {{/if}}
+      </div>
+    {{else}}
+      <div class="ui message">
+        <div class="header">
+          No notifications
+        </div>
+        You don't seem to have any notifications just yet.
+      </div>
+    {{/if}}
+  {{else}}
+    {{> dataLoading}}
+  {{/if}}
+</template>

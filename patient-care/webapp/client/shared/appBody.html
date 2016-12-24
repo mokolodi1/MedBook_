@@ -257,6 +257,12 @@
       {{/if}}
     {{/if}}
 
+    {{#if isActiveRoute "viewAllNotifications"}}
+      {{#breadcrumbItem isActive=true}}
+        Notifications
+      {{/breadcrumbItem}}
+    {{/if}}
+
     {{! Utility}}
 
     {{#if invalidUrl}}
@@ -384,52 +390,5 @@
     <p>
       If you think you are seeing this message in error, please {{> contactUsButton}}
     </p>
-  </div>
-</template>
-
-<template name="notificationsMenuItem">
-  <a id="view-notifications" class="ui icon item">
-    <i class="alarm icon"></i>
-    {{#if unseenCount}}
-      <div class="floating ui red label">{{unseenCount}}</div>
-    {{/if}}
-  </a>
-  <div id="notifications-popup" class="ui very wide popup">
-    <div class="ui relaxed divided selection list">
-      {{! style so as to not look like a link}}
-      <div class="item" style="background-color: transparent; cursor: auto;">
-        <div class="content">
-          <div class="header" style="display: inline;">Notifications</div>
-          <!-- <div class="right floated content">
-            <a href="#" id="notification-settings">Settings</a>
-          </div> -->
-        </div>
-      </div>
-
-      {{#if length getNotifications}}
-        {{#each getNotifications}}
-          <a class="item {{#unless visited}}unvisited{{/unless}}
-                  visit-notification"
-              href={{href}}>
-            <i class="{{#if icon}}{{icon}}{{else}}alarm{{/if}} icon"></i>
-            <div class="content">
-              <div class="description">{{{content}}}</div>
-              <div class="extra">
-                {{formatDate date_created}}
-              </div>
-            </div>
-          </a>
-        {{/each}}
-      {{else}}
-        <div class="item"
-            style="background-color: transparent; cursor: auto;">
-          <div class="content">
-            <div class="description">
-              This is where you'll find notifications about activity on MedBook.
-            </div>
-          </div>
-        </div>
-      {{/if}}
-    </div>
   </div>
 </template>
