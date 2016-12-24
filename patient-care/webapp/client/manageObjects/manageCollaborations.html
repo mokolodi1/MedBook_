@@ -196,37 +196,33 @@
     </div>
   </div>
 
-  {{#if editing}}
-    {{#if length requestsToJoin}}
-      {{#if isAdmin}}
-        <h4>The following people have requested access:</h4>
-        <div class="ui cards">
-          {{#each requestsToJoin}}
-            <div class="card">
-              <div class="content">
-                <div class="header">
-                  {{fullName}}
-                </div>
-                <div class="description">
-                  Email {{preferredName}} at
-                  <a href="mailto:{{email}}">{{email}}</a>.
-                </div>
+  {{#if and (length requestsToJoin) isAdmin}}
+    <h4>The following people have requested access:</h4>
+    <div class="ui cards">
+      {{#each requestsToJoin}}
+        <div class="card">
+          <div class="content">
+            <div class="header">
+              {{fullName}}
+            </div>
+            <div class="description">
+              Email {{preferredName}} at
+              <a href="mailto:{{email}}">{{email}}</a>.
+            </div>
+          </div>
+          <div class="extra content">
+            <div class="ui two buttons">
+              <div class="ui basic green button approve-collaborator">
+                Approve
               </div>
-              <div class="extra content">
-                <div class="ui two buttons">
-                  <div class="ui basic green button approve-collaborator">
-                    Approve
-                  </div>
-                  <div class="ui basic red button deny-collaborator">
-                    Deny
-                  </div>
-                </div>
+              <div class="ui basic red button deny-collaborator">
+                Deny
               </div>
             </div>
-          {{/each}}
+          </div>
         </div>
-      {{/if}}
-    {{/if}}
+      {{/each}}
+    </div>
   {{/if}}
 </template>
 
