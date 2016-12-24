@@ -138,4 +138,40 @@ RunSingleSampleTopGenes.prototype.run = function () {
   return deferred.promise;
 };
 
+RunSingleSampleTopGenes.prototype.onSuccess = function () {
+  let { args } = this.job;
+
+  var topText;
+  if (args.percent_or_count === "percent") {
+    topText = `${args.top_percent}% of genes`;
+  } else {
+    topText = `${args.top_count} genes`;
+  }
+
+  Notifications.insert({
+    user_id: this.job.user_id,
+    href: `/tools/limma/${this.job._id}`,
+    content: `Finished finding <b>top ${topText}</b> for ` +
+        `<b>${args.sample_label}</b>`,
+  });
+};
+
+RunSingleSampleTopGenes.prototype.onError = function (reason) {
+  let { job } = this;
+  let content = "Failed to run <b>single sample top genes</b> for " +
+      `<b>${job.args.sample_label}</b>`;
+
+  if (typeof reason === "string") {
+    content += reason;
+  } else {
+    content += "Internal error";
+  }
+
+  Notifications.insert({
+    user_id: job.user_id,
+    href: `/tools/limma/${job._id}`,
+    content,
+  });
+};
+
 JobClasses.RunSingleSampleTopGenes = RunSingleSampleTopGenes;

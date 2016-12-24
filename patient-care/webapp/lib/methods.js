@@ -623,6 +623,20 @@ Meteor.methods({
             "<a href=" + url + ">here</a>. <br><br>Email " + preferredName +
             " at <a href=mailto:" + user.email() + ">" + user.email() + "</a>.";
 
+        // send notifications first, then an email
+        _.each(to, (email) => {
+          let user = Meteor.users.findOne({
+            "collaborations.personal": email
+          });
+
+          Notifications.insert({
+            user_id: user._id,
+            href: `/collaborations?collaboration_id=${collaborationId}`,
+            content: `<b>${fullName}</b> has requested access to ` +
+                `<b>${collab.name}</b>`,
+          });
+        });
+
         Email.send({
           from: "ucscmedbook@gmail.com",
           to, subject, html,
@@ -697,7 +711,7 @@ Meteor.methods({
 
     Collaborations.update(collaborationId, modifier);
 
-    // Send the email telling them if they were accepted or rejected.
+    // Send the notificaiton telling them if they were accepted or rejected.
     // Also refresh the collaborations of the user if approved so that
     // their subscription reloads if they're on the manage collaborations
     // page.
@@ -710,6 +724,9 @@ Meteor.methods({
       let to = addingUser.email();
       let subject;
       let html;
+      let content;
+      let href;
+      let approverName = user.profile.fullName || user.personalCollaboration();
 
       if (approvedIfTrue) {
         // refresh the user's collaborations
@@ -724,6 +741,10 @@ Meteor.methods({
             " collaboration in MedBook has been approved! " +
             "<br><br>Access MedBook at " +
             "<a href=https://medbook.io>medbook.io</a>.";
+
+        content = `<b>${approverName}</b> approved your access to ` +
+            `<b>${collab.name}</b>`;
+        href = `/collaborations?collaboration_id=${collab._id}`;
       } else {
         subject = "Access to " + collab.name + " rejected";
 
@@ -733,8 +754,21 @@ Meteor.methods({
             "Please contact " +
             "<a href=mailto:" + rejectEmail + ">" + rejectEmail +
             "</a> for more information.";
+
+        let approver = user.profile.fullName || user.personalCollaboration();
+        content = `<b>${approverName}</b> denied your access to ` +
+            `<b>${collab.name}</b>. Click to email ${approverName}.`;
+        href = `mailto:${user.email()}`;
       }
 
+      // send the notification first
+      Notifications.insert({
+        user_id: addingUser._id,
+        href,
+        content,
+      });
+
+      // then send the email
       Email.send({
         from: "ucscmedbook@gmail.com",
         to, subject, html,
@@ -856,6 +890,8 @@ Meteor.methods({
     collection.update({ _id: { $in: mongoIds } }, {
       $set: { collaborations }
     }, { multi: true });
+
+    // TODO: send notifications
   },
 
   // manage data sets
@@ -1146,6 +1182,38 @@ Meteor.methods({
           });
         }
       });
+    });
+  },
+
+  viewedNotificationsList() {
+    // set all the notifications for the user as "seen"
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    Notifications.update({
+      user_id: user._id,
+      seen: false
+    }, {
+      $set: {
+        seen: true
+      }
+    }, { multi: true });
+  },
+  visitedNotification(notificationId) {
+    check(notificationId, String);
+
+    let user = MedBook.ensureUser(Meteor.userId());
+
+    Notifications.update({
+      _id: notificationId,
+
+      // security
+      user_id: user._id,
+    }, {
+      $set: {
+        seen: true,
+        visited: true,
+      }
     });
   },
 

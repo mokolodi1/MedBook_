@@ -11,4 +11,5 @@ MedBook.collections = {
 
    // deprecated
   Blobs: Blobs,
+  Notifications: Notifications,
 };
