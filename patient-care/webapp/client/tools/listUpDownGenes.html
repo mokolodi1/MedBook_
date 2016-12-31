@@ -21,10 +21,10 @@
 
   <h2>Start a new analysis</h2>
 
-  {{#autoForm id="createUpDownGenes" schema=formSchema}}
+  {{#autoForm id="createUpDownGenes" schema=formSchema class=loadingIfNotReady}}
     <div class="two fields">
       {{> afQuickField name="data_set_id"
-          options=patientAndDataSets type="select" search=true
+          options=dataSetOptions type="select" search=true
           placeholder="Select a data set..."}}
 
       {{#if afFieldValueIs name="data_set_id" value=undefined}}

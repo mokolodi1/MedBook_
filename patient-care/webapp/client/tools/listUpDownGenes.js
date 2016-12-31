@@ -1,6 +1,6 @@
 // Template.listUpDownGenes
 
-Template.listUpDownGenes.onCreated(function() {
+Template.listUpDownGenes.onCreated(function () {
   let instance = this;
 
   instance.customSampleGroup = new ReactiveVar();
@@ -22,6 +22,29 @@ Template.listUpDownGenes.onCreated(function() {
   });
 });
 
+Template.listUpDownGenes.onRendered(function () {
+  let instance = this;
+
+  // keep an old copy so it doesn't clear the placeholder text the first time
+  // the data set is chosen
+  let oldDataSetId;
+
+  // clear the sample_labels when you change the selected data set
+  instance.autorun((computation) => {
+    // get the value to make it reactive
+    let dataSetId = AutoForm.getFieldValue("data_set_id", "createUpDownGenes");
+
+    // don't run the first time the data set is chosen
+    if (oldDataSetId && dataSetId !== oldDataSetId) {
+      // NOTE: doesn't replace the placeholder text :( (a bug with
+      // Semantic UI methinks)
+      instance.$(".ui.dropdown.search.multiple").dropdown("clear");
+    }
+
+    oldDataSetId = dataSetId;
+  });
+});
+
 Template.listUpDownGenes.helpers({
   formSchema() {
     return new SimpleSchema({
@@ -37,7 +60,7 @@ Template.listUpDownGenes.helpers({
     });
   },
   undefined() { return undefined; },
-  patientAndDataSets() {
+  dataSetOptions() {
     return DataSets.find({}, { sort: { name: 1 } }).map((dataSet) => {
       return { value: dataSet._id, label: dataSet.name };
     });
@@ -93,6 +116,11 @@ Template.listUpDownGenes.helpers({
     let samples = AutoForm.getFieldValue("sample_labels", "createUpDownGenes");
 
     return samples && samples.length > 1;
+  },
+  loadingIfNotReady() {
+    if (!Template.instance().subscriptionsReady()) {
+      return "loading";
+    }
   },
 });
 
