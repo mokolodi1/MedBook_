@@ -12,7 +12,7 @@ Meteor.methods({
       iqr_multiplier: { type: Number, decimal: true },
       use_filtered_sample_group: {type: Boolean },
     }));
-    check(customSampleGroup, Object);
+    check(customSampleGroup, Match.Maybe(Object));
 
     let user = MedBook.ensureUser(Meteor.userId());
     // data set and sample group security is below...
@@ -103,7 +103,7 @@ Meteor.methods({
     // NOTE: this method might produce "unclean" errors because I don't
     // feel like rewriting most of the schema for SampleGroups for the
     // check function (above)
-    check(sampleGroup, Object);
+    check(sampleGroup, Match.Maybe(Object));
 
     let user = MedBook.ensureUser(Meteor.userId());
     user.ensureAccess(sampleGroup);

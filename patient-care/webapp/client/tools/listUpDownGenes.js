@@ -131,9 +131,6 @@ Template.listUpDownGenes.events({
     let formValues = AutoForm.getFormValues("createUpDownGenes");
     let customSampleGroup = instance.customSampleGroup.get();
 
-    // until Match.Maybe is available, make sure this is an Object
-    if (!customSampleGroup) customSampleGroup = {};
-
     instance.talkingToServer.set(true);
     Meteor.call("createUpDownGenes", formValues.insertDoc, customSampleGroup,
         (error, jobIds) => {
