@@ -185,7 +185,7 @@ ssh ubuntu@medbook.io
 mongo -host mongo MedBook < /path/to/migration/migration_name.js
 ```
 
-### Full migration checklist
+### Migration checklists
 
 #### Applying a migration
 
