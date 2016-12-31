@@ -184,3 +184,23 @@ ssh ubuntu@medbook.io
 // run the migration
 mongo -host mongo MedBook < /path/to/migration/migration_name.js
 ```
+
+### Full migration checklist
+
+#### Applying a migration
+
+1. test on devbox with db that has migration already applied
+- code review, push to `master`, build new dockers
+- check out `master` on staging
+- apply migration to staging db
+- spin up new dockers and test
+- stop dockers on prod
+- create a backup of the db
+- apply migration
+- spin up new dockers
+
+#### Back out plan if migration fails
+
+1. stop new dockers
+- restore db from the fresh backup
+- spin up old dockers
