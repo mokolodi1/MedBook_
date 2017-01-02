@@ -58,7 +58,6 @@ def import_study(jvm_args, meta_filename):
     args.append(IMPORT_STUDY_CLASS)
     args.append(meta_filename)
     args.append("--noprogress") # don't report memory usage and % progress
-    print args
     run_java(*args)
 
 def update_study_status(jvm_args, study_id):
@@ -114,7 +113,6 @@ def import_study_data(jvm_args, meta_filename, data_filename):
         args.append(data_filename)
 
     args.append("--noprogress") # don't report memory usage and % progress
-    print args
     run_java(*args)
 
 def import_case_list(jvm_args, meta_filename):
