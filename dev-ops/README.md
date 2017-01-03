@@ -192,15 +192,19 @@ mongo -host mongo MedBook < /path/to/migration/migration_name.js
 1. test on devbox with db that has migration already applied
 - code review, push to `master`, build new dockers
 - check out `master` on staging
-- apply migration to staging db
+- apply migration to staging db:
+  - `mongo -host mongo-staging MedBook < /path/to/migration/migration_name.js`
 - spin up new dockers and test
 - stop dockers on prod
+- check out `master` on prod
 - create a backup of the db
+  - Or (if the migration is applied first thing in the morning) use the existing nightly backup.
 - apply migration
-- spin up new dockers
+- spin up new dockers and test
 
 #### Back out plan if migration fails
 
 1. stop new dockers
 - restore db from the fresh backup
+- checkout the previous commit to master, which sets the desired docker version to the old ones
 - spin up old dockers
