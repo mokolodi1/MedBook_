@@ -77,6 +77,9 @@ Template.widgetsDemo.helpers({
       "ACOX1",
     ];
   },
+  lotsOfFeatures() {
+    return "YOP|".repeat(10001).split("|").slice(0, 10000);
+  },
   fakeJob(status) {
     return { status };
   },
