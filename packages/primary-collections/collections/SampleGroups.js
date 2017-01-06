@@ -44,8 +44,8 @@ SampleGroups.attachSchema(new SimpleSchema({
   sample_labels: { type: [String] },
   feature_labels: { type: [String] },
 
-  // The samples broken out by data set. No futher internal structure.
-  // NOTE: could be named better but a bunch of code depends on this structure
+  // The samples broken out by which data set they're from, with no further
+  // internal structure.
   data_sets: {
     type: [
       new SimpleSchema({
@@ -80,6 +80,7 @@ SampleGroups.attachSchema(new SimpleSchema({
         version: {
           type: Number,
           min: 0,
+          optional: true,
           custom: function () {
             // only required if it's from a sample group
             if (this.siblingField("collection_name").value === "SampleGroups") {
