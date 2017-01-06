@@ -45,6 +45,8 @@
       filename="a small list of features.txt"}}
   {{> listFeaturesButton featureLabels=fakeFeatures
       filename="isn't this cool.txt"}}
+  {{> listFeaturesButton featureLabels=lotsOfFeatures
+      filename="so many features.txt"}}
 
   <h2><code>{{|> viewJobButton}}</code></h2>
   This closes all open modals and goes to the specified link.
@@ -270,15 +272,15 @@
       {{! show a "show all samples" button with "hide study labels" hidden
           in a dropdown}}
       {{#if tooManyToShowAll}}
-        {{#semanticUIPopup selector=".toggle-list" jQueryScope=jQueryScope}}
-          {{> toggleListSampleLabelsButton showMore=showMore
+        {{#semanticUIPopup selector=".toggle-list"}}
+          {{> toggleListLabelsButton showMore=showMore itemWord="samples"
               tooManyToShowAll=tooManyToShowAll}}
           <div class="ui popup">
             Download for full list
           </div>
         {{/semanticUIPopup}}
       {{else}}
-        {{> toggleListSampleLabelsButton showMore=showMore
+        {{> toggleListLabelsButton showMore=showMore itemWord="samples"
               tooManyToShowAll=tooManyToShowAll}}
       {{/if}}
     {{/unless}}
@@ -319,9 +321,10 @@
   </ul>
 </template>
 
-<template name="toggleListSampleLabelsButton">
+<template name="toggleListLabelsButton">
   <div class="ui button toggle-list" style="display: inline;">
     Show
+
     {{#if showMore}}
       fewer
     {{else}}
@@ -331,7 +334,8 @@
         all
       {{/if}}
     {{/if}}
-    samples
+
+    {{itemWord}}
   </div>
 </template>
 
@@ -344,25 +348,18 @@
 <template name="listFeaturesButton">
   <div class="ui mini buttons">
     {{#if firstGreater (length featureLabels) 5}}
-      <div class="ui button toggle-list">
-        Show
-        {{#if showMore}}
-          fewer
-        {{else}}
-          {{#if tooManyToShowAll}}
-            more
-          {{else}}
-            all
-          {{/if}}
-        {{/if}}
-        features
-      </div>
       {{#if tooManyToShowAll}}
         {{#semanticUIPopup selector=".toggle-list"}}
+          {{> toggleListLabelsButton showMore=showMore itemWord="features"
+              tooManyToShowAll=tooManyToShowAll}}
+
           <div class="ui popup">
             Download for full list
           </div>
         {{/semanticUIPopup}}
+      {{else}}
+        {{> toggleListLabelsButton showMore=showMore itemWord="features"
+            tooManyToShowAll=tooManyToShowAll}}
       {{/if}}
     {{/if}}
 
