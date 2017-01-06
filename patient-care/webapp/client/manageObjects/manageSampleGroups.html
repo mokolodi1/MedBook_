@@ -21,7 +21,10 @@
 
   {{> showErrorMessage error}}
 
-  <button class="ui primary button create-sample-group">Create!</button>
+  <button class="ui primary button create-sample-group
+      {{#if getInstanceReactive "creatingSampleGroup"}}loading{{/if}}">
+    Create!
+  </button>
 </template>
 
 <template name="showSampleGroup">

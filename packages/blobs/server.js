@@ -101,14 +101,11 @@ Blobs2.create = function (pathOnServer, associated_object,
   }));
 };
 
-Blobs2.delete = function (selector, callback) {
+Blobs2.delete = function (selector) {
   if (typeof selector === "string") {
     check(selector, String);
   } else {
     check(selector, Object);
-  }
-  if (callback && typeof callback !== "function") {
-    throw new Meteor.Error("invalid-callback");
   }
 
   var rmPromises = [];
@@ -116,18 +113,33 @@ Blobs2.delete = function (selector, callback) {
     rmPromises.push(Q.nfcall(remove, blob.getFilePath()));
   });
 
-  // NOTE: anything attached to the returned promise will happen *after*
-  // the .then and .catch here.
-  return Q.all(rmPromises)
-    .then(Meteor.bindEnvironment(function (result) {
-      var asdf = Blobs2.remove(selector, { multi: true });
+  // remove the blobs from mongo
+  // NOTE: This will happen even if some of the blobs fail to be
+  // rm-ed for whatever reason. The fact that they are still sitting
+  // around is an internal issue, and it's not one that the client code
+  // should have to deal with.
+  Blobs2.remove(selector);
 
-      if (callback) callback(null, rmPromises.length);
-    }))
-    .catch(function (yop) {
-      if (callback) {
-        callback(new Meteor.Error("failed-to-remove-blobs",
-            "Failed to remove all blobs."));
-      }
+  return Q.allSettled(rmPromises)
+    .then(function(settledResult) {
+      // only show the general error message once
+      var firstProblem = true;
+
+      _.each(settledResult, function (result, index) {
+        if (result.state !== "fulfilled") {
+          if (firstProblem) {
+            firstProblem = false;
+
+            console.error("FAILED TO REMOVE SOME BLOBS FILES! " +
+                "(in Blobs2.delete) If you see this it means that something " +
+                "is very wrong with the place MedBook stores files.");
+          }
+
+          console.log("Error reason:", result.reason.toString());
+        }
+      });
+    })
+    .catch(function () {
+      console.error("Had problem dealing with allSettled in Blobs2.delete");
     });
 };

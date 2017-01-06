@@ -132,30 +132,6 @@ Meteor.publish("objectFromCollection", function(collectionName, objectId) {
 
 // tools
 
-Meteor.publish("dataSets", function() {
-  var user = MedBook.ensureUser(this.userId);
-
-  return DataSets.find({
-    collaborations: {$in: user.getCollaborations() },
-  });
-});
-
-Meteor.publish("dataSetNamesSamples", function() {
-  var user = MedBook.ensureUser(this.userId);
-
-  return DataSets.find({
-    collaborations: {$in: user.getCollaborations() },
-  }, {
-    fields: {
-      name: 1,
-      sample_labels: 1,
-
-      // to get rid of ensureAccess errors client-side
-      collaborations: 1,
-    }
-  });
-});
-
 Meteor.publish("searchableJobs", function (options) {
   check(options, new SimpleSchema({
     jobName: { type: String },
@@ -236,6 +212,11 @@ Meteor.publish("searchableJobs", function (options) {
   });
 });
 
+// for searchableJobs sorting
+Moko.ensureIndex(Jobs, {
+  date_created: 1,
+});
+
 // all data necessary for the GSEA form
 Meteor.publish("gseaFormData", function (maybeGeneSetId) {
   check(maybeGeneSetId, Match.Maybe(String));
@@ -268,6 +249,34 @@ Meteor.publish("gseaFormData", function (maybeGeneSetId) {
       }
     }),
   ];
+});
+
+// send down data set names and sample_labels, filtering by
+// _id list if provided
+Meteor.publish("dataSetNamesSamples", function(dataSetIds) {
+  check(dataSetIds, Match.Maybe([String]));
+
+  var user = MedBook.ensureUser(this.userId);
+
+  let query = {
+    collaborations: { $in: user.getCollaborations() },
+  };
+
+  if (dataSetIds) {
+    query._id = { $in: dataSetIds };
+  }
+
+  return DataSets.find(query, {
+    fields: {
+      name: 1,
+
+      // NOTE: We could make this faster by only sending one list,
+      // but the lists aren't overly large considering we're only sending
+      // them one at a time.
+      sample_labels: 1,
+      sample_label_index: 1,
+    }
+  });
 });
 
 // send down the sample labels for a specific data set
@@ -457,14 +466,6 @@ Meteor.publish("geneSetGroups", function () {
   let user = MedBook.ensureUser(this.userId);
 
   return GeneSetGroups.find({
-    collaborations: { $in: user.getCollaborations() },
-  });
-});
-
-Meteor.publish("sampleGroups", function () {
-  let user = MedBook.ensureUser(this.userId);
-
-  return SampleGroups.find({
     collaborations: { $in: user.getCollaborations() },
   });
 });

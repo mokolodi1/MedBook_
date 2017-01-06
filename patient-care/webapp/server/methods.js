@@ -130,6 +130,10 @@ Meteor.methods({
       throw new Meteor.Error("non-unique-data-sets");
     }
 
+    // keep track of each sample label to throw an error if there are
+    // is the same sample group in multiple data sets
+    let sampleLabelIndex = {};
+
     // filter through each data set
     sampleGroup.data_sets = _.map(sampleGroup.data_sets,
         (sampleGroupDataSet) => {
@@ -208,9 +212,23 @@ Meteor.methods({
             "Remove filters or remove the data set to continue.");
       }
 
+      // check to make sure the sample labels are unique throughout the
+      // entire sample group (across data sets)
+      _.each(sample_labels, (label) => {
+        if (sampleLabelIndex[label]) {
+          throw new Meteor.Error("duplicate-sample-label",
+              "Duplicate sample label",
+              `Sample ${label} is in multiple data sets in this sample group.` +
+              " Within a sample group, samples must be unique.");
+        }
+
+        sampleLabelIndex[label] = true;
+      });
+
       sampleGroupDataSet.sample_labels = sample_labels;
 
-      return sampleGroupDataSet; // NOTE: _.map at beginning
+      // NOTE: _.map at beginning
+      return sampleGroupDataSet;
     });
 
     // We can't use the regular SampleGroups.insert because SimpleSchema can't
@@ -277,27 +295,31 @@ Meteor.methods({
     check([collection_name, mongo_id], [String]);
 
     let user = MedBook.ensureUser(this.userId);
-    let obj = MedBook.collections[collection_name].findOne(mongo_id);
-    user.ensureAccess(obj);
+    let parentObj = MedBook.collections[collection_name].findOne(mongo_id);
+    user.ensureAccess(parentObj);
 
-    // make sure the collection name is okay, figure out the sort object
-    let sort;
+    // make sure the collection name is valid, figure out the sort object
+    let sortField;
     if (collection_name === "Forms") {
-      sort = {
-        [obj.sample_label_field]: 1
-      };
+      sortField = parentObj.sample_label_field;
     } else if (collection_name === "GeneSets") {
-      sort = {
-        [obj.gene_label_field]: 1
-      };
+      sortField = parentObj.gene_label_field;
     } else {
       throw new Meteor.Error("permission-denied");
     }
 
-    return Records.find({
+    // grab the records
+    // NOTE: Sorting a query requires an index with that sorting attribute,
+    // so we'll sort the records after fetching them so we can still take
+    // advantage of using an index to fetch them. (Otherwise we'd have to
+    // create an index for every gene/sample_label_field.)
+    let records = Records.find({
       "associated_object.mongo_id": mongo_id,
       "associated_object.collection_name": collection_name,
-    }, { sort }).fetch();
+    }).fetch();
+
+    // sort the records
+    return _.sortBy(records, sortField);
   },
   // Applies the expression and variance filters to a sample group
   // returns the upsert return value
@@ -609,4 +631,9 @@ Meteor.methods({
       args
     });
   },
+});
+
+Moko.ensureIndex(Records, {
+  "associated_object.mongo_id": 1,
+  "associated_object.collection_name": 1,
 });

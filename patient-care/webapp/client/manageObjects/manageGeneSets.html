@@ -28,7 +28,7 @@
 
   {{! height, width, overflow: makes the table scroll when it gets too big}}
   <div id="handsOnTable" style="margin-top: 10px; margin-bottom: 10px;
-      height: 100%; width: 100%; overflow: hidden;">
+      height: auto; width: 100%; overflow: hidden;">
   </div>
 
   {{#if getInstanceReactive "ignoringColumns"}}
@@ -184,7 +184,13 @@
     </tbody>
   </table>
 
-  <h3>Data</h3>
+  <h3>
+    Data
+
+    {{> recordsDownloadButton hotPassback=hotPassback filename=name
+        cssClass="small secondary"}}
+  </h3>
   {{> showRecords fields=fields mongoId=(param "selected")
-      collectionName="GeneSets" primaryFieldName=gene_label_field}}
+      collectionName="GeneSets" primaryFieldName=gene_label_field
+      hotPassback=hotPassback}}
 </template>

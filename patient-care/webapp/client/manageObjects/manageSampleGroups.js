@@ -5,21 +5,27 @@ Template.createSampleGroup.onCreated(function() {
 
   instance.newSampleGroup = new ReactiveVar();
   instance.error = new ReactiveVar();
+  instance.creatingSampleGroup = new ReactiveVar(false);
 });
 
 Template.createSampleGroup.helpers({
   nameAndDescription() {
     return SampleGroups.simpleSchema().pick(["name", "description"]);
   },
-  error() { return Template.instance().error },
-  newSampleGroup() { return Template.instance().newSampleGroup },
+  error() { return Template.instance().error; },
+  newSampleGroup() { return Template.instance().newSampleGroup; },
 });
 
 Template.createSampleGroup.events({
   "click .create-sample-group"(event, instance) {
     let sampleGroup = instance.newSampleGroup.get();
 
+    // make sure the user knows they clicked the button
+    instance.creatingSampleGroup.set(true);
+
     Meteor.call("createSampleGroup", sampleGroup, (error, selected) => {
+      instance.creatingSampleGroup.set(false);
+
       if (error) {
         if (error.reason === "Match failed") {
           // there might be edge cases here which I haven't found yet so other
@@ -74,6 +80,18 @@ Template.sampleGroupExprVarFilters.onCreated(function(){
   instance.subscribe("blobsAssociatedWithObject", "SampleGroups", sampleGroupId);
 });
 
+Template.sampleGroupExprVarFilters.onRendered(function () {
+  let instance = this;
+
+  // refresh the manage objects sticky when the subscriptions load
+  instance.autorun(() => {
+    // reactively watch this
+    instance.subscriptionsReady();
+
+    instance.data.refreshSticky();
+  });
+});
+
 Template.sampleGroupExprVarFilters.helpers({
 
   // if a filter has been applied, the download URL for the
@@ -121,7 +139,7 @@ function getFilterJobStatus(sampleGroupId){
         {status: {$in: ["creating", "waiting", "running","error"]}},
         {'args.sample_group_id': sampleGroupId},
       ],
-    },);
+    });
     if(currentJob){ return currentJob.status; } else { return false; }
 }
 
