@@ -111,6 +111,37 @@
   <p>
     This creates a download button from the hotPassback mentioned above.
   </p>
+
+
+  <h2>
+    <code>{{|> listCollaborators}}</code>
+  </h2>
+
+  <h4>
+    <code>{{|> listCollaborators collabList=emptyArrayReactiveVar collectionName=collectionName mongoIds=mongoIds editing=true}}</code>
+  </h4>
+  <p>
+    This shows a list of collaborators with editing capabilities if requested.
+  </p>
+  <p>
+    This is for editing the collaborators of one or more objects.
+  </p>
+
+  <h4>
+    <code>{{|> listCollaborators collabList=collabsList}}</code>
+  </h4>
+
+  <p>
+    <u>NOTE: not yet fully functional/tested</u>
+  </p>
+
+
+  <p>
+    This is for editing a list of collaborators on the client-side before
+    anything is inserted into mongo.
+  </p>
+
+  {{> listCollaborators collabList=collabs}}
 </template>
 
 <template name="shareAndDeleteButtons">
@@ -184,7 +215,7 @@
         {{! NOTE: assumption is that there can never be 0 collaborations}}
         {{#each collabsListFetched}}
           <div class="item">
-            {{#if ../editing}}
+            {{#if or ../editing (not ../mongoIds)}}
               <div class="right floated content">
                 {{! don't show if there's only one left}}
                 {{#if firstGreater collabsListLength 1}}
@@ -207,8 +238,8 @@
       {{/let}}
     </div>
 
-    {{#if editing}}
-      {{> addCollaboratorSearch collabsList=collabsList}}
+    {{#if or editing (not mongoIds)}}
+      {{> addCollaboratorSearch collabDescriptors=collabDescriptors}}
     {{/if}}
   {{else}}
     {{> dataLoading}}
@@ -294,6 +325,11 @@
 
 <template name="semanticUICheckbox">
   {{! Calls $(".ui.checkbox").checkbox() when rendered}}
+  {{> UI.contentBlock}}
+</template>
+
+<template name="semanticUIAccordion">
+  {{! Calls $(".ui.accordion").accordion() when rendered}}
   {{> UI.contentBlock}}
 </template>
 
