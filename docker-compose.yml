@@ -27,7 +27,7 @@ services:
   job-runner:
     container_name: "job-runner"
     restart: always
-    image: medbook/job-runner:v1.1.7
+    image: medbook/job-runner:v1.1.8
     volumes:
       - /filestore:/filestore
     environment:
