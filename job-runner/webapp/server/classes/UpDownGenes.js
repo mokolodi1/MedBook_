@@ -54,7 +54,7 @@ UpDownGenes.prototype.run = function () {
   }
 
   // Set up to work with getStoragePath; either true or null
-  var usingFilter = self.job.args.use_filtered_sample_group
+  var usingFilter = self.job.args.use_filtered_sample_group;
   if(! usingFilter){usingFilter = null;}
 
   var medianPath = getStoragePath("median.tsv", usingFilter);
@@ -153,7 +153,7 @@ UpDownGenes.prototype.run = function () {
       if (commandResult.exitCode !== 0) {
         throw new Error("Error code running outlier analysis script");
       }
-      console.log("done with single sample analysis");
+      console.log("Done with single sample analysis. Saving results...");
 
       // save the intermediary files if necessary
       if (regenerateFiles) {
@@ -161,11 +161,11 @@ UpDownGenes.prototype.run = function () {
         // until the job is done.
         // (This is an assumption that might not be true)
 
-        function printError (err) {
+        var printError = function (err) {
           if (err) {
             console.log("error creating blob:", err);
           }
-        }
+        };
         // Metadata for median & up downblobs; note if filtered.
         var meta = { iqr_multiplier: iqr_multiplier};
         if(usingFilter){ meta.from_filtered_sample_group = true; }
@@ -176,9 +176,9 @@ UpDownGenes.prototype.run = function () {
       }
 
       // calculate the paths for the output files
-      upPath = path.join(workDir, "up_outlier_genes")
-      downPath = path.join(workDir, "down_outlier_genes")
-      top5Path = path.join(workDir, "top_5_percent_most_highly_expressed_genes.tsv")
+      upPath = path.join(workDir, "up_outlier_genes");
+      downPath = path.join(workDir, "down_outlier_genes");
+      top5Path = path.join(workDir, "top_5_percent_most_highly_expressed_genes.tsv");
 
 
       // Save output files as Blobs2 "synchronously" with wrapAsync
@@ -192,19 +192,12 @@ UpDownGenes.prototype.run = function () {
 
       // Output files are associated with a job, not the sample group,
       // so they don't need to be tagged with usingFilter.
-      try{
-        var upGenesBlob = createBlob2Sync(upPath, associated_job_object, {});
-        var downGenesBlob = createBlob2Sync(downPath, associated_job_object, {});
-        var top5blob = createBlob2Sync(top5Path, associated_job_object, {});
-        output["up_blob_id"] = upGenesBlob._id;
-        output["down_blob_id"] = downGenesBlob._id;
-        output["top5percent_blob_id"] = top5blob._id;
-      }catch(error){
-        // Log the error and throw it again to properly fail the outlier analysis job
-        console.log("Error storing output files for Outlier Analysis:", error);
-        throw(error);
-      }
-
+      var upGenesBlob = createBlob2Sync(upPath, associated_job_object, {});
+      var downGenesBlob = createBlob2Sync(downPath, associated_job_object, {});
+      var top5blob = createBlob2Sync(top5Path, associated_job_object, {});
+      output.up_blob_id = upGenesBlob._id;
+      output.down_blob_id = downGenesBlob._id;
+      output.top5percent_blob_id = top5blob._id;
 
       // parse the output into the output object and gene sets
       var geneSetInsertPromises = [];
@@ -243,11 +236,14 @@ UpDownGenes.prototype.run = function () {
           // Populate the found genes.
           // The top5percent overexpressed file has a different format from the
           // other files so split its columns separately.
-          if(outlier.outlier_type == "top5percent"){
-            var tabSplit = line.split("\t");
 
-            var gene_label = tabSplit[0];
-            var sample_value = parseFloat(tabSplit[1]);
+          var tabSplit, gene_label, sample_value;
+
+          if (outlier.outlier_type == "top5percent") {
+            tabSplit = line.split("\t");
+
+            gene_label = tabSplit[0];
+            sample_value = parseFloat(tabSplit[1]);
 
             outlierOutput.push({
               gene_label: gene_label,
@@ -259,12 +255,12 @@ UpDownGenes.prototype.run = function () {
               "Genes": gene_label,
               "Sample value": sample_value,
             });
-          }else{
-            var tabSplit = line.split(" ");
+          } else {
+            tabSplit = line.split(" ");
 
-            var gene_label = tabSplit[0];
+            gene_label = tabSplit[0];
             var background_median = parseFloat(tabSplit[1]);
-            var sample_value = parseFloat(tabSplit[2]);
+            sample_value = parseFloat(tabSplit[2]);
 
             outlierOutput.push({
               gene_label: tabSplit[0],
@@ -377,7 +373,7 @@ UpDownGenes.prototype.onSuccess = function (result) {
     Email.send({
       to: user.collaborations.email_address,
       from: "ucscmedbook@gmail.com",
-      subject: "Outlier analysis for " + this.job.args["sample_label"] +
+      subject: "Outlier analysis for " + this.job.args.sample_label +
           " complete.",
       html: "Your outlier analysis job has completed. Results:\n<a href='" +
           resultsURL + "'>" + resultsURL + "</a>" ,
