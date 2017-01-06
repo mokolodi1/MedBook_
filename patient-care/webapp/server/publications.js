@@ -266,7 +266,17 @@ Meteor.publish("dataSetNamesSamples", function(dataSetIds) {
     query._id = { $in: dataSetIds };
   }
 
-  return DataSets.find(query, { fields: { name: 1, sample_labels: 1 } });
+  return DataSets.find(query, {
+    fields: {
+      name: 1,
+
+      // NOTE: We could make this faster by only sending one list,
+      // but the lists aren't overly large considering we're only sending
+      // them one at a time.
+      sample_labels: 1,
+      sample_label_index: 1,
+    }
+  });
 });
 
 // send down the sample labels for a specific data set

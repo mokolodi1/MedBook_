@@ -58,14 +58,18 @@
 
 <template name="viewFormRecords">
   <h1>
-    View records for
+    View data for
     {{#if Template.subscriptionsReady}}
       {{getForm.name}}
     {{else}}
       loading...
     {{/if}}
+
+    {{> recordsDownloadButton hotPassback=hotPassback
+        cssClass="primary" filename=getForm.name}}
   </h1>
 
   {{> showRecords fields=getForm.fields mongoId=(param "form_id")
-      collectionName="Forms" primaryFieldName=getForm.sample_label_field}}
+      collectionName="Forms" primaryFieldName=getForm.sample_label_field
+      hotPassback=hotPassback}}
 </template>

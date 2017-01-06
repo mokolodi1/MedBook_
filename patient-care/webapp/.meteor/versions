@@ -10,7 +10,6 @@ allow-deny@1.0.5
 arillo:flow-router-helpers@0.5.1
 audit-argument-checks@1.0.7
 autoupdate@1.2.11
-awsp:handsontable@0.16.1
 babel-compiler@6.8.5
 babel-runtime@0.1.9_1
 base64@1.0.9

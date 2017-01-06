@@ -133,6 +133,14 @@ Template.listSingleSampleTopGenes.helpers({
 
 // Template.singleSampleTopGenesJob
 
+Template.singleSampleTopGenesJob.onCreated(function () {
+  let instance = this;
+
+  instance.hotPassback = {
+    initialized: new ReactiveVar(false),
+  };
+});
+
 Template.singleSampleTopGenesJob.helpers({
   jobOptions() {
     return {
@@ -141,6 +149,21 @@ Template.singleSampleTopGenesJob.helpers({
       listRoute: "listSingleSampleTopGenes",
       argsTemplate: "singleSampleTopGenesArgs",
     };
+  },
+  hotPassback() {
+    return Template.instance().hotPassback;
+  },
+  filename() {
+    let { args } = this;
+
+    let topAmount;
+    if (args.percent_or_count === "percent") {
+      topAmount = `${args.top_percent}% of genes`;
+    } else {
+      topAmount = `${args.top_count} genes`;
+    }
+
+    return `Top ${topAmount} in ${args.sample_label}`;
   },
 });
 
@@ -160,7 +183,7 @@ Template.showGeneSetAssociatedWithJob.onCreated(function () {
 
   instance.subscribe("associatedObjectGeneSet", {
     collection_name: "Jobs",
-    mongo_id: instance.data._id,
+    mongo_id: instance.data.job._id,
   });
 });
 

@@ -32,9 +32,7 @@ SimpleSchema.messages({
 });
 // NOTE: result of the function, not a function itself!
 var collaborationSchema = function() {
-  // collaborators and administrators are set separately
-  let collabSchemaObject = _.omit(Collaborations.simpleSchema().schema(),
-      "collaborators", "administrators");
+  let collabSchemaObject = Collaborations.simpleSchema().schema();
 
   let name = collabSchemaObject.name;
   let oldCustom = name.custom;

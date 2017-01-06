@@ -58,14 +58,15 @@
 
       {{! Show a list of previously run GSEA jobs as well as a form to
           create a new GSEA job}}
-      <button class="ui labeled icon button
-          {{#if Template.subscriptionsReady}}
-            primary run-gsea{{else}}loading{{/if}}">
+      <button class="ui labeled icon primary button
+          {{#if Template.subscriptionsReady}}run-gsea{{else}}loading{{/if}}">
         <i class="right arrow icon"></i>
         Run GSEA
       </button>
+      {{> recordsDownloadButton hotPassback=hotPassback filename=filename
+          cssClass="secondary"}}
     </h2>
-    {{> showLimmaResult}}
+    {{> showLimmaResult job=this hotPassback=hotPassback}}
 
     <h2>
       Voom plot
@@ -135,10 +136,13 @@
 
 <template name="showLimmaResult">
   {{#if Template.subscriptionsReady}}
-    {{#with getGeneSet}}
-      {{> showRecords fields=fields mongoId=_id
-          collectionName="GeneSets" primaryFieldName=gene_label_field}}
-    {{/with}}
+    {{! define in a #let to be used inside the #with}}
+    {{#let hotPassback=hotPassback}}
+      {{#with getGeneSet}}
+        {{> showRecords fields=fields mongoId=_id hotPassback=hotPassback
+            collectionName="GeneSets" primaryFieldName=gene_label_field}}
+      {{/with}}
+    {{/let}}
   {{else}}
     {{> dataLoading}}
   {{/if}}
