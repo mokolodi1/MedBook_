@@ -711,8 +711,16 @@ Template.recordsHandsOnTable.onRendered(function () {
     startCols: recordsData.length,
     columns,
     colHeaders,
-    readOnly: true
+    readOnly: true,
+    columnSorting: true,
   });
+
+  let { hotPassback } = instance.data;
+
+  if (hotPassback) {
+    hotPassback.hotInstance = hot;
+    hotPassback.initialized.set(true);
+  }
 });
 
 Template.recordsHandsOnTable.helpers({
@@ -823,5 +831,16 @@ Template.gseaFromGeneSetModal.helpers({
   },
   permissionLikelyDenied() {
     return Template.instance().permissionLikelyDenied.get();
+  },
+});
+
+// Template.recordsDownloadButton
+
+Template.recordsDownloadButton.events({
+  "click .download-hot-data"(event, instance) {
+    let { hotPassback, filename } = instance.data;
+
+    let exportPlugin = hotPassback.hotInstance.getPlugin('exportFile');
+    exportPlugin.downloadFile("csv", { filename });
   },
 });

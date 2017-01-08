@@ -112,6 +112,24 @@
 
     See manageForms or manageGeneSets for a code example.
   </p>
+  <p>
+    You can pass in hotPassback, which is a JSON object that should be
+    initialized as such:
+    <code>{ initialized: new ReactiveVar(false) }</code>.
+    This object will have the <code>hotInstance</code> set as the return
+    value of the <code>new Handsontable</code> call. When that happen,
+    <code>initialized</code> will be set to true. This is useful for
+    doing things like having an export button that's not right next to
+    the HOT on the page. (See <code>recordsDownloadButton</code>.)
+  </p>
+
+  <h2>
+    <code>{{|> recordsDownloadButton hotPassback=hotPassback
+    cssClass="small" filename="file will be called this.txt"}}</code>
+  </h2>
+  <p>
+    This creates a download button from the hotPassback mentioned above.
+  </p>
 
   <h2><code>{{|> samplesAndFeatures}}</code></h2>
   <p>
@@ -536,7 +554,7 @@
         the information about the form has loaded}}
     {{#if and fields primaryFieldName}}
       {{> recordsHandsOnTable recordsData=recordsData fields=fields
-          primaryFieldName=primaryFieldName}}
+          primaryFieldName=primaryFieldName hotPassback=hotPassback}}
     {{else}}
       {{> dataLoading}}
     {{/if}}
@@ -614,4 +632,11 @@
           filename=(concat name " features")}}
     </div>
   </div>
+</template>
+
+<template name="recordsDownloadButton">
+  <button class="ui {{cssClass}} button download-hot-data
+      {{#unless hotPassback.initialized.get}}loading{{/unless}}">
+    Download
+  </button>
 </template>

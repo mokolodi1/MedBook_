@@ -184,7 +184,13 @@
     </tbody>
   </table>
 
-  <h3>Data</h3>
+  <h3>
+    Data
+
+    {{> recordsDownloadButton hotPassback=hotPassback filename=name
+        cssClass="small secondary"}}
+  </h3>
   {{> showRecords fields=fields mongoId=(param "selected")
-      collectionName="GeneSets" primaryFieldName=gene_label_field}}
+      collectionName="GeneSets" primaryFieldName=gene_label_field
+      hotPassback=hotPassback}}
 </template>

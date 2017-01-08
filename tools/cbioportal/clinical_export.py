@@ -39,6 +39,13 @@ def export_from_object(db, sampleGroup, form_id, patient_form_id, work_dir, isPl
     collabs = ""
     for collab in collaboration_list:
         collabs = collabs+collab.encode('ascii','ignore')+';'
+    form = db["forms"].find_one({ "_id": form_id })
+    try:
+	    field_list = form[u'fields']
+    except:
+	    print "Form", form_id, "not found"
+    sample_label_field = form[u'sample_label_field']
+    print "field_list", field_list, sample_label_field
     out_study = open("./meta_study.txt","w")
     out_study.write("type_of_cancer: %s\n" % cancer_type);
     out_study.write("cancer_study_identifier:  %s\n" % dataset_label);
@@ -47,6 +54,26 @@ def export_from_object(db, sampleGroup, form_id, patient_form_id, work_dir, isPl
     out_study.write("citation: unpublished\n");
     out_study.write("groups: %s\n" % collabs);
     out_study.write("short_name: %s\n" % dataset_label);
+
+    # db.records.find({"associated_object.mongo_id":"6QpxSMZymmL28Ge8k"},{Age:1,Race:1,_id:0,"Patient ID":1})
+    record_list = db["records"].find({ "associated_object.mongo_id": form_id })
+    sample_count = 0
+    for record in record_list:
+        sample_count += 1
+    os.mkdir("./case_lists")
+    out_case_list = open("./case_lists/cases_all.txt","w");
+    out_case_list.write("cancer_study_identifier: %s\n"% dataset_label)
+    out_case_list.write("stable_id: %s_all\n"% dataset_label)
+    out_case_list.write("case_list_category: all_cases_in_study\n");
+    out_case_list.write("case_list_name: All Tumors\n");
+    out_case_list.write("case_list_description: All tumor samples (%d samples)\n"% sample_count);
+    out_case_list.write("case_list_ids: ");
+    record_list = db["records"].find({ "associated_object.mongo_id": form_id })
+    for record in record_list:
+        sid = record[sample_label_field].split('/')
+        out_case_list.write("%s\t"% sid[1]);
+    out_case_list.write("\n");
+    out_case_list.close()
 
     out_meta_clin = open("./meta_sample.txt","w")
     out_meta_clin.write("cancer_study_identifier: %s\n"% dataset_label)
@@ -71,13 +98,6 @@ def export_from_object(db, sampleGroup, form_id, patient_form_id, work_dir, isPl
     out_meta_exp.write("datatype: Z-SCORE\n")
     out_meta_exp.write("data_filename: data_expression.txt\n")
     out_clin = open("./data_sample.txt","w")
-    form = db["forms"].find_one({ "_id": form_id })
-    try:
-	    field_list = form[u'fields']
-    except:
-	    print "Form", form_id, "not found"
-    sample_label_field = form[u'sample_label_field']
-    print "field_list", field_list, sample_label_field
 
     #line 1 - field names
     out_clin.write("#%s" % field_list[0][u'name']),
@@ -116,9 +136,8 @@ def export_from_object(db, sampleGroup, form_id, patient_form_id, work_dir, isPl
     	#if field[u'name'] != sample_label_field:
 		out_clin.write("\t%s" % field[u'name'].upper().replace(" ","_").replace("-","_").replace("?","_").replace(",","_")),
     out_clin.write("\n")
-    # db.records.find({"associated_object.mongo_id":"6QpxSMZymmL28Ge8k"},{Age:1,Race:1,_id:0,"Patient ID":1})
-    record_list = db["records"].find({ "associated_object.mongo_id": form_id })
 
+    record_list = db["records"].find({ "associated_object.mongo_id": form_id })
     for record in record_list:
         pid = record["Patient_ID"]
         sid = record[sample_label_field]
