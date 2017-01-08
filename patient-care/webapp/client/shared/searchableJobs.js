@@ -516,6 +516,7 @@ Template.tablePagination.events({
 
       // update the rowsPerPage and the saved rowsPerPage
       instance.data.options.rowsPerPage.set(oldValue);
+      
       Meteor.users.update(Meteor.userId(), {
         $set: {
           [ `profile.tablePagination.rowsPerPage` ]: oldValue

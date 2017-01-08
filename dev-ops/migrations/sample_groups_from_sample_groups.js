@@ -18,7 +18,6 @@ print("restored pre-migration collections");
 var current = 1;
 var total = db.sample_groups.find({}).count();
 
-
 db.sample_groups.find({}).forEach(function (sampleGroup) {
   var filteredSampleSources = [];
 
@@ -26,10 +25,13 @@ db.sample_groups.find({}).forEach(function (sampleGroup) {
     var sgDataSet = sampleGroup.data_sets[i];
 
     // generate the filtered source from the old sgDataSet
-    source = JSON.parse(JSON.stringify(sgDataSet));
+    var source = JSON.parse(JSON.stringify(sgDataSet));
 
+    // rename a couple attributes
     source.mongo_id = source.data_set_id;
+    source.name = source.data_set_name;
     delete source.data_set_id;
+    delete source.data_set_name;
 
     source.collection_name = "DataSets";
 
