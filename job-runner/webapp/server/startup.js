@@ -137,7 +137,7 @@ function runNextJob () {
     console.log("job: rejected - ", reason);
     var stackTrace = "";
     if (reason && reason.stack) {
-      stackTrace = reason.stack
+      stackTrace = reason.stack;
       console.log("stack trace:", stackTrace);
     }
     if (errorWarningUser) {
@@ -188,6 +188,14 @@ function runNextJob () {
 Meteor.startup(function () {
   console.log("job-runner server is starting!");
 
+  // call onError for jobs that got killed
+  Jobs.find({ status: "running" }).map(function (mongoJob) {
+    var jobClass = JobClasses[mongoJob.name];
+    var job = new jobClass(mongoJob._id);
+
+    job.onError("Server restarted");
+  });
+
   // set errors for jobs that got killed
   Jobs.update({
     status: "running"
@@ -224,3 +232,5 @@ Meteor.startup(function () {
 
   SyncedCron.start();
 });
+
+console.log("hi");

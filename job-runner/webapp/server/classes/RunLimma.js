@@ -198,4 +198,33 @@ RunLimma.prototype.run = function () {
   return deferred.promise;
 };
 
+RunLimma.prototype.onSuccess = function () {
+  Notifications.insert({
+    user_id: this.job.user_id,
+    href: `/tools/limma/${this.job._id}`,
+    content: "<b>Limma</b> has finished for " +
+        `<b>${this.job.args.reference_sample_group_name}</b> vs. ` +
+        `<b>${this.job.args.experimental_sample_group_name}</b>`,
+  });
+};
+
+RunLimma.prototype.onError = function (reason) {
+  let { job } = this;
+  let content = "Failed to run <b>Limma</b> for " +
+      `<b>${job.args.reference_sample_group_name}</b> vs. ` +
+      `<b>${job.args.experimental_sample_group_name}</b>: `;
+
+  if (typeof reason === "string") {
+    content += reason;
+  } else {
+    content += "Internal error";
+  }
+
+  Notifications.insert({
+    user_id: job.user_id,
+    href: `/tools/limma/${job._id}`,
+    content,
+  });
+};
+
 JobClasses.RunLimma = RunLimma;

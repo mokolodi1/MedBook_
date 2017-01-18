@@ -155,17 +155,19 @@ Template.createGseaForm.helpers({
 
     let geneSet = GeneSets.findOne(geneSetId);
 
-    return _.chain(geneSet.fields)
-      .filter((field) => {
-        return field.value_type === "Number";
-      })
-      .map((field) => {
-        return {
-          value: field.name,
-          label: field.name,
-        };
-      })
-      .value();
+    if (geneSet) {
+      return _.chain(geneSet.fields)
+        .filter((field) => {
+          return field.value_type === "Number";
+        })
+        .map((field) => {
+          return {
+            value: field.name,
+            label: field.name,
+          };
+        })
+        .value();
+    }
   },
   // return true if there are duplicate gene set names in the union of the
   // selected gene set groups
@@ -226,7 +228,10 @@ Template.gseaJob.events({
 
 Template.gseaJobArgs.helpers({
   getGeneSetGroupId(index, job) {
-    return job.args.gene_set_group_ids[index];
+    // sometimes only part of the object is loaded
+    if (job.args.gene_set_group_ids) {
+      return job.args.gene_set_group_ids[index];
+    }
   },
   geneSetAssociatedObj() {
     return {

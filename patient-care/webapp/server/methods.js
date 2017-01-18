@@ -4,7 +4,7 @@ Meteor.methods({
   // Starts an UpDownGenes job for each of the sample_labels. If a job already
   // exists, the duplicate job is returned.
   // Returns an array of job _ids
-  createUpDownGenes: function (formValues, customSampleGroup) {
+  createUpDownGenes: function (formValues, collaborations, customSampleGroup) {
     check(formValues, new SimpleSchema({
       data_set_id: { type: String },
       sample_labels: { type: [String] },
@@ -12,7 +12,8 @@ Meteor.methods({
       iqr_multiplier: { type: Number, decimal: true },
       use_filtered_sample_group: {type: Boolean },
     }));
-    check(customSampleGroup, Object);
+    check(collaborations, [String]);
+    check(customSampleGroup, Match.Maybe(Object));
 
     let user = MedBook.ensureUser(Meteor.userId());
     // data set and sample group security is below...
@@ -72,6 +73,13 @@ Meteor.methods({
       }
     }
 
+    if (!user.hasAccess(collaborations)) {
+      throw new Meteor.Error("must-have-access-to-create",
+          "You won't have access!",
+          "You can only create jobs that you will have access to. " +
+          "Please add yourself as a collaborator to continue.");
+    }
+
     // args shared by all jobs to be created in just a moment
     let sameArgs = {
       data_set_id,
@@ -93,14 +101,13 @@ Meteor.methods({
         name: "UpDownGenes",
         status: "waiting",
         user_id: user._id,
-        collaborations: [ user.personalCollaboration() ],
+        collaborations,
         args,
         prerequisite_job_ids
       });
     });
   },
   createSampleGroup: function (sampleGroup) {
-    // TODO: figure out how to check this schema
     check(sampleGroup, new SimpleSchema({
       name: { type: String },
       version: { type: Number, min: 1 },
@@ -676,41 +683,14 @@ Meteor.methods({
     return future.wait();
   },
 
-  // return a list of description objects for the union
-  // of collaborations in multiple objects
-  getCollabDescriptions(collectionName, mongoIds, attribute) {
-    check(collectionName, String);
-    check(mongoIds, [String]);
-    check(attribute, String);
+  // return a list of description objects for the given
+  // list of collaborations
+  getCollabDescriptions(collaborationNames) {
+    check(collaborationNames, [String]);
 
     let user = MedBook.ensureUser(this.userId);
 
-    // ensure the attribute is valid
-    let allowedAttributes = [
-      "collaborations",
-      "collaborators",
-      "administrators",
-    ];
-    if (allowedAttributes.indexOf(attribute) === -1) {
-      throw new Meteor.Error("invalid-attribute");
-    }
-
-    // put all the collab names into this hash map
-    let collabNameHash = {};
-
-    MedBook.collections[collectionName].find({
-      _id: { $in: mongoIds }
-    }, {
-      fields: { [ attribute ]: 1 }
-    }).forEach((obj) => {
-      _.each(obj[attribute], (collabName) => {
-        collabNameHash[collabName] = true;
-      });
-    });
-
-    let combinedCollabs = Object.keys(collabNameHash);
-
-    return _.map(combinedCollabs, (name) => {
+    return _.map(collaborationNames, (name) => {
       if (name.indexOf("@") === -1) {
         // if it's a collaboration name...
         let collab = Collaborations.findOne({ name }, {
@@ -747,6 +727,41 @@ Meteor.methods({
         return userDescription;
       }
     });
+  },
+
+  // return a list of description objects for the union
+  // of collaborations in multiple objects
+  getObjsCollabDescriptions(collectionName, mongoIds, attribute) {
+    check(collectionName, String);
+    check(mongoIds, [String]);
+    check(attribute, String);
+
+    let user = MedBook.ensureUser(this.userId);
+
+    // ensure the attribute is valid
+    let allowedAttributes = [
+      "collaborations",
+      "collaborators",
+      "administrators",
+    ];
+    if (allowedAttributes.indexOf(attribute) === -1) {
+      throw new Meteor.Error("invalid-attribute");
+    }
+
+    // put all the collab names into this hash map
+    let collabNameHash = {};
+
+    MedBook.collections[collectionName].find({
+      _id: { $in: mongoIds }
+    }, {
+      fields: { [ attribute ]: 1 }
+    }).forEach((obj) => {
+      _.each(obj[attribute], (collabName) => {
+        collabNameHash[collabName] = true;
+      });
+    });
+
+    return Meteor.call("getCollabDescriptions", Object.keys(collabNameHash));
   },
   // refresh the cBioPortal data
   // NOTE: the only security here for now is that they have a MedBook account

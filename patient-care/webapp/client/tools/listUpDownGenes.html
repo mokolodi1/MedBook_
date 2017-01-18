@@ -21,10 +21,10 @@
 
   <h2>Start a new analysis</h2>
 
-  {{#autoForm id="createUpDownGenes" schema=formSchema}}
+  {{#autoForm id="createUpDownGenes" schema=formSchema class=loadingIfNotReady}}
     <div class="two fields">
       {{> afQuickField name="data_set_id"
-          options=patientAndDataSets type="select" search=true
+          options=dataSetOptions type="select" search=true
           placeholder="Select a data set..."}}
 
       {{#if afFieldValueIs name="data_set_id" value=undefined}}
@@ -44,15 +44,24 @@
       {{/if}}
     </div>
 
+    {{#if multipleSamplesSelected}}
+      <div class="two fields">
+        <div class="field">{{! NOTE: empty}}</div>
+
+        <div class="field">
+          <div class="ui info message">
+            A separate outlier analysis job will be created for
+            each sample selected.
+          </div>
+        </div>
+      </div>
+    {{/if}}
+
     <div class="two fields">
       {{> afQuickField name="iqr_multiplier" value=1.5}}
 
       {{> afQuickField name="sample_group_id" options=sampleGroupOptions
           type="select" search=true placeholder="Choose background..."}}
-    </div>
-    <div class="inline field">
-      {{> afQuickField name="use_filtered_sample_group"
-          type="boolean-checkbox" }}
     </div>
 
     {{#if afFieldValueIs name="sample_group_id" value="creating"}}
@@ -61,12 +70,33 @@
       </div>
     {{/if}}
 
-    {{#if multipleSamplesSelected}}
-      <div class="ui info message">
-        A separate outlier analysis job will be created for
-        each sample selected.
+    <div class="two fields">
+      {{#semanticUIAccordion accordionOptions}}
+        <div class="ui accordion field">
+          <div class="title">
+            <i class="icon dropdown"></i>
+            Edit sharing (inherits data set collaborations by default)
+          </div>
+
+          <div class="content">
+            <div class="ui segment">
+              {{#if dataSetIdList}}
+                {{> listCollaborators collabsList=jobCollabs
+                    collectionName="DataSets" mongoIds=dataSetIdList editing=true}}
+              {{else}}
+                Select a data set to show sharing options.
+              {{/if}}
+            </div>
+
+          </div>
+        </div>
+      {{/semanticUIAccordion}}
+
+      <div class="field" style="margin-top: 7px; margin-bottom: 7px;">
+        {{> afQuickField name="use_filtered_sample_group"
+            type="boolean-checkbox" checkboxType="toggle"}}
       </div>
-    {{/if}}
+    </div>
 
     {{> showErrorMessage error}}
 

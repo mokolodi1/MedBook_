@@ -83,15 +83,8 @@
       </a>
 
       <div class="right menu">
-        <div class="ui simple dropdown icon item">
-          <i class="alarm icon"></i>
-          <!-- <div class="floating ui red label">3</div> -->
-          <div class="menu">
-            <div class="item">
-              No notifications
-            </div>
-          </div>
-        </div>
+        {{> notificationsMenuItem}}
+
         <div class="ui simple dropdown icon item">
           <i class="info circle icon"></i>
           <div class="menu">
@@ -101,6 +94,7 @@
             </a>
           </div>
         </div>
+
         <div class="ui simple dropdown icon item">
           <i class="grid layout icon"></i>
           <div class="menu">
@@ -261,6 +255,12 @@
           View records
         {{/breadcrumbItem}}
       {{/if}}
+    {{/if}}
+
+    {{#if isActiveRoute "viewAllNotifications"}}
+      {{#breadcrumbItem isActive=true}}
+        Notifications
+      {{/breadcrumbItem}}
     {{/if}}
 
     {{! Utility}}
