@@ -22,9 +22,25 @@ h4.ui.top.attached.block.header {
 
 /* make floating notification label not too high */
 .ui.menu .ui.floating.label {
-  top: -0.4em;
+  top: 0em;
+  left: 3.7em;
 }
 
 .collaboration-results .result {
   margin-left: 120px !important;
+}
+
+.unvisited-notification {
+  // color: red;
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
+// fix HandsOnTable headers from being above Semantic UI headers
+.ht_clone_top {
+  z-index: 99;
+}
+
+.ui.selection.list .non-selectable.item {
+  background-color: transparent !important;
+  cursor: auto;
 }

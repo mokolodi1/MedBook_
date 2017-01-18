@@ -45,6 +45,7 @@ Package.onUse(function(api) {
 
   // utility collections
   addAndExport(api, "Jobs");
+  addAndExport(api, "Notifications");
 
   // deprecated: Blobs
   api.use("cfs:gridfs@0.0.33");
