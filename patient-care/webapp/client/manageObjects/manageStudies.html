@@ -78,7 +78,8 @@
 
     {{#if length sample_labels}}
       <h4>Samples</h4>
-      {{> listSamplesButton sample_labels}}
+      {{> listSamplesButton sampleLabels=sample_labels
+          filename=(concat name " samples")}}
     {{else}}
       <div class="ui message">
         <div class="header">

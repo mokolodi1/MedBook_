@@ -108,10 +108,30 @@ Meteor.methods({
     });
   },
   createSampleGroup: function (sampleGroup) {
-    // NOTE: this method might produce "unclean" errors because I don't
-    // feel like rewriting most of the schema for SampleGroups for the
-    // check function (above)
-    check(sampleGroup, Match.Maybe(Object));
+    check(sampleGroup, new SimpleSchema({
+      name: { type: String },
+      version: { type: Number, min: 1 },
+      collaborations: { type: [String] },
+
+      filtered_sample_sources: {
+        type: [
+          new SimpleSchema({
+            collection_name: {
+              type: String,
+              allowedValues: [ "DataSets", "SampleGroups", ],
+            },
+            mongo_id: { type: String },
+
+            filters: {
+              type: [Object],
+
+              // NOTE: we do a thorough check of this before inserting
+              blackbox: true,
+            },
+          })
+        ]
+      },
+    }));
 
     let user = MedBook.ensureUser(Meteor.userId());
     user.ensureAccess(sampleGroup);
@@ -121,9 +141,10 @@ Meteor.methods({
       throw new Meteor.Error("name-missing", "Name missing",
           "Please name your sample group.");
     }
-    if (sampleGroup.data_sets.length === 0) {
-      throw new Meteor.Error("no-data-sets", "No data sets",
-          "Please add at least one data set to your sample group.");
+    if (sampleGroup.filtered_sample_sources.length === 0) {
+      throw new Meteor.Error("no-data-sources", "No data sources",
+          "Please add at least one data set or sample group " +
+          "to your sample group.");
     }
 
     // make sure the version is correct (aka don't trust the user)
@@ -132,64 +153,100 @@ Meteor.methods({
     sampleGroup.version =
         Meteor.call("getSampleGroupVersion", sampleGroup.name);
 
-    // ensure uniqueness for data sets
-    let uniqueDataSets = _.uniq(_.pluck(sampleGroup.data_sets, "data_set_id"));
-    if (uniqueDataSets.length !== sampleGroup.data_sets.length) {
+    // ensure uniqueness for data sets/sample groups
+    let sourceDescriptors = _.map(sampleGroup.filtered_sample_sources,
+        (source) => {
+      return `${source.collection_name}/${source.mongo_id}`;
+    });
+    if (_.uniq(sourceDescriptors).length !==
+        sampleGroup.filtered_sample_sources.length) {
+      // don't need a nice description because this shouldn't happen:
+      // the uniqueness is handled by the client
       throw new Meteor.Error("non-unique-data-sets");
     }
 
-    // keep track of each sample label to throw an error if there are
-    // is the same sample group in multiple data sets
-    let sampleLabelIndex = {};
+    // keep track of each sample label, throw an error if a label exists in
+    // multiple data sets
+    let sampleLabelHash = {};
 
-    // filter through each data set
-    sampleGroup.data_sets = _.map(sampleGroup.data_sets,
-        (sampleGroupDataSet) => {
-      // ensure access
-      let dataSet = DataSets.findOne(sampleGroupDataSet.data_set_id);
-      user.ensureAccess(dataSet);
+    // Store each source's sample labels list in a hash map
+    // organized by data set _id. This is used at the end to compute
+    // the data_sets attribute.
+    // We use a hash here because samples can potentially be added twice from
+    // two sources.
+    let dsSampleLabelHash = {};
+
+    // utility function for adding to the dsSampleLabelHash
+    function addToDSSampleLabelHash(dataSetId, sampleLabels) {
+      dsSampleLabelHash[dataSetId] = {};
+
+      _.each(sampleLabels, (label) => {
+        dsSampleLabelHash[dataSetId][label] = true;
+      });
+    }
+
+    // Store each source's feature labels list to the hash map
+    // organized by source description: `${collection_name}/${mongo_id}`
+    // This is used at the end to compute the intersection of the feature
+    // labels.
+    let sourceFeaturesHash = {};
+
+    // Store the feature labels of the first source in the sample group
+    // for use later on.
+    let masterFeatureLabels;
+
+    // filter through each source
+    sampleGroup.filtered_sample_sources =
+        _.map(sampleGroup.filtered_sample_sources, (sgSource) => {
+      let collection = MedBook.collections[sgSource.collection_name];
+      let fetchedSource = collection.findOne(sgSource.mongo_id);
+      user.ensureAccess(fetchedSource);
 
       // make sure they're all the same type
       if (!sampleGroup.value_type) {
         // infer from the data sets for now
-        sampleGroup.value_type = dataSet.value_type;
+        sampleGroup.value_type = fetchedSource.value_type;
       }
 
-      if (dataSet.value_type !== sampleGroup.value_type) {
+      if (fetchedSource.value_type !== sampleGroup.value_type) {
         throw new Meteor.Error("mixed-value-types", "Mixed value types",
-            "You can only create a sample group with data sets " +
+            "You can only create a sample group with sources " +
             "of a single value type.");
       }
 
-      // don't trust the client's name or unfiltered count
-      sampleGroupDataSet.data_set_name = dataSet.name;
-      sampleGroupDataSet.unfiltered_sample_count =
-          dataSet.sample_labels.length;
+      // set the name and unfiltered_sample_count
+      sgSource.name = fetchedSource.name;
+      sgSource.unfiltered_sample_count = fetchedSource.sample_labels.length;
 
       // Apply the sample group's filters.
       // We start with all the sample labels in a data set.
       // Then, apply filters as follows.
-      // -  Filter by form values: Run the passed query in mongo and remove all samples
-      //    that are not included in the query results
-      // -  Include Specific Samples : remove all samples NOT on the include list
-      // -  Exclude Specific Samples : remove all samples on the exclude list
-      let allSamples = dataSet.sample_labels;
-      let sample_labels = allSamples; // need a copy of this
+      // -  Filter by form values: Run the passed query in mongo and remove
+      //    all samples that are not included in the query results
+      // -  Include Specific Samples: remove all samples NOT on the include list
+      // -  Exclude Specific Samples: remove all samples on the exclude list
+      let { sample_labels } = fetchedSource;
 
+      // make a copy of the whole list before filtering
+      let allSamples = sample_labels;
 
-      _.each(sampleGroupDataSet.filters, (filter) => {
+      _.each(sgSource.filters, (filter) => {
         let { options } = filter;
 
         if (filter.type === "form_values"){
           if (!options.mongo_query) {
-            throw new Meteor.Error("mongo-query-empty", "Not done editing filters",
+            throw new Meteor.Error("mongo-query-empty",
+                "Not done editing filters",
                 "Please click done to continue.");
           }
 
           // Run the mongo_query
           // Get the result sample labels synchronously
           let result_sample_labels = Meteor.call('getSamplesFromFormFilter',
-            sampleGroupDataSet.data_set_id,
+            {
+              collection_name: sgSource.collection_name,
+              mongo_id: sgSource.mongo_id,
+            },
             options.mongo_query,
             options.form_id
           );
@@ -198,76 +255,158 @@ Meteor.methods({
               "sample labels.");
 
           sample_labels = _.intersection(sample_labels, result_sample_labels);
-
         } else if (filter.type === "include_sample_list") {
           if (_.difference(options.sample_labels, allSamples).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
+
           sample_labels = _.intersection(sample_labels, options.sample_labels);
         } else if (filter.type === "exclude_sample_list") {
           if (_.difference(options.sample_labels, allSamples).length) {
             throw new Meteor.Error("invalid-sample-labels");
           }
+
           sample_labels = _.difference(sample_labels, options.sample_labels);
         } else {
           throw new Meteor.Error("invalid-filter-type");
         }
+
+        // set the sample_count for include/exclude lists
+        if (filter.type === "include_sample_list" ||
+            filter.type === "exclude_sample_list") {
+          filter.options.sample_count = filter.options.sample_labels.length;
+        }
       });
 
       if (sample_labels.length === 0) {
-        throw new Meteor.Error("data-set-empty", "No samples found",
-            `Specified filters for ${dataSet.name} returned no samples. ` +
-            "Remove filters or remove the data set to continue.");
+        throw new Meteor.Error("source-empty", "No samples found",
+            `Specified filters for ${fetchedSource.name} returned no ` +
+            "samples. Remove filters or remove the data set or sample group " +
+            "to continue.");
       }
 
-      // check to make sure the sample labels are unique throughout the
-      // entire sample group (across data sets)
-      _.each(sample_labels, (label) => {
-        if (sampleLabelIndex[label]) {
-          throw new Meteor.Error("duplicate-sample-label",
-              "Duplicate sample label",
-              `Sample ${label} is in multiple data sets in this sample group.` +
-              " Within a sample group, samples must be unique.");
-        }
+      // set the working sample_labels list to be the list for the sample group
+      sgSource.sample_labels = sample_labels;
+      sgSource.sample_count = sample_labels.length;
 
-        sampleLabelIndex[label] = true;
-      });
+      // add the source's features to the hash map
+      let featuresHash = _.reduce(fetchedSource.feature_labels,
+          (memo, label) => {
+        memo[label] = true;
+        return memo;
+      }, {});
 
-      sampleGroupDataSet.sample_labels = sample_labels;
+      let descriptor = `${sgSource.collection_name}/${sgSource.mongo_id}`;
+      sourceFeaturesHash[descriptor] = featuresHash;
+
+      if (!masterFeatureLabels) {
+        masterFeatureLabels = fetchedSource.feature_labels;
+      }
+
+      // add all the samples to their respective data sets in the
+      // dsSampleLabelHash so we can figure out where everything comes from
+      if (sgSource.collection_name === "DataSets") {
+        addToDSSampleLabelHash(sgSource.mongo_id, sgSource.sample_labels);
+      } else if (sgSource.collection_name === "SampleGroups") {
+        // add each of the data sets in the sample groups to the hash map
+        let sgInSg = SampleGroups.findOne(sgSource.mongo_id);
+
+        _.each(sgInSg.data_sets, (sgDataSet) => {
+          addToDSSampleLabelHash(sgDataSet.data_set_id,
+              sgDataSet.sample_labels);
+        });
+      } else {
+        throw "invalid-collection_name";
+      }
 
       // NOTE: _.map at beginning
-      return sampleGroupDataSet;
+      return sgSource;
     });
+
+    // set the sample group's sample_labels
+    sampleGroup.sample_labels = Object.keys(sampleLabelHash);
+
+
+
+    // With dsSampleLabelHash populated, we can calculate the sources
+    // of each of the samples. In this step we ensure that each sample is
+    // only added once from each data set. (A sample can be "added twice",
+    // for instance from two sample groups, so long as the sample's original
+    // data set is the same.)
+    let samplesAttachedToDataSet = {};
+
+    sampleGroup.data_sets = _.map(dsSampleLabelHash,
+        (sampleLabelHash, data_set_id) => {
+      let dataSet = DataSets.findOne(data_set_id, {
+        // Idk how much faster this makes it but there ya go
+        fields: { name: 1 }
+      });
+
+      let sample_labels = Object.keys(sampleLabelHash);
+
+      // make sure there aren't duplicate samples
+      _.each(sample_labels, (label) => {
+        if (samplesAttachedToDataSet[label]) {
+          throw new Meteor.Error("duplicate-sample-label",
+              "Sample from two data sets",
+              `Sample ${label} has been added from two or more data sets: ` +
+              `${samplesAttachedToDataSet[label]} and ${dataSet.name}. ` +
+              "It's possible that these data sets were added as part of " +
+              "a sample group.");
+        }
+
+        samplesAttachedToDataSet[label] = dataSet.name;
+      });
+
+      return {
+        data_set_id,
+        data_set_name: dataSet.name,
+        sample_labels,
+        sample_count: sample_labels.length,
+      };
+    });
+
+    // Now that we have the sourceFeaturesHash populated, we can calculate
+    // the intersection of the sources' sample labels
+    let featureLabels = [];
+
+    // for each label in the masterFeatureLabels, check to see if it's in
+    // every data set
+    masterFeatureLabels.forEach(function (featureLabel) {
+      var inEachDataSet = true;
+
+      // loop through the data sets
+      sourceDescriptors.forEach(function (descriptor) {
+        // if it's not in the data set, flip the flag
+        if (!sourceFeaturesHash[descriptor][featureLabel]) {
+          inEachDataSet = false;
+        }
+      });
+
+      // push it to the master list if it's in every source
+      if (inEachDataSet) {
+        featureLabels.push(featureLabel);
+      }
+    });
+
+    sampleGroup.feature_labels = featureLabels;
 
     // We can't use the regular SampleGroups.insert because SimpleSchema can't
     // handle inserting objects with very large arrays (ex. sample_labels).
     // Instead, handle the autoValues and check the schema manually...
 
-    // check to make sure sample_labels are valid in actual sample group
-    // (not done below because SimpleSchema hangs)
-    _.each(sampleGroup.data_sets, (dataSet) => {
-      check(dataSet.sample_labels, [String]);
-
-      dataSet.sample_count = dataSet.sample_labels.length;
-      check(dataSet.sample_count, Number);
-
-      // Confirm the filter options (include / exclude sample list only)
-      _.each(dataSet.filters, (filter) => {
-        if((filter.type === "include_sample_list") ||
-            (filter.type === "exclude_sample_list")){
-          check(filter.options.sample_labels, [String]);
-          filter.options.sample_count = filter.options.sample_labels.length;
-        }
-      });
-    });
-
     // clone object to be checked for the schema
     let clonedSampleGroup = JSON.parse(JSON.stringify(sampleGroup));
-    _.each(clonedSampleGroup.data_sets, (dataSet) => {
-      // SimpleSchema can't handle large arrays, so set this to one
-      dataSet.sample_labels = [ "yop" ];
-      dataSet.sample_count = 1;
-    });
+
+    // SimpleSchema can't handle large arrays, so use a fake array of strings
+    function fakeSampleLabelsAndCount(item) {
+      item.sample_labels = [ "yop/yop" ];
+      item.sample_count = 1;
+    }
+    _.each(clonedSampleGroup.data_sets, fakeSampleLabelsAndCount);
+    _.each(clonedSampleGroup.filtered_sample_sources, fakeSampleLabelsAndCount);
+    clonedSampleGroup.feature_labels = [ "yop" ];
+    clonedSampleGroup.sample_labels = [ "yop/yop" ];
 
     let validationContext = SampleGroups.simpleSchema().newContext();
     var isValid = validationContext.validate(clonedSampleGroup);
@@ -280,9 +419,9 @@ Meteor.methods({
       throw new Meteor.Error("invalid-sample-group");
     }
 
+    // NOTE: might cause collisions (super unlikely)
+    sampleGroup._id = Random.id();
     sampleGroup.date_created = new Date();
-    let newId = Random.id(); // XXX: might cause collisions
-    sampleGroup._id = newId;
 
     // insert asynchronously -- thanks @ArnaudGallardo
     var future = new Future();
@@ -293,7 +432,7 @@ Meteor.methods({
         console.log("Creating sample group threw Future error:", err);
         future.throw(err);
       } else {
-        future.return(newId);
+        future.return(sampleGroup._id);
       }
     });
 

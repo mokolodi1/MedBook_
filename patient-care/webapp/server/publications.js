@@ -251,32 +251,34 @@ Meteor.publish("gseaFormData", function (maybeGeneSetId) {
   ];
 });
 
-// send down data set names and sample_labels, filtering by
-// _id list if provided
-Meteor.publish("dataSetNamesSamples", function(dataSetIds) {
+// send down names, sample_labels, and which data sets are in which
+// sample groups for the specified _ids
+Meteor.publish("sgCreatorInfo", function(dataSetIds, sampleGroupIds) {
   check(dataSetIds, Match.Maybe([String]));
+  check(sampleGroupIds, Match.Maybe([String]));
 
   var user = MedBook.ensureUser(this.userId);
 
-  let query = {
-    collaborations: { $in: user.getCollaborations() },
-  };
-
-  if (dataSetIds) {
-    query._id = { $in: dataSetIds };
-  }
-
-  return DataSets.find(query, {
+  let options = {
     fields: {
       name: 1,
-
-      // NOTE: We could make this faster by only sending one list,
-      // but the lists aren't overly large considering we're only sending
-      // them one at a time.
       sample_labels: 1,
-      sample_label_index: 1,
+
+      // send down which data sets are in a sample group
+      "data_sets.data_set_id": 1,
     }
-  });
+  };
+
+  return [
+    DataSets.find({
+      _id: { $in: dataSetIds },
+      collaborations: { $in: user.getCollaborations() },
+    }, options),
+    SampleGroups.find({
+      _id: { $in: sampleGroupIds },
+      collaborations: { $in: user.getCollaborations() },
+    }, options),
+  ];
 });
 
 // send down the sample labels for a specific data set

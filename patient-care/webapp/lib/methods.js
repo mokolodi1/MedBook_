@@ -1,32 +1,13 @@
 Meteor.methods({
-    // Takes: data_set_id (string) -- ID of the target data set
     // Finds all Forms that have a Record for at least one sample in
     // the passed data set.
-
-    // Return format
-    //     [
-    //        {
-    //        form_id: ID,
-    //        form_name: name of my form,
-    //        fields: [
-    //                {
-    //                  name: field name
-    //                  value_type: string etc
-    //                  values: [ "value1", "value2",...]
-    //                }, ...
-    //            ]
-    //         }
-    //     ]
-    //
-  getFormsMatchingDataSet: function(data_set_id) {
-
-    check(data_set_id, String);
+  getFormsMatchingDataSet: function(collectionName, mongoId) {
+    check([collectionName, mongoId], [String]);
 
     // Client-side stub:
     if( Meteor.isClient) {
       let stub = [{
           formId: "ph_formid",
-          dataSetId: "ph_datasetid",
           name: "Loading forms...",
           fields: [],
         }];
@@ -34,9 +15,10 @@ Meteor.methods({
     }
 
     // Permissions
-    let dataset = DataSets.findOne(data_set_id);
+    let collection = MedBook.collections[collectionName];
+    let source = collection.findOne(mongoId);
     let user = MedBook.ensureUser(Meteor.userId());
-    user.ensureAccess(dataset);
+    user.ensureAccess(source);
 
     let formsWithFields = [] ;
 
@@ -44,10 +26,8 @@ Meteor.methods({
     // if we found any, include the form as an option to pick
     let formsCursor = Forms.find({
       collaborations: { $in: user.getCollaborations() },
-      sample_labels: { $in: dataset.sample_labels }
+      sample_labels: { $in: source.sample_labels }
     });
-
-    let encoded_data_set_id = encodeURIComponent(data_set_id);
 
     formsCursor.forEach(function(form){
       // Populate the form field table with its fields
@@ -103,7 +83,6 @@ Meteor.methods({
       // add to the modified form object to return
       formsWithFields.push({
         formId: encoded_form_id,
-        dataSetId: encoded_data_set_id,
         name: form.name,
         fields: currentFormFields
       });
@@ -114,11 +93,16 @@ Meteor.methods({
   // Takes : data_set_id : data set to source samples from
   //        serialized_query : stringifed JSON Mongo query
   //        form_id -- ID of the form whose fields we're querying on
-  getSamplesFromFormFilter: function(data_set_id, serialized_query, form_id){
-
-    check(data_set_id, String);
-    check(serialized_query, String);
-    check(form_id, String);
+  // XXX: move to server code
+  getSamplesFromFormFilter(sourceDesc, serialized_query, form_id) {
+    check(sourceDesc, new SimpleSchema({
+      collection_name: {
+        type: String,
+        allowedValues: [ "DataSets", "SampleGroups" ],
+      },
+      mongo_id: { type: String },
+    }));
+    check([serialized_query, form_id], [String]);
 
     // Don't run client-side.
     if(Meteor.isClient){
@@ -127,17 +111,20 @@ Meteor.methods({
 
     // console.log("got form id", form_id);
 
-    let dataset = DataSets.findOne(data_set_id);
-    let form = Forms.findOne({_id: form_id});
+    let { collection_name, mongo_id } = sourceDesc;
+
+    let collection = MedBook.collections[collection_name];
+    let source = collection.findOne(mongo_id);
+    let form = Forms.findOne(form_id);
 
     // console.log("found form with id", form);
 
-    let samples = dataset.sample_labels;
+    let samples = source.sample_labels;
     let sample_label_field = form.sample_label_field ;
 
     // Confirm permissions
     let user = MedBook.ensureUser(Meteor.userId());
-    user.ensureAccess(dataset);
+    user.ensureAccess(source);
     user.ensureAccess(form);
 
     //console.log("Query to be run:", serialized_query); // XXX

@@ -93,18 +93,12 @@ Template.listUpDownGenes.helpers({
     }
   },
   sampleGroupOptions() {
-    let query = SampleGroups.find({}, { sort: { name: 1 } });
+    let sampleGroups = SampleGroups.find({}, { sort: { name: 1 } });
 
-    let sgOptions = query.map((sampleGroup) => {
+    return sampleGroups.map((sampleGroup) => {
       let sgLabel = `${sampleGroup.name} (v${sampleGroup.version})`;
       return { value: sampleGroup._id, label: sgLabel };
     });
-
-    return [ {
-      value: "creating",
-      label: "Create new",
-      icon: "plus icon"
-    } ].concat(sgOptions);
   },
   customSampleGroup() { return Template.instance().customSampleGroup; },
   error() { return Template.instance().error; },
@@ -158,6 +152,7 @@ Template.listUpDownGenes.events({
     let customSampleGroup = instance.customSampleGroup.get();
 
     instance.talkingToServer.set(true);
+
     Meteor.call("createUpDownGenes", formValues.insertDoc,
         instance.jobCollabs.get(), customSampleGroup, (error, jobIds) => {
       instance.talkingToServer.set(false);

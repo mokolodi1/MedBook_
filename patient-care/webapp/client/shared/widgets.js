@@ -22,6 +22,14 @@ Template.widgetsDemo.helpers({
     };
   },
   reactiveError() { return Template.instance().error; },
+  fakeSamplesSmall() {
+    return [
+      "ckcc/A01",
+      "ckcc/A02",
+      "ckcc/A03",
+      "ckcc/A04",
+    ];
+  },
   fakeSamples() {
     return [
       "ckcc/A01",
@@ -35,6 +43,42 @@ Template.widgetsDemo.helpers({
       "ckcc/B04",
       "ckcc/B05",
     ];
+  },
+  fakeSamplesHuge() {
+    let sampleLabels = [];
+
+    _.times(1500, (n) => {
+      sampleLabels.push(`ckcc/${n}`);
+    });
+
+    return sampleLabels;
+  },
+  fakeFeaturesSmall() {
+    return [
+      "FABP4",
+      "ADIPOQ",
+      "PPARG",
+    ];
+  },
+  fakeFeatures() {
+    return [
+      "FABP4",
+      "ADIPOQ",
+      "PPARG",
+      "LIPE",
+      "DGAT1",
+      "LPL",
+      "CPT2",
+      "CD36",
+      "GPAM",
+      "ADIPOR2",
+      "ACAA2",
+      "ETFB",
+      "ACOX1",
+    ];
+  },
+  lotsOfFeatures() {
+    return "YOP|".repeat(10001).split("|").slice(0, 10000);
   },
   fakeJob(status) {
     return { status };
@@ -351,27 +395,44 @@ Template.contactUsButton.helpers({
 Template.listSamplesButton.onCreated(function () {
   let instance = this;
 
-  let showAllDefault = instance.data.length <= 5;
-  instance.showAllSamples = new ReactiveVar(showAllDefault);
+  instance.showMore = new ReactiveVar(false);
 
-  instance.hideStudyLabels = new ReactiveVar(false);
+  // set the showMore default value whenever the data changes
+  instance.autorun(() => {
+    let { sampleLabels } = Template.currentData();
+
+    if (sampleLabels) {
+      instance.showMore.set(sampleLabels.length <= 6);
+    }
+  });
 });
 
 Template.listSamplesButton.helpers({
-  showAllSamples() { return Template.instance().showAllSamples.get(); },
-  hideStudyLabels() { return Template.instance().hideStudyLabels.get(); },
+  showMore() { return Template.instance().showMore.get(); },
+  showStudyLabels() {
+    let { profile } = Meteor.user();
+
+    return profile && profile.showStudyLabels;
+  },
   sampleToShow() {
     let instance = Template.instance();
 
-    let sampleLabels = instance.data;
+    let { sampleLabels } = instance.data;
 
     // remove study labels if necessary
-    if (instance.hideStudyLabels.get()) {
+    let { profile } = Meteor.user();
+    if (!profile || !profile.showStudyLabels) {
       sampleLabels = MedBook.utility.unqualifySampleLabels(sampleLabels);
     }
 
     // return either the whole list or the first couple items
-    if (instance.showAllSamples.get()) {
+    if (instance.showMore.get()) {
+      if (instance.data.sampleLabels.length > 1000) {
+        return sampleLabels
+          .slice(0, 1000)
+          .concat([`... and ${sampleLabels.length - 1000} more samples`]);
+      }
+
       return sampleLabels;
     } else {
       return sampleLabels
@@ -384,14 +445,115 @@ Template.listSamplesButton.helpers({
       action: "nothing"
     };
   },
+  alwaysShowAll() {
+    return this.sampleLabels && this.sampleLabels.length <= 6;
+  },
+  not(variable) {
+    return !variable;
+  },
+  tooManyToShowAll() {
+    return this.sampleLabels.length > 1000;
+  },
 });
 
 Template.listSamplesButton.events({
-  "click .show-list"(event, instance) {
-    instance.showAllSamples.set(!instance.showAllSamples.get());
+  "click .toggle-list"(event, instance) {
+    instance.showMore.set(!instance.showMore.get());
   },
   "click .toggle-study-labels"(event, instance) {
-    instance.hideStudyLabels.set(!instance.hideStudyLabels.get());
+    let { profile } = Meteor.user();
+    let newValue = !profile || !profile.showStudyLabels;
+
+    Meteor.users.update(Meteor.userId(), {
+      $set: {
+        "profile.showStudyLabels": newValue
+      }
+    });
+  },
+  "click .download-list"(event, instance) {
+    let { sampleLabels } = instance.data;
+
+    // unqualify sample labels before downloading the list
+    let { profile } = Meteor.user();
+    if (!profile || !profile.showStudyLabels) {
+      sampleLabels = MedBook.utility.unqualifySampleLabels(sampleLabels);
+    }
+
+    saveStringAsFile(sampleLabels.join("\n"), instance.data.filename);
+  },
+});
+
+// Template.listFeaturesButton
+
+let saveStringAsFile = function () {
+  // run this once and then return a function which knows about this a tag
+  var a = document.createElement("a");
+  document.body.appendChild(a);
+  a.style = "display: none";
+
+  return function (data, fileName) {
+    let blob = new Blob([data], { type: "text/plain" });
+    let url = window.URL.createObjectURL(blob);
+
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+}();
+
+Template.listFeaturesButton.onCreated(function () {
+  let instance = this;
+
+  instance.showMore = new ReactiveVar(false);
+
+  // set the showMore default value whenever the data changes
+  instance.autorun(() => {
+    let { featureLabels } = Template.currentData();
+
+    if (featureLabels) {
+      instance.showMore.set(featureLabels.length <= 6);
+    }
+  });
+});
+
+Template.listFeaturesButton.helpers({
+  showMore() { return Template.instance().showMore.get(); },
+  featuresToShow() {
+    let instance = Template.instance();
+
+    let { featureLabels } = instance.data;
+
+    if (featureLabels) {
+      // return either the whole list or the first couple items
+      if (instance.showMore.get()) {
+        if (instance.data.featureLabels.length > 1000) {
+          return featureLabels
+            .slice(0, 1000)
+            .concat([`... and ${featureLabels.length - 1000} more features`]);
+        }
+
+        return featureLabels;
+      } else {
+        return featureLabels
+          .slice(0, 3)
+          .concat([`... and ${featureLabels.length - 3} more features`]);
+      }
+    }
+  },
+  tooManyToShowAll() {
+    return this.featureLabels.length > 1000;
+  },
+});
+
+Template.listFeaturesButton.events({
+  "click .toggle-list"(event, instance) {
+    instance.showMore.set(!instance.showMore.get());
+  },
+  "click .download-list"(event, instance) {
+    let text = instance.data.featureLabels.join("\n");
+
+    saveStringAsFile(text, instance.data.filename);
   },
 });
 
@@ -422,7 +584,7 @@ Template.semanticUIPopup.onRendered(function () {
   let { selector, options } = this.data;
 
   if (!selector) {
-    console.log("Didn't give a selector to the semanticUIPopup");
+    console.error("Didn't give a selector to the semanticUIPopup");
   } else {
     this.$(selector).popup(options);
   }

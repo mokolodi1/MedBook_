@@ -12,105 +12,137 @@
     </div>
   </div>
 
-  {{#with getSampleGroup}}
-    {{#if length data_sets}}
-      {{! show all of the data sets}}
-      <div class="ui list">
-        {{#each data_sets}}
-          <div class="item">
-            <div class="content">
-              <div class="header">
-                {{dataSetName}}
+  <div class="ui form" style="margin-top: 14px;">
+    <div class="field">
+      <label>Add a data set or sample group</label>
+      <div class="ui fluid search selection dropdown add-set-or-group
+          {{#unless metadataSubsReady}}loading{{/unless}}"
+          style="margin-bottom: 10px;">
+        <i class="dropdown icon"></i>
+        <div class="default text">Select a data set or sample group</div>
+        <div class="menu">
+          {{> listSetOrGroup cursor=notAddedDataSets header="Data sets"
+              collectionName="DataSets"}}
 
-                <div class="ui mini buttons">
-                  {{> addFilterButton data_set=this sampleGroup=sampleGroup
-                      dataSetIndex=@index}}
-                  <div class="ui icon button remove-data-set">
-                    <i class="minus icon"></i> Remove
-                  </div>
+          {{> listSetOrGroup cursor=notAddedSampleGroups header="Sample groups"
+              collectionName="SampleGroups"}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{#with getSampleGroup}}
+    {{#if length filtered_sample_sources}}
+      <div class="ui segment" style="padding-bottom: 0px;">
+        {{! show all of the data sets}}
+        <div class="ui list">
+          {{#each filtered_sample_sources}}
+            <div class="item">
+              <div class="content">
+                <h3>
+                  {{sourceName}}
+
+                  {{> dataSetOrSampleGroupLabel}}
+
+                  {{> addRemoveFilterButtons sampleGroup=sampleGroup
+                      sourceIndex=@index}}
+                </h3>
+                <div class="description"></div>
+                <div class="list" style="padding-top: 0px;">
+                  {{#let sourceIndex=@index}}
+                    {{#each filters}}
+                      {{> showFilter sourceIndex=sourceIndex
+                          filterIndex=@index
+                          sampleGroup=sampleGroup}}
+                    {{/each}}
+                  {{/let}}
                 </div>
               </div>
-              <div class="description"></div>
-              <div class="list" style="padding-top: 0px;">
-                {{#let dataSetIndex=@index}}
-                  {{#each filters}}
-                    {{> showFilter dataSetIndex=dataSetIndex
-                        filterIndex=@index
-                        sampleGroup=sampleGroup}}
-                  {{/each}}
-                {{/let}}
-              </div>
             </div>
-          </div>
-        {{/each}}
+          {{/each}}
+        </div>
       </div>
     {{else}}
       <div class="ui message">
         <div class="header">
-          No data sets added
+          No data sets or sample groups added
         </div>
-        Use the search bar below to add a data set.
+        Use the search bar below to add a data set or a sample group.
       </div>
     {{/if}}
   {{/with}}
-
-  <div class="ui search data-set-search" style="margin-bottom: 10px;">
-    <div class="ui fluid icon input">
-      <input class="prompt add-data-set" type="text"
-          placeholder="Add a data set">
-      <i class="search icon"></i>
-    </div>
-    <div class="results"></div>
-  </div>
 </template>
 
-<template name="addFilterButton">
-  <div class="ui icon item dropdown button"> {{! "dropdown" for hand as mouse}}
-    <i class="filter icon"></i> Add filter
-  </div>
-  <div class="ui flowing popup">
-    <!-- if a form values filter is applied to this data set,
-    don't display the option to insert another one -->
-    {{#unless isAFormValuesFilterActive}}
-      <div class="ui list" style="padding: 0px;">
+<template name="dataSetOrSampleGroupLabel">
+  {{#if compare collection_name "DataSets"}}
+    <div class="ui teal horizontal label">Data set</div>
+  {{else}}
+    <div class="ui purple horizontal label">Sample group</div>
+  {{/if}}
+</template>
+
+<template name="listSetOrGroup">
+  {{#if length cursor}}
+    <div class="header">{{header}}</div>
+    {{#let collectionName=collectionName}}
+      {{#each cursor}}
+        <div class="item" data-value={{_id}}
+            data-collection={{collectionName}}>
+          {{name}}
+
+          {{#if version}}
+            (v{{version}})
+          {{/if}}
+        </div>
+      {{/each}}
+    {{/let}}
+  {{/if}}
+</template>
+
+<template name="addRemoveFilterButtons">
+  <div class="ui tiny right floated buttons">
+    <div class="ui primary dropdown button add-filter">
+      <i class="filter icon"></i>
+      <span class="text">Add filter</span>
+
+      <div class="menu">
         <a class="item add-form-values-filter">
           Filter by form values
         </a>
+        <a class="item add-sample-label-list-filter">
+          Include Specific samples
+        </a>
+        <a class="item add-exclude-sample-label-list-filter">
+          Exclude Specific samples
+        </a>
       </div>
-    {{/unless}}
-    <div class="ui list" style="padding: 0px;">
-      <a class="item add-sample-label-list-filter">
-        Include Specific samples
-      </a>
     </div>
-    <div class="ui list" style="padding: 0px;">
-      <a class="item add-exclude-sample-label-list-filter">
-        Exclude Specific samples
-      </a>
+
+    <div class="ui icon button negative remove-data-set">
+      <i class="minus icon"></i> Remove
     </div>
   </div>
 </template>
 
 <template name="showFilter">
-  <div class="item">
+  <div class="item" style="margin-top: 10px;">
     <i class="filter icon"></i>
     <div class="content" style="width: 100%;">
       {{#with getFilter}}
         {{#if compare type "form_values"}}
-          {{>formValuesFilter options=getFilter.options
-            setOptions=setOptions data_set_id=data_set_id
-            title="Filter by form values"
-          }}
+          {{> formValuesFilter options=getFilter.options
+            setOptions=setOptions source=source}}
         {{/if}}
+
         {{#if compare type "include_sample_list"}}
           {{> sampleLabelListFilter options=getFilter.options
-              setOptions=setOptions data_set_id=data_set_id
+              setOptions=setOptions source=source
               title="Include specific samples"}}
         {{/if}}
 
         {{#if compare type "exclude_sample_list"}}
           {{> sampleLabelListFilter options=getFilter.options
-              setOptions=setOptions data_set_id=data_set_id
+              setOptions=setOptions source=source
               title="Exclude specific samples"}}
         {{/if}}
       {{/with}}
@@ -133,82 +165,108 @@
 
 <!--  Filter on a form using querybuilder -->
 <template name="formValuesFilter">
-  {{title}}:
-  {{#if getEditing}}
-    {{#if length getAvailableFilterForms}}
-      {{> formValuesFilterMenu getAvailableFilterForms=getAvailableFilterForms}}
-      <!-- Set up the potential queryBuilder divs to be attached in onRendered -->
-      <!-- id needs to be unique across page, so include dataset id as there will be
-          only one form filter per dataset -->
-      {{#each getAvailableFilterForms}}
-        <div class="querybuilder" id="{{this.dataSetId}}_{{this.formId}}_querybuilder">
-        </div>
-      {{/each}}
-      <div class="ui icon primary mini button done-editing">
-        <i class="check icon"></i>Done
+  <div style="margin-bottom: 14px;">
+    <h4>
+      Filter by form values:
+
+      <div class="ui mini right floated buttons">
+        {{#if getEditing}}
+          {{> sgFilterDoneButton}}
+        {{else}}
+          {{> sgFilterEditButton}}
+        {{/if}}
+
+        {{> sgFilterRemoveButton}}
       </div>
-    {{else}}
-      No forms are available for this data set.
-      <div class="ui mini buttons">
-        <button class="ui icon button remove-filter" type="button">
-          <i class="minus icon"></i> Remove filter
-        </button>
-      </div>
+    </h4>
+
+    {{#if getEditing}}
+      {{#if length getAvailableFilterForms}}
+        {{> formValuesFilterMenu getAvailableFilterForms=getAvailableFilterForms}}
+        <!-- Set up the potential queryBuilder divs to be attached in onRendered -->
+        {{#each getAvailableFilterForms}}
+          <div class="querybuilder {{this.formId}}_querybuilder">
+          </div>
+        {{/each}}
+      {{else}}
+        No forms are available for this data set.
+      {{/if}}
     {{/if}}
- {{else}}
-    <div class="ui mini buttons">
-      <button class="ui icon mini button edit-filter" type="button">
-        <i class="edit icon"></i> Edit filter
-      </button>
-      <button class="ui icon button remove-filter" type="button">
-        <i class="minus icon"></i> Remove filter
-      </button>
-    </div>
-  {{/if}}
+  </div>
 </template>
 
 <template name="sampleLabelListFilter">
-  {{title}}:
+  <h4>
+    {{title}}:
+
+    <div class="ui mini right floated buttons">
+      {{#if getEditing}}
+        {{> sgFilterDoneButton}}
+      {{else}}
+        {{> sgFilterEditButton}}
+      {{/if}}
+
+      {{> sgFilterRemoveButton}}
+    </div>
+  </h4>
+
   {{#if getEditing}}
-    <div class="ui form">
-      <div class="field">
-        <textarea value={{sampleLabelsToText}}
-            placeholder="Enter sample names seperated by newlines, commas, or semicolons."></textarea>
+    <div style="margin-bottom: 14px;">
+      <div class="ui form">
+        <div class="field">
+          <textarea value={{sampleLabelsToText}}
+              placeholder="Enter sample names seperated by newlines, commas, or semicolons."></textarea>
+        </div>
+      </div>
+
+      {{#if length getInvalidSampleLabels}}
+        <div class="ui negative message">
+          <i class="close icon close-sample-error-message"></i>
+          <div class="header">
+            The following sample names are invalid
+          </div>
+          <ul class="list">
+            {{#each getInvalidSampleLabels}}
+              <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/if}}
+
+      {{> showErrorMessage filterError}}
+
+      <div class="ui info message">
+        You must click
+        <a class="show-done-editing">done</a>
+        to validate your samples before creating the sample group.
       </div>
     </div>
-
-    {{#if length getInvalidSampleLabels}}
-      <div class="ui negative message">
-        <i class="close icon close-sample-error-message"></i>
-        <div class="header">
-          The following sample names are invalid
-        </div>
-        <ul class="list">
-          {{#each getInvalidSampleLabels}}
-            <li>{{this}}</li>
-          {{/each}}
-        </ul>
-      </div>
-    {{/if}}
-
-    <button class="ui icon primary mini button done-editing">
-      <i class="check icon"></i> Done
-    </button>
   {{else}}
     {{#if length options.sample_labels}}
-      {{> listSamplesButton options.sample_labels}}
+      {{! put it in a div to force the hide study labels button to new line}}
+      <div>
+        {{> listSamplesButton sampleLabels=options.sample_labels}}
+      </div>
     {{else}}
       None
     {{/if}}
-
-    <div class="ui mini buttons">
-      <button class="ui icon mini button edit-filter" type="button">
-        <i class="edit icon"></i> Edit filter
-      </button>
-
-      <button class="ui icon button remove-filter" type="button">
-        <i class="minus icon"></i> Remove filter
-      </button>
-    </div>
   {{/if}}
+</template>
+
+<template name="sgFilterRemoveButton">
+  <button class="ui icon negative button remove-filter" type="button">
+    <i class="minus icon"></i> Remove filter
+  </button>
+</template>
+
+<template name="sgFilterDoneButton">
+  <button class="ui icon positive mini button done-editing">
+    <i class="check icon"></i> Done
+  </button>
+</template>
+
+<template name="sgFilterEditButton">
+  <button class="ui icon mini secondary button edit-filter" type="button">
+    <i class="edit icon"></i> Edit filter
+  </button>
 </template>

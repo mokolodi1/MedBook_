@@ -62,11 +62,6 @@ Template.showSampleGroup.helpers({
     return `/download/${userId}/${loginToken}/data-collection/` +
         `SampleGroups/${this._id}`;
   },
-  totalSampleCount() {
-    return _.reduce(this.data_sets, (memo, sgDataSet) => {
-      return memo + sgDataSet.sample_count;
-    }, 0);
-  },
 });
 
 // Sample Group Expression Level & Variance Filters
@@ -78,18 +73,6 @@ Template.sampleGroupExprVarFilters.onCreated(function(){
   // use Template.subscriptionsReady to know when these are available
   instance.subscribe("sampleGroupFilterJobs", sampleGroupId);
   instance.subscribe("blobsAssociatedWithObject", "SampleGroups", sampleGroupId);
-});
-
-Template.sampleGroupExprVarFilters.onRendered(function () {
-  let instance = this;
-
-  // refresh the manage objects sticky when the subscriptions load
-  instance.autorun(() => {
-    // reactively watch this
-    instance.subscriptionsReady();
-
-    instance.data.refreshSticky();
-  });
 });
 
 Template.sampleGroupExprVarFilters.helpers({
