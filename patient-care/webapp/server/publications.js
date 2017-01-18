@@ -522,3 +522,27 @@ Meteor.publish("geneSetParentObj", function (geneSetId) {
     }),
   ];
 });
+
+Meteor.publish("unseenNotifications", function () {
+  let user = MedBook.ensureUser(this.userId);
+
+  Counts.publish(this, "unseen-notifications", Notifications.find({
+    user_id: user._id,
+    seen: false
+  }));
+
+  return [];
+});
+
+Meteor.publish("notifications", function (limit = 8) {
+  check(limit, Number);
+
+  let user = MedBook.ensureUser(this.userId);
+
+  return Notifications.find({
+    user_id: user._id
+  }, {
+    sort: { date_created: -1 },
+    limit,
+  });
+});

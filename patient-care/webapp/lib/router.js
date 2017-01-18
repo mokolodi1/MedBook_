@@ -62,6 +62,8 @@ tools.route("/limma-gsea", sameNameAndAction("listLimmaGSEA"));
 tools.route("/limma-gsea/:job_id", sameNameAndAction("limmaGseaJob"));
 tools.route("/tumor-map", sameNameAndAction("listTumorMap"));
 
+/// I AM HERE
+FlowRouter.route("/notifications", sameNameAndAction("viewAllNotifications"));
 
 // documentation
 

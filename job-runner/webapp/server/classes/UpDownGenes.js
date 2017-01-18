@@ -153,7 +153,7 @@ UpDownGenes.prototype.run = function () {
       if (commandResult.exitCode !== 0) {
         throw new Error("Error code running outlier analysis script");
       }
-      console.log("done with single sample analysis");
+      console.log("done with single sample analysis; inserting...");
 
       // save the intermediary files if necessary
       if (regenerateFiles) {
@@ -365,29 +365,33 @@ UpDownGenes.prototype.run = function () {
   return deferred.promise;
 };
 
-// Called when this job successfully completes.
-// Emails the creator with an alert & link to results page
-UpDownGenes.prototype.onSuccess = function (result) {
-  console.log("UpDownGenes -- Success -- sending notification email.");
-
-  var user = Meteor.users.findOne({ _id: this.job.user_id });
-  var resultsURL = "https://medbook.io/tools/outlier-analysis/" + this.job._id;
-
-  try {
-    Email.send({
-      to: user.collaborations.email_address,
-      from: "ucscmedbook@gmail.com",
-      subject: "Outlier analysis for " + this.job.args["sample_label"] +
-          " complete.",
-      html: "Your outlier analysis job has completed. Results:\n<a href='" +
-          resultsURL + "'>" + resultsURL + "</a>" ,
-    });
-
-    console.log("Notification email sent for job ",  this.job._id);
-  } catch (e) {
-    console.log("Error: Notification email failed for job ",  this.job._id);
-  }
+UpDownGenes.prototype.onSuccess = function () {
+  Notifications.insert({
+    user_id: this.job.user_id,
+    href: `/tools/outlier-analysis/${this.job._id}`,
+    content: "<b>Outlier analysis</b> has finished for " +
+        `<b>${this.job.args.sample_label}</b> vs. ` +
+        `<b>${this.job.args.sample_group_name}</b>`,
+  });
 };
 
+UpDownGenes.prototype.onError = function (reason) {
+  let { job } = this;
+  let content = "Failed to run <b>outlier analysis</b> for " +
+      `<b>${this.job.args.sample_label}</b> vs. ` +
+      `<b>${this.job.args.sample_group_name}</b>: `;
+
+  if (typeof reason === "string") {
+    content += reason;
+  } else {
+    content += "Internal error";
+  }
+
+  Notifications.insert({
+    user_id: job.user_id,
+    href: `/tools/outlier-analysis/${job._id}`,
+    content,
+  });
+};
 
 JobClasses.UpDownGenes = UpDownGenes;

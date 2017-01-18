@@ -134,13 +134,13 @@ RunGSEA.prototype.run = function () {
 
         // figure out which files we need to read
         // Ex: "gsea_report_for_na_neg_1473259869004.html"
-        function getFilePath(regex) {
+        var getFilePath = function (regex) {
           var fileName = _.find(prerankedOutputFileNames, function (fileName) {
             return regex.test(fileName);
           });
 
           return path.join(gseaPrerankedPath, fileName);
-        }
+        };
         // http://regexr.com/3e6e4
         var posFilePath = getFilePath(/_report_.*_pos_.*\.html$/);
         var negFilePath = getFilePath(/_report_.*_neg_.*\.html$/);
@@ -193,9 +193,9 @@ RunGSEA.prototype.run = function () {
             // NOTE: blank strings are falsey
             if (detailsLink) {
               // http://regexr.com/3e6e7
-              var match = /<a href='(.*?).html'>/g.exec(detailsLink);
+              var nameMatch = /<a href='(.*?).html'>/g.exec(detailsLink);
 
-              geneSetNames.push(match[1]);
+              geneSetNames.push(nameMatch[1]);
             }
           });
         });
@@ -204,7 +204,8 @@ RunGSEA.prototype.run = function () {
         // with exactly 1 gene set. If this is the case, instead skip it and
         // return a fake exit code so the job thinks the spawn succeeded
         if(geneSetNames.length === 1){
-            console.log("Exactly 1 gene set found; skipping leading edge analysis.")
+            console.log("Exactly 1 gene set found; " +
+                "skipping leading edge analysis.");
             skipLeadingEdge = true;
             return {exitCode:0};
         } else {
@@ -312,6 +313,33 @@ RunGSEA.prototype.run = function () {
       deferred.reject(reason);
     }, deferred.reject));
   return deferred.promise;
+};
+
+RunGSEA.prototype.onSuccess = function () {
+  Notifications.insert({
+    user_id: this.job.user_id,
+    href: `/tools/gsea/${this.job._id}`,
+    content: "<b>GSEA</b> has finished for " +
+        `<b>${this.job.args.gene_set_name}</b>`,
+  });
+};
+
+RunGSEA.prototype.onError = function (reason) {
+  let { job } = this;
+  let content = "Failed to run <b>GSEA</b> with " +
+      `<b>${job.args.gene_set_name}</b>: `;
+
+  if (typeof reason === "string") {
+    content += reason;
+  } else {
+    content += "Internal error";
+  }
+
+  Notifications.insert({
+    user_id: job.user_id,
+    href: `/tools/gsea/${job._id}`,
+    content,
+  });
 };
 
 JobClasses.RunGSEA = RunGSEA;

@@ -55,3 +55,4 @@ dispatch:mocha
 
 cfs:http-methods
 tmeasday:publish-counts
+momentjs:moment
