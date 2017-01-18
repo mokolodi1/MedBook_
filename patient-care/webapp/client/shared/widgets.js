@@ -44,6 +44,11 @@ Template.widgetsDemo.helpers({
       action: "nothing"
     };
   },
+  collabList() {
+    return [
+      MedBook.findUser(Meteor.userId()).personalCollaboration()
+    ];
+  },
 });
 
 // Template.shareAndDeleteButtons
@@ -108,15 +113,13 @@ Template.editCollaborationsModal.onRendered(function() {
     onApprove() {
       // TODO: another modal if they're going to lose access to the objects
 
-      let newCollabs = _.pluck(instance.collabsList.get(), "id");
-
       instance.waitingForServer.set(true);
 
       let collectionName = Session.get("editCollaborationsCollection");
       let mongoIds = Session.get("editCollaborationsMongoIds");
 
       Meteor.call("updateObjectCollaborations",
-          collectionName, mongoIds, newCollabs,
+          collectionName, mongoIds, instance.collabsList.get(),
           (error) => {
         instance.waitingForServer.set(false);
         if (!error) {
@@ -147,13 +150,41 @@ Template.listCollaborators.onCreated(function () {
 
   instance.dataLoading = new ReactiveVar(false);
 
+  // store the full descriptor objects here and pass the ids to
+  // instance.data.collabList
+  instance.collabDescriptors = new ReactiveVar([]);
+
+  // pass the collaboration names to the parent template whenever
+  // collabDescriptors changes
+  instance.autorun(() => {
+    let collabNames = _.pluck(instance.collabDescriptors.get(), "id");
+
+    if (instance.data.collabsList) {
+      instance.data.collabsList.set(collabNames);
+    } else {
+      console.error("forgot to pass listCollaborators collabsList");
+    }
+  });
+
+  // cache old values of mongoIds, collectionName so it doesn't rerun a bunch
+  let oldCollectionName, oldMongoIds;
+
   // who the user can share with
   instance.autorun(() => {
     let { collectionName, mongoIds, attribute } = Template.currentData();
 
-    // wait until we're logged-in because when the user refreshes there's
-    // a slight delay before logging in where it'll run this code and fail
-    if (Meteor.user() && mongoIds) {
+    // get the correct collaborations for possibly many objects...
+    // Wait until we're logged-in because when the user refreshes there's
+    // a slight delay before logging in where it'll run this code and fail.
+    // Sometimes collectionName and mongoIds needs to load with a subscription,
+    // so wait until they're truthy.
+    // Don't run again if nothing's changed.
+    if (Meteor.userId() && collectionName && mongoIds &&
+        !(collectionName === oldCollectionName &&
+            _.isEqual(mongoIds, oldMongoIds))) {
+      oldCollectionName = collectionName;
+      oldMongoIds = mongoIds;
+
       // for now show "data loading" UI
       instance.dataLoading.set(true);
 
@@ -161,11 +192,11 @@ Template.listCollaborators.onCreated(function () {
         attribute = "collaborations";
       }
 
-      Meteor.call("getCollabDescriptions", collectionName, mongoIds,
+      Meteor.call("getObjsCollabDescriptions", collectionName, mongoIds,
           attribute, (error, result) => {
-        if (error) throw error;
+        if (error) console.log("error:", error);
 
-        instance.data.collabsList.set(result);
+        instance.collabDescriptors.set(result);
         instance.dataLoading.set(false);
       });
     }
@@ -174,23 +205,25 @@ Template.listCollaborators.onCreated(function () {
 
 Template.listCollaborators.helpers({
   collabsListFetched() {
-    let data = Template.currentData();
-
-    if (data && data.collabsList) {
-      return data.collabsList.get();
-    }
+    return Template.instance().collabDescriptors.get();
   },
+  collabDescriptors() {
+    return Template.instance().collabDescriptors;
+  },
+  not(thing) {
+    return !thing;
+  }
 });
 
 Template.listCollaborators.events({
   "click .remove-collaboration"(event, instance) {
-    let collabsList = instance.data.collabsList.get();
+    let collabDescriptors = instance.collabDescriptors.get();
 
-    collabsList = _.filter(collabsList, (collabDesc) => {
+    collabDescriptors = _.filter(collabDescriptors, (collabDesc) => {
       return collabDesc.id !== this.id;
     });
 
-    instance.data.collabsList.set(collabsList);
+    instance.collabDescriptors.set(collabDescriptors);
   },
 });
 
@@ -222,7 +255,7 @@ Template.addCollaboratorSearch.onRendered(function () {
               `?token=${Accounts._storedLoginToken()}&q={query}`,
           onResponse(response) {
             // remove existing users/collaborations from the response
-            let allExisting = instance.data.collabsList.get();
+            let allExisting = instance.data.collabDescriptors.get();
 
             const removeExisting = (resultsAttribute, type) => {
               // save the parent so we can set .results easily
@@ -254,13 +287,13 @@ Template.addCollaboratorSearch.onRendered(function () {
         },
         type: "category",
         onSelect(result, response) {
-          let collabsList = instance.data.collabsList.get();
+          let collabDescriptors = instance.data.collabDescriptors.get();
 
           // only add if it doesn't already exist
-          if (_.pluck(collabsList, "id").indexOf(result.id) === -1) {
-            collabsList.push(result);
+          if (_.pluck(collabDescriptors, "id").indexOf(result.id) === -1) {
+            collabDescriptors.push(result);
 
-            instance.data.collabsList.set(collabsList);
+            instance.data.collabDescriptors.set(collabDescriptors);
           }
 
           // clear the search input field and focus it (in case
@@ -372,6 +405,12 @@ Template.semanticUIDropdown.onRendered(function () {
 
 Template.semanticUICheckbox.onRendered(function () {
   this.$(".ui.checkbox").checkbox(this.data.options);
+});
+
+// Template.semanticUIAccordion
+
+Template.semanticUIAccordion.onRendered(function () {
+  this.$(".ui.accordion").accordion(this.data);
 });
 
 // Template.semanticUIPopup
